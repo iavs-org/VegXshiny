@@ -3,14 +3,30 @@
 #' @param request Internal parameter for `{shiny}`. 
 #'     DO NOT REMOVE.
 #' @import shiny
+#' @import shinyBS
+#' @import shinythemes
+#' @importFrom shinyTree shinyTree
 #' @noRd
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    
     # Your application UI logic 
-    fluidPage(
-      h1("VegXshiny")
+    navbarPage("VegXShiny", 
+               theme = shinytheme("yeti"),
+               
+               tabPanel("About"),
+               
+               tabPanel("Manage Files",
+                        fileInput("file", "Choose CSV files", accept = ".csv", multiple = T),
+               ),
+               
+               tabPanel("Create VegX",
+                        mod_elementControl_ui("elementControl_ui_1")
+               ),
+               tabPanel("Check Status", ),
+               tabPanel("Export VegX")
     )
   )
 }
@@ -28,7 +44,7 @@ golem_add_external_resources <- function(){
   add_resource_path(
     'www', app_sys('app/www')
   )
- 
+  
   tags$head(
     favicon(),
     bundle_resources(
