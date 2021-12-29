@@ -22,4 +22,10 @@ vegx_smpl = xml_find_all(namespaces[["veg"]], ".//*[@name='vegX']")
 simplify_vegx_node(vegx_smpl, "veg", namespaces)
 
 # VegX names
-vegx_names = xml_attr(xml_children(vegx_smpl), "name")
+vegx_main_elements = xml_attr(xml_children(vegx_smpl), "name")
+
+# VegX leaf nodes
+vegx_leaf_elements = xml_find_all(vegx_smpl, "//*[@name='vegX']//*[not(*)]") %>% 
+  xml_attr("name") %>% 
+  unique()
+vegx_leaf_elements = vegx_leaf_elements[!is.na(vegx_leaf_elements)]

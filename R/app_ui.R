@@ -13,20 +13,22 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     
     # Your application UI logic 
-    navbarPage("VegXShiny", 
-               theme = shinytheme("yeti"),
+    navbarPage("VegXShiny",  
+               theme = shinytheme("darkly"),
                
-               tabPanel("About"),
-               
-               tabPanel("Manage Files",
-                        fileInput("file", "Choose CSV files", accept = ".csv", multiple = T),
+               tabPanel("About",
+                        mod_about_ui("about_ui_1")
                ),
                
-               tabPanel("Create VegX",
+               tabPanel(div(icon("file", class = "icon-padded"), "Manage Files"),
+                        mod_fileManagement_ui("fileManagement_ui_1")
+               ),
+               
+               tabPanel(div(icon("leaf", class = "icon-padded"), "Create VegX"),
                         mod_elementControl_ui("elementControl_ui_1")
                ),
-               tabPanel("Check Status", ),
-               tabPanel("Export VegX")
+               tabPanel(div(icon("chart-bar", class = "icon-padded"), "Check Progress")),
+               tabPanel(div(icon("download", class = "icon-padded"), "Export VegX"))
     )
   )
 }

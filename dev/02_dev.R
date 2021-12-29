@@ -15,11 +15,21 @@
 
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
-usethis::use_package("shinyTree")
+usethis::use_package("dplyr")
+usethis::use_package("tidyr")
+usethis::use_package("stringr")
+usethis::use_package("markdown")
+usethis::use_package("knitr")
 usethis::use_package("xml2")
+usethis::use_package("shinyWidgets")
+usethis::use_package("shinyjs")
+usethis::use_package("shinyTree")
+usethis::use_package("shinyBS")
+usethis::use_package("rhandsontable")
 
 ## Add modules ----
-golem::add_module("elementSelect")
+golem::add_module("about")
+golem::add_module("fileManagement")
 golem::add_module("elementControl")
 
 ## Add helper functions ----
@@ -34,11 +44,11 @@ golem::add_css_file( "custom" )
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw( name = "my_dataset", open = FALSE ) 
+usethis::use_data_raw(name = "my_dataset", open = FALSE) 
 
 ## Tests ----
 ## Add one line by test you want to create
-usethis::use_test( "app" )
+usethis::use_test("app")
 
 # Documentation
 

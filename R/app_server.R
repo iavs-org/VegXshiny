@@ -10,6 +10,7 @@ app_server <- function( input, output, session ) {
   # Server logic
   library(shinyTree) # package doesnt work otherwise...
   
-  mod_elementControl_server("elementControl_ui_1")  
-  #mod_elementSelect_server("elementSelect_ui_1")
+  mod_about_server("about_ui_1")
+  user_data = mod_fileManagement_server("fileManagement_ui_1")
+  mod_elementControl_server("elementControl_ui_1", user_data = user_data)  
 }

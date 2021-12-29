@@ -11,9 +11,14 @@ Imports:
     glue,
     golem (>= 0.3.1),
     htmltools,
+    knitr,
+    markdown,
     processx,
+    rhandsontable,
     shiny (>= 1.6.0),
-    shinyTree
+    shinyjs,
+    shinyTree,
+    shinyWidgets
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2

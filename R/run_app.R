@@ -9,7 +9,9 @@
 #' @importFrom golem with_golem_options
 
 run_app <- function(
-  onStart = function(){shiny::removeInputHandler("shinyTree")},
+  onStart = function(){
+    shiny::removeInputHandler("shinyTree")
+  },
   options = list(), 
   enableBookmarking = NULL,
   uiPattern = "/",

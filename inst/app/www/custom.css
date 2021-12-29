@@ -1,0 +1,37 @@
+.htCore {
+  color:black;
+}
+
+.btn-default {
+  background-color:#777;
+  white-space:normal;
+}
+
+.btn-sidebar {
+  text-align:left !important; 
+  border-width:0px !important; 
+  margin-top:1px !important;
+  padding-top:6px; 
+  padding-bottom:6px;
+  overflow:hidden;
+  white-space:nowrap;
+  display:inline-block;
+  text-overflow:ellipsis;
+}
+
+.btn-success {
+  background-color:#2e752e !important;
+  border-color:#2e752e !important;
+}
+
+.icon-padded {
+  padding-right:3px;
+}
+
+.annotation {
+  font-style:italic;
+}
+
+hr {
+  margin-bottom:0px !important;
+}
