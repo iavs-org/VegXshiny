@@ -8,9 +8,15 @@
 
 app_server <- function( input, output, session ) {
   # Server logic
-  library(shinyTree) # package doesnt work otherwise...
+  library(shinyTree) # package doesn't work otherwise
+  library(shinyBS)   # same
   
-  mod_about_server("about_ui_1")
-  user_data = mod_fileManagement_server("fileManagement_ui_1")
-  mod_elementControl_server("elementControl_ui_1", user_data = user_data)  
+  # Build about page
+  mod_about_server("about")
+  
+  # Get uploaded files
+  user_data = mod_fileManagement_server("fileManagement")
+  
+  # Create mappings and build VegX document
+  mod_documentCreation_server("documentCreation", user_data)
 }

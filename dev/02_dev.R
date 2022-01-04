@@ -30,7 +30,11 @@ usethis::use_package("rhandsontable")
 ## Add modules ----
 golem::add_module("about")
 golem::add_module("fileManagement")
-golem::add_module("elementControl")
+golem::add_module("documentCreation")
+golem::add_module("elementNavigation")
+golem::add_module("elementSelection")
+golem::add_module("elementMapping")
+golem::add_module("xmlBuilder")
 
 ## Add helper functions ----
 golem::add_fct("xml")

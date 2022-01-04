@@ -13,19 +13,19 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     
     # Your application UI logic 
-    navbarPage("VegXShiny",  
+    navbarPage("VegXshiny",  
                theme = shinytheme("darkly"),
                
                tabPanel("About",
-                        mod_about_ui("about_ui_1")
+                        mod_about_ui("about")
                ),
                
                tabPanel(div(icon("file", class = "icon-padded"), "Manage Files"),
-                        mod_fileManagement_ui("fileManagement_ui_1")
+                        mod_fileManagement_ui("fileManagement")
                ),
                
                tabPanel(div(icon("leaf", class = "icon-padded"), "Create VegX"),
-                        mod_elementControl_ui("elementControl_ui_1")
+                        mod_documentCreation_ui("documentCreation")
                ),
                tabPanel(div(icon("chart-bar", class = "icon-padded"), "Check Progress")),
                tabPanel(div(icon("download", class = "icon-padded"), "Export VegX"))
@@ -53,8 +53,6 @@ golem_add_external_resources <- function(){
       path = app_sys('app/www'),
       app_title = 'VegXshiny'
     )
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert() 
   )
 }
 

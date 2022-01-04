@@ -35,9 +35,3 @@ mod_about_server <- function(id){
     })
   })
 }
-
-## To be copied in the UI
-# mod_about_ui("about_ui_1")
-
-## To be copied in the server
-# mod_about_server("about_ui_1")

@@ -20,8 +20,15 @@
 }
 
 .btn-success {
-  background-color:#2e752e !important;
-  border-color:#2e752e !important;
+  background-color:#2e752e;
+  border-color:#2e752e;
+}
+
+.btn-active {
+  font-weight:900 !important;
+  border-width: 0.5px !important;
+  border-color: #fff !important;
+  text-align:center !important;
 }
 
 .icon-padded {
@@ -30,8 +37,9 @@
 
 .annotation {
   font-style:italic;
+  padding-bottom: 10px!important;
 }
 
 hr {
-  margin-bottom:0px !important;
+  margin: 3px 0px!important;
 }
