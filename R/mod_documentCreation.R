@@ -23,9 +23,9 @@ mod_documentCreation_ui <- function(id){
       
       nav_item(tags$label("VegX main elements")),
       nav_item(shinyWidgets::radioGroupButtons(ns("input_mode"), choices = c("Basic", "Advanced", "All"), selected = "All",
-                                               justified = TRUE, status = "primary", size = "xs")),
+                                               justified = TRUE, status = "info", size = "xs")),
       nav_item(hr()),
-      
+
       nav("AggregateOrganismObservations",  mod_elementMapping_ui(ns("aggregateOrganismObservations"))),
       nav("Attributes",                     mod_elementMapping_ui(ns("attributes"))),
       nav("CommunityConcepts",              mod_elementMapping_ui(ns("communityConcepts"))),
@@ -74,23 +74,27 @@ mod_documentCreation_server <- function(id, user_data){
                   "stratumObservations", "surfaceCoverobservations", "surfaceTypes", "taxonConcepts", "taxonDeterminations")
     )
     
+    # Define "global" reactive values
+    elem_selected = reactiveValues() # Container for selected sub-elements per main element
+    vegx_mappings = reactiveValues() # Container for existing mappings  
+    tabs_visible  = reactiveVal()    # Currently shown tabs
+      
     # Update sidebar depending on input_mode
     observeEvent(eventExpr = input$input_mode,
                  handlerExpr = {
                    tabs_hide = tabs_lookup[[input$input_mode]]
                    lapply(tabs_hide, function(tab){bslib::nav_hide("sidebar", stringr::str_replace(tab, "^.{1}", toupper))})
                    
-                   tabs_show = setdiff(vegx_main_elements, tabs_hide)
-                   lapply(tabs_show, function(tab){bslib::nav_show("sidebar", stringr::str_replace(tab, "^.{1}", toupper))})
+                   tabs_visible(setdiff(vegx_main_elements, tabs_hide))
+                   lapply(tabs_visible(), function(tab){bslib::nav_show("sidebar", stringr::str_replace(tab, "^.{1}", toupper))})
                  })
     
-    # Define shared reactive values
-    elem_selected = reactiveValues() # Container for selected sub-elements per main element
-    vegx_mappings = reactiveValues() # Container for existing mappings  
-    
+
     # Call modules
     lapply(vegx_main_elements, function(tab_name){
-      mod_elementMapping_server(id = tab_name, user_data = user_data, tab_selected = tab_name, elem_selected = elem_selected)
+      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, session)
     })
+    
+    #mod_xmlBuilder_server("xmlBuilder", tabs_shown, tab_selected, elem_selected)
   })
 }
