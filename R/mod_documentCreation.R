@@ -9,8 +9,7 @@
 #' @import shiny
 #' @import bslib
 #' @import shinyjs 
-#' @importFrom shinyBS bsButton updateButton
-#' @importFrom stringr str_replace str_extract
+#' @importFrom stringr str_replace
 #' @importFrom shinyWidgets radioGroupButtons
 
 mod_documentCreation_ui <- function(id){
@@ -60,7 +59,7 @@ mod_documentCreation_ui <- function(id){
 #' documentCreation Server Functions
 #'
 #' @noRd 
-mod_documentCreation_server <- function(id, user_data){
+mod_documentCreation_server <- function(id, user_data, info_text){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -92,7 +91,7 @@ mod_documentCreation_server <- function(id, user_data){
 
     # Call modules
     lapply(vegx_main_elements, function(tab_name){
-      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, session)
+      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, info_text, session)
     })
     
     #mod_xmlBuilder_server("xmlBuilder", tabs_shown, tab_selected, elem_selected)

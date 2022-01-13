@@ -45,6 +45,12 @@ TODO:
 }
 
 .annotation {
+  display:inline-block;
+  vertical-align:middle!important;
   font-style:italic;
-  padding-bottom: 10px!important;
+  margin-bottom: 10px;
+}
+
+.btn-dropdown-input {
+  margin-left: 6px!important;
 }

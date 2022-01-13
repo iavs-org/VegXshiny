@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @importFrom shinyTree shinyTree renderTree get_selected
 #' @importFrom shinyWidgets checkboxGroupButtons
 #' @importFrom shinyjs click addClass
 #' @importFrom bslib nav_select
@@ -16,6 +17,7 @@ mod_elementMapping_ui <- function(id){
   
   fluidPage(
     useShinyjs(),
+    # ----------------- #
     fluidRow(
       column(
         width = 12,
@@ -24,20 +26,47 @@ mod_elementMapping_ui <- function(id){
         hr(.noWS = "after")
       )
     ),
+    
+    # ----------------- #
     fluidRow(
       column(
         width = 12,
         tags$h4(tags$b("Elements")),
-        div("Select the VegX elements you want to use.", class = "text-info annotation"),
-        shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T),
+        div(class = "annotation text-info",
+            tags$span("Select the VegX elements you want to use."), 
+            shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
+                                         tags$p("The tree lists all available VegX elements for the currently selected main element. If available, additional documentation information from the VegX
+                                         schema is shown when hovering over a given item."))
+        ),
+        br(),
+        fluidRow(
+          column(7, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T)),
+          column(5, 
+                 div(class = "info-box",
+                     textOutput(ns("info_text"))
+                 ),
+          )
+        ),
         hr(.noWS = "before")
       )
     ),
+    
+    # ----------------- #
     fluidRow(
       column(
         width = 12,
-        tags$h4(tags$b("Mappings")),
-        div("Map the selected VegX elements to your uploaded data or provide free text descriptions.", class = "text-info annotation"),
+        tags$h4(tags$b("Values")),
+        div(class = "annotation text-info",
+            tags$span("Associate the selected VegX elements with values."), 
+            shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
+                                         tags$p("There are two ways to map elements to values:"),
+                                         tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will force the create one VegX node 
+                                                         per row for the entire VegX main element."),
+                                                 tags$li("Provide a free text value. If all mappings in the main element are free text values, this will create a single new VegX node. 
+                                                          This option may be useful, e.g., when entering new methods or attributes. If there are mappings present that link to uploaded data, 
+                                                          free text values will be copied to all newly created nodes."))
+            )
+        ),
         fluidRow(
           align = "center", 
           column(5, tags$label("VegX Element")),
@@ -51,12 +80,14 @@ mod_elementMapping_ui <- function(id){
         hr(.noWS = c("before","after")),
       )
     ),
+    
+    # ----------------- #
     fluidRow(
       align = "center",
       column(
         width = 12,
         actionButton(ns("submit"), label = "Submit", width = "300px", class = "btn-primary", style = "font-weight:bold"),
-        shinyjs::hidden(actionButton(ns("edit"), label = "Edit", width = "300px", class = "btn-edit", style = "font-weight:bold")))
+        shinyjs::hidden(actionButton(ns("edit"), label = "Edit", width = "300px", class = "btn-success", style = "font-weight:bold")))
     )
   )
 }
@@ -64,7 +95,7 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, parent_session){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, info_text, parent_session){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -74,7 +105,22 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     
     # --------------------------------------------------------------------------------------- #
     #### VegX element selection ####
+    if(isolate(tab_selected) %in% c("simpleUserDefined", "complexUserDefined")){
+      return()
+    } else if(isolate(tab_selected) == "note"){
+      elem_list = vegx_to_list(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']")), "name")  
+    } else {
+      elem_list = vegx_to_list(xml_children(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']"))), "name")
+    }
+  
+    output$tree = shinyTree::renderTree(elem_list)
+    output$info_text = renderText({info_text()})
+    
     observeEvent(input$tree, {
+      # TODO
+      # show tooltip on hover
+      # prevent selection of multiple xsd:choice elements 
+      
       selected = shinyTree::get_selected(input$tree, "slices") # Get selected elements
       selected = names(unlist(selected))
       is_leaf = stringr::str_extract(selected, "[^.]+$") %in% vegx_leaf_elements # Check which selected elements are leaf nodes
@@ -82,15 +128,11 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
       updateSelectInput(inputId = "mapping_1", choices = elem_selected[[tab_selected]])
     })
     
-    output$tree = shinyTree::renderTree({
-      vegx_to_list(xml_children(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']"))), "name")
-    })
-    
     # --------------------------------------------------------------------------------------- #
     #### Element Mapping ####
     mapping_id = reactiveVal(1)    # running number for creating unique input widgets
     mapping_count = reactiveVal(0) # Counter for number of rows shown
-    fields_used = reactiveValues() # List elements and values currently selected
+    fields_used = reactiveValues(elements = list(), values = list()) # Elements and values currently selected
     
     data_columns = reactive({
       sapply(names(user_data), simplify = F, USE.NAMES = T, function(file_name){
@@ -102,7 +144,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     observeEvent(eventExpr = mapping_count,
                  handlerExpr = shinyjs::click("add_mapping"))
     
-    # Add new mapping row
+    # Adding new mapping row
     observeEvent(eventExpr = input$add_mapping,
                  handlerExpr = {
                    if(length(elem_selected[[tab_selected]]) > mapping_count() | mapping_count() == 0){ 
@@ -120,48 +162,71 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                  }
     )
     
+    # Remove deprecated mappings (e.g. when input$element has changed)
+    observeEvent(eventExpr = fields_used$elements,
+                 handlerExpr = {
+                   elem_used = unlist(fields_used[["elements"]])
+                   elem_mapped = names(vegx_mappings[[tab_selected]])
+                   mappings_remove = setdiff(elem_mapped, elem_used)
+                   lapply(mappings_remove, function(name){
+                     vegx_mappings[[tab_selected]][[name]] = NULL}
+                   )
+                 })
+    
     # --------------------------------------------------------------------------------------- #
     #### Submit & Edit buttons ####
     observeEvent(eventExpr = input$submit,
                  handlerExpr = {
-                   # TODO 
-                   # --> Check mappings
-                   # --> produce xml and add to VegX document
-                   # --> update action log and progress tab 
-                   
-                   # Update style
-                   shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
-                   
-                   # Disable UI
-                   shinyjs::disable(selector = paste0("div[data-value='", stringr::str_replace(tab_selected, "^.{1}", toupper), "'] > *"))
-                   shinyjs::runjs(paste0("$('#", ns("tree"), " li').each( function() {
+                   if(length(vegx_mappings[[tab_selected]]) == 0){
+                     shiny::showNotification("Nothing to submit", type = "warning")
+                   } else {
+                     # produce xml and add to VegX document
+                     # update action log and progress tab
+                     
+                     # # Remove incomplete mappings
+                     # showModal(
+                     #   modalDialog(tags$label("This action will:"),
+                     #               tags$li("Remove x incomplete mappings"),
+                     #               tags$li("Add x Vew vegX elements to your document"),
+                     #               footer = modalButton("Confirm"),
+                     #               size = "m",
+                     #               easyClose = T
+                     #   )
+                     # )
+                     
+                     # Update style
+                     shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
+                     
+                     # Disable UI
+                     shinyjs::disable(selector = paste0("div[data-value='", stringr::str_replace(tab_selected, "^.{1}", toupper), "'] > *"))
+                     shinyjs::runjs(paste0("$('#", ns("tree"), " li').each( function() {
                                             $('#", ns("tree") ,"').jstree().disable_node(this.id);
                                           })"))
-                   
-                   # Insert Edit Button
-                   shinyjs::hide("submit")
-                   shinyjs::enable("edit")
-                   shinyjs::show("edit")
-                   
-                   # Jump to next tab
-                   tabs = sort(tabs_visible())
-                   tab_index = which(tabs == tab_selected)
-                   next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper)
-                   nav_select("sidebar", selected = next_tab, session = parent_session)
+                     
+                     # Insert Edit Button
+                     shinyjs::hide("submit")
+                     shinyjs::enable("edit")
+                     shinyjs::enable(selector = ".btn-circle-xs")
+                     shinyjs::show("edit")
+                     
+                     # Jump to next tab
+                     tabs = sort(tabs_visible())
+                     tab_index = which(tabs == tab_selected)
+                     next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper)
+                     nav_select("sidebar", selected = next_tab, session = parent_session)
+                   }
                  })
     
     observeEvent(eventExpr = input$edit,
                  handlerExpr = {
-                   # TODO
-                   # supervise updates
-                   # change XML
-                   
                    # Update style of tab in sidebar
                    shinyjs::removeClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                    shinyjs::enable(selector = paste0("div[data-value='", stringr::str_replace(tab_selected, "^.{1}", toupper), "'] > *"))
                    shinyjs::runjs(paste0("$('#", ns("tree"), " li').each( function() {
                                             $('#", ns("tree") ,"').jstree().enable_node(this.id);
                                           })"))
+                   
+                   # Show submit button
                    shinyjs::hide("edit")
                    shinyjs::show("submit")
                  })
