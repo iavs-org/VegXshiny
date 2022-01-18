@@ -7,25 +7,35 @@ namespace_uris = list(
   "http://iavs.org/vegX/community-2.0.1" = "comm"
 )
 
-# Namespace file locations
-namespaces = list(
-  veg  = read_xml("inst/app/www/vegxschema/veg.xsd"),
-  misc = read_xml("inst/app/www/vegxschema/veg-misc.xsd"),
-  obs  = read_xml("inst/app/www/vegxschema/veg-plotobservation.xsd"),
-  plot = read_xml("inst/app/www/vegxschema/veg-plot.xsd"),
-  org  = read_xml("inst/app/www/vegxschema/veg-organism.xsd"),
-  comm = read_xml("inst/app/www/vegxschema/veg-community.xsd")
-)
+# ------------------------------------- #
+####       Schema preparation        ####
+# ------------------------------------- #
+# Link schema
+schema_files = load_schema() # read schema files
+vegx_schema_full = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
+link_vegx_schema(vegx_schema_full, "veg", schema_files, simplify = F)
 
-# VegX Schema
-vegx_smpl = xml_find_all(namespaces[["veg"]], ".//*[@name='vegX']")
-simplify_vegx_node(vegx_smpl, "veg", namespaces)
+# Simplify linked schema
+schema_files = load_schema() # read fresh copy of schema files
+vegx_schema_simple = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
+link_vegx_schema(vegx_schema_simple, "veg", schema_files, simplify = T)
 
-# VegX names
-vegx_main_elements = xml_attr(xml_children(vegx_smpl), "name")
+# Collect VegX main element names
+vegx_main_elements = xml2::xml_attr(xml_children(vegx_schema_simple), "name")
 
-# VegX leaf nodes
-vegx_leaf_elements = xml_find_all(vegx_smpl, "//*[@name='vegX']//*[not(*)]") %>% 
-  xml_attr("name") %>% 
+# Collect VegX leaf element names
+vegx_leaf_elements = xml_find_all(vegx_schema_simple, "//*[@name='vegX']//*[not(*)]") %>%
+  xml2::xml_attr("name") %>%
   unique()
 vegx_leaf_elements = vegx_leaf_elements[!is.na(vegx_leaf_elements)]
+
+# ------------------------------------- #
+####    VegX document preparation    ####
+# ------------------------------------- #
+# Create empty VegX file
+vegx_doc = xml_new_root("vegX")
+
+# create namespace attributes
+ns_uris = unlist(namespace_uris)
+attrs = setNames(names(ns_uris), paste0("xmlns:", ns_uris))
+xml_set_attrs(vegx_doc, attrs)
