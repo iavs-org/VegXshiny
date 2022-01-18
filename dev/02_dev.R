@@ -25,6 +25,7 @@ usethis::use_package("shinyWidgets")
 usethis::use_package("shinyjs")
 usethis::use_package("shinyTree")
 usethis::use_package("shinyBS")
+usethis::use_package("shinyAce")
 usethis::use_package("rhandsontable")
 
 ## Add modules ----
@@ -33,9 +34,11 @@ golem::add_module("fileManagement")
 golem::add_module("documentCreation")
 golem::add_module("elementMapping")
 golem::add_module("rowGenerator")
+golem::add_module("viewXML")
 
 ## Add helper functions ----
-golem::add_fct("xml")
+golem::add_fct("xml_schema")
+golem::add_fct("xml_export")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

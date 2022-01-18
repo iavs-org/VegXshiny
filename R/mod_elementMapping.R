@@ -22,8 +22,8 @@ mod_elementMapping_ui <- function(id){
       column(
         width = 12,
         tags$h2(textOutput(ns("tab_selected"))),
-        div(textOutput(ns("annotation")), class = "text-info annotation"),
-        hr(.noWS = "after")
+        div(textOutput(ns("annotation_main_element")), class = "text-info annotation"),
+        hr()
       )
     ),
     
@@ -35,16 +35,16 @@ mod_elementMapping_ui <- function(id){
         div(class = "annotation text-info",
             tags$span("Select the VegX elements you want to use."), 
             shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                         tags$p("The tree lists all available VegX elements for the currently selected main element. If available, additional documentation information from the VegX
-                                         schema is shown when hovering over a given item."))
+                                         tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search box to quickly identify the 
+                                             location of an element by its name. If available, additional documentation information from the VegX schema is presented on mouse-over."))
         ),
         br(),
         fluidRow(
           column(7, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T)),
           column(5, 
                  div(class = "info-box",
-                     textOutput(ns("info_text"))
-                 ),
+                     textOutput(ns("annotation_text"))
+                 )
           )
         ),
         hr(.noWS = "before")
@@ -81,6 +81,7 @@ mod_elementMapping_ui <- function(id){
       )
     ),
     
+    
     # ----------------- #
     fluidRow(
       align = "center",
@@ -95,30 +96,29 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, info_text, parent_session){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, annotation_text, parent_session){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
     #### Header ####
     output$tab_selected = renderText(stringr::str_replace(tab_selected, "^.{1}", toupper)) # Capitalize first letter
-    output$annotation = renderText(xml_attr(xml_children(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']"))), "annotation"))
+    output$annotation_main_element = renderText(xml_attr(xml_children(xml_find_all(vegx_schema_simple, paste0(".//*[@name='", tab_selected, "']"))), "annotation"))
     
     # --------------------------------------------------------------------------------------- #
     #### VegX element selection ####
     if(isolate(tab_selected) %in% c("simpleUserDefined", "complexUserDefined")){
       return()
     } else if(isolate(tab_selected) == "note"){
-      elem_list = vegx_to_list(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']")), "name")  
+      elem_list = schema_to_list(xml_find_all(vegx_schema_simple, paste0(".//*[@name='", tab_selected, "']")), "name")  
     } else {
-      elem_list = vegx_to_list(xml_children(xml_find_all(vegx_smpl, paste0(".//*[@name='", tab_selected, "']"))), "name")
+      elem_list = schema_to_list(xml_children(xml_find_all(vegx_schema_simple, paste0(".//*[@name='", tab_selected, "']"))), "name")
     }
-  
+    
     output$tree = shinyTree::renderTree(elem_list)
-    output$info_text = renderText({info_text()})
+    output$annotation_text = renderText({annotation_text()})
     
     observeEvent(input$tree, {
       # TODO
-      # show tooltip on hover
       # prevent selection of multiple xsd:choice elements 
       
       selected = shinyTree::get_selected(input$tree, "slices") # Get selected elements
@@ -148,7 +148,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     observeEvent(eventExpr = input$add_mapping,
                  handlerExpr = {
                    if(length(elem_selected[[tab_selected]]) > mapping_count() | mapping_count() == 0){ 
-                     tmp_id = paste0("id", mapping_id())
+                     tmp_id = paste0("row", mapping_id())
                      mod_rowGenerator_server(id = tmp_id, tab_selected, elem_selected, data_columns, fields_used, vegx_mappings, mapping_count)
                      insertUI(selector = paste0("#", ns("placeholder")),
                               where = "beforeBegin",

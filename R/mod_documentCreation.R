@@ -18,13 +18,14 @@ mod_documentCreation_ui <- function(id){
     navs_pill_list(
       id=ns("sidebar"),
       widths = c(2, 10),
-      selected = "Projects",
+      selected = "Parties",
       
+      nav_item(actionButton(ns("print_mappings"), label = "Print mappings")),
       nav_item(tags$label("VegX main elements")),
       nav_item(shinyWidgets::radioGroupButtons(ns("input_mode"), choices = c("Basic", "Advanced", "All"), selected = "All",
                                                justified = TRUE, status = "info", size = "xs")),
       nav_item(hr()),
-
+      
       nav("AggregateOrganismObservations",  mod_elementMapping_ui(ns("aggregateOrganismObservations"))),
       nav("Attributes",                     mod_elementMapping_ui(ns("attributes"))),
       nav("CommunityConcepts",              mod_elementMapping_ui(ns("communityConcepts"))),
@@ -59,7 +60,7 @@ mod_documentCreation_ui <- function(id){
 #' documentCreation Server Functions
 #'
 #' @noRd 
-mod_documentCreation_server <- function(id, user_data, info_text){
+mod_documentCreation_server <- function(id, user_data, annotation_text){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -77,7 +78,10 @@ mod_documentCreation_server <- function(id, user_data, info_text){
     elem_selected = reactiveValues() # Container for selected sub-elements per main element
     vegx_mappings = reactiveValues() # Container for existing mappings  
     tabs_visible  = reactiveVal()    # Currently shown tabs
-      
+    
+    observeEvent(eventExpr = input$print_mappings,
+                 handlerExpr = print(reactiveValuesToList(vegx_mappings)))
+    
     # Update sidebar depending on input_mode
     observeEvent(eventExpr = input$input_mode,
                  handlerExpr = {
@@ -88,12 +92,10 @@ mod_documentCreation_server <- function(id, user_data, info_text){
                    lapply(tabs_visible(), function(tab){bslib::nav_show("sidebar", stringr::str_replace(tab, "^.{1}", toupper))})
                  })
     
-
+    
     # Call modules
     lapply(vegx_main_elements, function(tab_name){
-      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, info_text, session)
+      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, annotation_text, session)
     })
-    
-    #mod_xmlBuilder_server("xmlBuilder", tabs_shown, tab_selected, elem_selected)
   })
 }

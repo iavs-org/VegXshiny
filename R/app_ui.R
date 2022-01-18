@@ -2,9 +2,7 @@
 #' 
 #' @param request Internal parameter for `{shiny}`. 
 #'     DO NOT REMOVE.
-#' @import shiny
-#' @import shinyBS
-#' @import shinythemes
+#' @import shiny shinyBS shinythemes shinyAce
 #' @importFrom shinyTree shinyTree
 #' @noRd
 app_ui <- function(request) {
@@ -27,8 +25,9 @@ app_ui <- function(request) {
                tabPanel(div(icon("leaf", class = "icon-padded"), "Create VegX"),
                         mod_documentCreation_ui("documentCreation")
                ),
-               tabPanel(div(icon("chart-bar", class = "icon-padded"), "Check Progress")),
-               tabPanel(div(icon("download", class = "icon-padded"), "Export VegX"))
+               tabPanel(div(icon("chart-bar", class = "icon-padded"), "XML Viewer"),
+                        mod_viewXML_ui("viewXML")
+               )
     )
   )
 }
