@@ -18,6 +18,7 @@ load_schema = function(){
   )
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Simplify VegX XML schema and link across documents
 #'
 #' @description This is a recursive function to parse and simplify the VegX XSD schema. It is typically called on the root node (<xsd:element name="vegX"> in veg.xsd) and then works its way through the schema. In doing so, it does mainly two things: (1) remove 'clutter' such as attribute, annotation, sequence or complexType nodes and (2) link nodes across namespaces. 
@@ -27,7 +28,7 @@ load_schema = function(){
 #' @param schema_files A named list with xsd definitions (see global.R).
 #' @param simplify Whether to remove container elements (complexType, sequence, simpleContent, extension) when linking the schema. Default True.
 #'
-#' @return This function does not return anything.
+#' @return This function is used for its side effects.
 #'
 #' @noRd
 #' 
@@ -51,7 +52,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
     }
     
     # Remove annotation and attribute elements (but not attributes of the root)
-    xml_remove(children[xml_name(children) %in% c("attribute", "annotation")], free = T) 
+    xml_remove(children[xml_name(children) %in% c("attribute", "annotation")]) 
     children = xml_children(node)
   } else {
     # Don't remove but ignore annotation and attribute nodes
@@ -74,7 +75,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
       # If namespace belongs to VegX, graft type definition into current node
       if(ns %in% names(schema_files)){
         node_append = xml_find_all(schema_files[[ns]], str_glue("//*[@name='{type}']"))
-        children_append = xml_children(node_append)
+        children_append = node_append %>% xml_children %>% xml_find_all("../*[not(self::xsd:annotation)]") # Avoid duplicate annotation type definition
         sapply(children_append, function(child){xml_add_child(node, child, .copy=T)})
         link_vegx_schema(node, ns, schema_files, simplify)
       }
@@ -94,6 +95,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
   return()
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Convert a VegX XML schema node and all its descendents to an R list object.
 #'
 #' @param node an xml_node or xml_nodeset of length 1

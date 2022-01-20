@@ -16,17 +16,18 @@
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
 usethis::use_package("dplyr")
-usethis::use_package("tidyr")
-usethis::use_package("stringr")
-usethis::use_package("markdown")
 usethis::use_package("knitr")
-usethis::use_package("xml2")
-usethis::use_package("shinyWidgets")
+usethis::use_package("markdown")
+usethis::use_package("rhandsontable")
+usethis::use_package("shinyAce")
+usethis::use_package("shinyBS")
 usethis::use_package("shinyjs")
 usethis::use_package("shinyTree")
-usethis::use_package("shinyBS")
-usethis::use_package("shinyAce")
-usethis::use_package("rhandsontable")
+usethis::use_package("shinyWidgets")
+usethis::use_package("stringr")
+usethis::use_package("testthat")
+usethis::use_package("tidyr")
+usethis::use_package("xml2")
 
 ## Add modules ----
 golem::add_module("about")

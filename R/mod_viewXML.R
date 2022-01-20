@@ -28,14 +28,14 @@ mod_viewXML_ui <- function(id){
 #' viewXML Server Functions
 #'
 #' @noRd 
-mod_viewXML_server <- function(id, vegx_txt){
+mod_viewXML_server <- function(id, vegx_text){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
-    observeEvent(eventExpr = vegx_txt,
-                 handlerExpr = {
-                   updateAceEditor(session, "xml_viewer", value = vegx_txt())
-                 })
+    observe({
+      print(vegx_text())
+      updateAceEditor(session, "xml_viewer", value = vegx_text())
+    })
     
     output$export = downloadHandler(
       filename = "vegx.xml",
