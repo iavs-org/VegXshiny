@@ -4,9 +4,9 @@
 #' 
 #' @return a list of xml2 documents
 #' 
-#' @noRd
-#' 
 #' @importFrom xml2 read_xml
+#' 
+#' @noRd
 load_schema = function(){
   list(
     veg  = xml2::read_xml("inst/app/www/vegxschema/veg.xsd"),
@@ -30,10 +30,11 @@ load_schema = function(){
 #'
 #' @return This function is used for its side effects.
 #'
-#' @noRd
-#' 
+#' @import dplyr
 #' @import xml2
-#' @importFrom stringr str_glue str_detect str_split
+#' @import stringr
+#'
+#' @noRd
 link_vegx_schema = function(node, ns, schema_files, simplify = T){
   # Pre-processing
   if(simplify){
@@ -77,6 +78,9 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
         node_append = xml_find_all(schema_files[[ns]], str_glue("//*[@name='{type}']"))
         children_append = node_append %>% xml_children %>% xml_find_all("../*[not(self::xsd:annotation)]") # Avoid duplicate annotation type definition
         sapply(children_append, function(child){xml_add_child(node, child, .copy=T)})
+        if(simplify & xml_has_attr(node_append, "id")){
+          xml_set_attr(node, "id", xml_attr(node_append, "id"))   # If simplify = True and node_append has 'id' attribute, inherit 
+        }
         link_vegx_schema(node, ns, schema_files, simplify)
       }
     } else {

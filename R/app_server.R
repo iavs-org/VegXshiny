@@ -2,7 +2,14 @@
 #' 
 #' @param input,output,session Internal parameters for {shiny}. 
 #'
-#' @import shiny golem 
+#' @import shiny 
+#' @import golem 
+#' @import xml2 
+#' @import dplyr
+#' @import bslib
+#' @import shinyjs 
+#' @import stringr
+#' 
 #' @noRd 
 
 app_server <- function( input, output, session ) {
@@ -12,10 +19,9 @@ app_server <- function( input, output, session ) {
   # --------------------------------------------------------------------------------------- #
   # Create reactive values
   vegx_text = reactiveVal({
-    ""
-    #tmp = tempfile(fileext = ".xml")
-    #write_xml(vegx_doc, tmp, options = "format")
-    #readChar(tmp, file.info(tmp)$size)
+    tmp = tempfile(fileext = ".xml")
+    write_xml(vegx_doc, tmp, options = "format")
+    readChar(tmp, file.info(tmp)$size)
   })
   
   # --------------------------------------------------------------------------------------- #

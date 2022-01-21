@@ -8,36 +8,23 @@ TODO:
 
 /* set text color in handsontable to black*/
 .htCore {
-  color:black;
+  color:black!important;
 }
 
-.btn-default {
-  background-color:#777;
-  white-space:normal;
-}
-
-.btn-sidebar {
+.nav-stacked > li > a {
   text-align:left !important; 
+  vertical-align:middle!important;
   border-width:0px !important; 
-  margin-top:1px !important;
-  padding-top:6px; 
-  padding-bottom:6px;
+  padding-top:6px!important; 
+  padding-bottom:6px!important;
   overflow:hidden;
   white-space:nowrap;
   display:inline-block;
   text-overflow:ellipsis;
 }
 
-.btn-success {
-  background-color:#2e752e;
-  border-color:#2e752e;
-}
-
-.btn-active {
-  font-weight:900 !important;
-  border-width: 0.5px !important;
-  border-color: #fff !important;
-  text-align:center !important;
+.nav-stacked > li > a:hover, .nav-stacked > li > a:focus {
+  filter: brightness(1.5);
 }
 
 .icon-padded {

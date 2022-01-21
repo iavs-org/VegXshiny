@@ -6,17 +6,10 @@
 #'
 #' @noRd 
 #'
-#' @import rhandsontable
-#' @importFrom shiny NS tagList 
+#' @importFrom rhandsontable rhandsontable renderRHandsontable
 mod_fileManagement_ui <- function(id){
   ns <- NS(id)
   
-  # fluidPage(
-  #   fixedPanel(width = 2, left = 0, 
-  #              fileInput("file", "Upload files", accept = ".csv", width = "100%", multiple = T)
-  #              )
-  #     
-  # )
   sidebarLayout(
     sidebarPanel(width = 2,
                  tagList(
@@ -77,9 +70,3 @@ mod_fileManagement_server <- function(id){
     return(user_data)
   })
 }
-
-## To be copied in the UI
-# mod_fileManagement_ui("fileManagement_ui_1")
-
-## To be copied in the server
-# mod_fileManagement_server("fileManagement_ui_1")

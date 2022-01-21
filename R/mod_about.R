@@ -6,7 +6,6 @@
 #'
 #' @noRd 
 #' 
-#' @import shiny
 #' @importFrom knitr knit
 #' @importFrom markdown markdownToHTML
 mod_about_ui <- function(id){

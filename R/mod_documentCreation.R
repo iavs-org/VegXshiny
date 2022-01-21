@@ -6,10 +6,6 @@
 #'
 #' @noRd 
 #'
-#' @import shiny
-#' @import bslib
-#' @import shinyjs 
-#' @importFrom stringr str_replace
 #' @importFrom shinyWidgets radioGroupButtons
 
 mod_documentCreation_ui <- function(id){
@@ -20,7 +16,6 @@ mod_documentCreation_ui <- function(id){
       widths = c(2, 10),
       selected = "Parties",
       
-      nav_item(actionButton(ns("print_mappings"), label = "Print mappings")),
       nav_item(tags$label("VegX main elements")),
       nav_item(shinyWidgets::radioGroupButtons(ns("input_mode"), choices = c("Basic", "Advanced", "All"), selected = "All",
                                                justified = TRUE, status = "info", size = "xs")),
@@ -78,9 +73,6 @@ mod_documentCreation_server <- function(id, user_data, annotation_text, vegx_tex
     elem_selected = reactiveValues() # Container for selected sub-elements per main element
     vegx_mappings = reactiveValues() # Container for existing mappings  
     tabs_visible  = reactiveVal()    # Currently shown tabs
-    
-    observeEvent(eventExpr = input$print_mappings,
-                 handlerExpr = print(reactiveValuesToList(vegx_mappings)))
     
     # Update sidebar depending on input_mode
     observeEvent(eventExpr = input$input_mode,

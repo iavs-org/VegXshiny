@@ -5,14 +5,10 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd 
-#'
-#' @importFrom shiny NS tagList 
+#' 
+#' @importFrom jsonlite fromJSON
 #' @importFrom shinyTree shinyTree renderTree get_selected
 #' @importFrom shinyWidgets checkboxGroupButtons
-#' @importFrom shinyjs click addClass
-#' @importFrom bslib nav_select
-#' @importFrom stringr str_replace_all
-#' @importFrom xml2 xml_find_all xml_add_child
 
 mod_elementMapping_ui <- function(id){
   ns <- NS(id)
@@ -138,8 +134,9 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     fields_used = reactiveValues(elements = list(), values = list()) # Elements and values currently selected
     
     data_columns = reactive({
-      sapply(names(user_data), simplify = F, USE.NAMES = T, function(file_name){
-        user_data[[file_name]]$x$rColHeaders
+      col_vectors = sapply(names(user_data), simplify = F, USE.NAMES = T, function(file_name){
+        name_vec = user_data[[file_name]]$x$rColHeaders
+        name_vec = setNames(paste(file_name, name_vec, sep = "$"), name_vec)
       })
     })
     
@@ -186,18 +183,42 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    } else {
                      # Process mappings and build VegX
                      mappings = isolate(vegx_mappings[[tab_selected]])
-                     node_paths = names(unlist(mappings))
-                     node_values = unname(unlist(mappings))
-                     new_node = mappings_to_vegx(node_paths, node_values)
+                     node_values = lapply(mappings, function(mapping) return(mapping$value))  # need a list here for processing in next step
+                     node_sources = sapply(mappings, function(mapping) return(mapping$source))
                      
-                     # Append new node to VegX document
-                     parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
-                     if(parent_missing){
-                       xml_add_child(vegx_doc, tab_selected)
+                     # Replace 'value' with data column if source is "file"
+                     for(i in which(node_sources == "File")){
+                       file_name = str_split(node_values[[i]], "\\$", simplify = T)[1]
+                       column_name = str_split(node_values[[i]], "\\$", simplify = T)[2]
+                       upload = user_data[[file_name]]
+                       upload_df = jsonlite::fromJSON(upload$x$data)
+                       colnames(upload_df) = upload$x$rColHeaders
+                       node_values[[i]] = upload_df[,column_name]
                      }
-                     parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
-                     xml_add_child(parent, new_node)
-         
+                     #TODO handle ID elements
+        
+                     tryCatch({
+                       node_values = as.data.frame(node_values)
+                     }, error = function(e){
+                       shiny::showNotification("Mappings could not be merged. Did you specify columns of different length?", type = "error")
+                       return()
+                     })
+                     
+                     # loop over mappings
+                     for(i in 1:nrow(node_values)){
+                       # Create new node
+                       new_node = new_vegx_node(names(mappings), as.character(node_values[i,]))
+                       if(is.na(new_node)){next}
+                       
+                       # Append new node to VegX document
+                       parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
+                       if(parent_missing){
+                         xml_add_child(vegx_doc, tab_selected)
+                       }
+                       parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
+                       xml_add_child(parent, new_node)
+                     }
+                     
                      # Update VegX text 
                      tmp = tempfile(fileext = ".xml")
                      write_xml(vegx_doc, tmp, options = "format")

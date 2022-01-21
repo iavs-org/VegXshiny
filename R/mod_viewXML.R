@@ -6,9 +6,7 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 #' @importFrom shinyAce aceEditor updateAceEditor
-#' @importFrom xml2 xml_new_root xml_set_attrs write_xml
 mod_viewXML_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -21,7 +19,8 @@ mod_viewXML_ui <- function(id){
       autoComplete = "disabled"
     ),
     downloadButton(ns("export"), "Export"),
-    actionButton(ns("edit"), "Edit")
+    actionButton(ns("edit"), "Edit"),
+    actionButton("validate", "Validate")
   )
 }
 
@@ -33,7 +32,6 @@ mod_viewXML_server <- function(id, vegx_text){
     ns <- session$ns
     
     observe({
-      print(vegx_text())
       updateAceEditor(session, "xml_viewer", value = vegx_text())
     })
     
