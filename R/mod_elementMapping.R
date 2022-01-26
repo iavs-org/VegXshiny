@@ -8,7 +8,7 @@
 #' 
 #' @importFrom jsonlite fromJSON
 #' @importFrom shinyTree shinyTree renderTree get_selected
-#' @importFrom shinyWidgets checkboxGroupButtons
+#' @importFrom shinyWidgets radioGroupButtons
 
 mod_elementMapping_ui <- function(id){
   ns <- NS(id)
@@ -16,77 +16,98 @@ mod_elementMapping_ui <- function(id){
   fluidPage(
     useShinyjs(),
     # ----------------- #
+    #### Header ####
     fluidRow(
       column(
         width = 12,
         tags$h2(textOutput(ns("tab_selected"))),
-        div(textOutput(ns("annotation_main_element")), class = "text-info annotation"),
-        hr()
+        div(textOutput(ns("annotation_main_element")), class = "text-info annotation")
+        ## TODO insert small reminder if issues exist with this element
       )
     ),
     
     # ----------------- #
+    #### Mappings ####
     fluidRow(
       column(
         width = 12,
-        tags$h4(tags$b("Elements")),
-        div(class = "annotation text-info",
-            tags$span("Select the VegX elements you want to use."), 
-            shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                         tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search box to quickly identify the 
-                                             location of an element by its name. If available, additional documentation information from the VegX schema is presented on mouse-over."))
-        ),
-        br(),
-        fluidRow(
-          column(7, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T)),
-          column(5, 
-                 div(class = "info-box",
-                     textOutput(ns("annotation_text"))
-                 )
-          )
-        ),
-        hr(.noWS = "before")
-      )
-    ),
-    
-    # ----------------- #
-    fluidRow(
-      column(
-        width = 12,
-        tags$h4(tags$b("Values")),
-        div(class = "annotation text-info",
-            tags$span("Associate the selected VegX elements with values."), 
-            shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                         tags$p("There are two ways to map elements to values:"),
-                                         tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will force the create one VegX node 
-                                                         per row for the entire VegX main element."),
-                                                 tags$li("Provide a free text value. If all mappings in the main element are free text values, this will create a single new VegX node. 
-                                                          This option may be useful, e.g., when entering new methods or attributes. If there are mappings present that link to uploaded data, 
-                                                          free text values will be copied to all newly created nodes."))
+        tabsetPanel(
+          
+          ##### new mapping #####
+          tabPanel(
+            title = "Create new",  
+            tags$h4(tags$b("Elements")),
+            div(class = "annotation text-info",
+                tags$span("Select the VegX elements you want to use."), 
+                shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
+                                             tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search 
+                                                    box to quickly identify the location of an element by its name. If available, additional documentation information 
+                                                    from the VegX schema is presented on mouse-over."))
+            ),
+            br(),
+            fluidRow(
+              column(7, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T)),
+              column(5, 
+                     div(class = "info-box",
+                         textOutput(ns("annotation_text"))
+                     )
+              )
+            ),
+            
+            hr(.noWS = c("before","after")),
+            
+            # ----------------- #
+            
+            fluidRow(
+              column(
+                width = 12,
+                tags$h4(tags$b("Values")),
+                div(class = "annotation text-info",
+                    tags$span("Associate the selected VegX elements with values."), 
+                    shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
+                                                 tags$p("There are two ways to map elements to values:"),
+                                                 tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will force the create 
+                                                             one VegX node per row for the entire VegX main element."),
+                                                         tags$li("Provide a free text value. If all mappings in the main element are free text values, this will create a 
+                                                             single new VegX node. This option may be useful, e.g., when entering new methods or attributes. If there 
+                                                             are mappings present that link to uploaded data, free text values will be copied to all newly created nodes."))
+                    )
+                ),
+                fluidRow(
+                  align = "center", 
+                  column(5, tags$label("VegX Element")),
+                  column(5, tags$label("Value(s)")),
+                  column(2,
+                         column(9, tags$label("Values from"))
+                  )
+                ),
+                div(id = ns("placeholder")),
+                actionButton(ns("add_mapping"), label = "Add mapping", icon = icon("plus", class = "icon-padded")), 
+                hr(.noWS = c("before","after")),
+              )
+            ),
+            
+            # ----------------- #
+            
+            fluidRow(
+              column(
+                tags$h4(tags$b("Submission")),
+                width = 12,
+                actionButton(ns("add_nodes"), label = "Add as new nodes", width = "250px", class = "btn-primary", style = "font-weight:bold"),
+                actionButton(ns("merge_nodes"), label = "Merge into existing nodes", width = "250px", class = "btn-primary", style = "font-weight:bold"),
+                actionButton(ns("replace_nodes"), label = "Replace existing nodes", width = "250px", class = "btn-primary", style = "font-weight:bold")
+              )
             )
-        ),
-        fluidRow(
-          align = "center", 
-          column(5, tags$label("VegX Element")),
-          column(5, tags$label("Value(s)")),
-          column(2,
-                 column(9, tags$label("Values from"))
+          ),
+          
+          # ----------------- #
+          ##### templates #####
+          tabPanel(
+            title = "Templates",
+            tags$h1("templates")
           )
-        ),
-        div(id = ns("placeholder")),
-        actionButton(ns("add_mapping"), label = "Add mapping", icon = icon("plus", class = "icon-padded")), 
-        hr(.noWS = c("before","after")),
+        )
       )
-    ),
-    
-    
-    # ----------------- #
-    fluidRow(
-      align = "center",
-      column(
-        width = 12,
-        actionButton(ns("submit"), label = "Submit", width = "300px", class = "btn-primary", style = "font-weight:bold"),
-        shinyjs::hidden(actionButton(ns("edit"), label = "Edit", width = "300px", class = "btn-success", style = "font-weight:bold")))
     )
   )
 }
@@ -174,105 +195,209 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                  })
     
     # --------------------------------------------------------------------------------------- #
-    #### Submit & Edit buttons ####
+    #### Submission ####
     # --------------------------------------------------------------------------------------- #
-    observeEvent(eventExpr = input$submit,
+    node_values_df =  reactiveVal()
+    
+    ##### Modal Dialogues #####
+    ###### Add nodes ######
+    observeEvent(eventExpr = input$add_nodes,
                  handlerExpr = {
                    if(length(vegx_mappings[[tab_selected]]) == 0){
                      shiny::showNotification("Nothing to submit", type = "warning")
                    } else {
-                     # Process mappings and build VegX
+                     # Process mappings and build node table
                      mappings = isolate(vegx_mappings[[tab_selected]])
-                     node_values = lapply(mappings, function(mapping) return(mapping$value))  # need a list here for processing in next step
-                     node_sources = sapply(mappings, function(mapping) return(mapping$source))
+                     nodes_df = build_node_values_df(mappings, user_data)
                      
-                     # Replace 'value' with data column if source is "file"
-                     for(i in which(node_sources == "File")){
-                       file_name = str_split(node_values[[i]], "\\$", simplify = T)[1]
-                       column_name = str_split(node_values[[i]], "\\$", simplify = T)[2]
-                       upload = user_data[[file_name]]
-                       upload_df = jsonlite::fromJSON(upload$x$data)
-                       colnames(upload_df) = upload$x$rColHeaders
-                       node_values[[i]] = upload_df[,column_name]
-                     }
-                     #TODO handle ID elements
-        
-                     tryCatch({
-                       node_values = as.data.frame(node_values)
-                     }, error = function(e){
-                       shiny::showNotification("Mappings could not be merged. Did you specify columns of different length?", type = "error")
-                       return()
-                     })
-                     
-                     # loop over mappings
-                     for(i in 1:nrow(node_values)){
-                       # Create new node
-                       new_node = new_vegx_node(names(mappings), as.character(node_values[i,]))
-                       if(is.na(new_node)){next}
-                       
-                       # Append new node to VegX document
-                       parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
-                       if(parent_missing){
-                         xml_add_child(vegx_doc, tab_selected)
-                       }
-                       parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
-                       xml_add_child(parent, new_node)
+                     # Check df
+                     if(is.null(nodes_df)){
+                       shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                     } else {
+                       node_values_df(nodes_df) 
                      }
                      
-                     # Update VegX text 
-                     tmp = tempfile(fileext = ".xml")
-                     write_xml(vegx_doc, tmp, options = "format")
-                     new_text = readChar(tmp, file.info(tmp)$size)
-                     vegx_text(new_text)
+                     # Extract basic information for modal dialog
+                     n_nodes = nrow(nodes_df)
+                     name_nodes = xml_find_all(vegx_schema_simple, paste0("//*[@name='", tab_selected, "']")) %>%
+                       xml_children() %>%
+                       xml_attr("name")
                      
-                     # update action log and progress tab
-                     
-                     # Remove incomplete mappings
+                     # Show modal dialog
                      showModal(
-                       modalDialog(tags$label("This action will:"),
-                                   tags$li("Remove x incomplete mappings"),
-                                   tags$li("Add x Vew vegX elements to your document"),
-                                   footer = modalButton("Confirm"),
-                                   size = "m",
-                                   easyClose = T
+                       modalDialog(tags$h3("Add new nodes"),
+                                   hr(),
+                                   tags$label("This action will:"),
+                                   tags$li(paste0("Add ", n_nodes," new ", name_nodes," element(s) to your document")),
+                                   tags$li("Reset the mapping interface"),
+                                   size = "l",
+                                   footer = tagList(
+                                     tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                               actionButton(ns("confirm_add_nodes"), class = "pull-right btn-success", "Confirm", icon("check")))
+                                   ),
                        )
                      )
-                     
-                     # Update style
-                     shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
-                     
-                     # # Disable UI
-                     # shinyjs::disable(selector = paste0("div[data-value='", stringr::str_replace(tab_selected, "^.{1}", toupper), "'] > *"))
-                     # shinyjs::runjs(paste0("$('#", ns("tree"), " li').each( function() {
-                     #                        $('#", ns("tree") ,"').jstree().disable_node(this.id);
-                     #                      })"))
-                     # 
-                     # # Insert Edit Button
-                     # shinyjs::hide("submit")
-                     # shinyjs::enable("edit")
-                     # shinyjs::enable(selector = ".btn-circle-xs")
-                     # shinyjs::show("edit")
-                     # 
-                     # # Jump to next tab
-                     # tabs = sort(tabs_visible())
-                     # tab_index = which(tabs == tab_selected)
-                     # next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper)
-                     # nav_select("sidebar", selected = next_tab, session = parent_session)
                    }
                  })
     
-    observeEvent(eventExpr = input$edit,
+    ###### Merge nodes ######
+    observeEvent(eventExpr = input$merge_nodes,
                  handlerExpr = {
-                   # Update style of tab in sidebar
-                   shinyjs::removeClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
-                   shinyjs::enable(selector = paste0("div[data-value='", stringr::str_replace(tab_selected, "^.{1}", toupper), "'] > *"))
-                   shinyjs::runjs(paste0("$('#", ns("tree"), " li').each( function() {
-                                            $('#", ns("tree") ,"').jstree().enable_node(this.id);
-                                          })"))
+                   if(length(vegx_mappings[[tab_selected]]) == 0){
+                     shiny::showNotification("Nothing to submit.", type = "warning")
+                   } else if(length(xml_children(xml_find_all(vegx_doc, paste0("//", tab_selected)))) == 0){
+                     shiny::showNotification("No nodes to merge with.", type = "warning")
+                   } else {
+                     # Process mappings and build node table
+                     mappings = isolate(vegx_mappings[[tab_selected]])
+                     nodes_df = build_node_values_df(mappings, user_data)
+                     
+                     # Check df
+                     if(is.null(nodes_df)){
+                       shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                     } else {
+                       node_values_df(nodes_df) 
+                     }
+                     
+                     # Extract basic information for modal dialog
+                     n_new_nodes = nrow(node_values_df())
+                     name_new_nodes = xml_find_all(vegx_schema_simple, paste0("//*[@name='", tab_selected, "']")) %>%
+                       xml_children() %>%
+                       xml_attr("name")
+                     
+                     target_nodes_df = nodes_df %>% mutate(target_id = NA) %>% relocate("target_id")
+                     target_nodes_hot = rhandsontable::rhandsontable(target_nodes_df, useTypes = F)
+                     output$target_nodes_hot = rhandsontable::renderRHandsontable(target_nodes_hot)
+                     
+                     # Show modal dialog
+                     showModal(
+                       modalDialog(tags$h3("Merge with existing nodes"),
+                                   hr(),
+                                   tags$label("This action will merge the below mappings into the specified target nodes."),
+                                   rhandsontable::rHandsontableOutput(ns("target_nodes_hot")),
+                                   tags$br(),
+                                   tags$p("All existing mappings will be reset."),
+                                   size = "l",
+                                   footer = tagList(
+                                     tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                               actionButton(ns("confirm_merge_nodes"), class = "pull-right btn-success", "Confirm", icon("check")))
+                                   ),
+                       )
+                     )
+                   }
+                 })
+    
+    ###### Replace nodes ######
+    observeEvent(eventExpr = input$replace_nodes,
+                 handlerExpr = {
+                   if(length(vegx_mappings[[tab_selected]]) == 0){
+                     shiny::showNotification("Nothing to submit", type = "warning")
+                   } else {
+                     # Process mappings and build node table
+                     mappings = isolate(vegx_mappings[[tab_selected]])
+                     nodes_df = build_node_values_df(mappings, user_data)
+                     
+                     # Check df
+                     if(is.null(nodes_df)){
+                       shiny::showNotification("Mappings table could not build. Did you specify data columns of different length?", type = "error")
+                     } else {
+                       node_values_df(nodes_df) 
+                     }
+                     
+                     # ...
+                   }
+                 })
+    
+    
+    ##### Update document #####
+    observeEvent(eventExpr = input$dismiss_modal, 
+                 handlerExpr = {
+                   removeModal()
+                 })
+    
+    ###### Add nodes ######
+    observeEvent(eventExpr = input$confirm_add_nodes, 
+                 handlerExpr = {
+                   node_values_df = isolate(node_values_df())
+                   node_names = colnames(node_values_df)
                    
-                   # Show submit button
-                   shinyjs::hide("edit")
-                   shinyjs::show("submit")
+                   # loop over mappings
+                   for(i in 1:nrow(node_values_df)){
+                     # Create new node
+                     new_node = new_vegx_node(node_names, as.character(node_values_df[i,]))
+                     if(is.na(new_node)){next}
+                     
+                     # Append new node to VegX document
+                     parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
+                     if(parent_missing){
+                       xml_add_child(vegx_doc, tab_selected)
+                     }
+                     parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
+                     xml_add_child(parent, new_node)
+                   }
+                   
+                   # Update VegX text 
+                   tmp = tempfile(fileext = ".xml")
+                   write_xml(vegx_doc, tmp, options = "format")
+                   new_text = readChar(tmp, file.info(tmp)$size)
+                   vegx_text(new_text)
+                   
+                   # TODO update action log and progress tab
+                   #
+                   
+                   # Update style
+                   shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
+                   
+                   # # Jump to next tab
+                   tabs = sort(tabs_visible())
+                   tab_index = which(tabs == tab_selected)
+                   next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
+                   nav_select("sidebar", selected = next_tab, session = parent_session)
+                   
+                   removeModal()
+                 })
+    
+    ###### Merge nodes ######
+    observeEvent(eventExpr = input$confirm_merge_nodes, 
+                 handlerExpr = {
+                   # Get existing ids from document
+                   existing_ids = xml_find_all(vegx_doc, paste0("//", tab_selected)) %>% 
+                     xml_children() %>% 
+                     xml_attr("id")
+                   
+                   # Prepare data 
+                   target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot) %>% 
+                     filter(target_id %in% existing_ids)
+                   target_ids = target_nodes_hot$target_id
+                   node_values_df = target_nodes_hot %>% dplyr::select(-target_id)
+                   node_names = colnames(node_values_df)
+                   
+                   # loop over mappings
+                   # TODO check for compliance with schema (maxOccurs)
+                   for(i in 1:nrow(target_nodes_hot)){
+                     
+                     merge_into_vegx_node(target_ids[i], node_names, as.character(node_values_df[i,]))
+                   }
+                   
+                   # Update VegX text 
+                   tmp = tempfile(fileext = ".xml")
+                   write_xml(vegx_doc, tmp, options = "format")
+                   new_text = readChar(tmp, file.info(tmp)$size)
+                   vegx_text(new_text)
+                   
+                   # TODO update action log and progress tab
+                   #
+                   
+                   # Update style
+                   shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
+                   
+                   # # Jump to next tab
+                   tabs = sort(tabs_visible())
+                   tab_index = which(tabs == tab_selected)
+                   next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
+                   nav_select("sidebar", selected = next_tab, session = parent_session)
+                   
+                   removeModal()
                  })
   })
 }

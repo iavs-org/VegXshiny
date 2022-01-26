@@ -9,18 +9,27 @@
 #' @importFrom shinyAce aceEditor updateAceEditor
 mod_viewXML_ui <- function(id){
   ns <- NS(id)
-  tagList(
-    aceEditor(
-      outputId = ns("xml_viewer"), 
-      value = "",
-      mode = "xml",
-      theme = "tomorrow",
-      readOnly = T,
-      autoComplete = "disabled"
+  
+  sidebarLayout(
+    sidebarPanel(width = 2,
+                 tagList(
+                   downloadButton(ns("export"), "Export",  class = "btn-sidebar"),
+                   actionButton(ns("edit"), "Edit", class = "btn-sidebar"),
+                   actionButton(ns("validate"), "Validate", class = "btn-sidebar")
+                 )
     ),
-    downloadButton(ns("export"), "Export"),
-    actionButton(ns("edit"), "Edit"),
-    actionButton("validate", "Validate")
+    mainPanel(width = 10, 
+              tagList(
+                aceEditor(
+                  outputId = ns("xml_viewer"), 
+                  value = "",
+                  mode = "xml",
+                  theme = "tomorrow",
+                  readOnly = T,
+                  autoComplete = "disabled"
+                ),
+              )
+    )
   )
 }
 

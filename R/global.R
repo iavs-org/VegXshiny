@@ -39,8 +39,10 @@ vegx_doc = xml_new_root("vegX")
 
 # create namespace attributes
 ns_uris = unlist(namespace_uris)
-attrs = setNames(names(ns_uris), paste0("xmlns:", ns_uris))
-xml_set_attrs(vegx_doc, attrs)
+ns_attrs_vegx = setNames(names(ns_uris), paste0("xmlns:", ns_uris))
+ns_attrs_w3c = c("xmlns:xsi"="http://www.w3.org/2001/XMLSchema-instance")
+ns_attrs = c(ns_attrs_vegx, ns_attrs_w3c)
+xml_set_attrs(vegx_doc, ns_attrs)
 
 # --------------------------------------------------------------------------------------- #
 ####    ID factory     ####

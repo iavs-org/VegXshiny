@@ -18,15 +18,22 @@ app_ui <- function(request) {
                         mod_about_ui("about")
                ),
                
-               tabPanel(div(icon("file", class = "icon-padded"), "Manage Files"),
+               tabPanel(div(icon("folder-open", class = "icon-padded"), "Manage Files"),
                         mod_fileManagement_ui("fileManagement")
                ),
+               
+               # TODO TEMPLATE BUILDER?!
                
                tabPanel(div(icon("leaf", class = "icon-padded"), "Create VegX"),
                         mod_documentCreation_ui("documentCreation")
                ),
-               tabPanel(div(icon("chart-bar", class = "icon-padded"), "XML Viewer"),
+               
+               tabPanel(div(icon("file", class = "icon-padded"), "XML Viewer"),
                         mod_viewXML_ui("viewXML")
+               ),
+               
+               tabPanel(div(icon("history", class = "icon-padded"), "Action Log"),
+                        mod_actionLog_ui("actionLog")
                )
     )
   )

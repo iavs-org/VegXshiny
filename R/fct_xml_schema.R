@@ -25,7 +25,7 @@ load_schema = function(){
 #'
 #' @param node An xml_node or xml_nodeset of length 1.
 #' @param ns A character string specifying the VegX namespace of the current node (veg, misc, obs, plot, org, comm).
-#' @param schema_files A named list with xsd definitions (see global.R).
+#' @param schema_files A named list with xsd definitions (see \link{load_schema}).
 #' @param simplify Whether to remove container elements (complexType, sequence, simpleContent, extension) when linking the schema. Default True.
 #'
 #' @return This function is used for its side effects.
@@ -106,7 +106,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
 #' @param name_attr the XML attribute used for naming list elements
 #' @param ns a character string specifying the VegX namespace of the current node (veg, misc, obs, plot, org, comm)
 #' 
-#' @description This is a recursive function to build an R list from a VegX XML document. 
+#' @description This is a recursive function to build an R list from a VegX document. 
 #'
 #' @return A list with a structure corresponding to node
 #'

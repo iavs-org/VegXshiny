@@ -16,6 +16,8 @@ mod_fileManagement_ui <- function(id){
                    fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = ".csv")
                  )
     ),
+    # TODO Add edit button, save edits (hot_to_r(input$xxx))
+    
     mainPanel(width = 10, 
               tagList(
                 uiOutput(ns("file_grid")),

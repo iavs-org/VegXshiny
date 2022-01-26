@@ -57,6 +57,39 @@ new_vegx_node = function(node_paths, node_values, create_id = T){
   }
 }
 
+merge_into_vegx_node = function(target_node_id, node_paths, node_values){
+  # Prepare data
+  node_names = node_paths %>% str_split(" > ")
+  root_name = unique(sapply(node_names, function(names){names[1]}))
+  if(length(root_name) != 1){
+    stop("Node paths do not share the same root")
+  }
+  
+  # Build XML
+  # TODO respect sequence order defined in schema
+  tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
+  for(i in 1:length(node_names)){
+    parent = tmp_root
+    if(is.na(node_values[i]) | node_values[i] == ""){next}
+    for(j in 2:length(node_names[[i]])){ # ignore root node
+      xpath = paste0("..//*[@name='", paste(node_names[[i]][1:j], collapse = "']//*[@name='"), "']") 
+      name = node_names[[i]][j]
+      if(name == "choice"){next}
+      siblings = xml_children(parent)
+      if(j == length(node_names[[i]])){
+        xml_add_child(parent, name, node_values[i])
+      } else {
+        if (!name %in% xml_name(siblings)){
+          xml_add_child(parent, name)
+        }
+        parent = xml_child(parent, name)
+      }
+    }
+  }
+  return()
+}
+
+
 # library(dplyr)
 # library(stringr)
 # library(xml2)

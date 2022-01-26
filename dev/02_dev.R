@@ -36,10 +36,12 @@ golem::add_module("documentCreation")
 golem::add_module("elementMapping")
 golem::add_module("rowGenerator")
 golem::add_module("viewXML")
+golem::add_module("actionLog")
 
 ## Add helper functions ----
 golem::add_fct("xml_schema")
 golem::add_fct("xml_export")
+golem::add_fct("misc")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
