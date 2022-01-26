@@ -51,11 +51,11 @@ golem::add_css_file( "custom" )
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw(name = "my_dataset", open = FALSE) 
+usethis::use_data(template_mappings) 
 
 ## Tests ----
 ## Add one line by test you want to create
-usethis::use_test("app")
+usethis::use_data_raw("method_templates")
 
 # Documentation
 

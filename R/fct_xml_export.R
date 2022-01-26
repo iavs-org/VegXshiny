@@ -13,6 +13,7 @@
 #' @return xml_document
 new_vegx_node = function(node_paths, node_values, create_id = T){
   # Prepare data
+  
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
   if(length(root_name) != 1){

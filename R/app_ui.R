@@ -18,13 +18,13 @@ app_ui <- function(request) {
                         mod_about_ui("about")
                ),
                
-               tabPanel(div(icon("folder-open", class = "icon-padded"), "Manage Files"),
+               tabPanel(div(icon("folder-open", class = "icon-padded"), "File Manager"),
                         mod_fileManagement_ui("fileManagement")
                ),
                
                # TODO TEMPLATE BUILDER?!
                
-               tabPanel(div(icon("leaf", class = "icon-padded"), "Create VegX"),
+               tabPanel(div(icon("leaf", class = "icon-padded"), "VegX Builder"),
                         mod_documentCreation_ui("documentCreation")
                ),
                

@@ -13,9 +13,9 @@ mod_viewXML_ui <- function(id){
   sidebarLayout(
     sidebarPanel(width = 2,
                  tagList(
-                   downloadButton(ns("export"), "Export",  class = "btn-sidebar"),
-                   actionButton(ns("edit"), "Edit", class = "btn-sidebar"),
-                   actionButton(ns("validate"), "Validate", class = "btn-sidebar")
+                   downloadButton(ns("export"), "Export",  class = "btn-sidebar", style = "width:100%"),
+                   actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"),
+                   actionButton(ns("validate"), "Validate", class = "btn-sidebar", width = "100%")
                  )
     ),
     mainPanel(width = 10, 
