@@ -50,9 +50,7 @@ golem::add_css_file("custom")
 
 
 ## Add internal datasets ----
-usethis::use_data_raw("templates")
-usethis::use_data_raw("templates_overview")
-usethis::use_data_raw("id_lookup")
+usethis::use_data_raw("data_preparation")
 
 ## Tests ----
 ## Add one line by test you want to create
