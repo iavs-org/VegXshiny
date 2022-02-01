@@ -44,18 +44,19 @@ golem::add_fct("xml_export")
 golem::add_fct("misc")
 
 ## External resources
-## Creates .js and .css files at inst/app/www
 golem::add_js_file("custom")
-golem::add_css_file( "custom" )
+golem::add_js_handler("node_tooltip")
+golem::add_css_file("custom")
 
 
 ## Add internal datasets ----
-## If you have data in your package
-usethis::use_data(template_mappings) 
+usethis::use_data_raw("templates")
+usethis::use_data_raw("templates_overview")
+usethis::use_data_raw("id_lookup")
 
 ## Tests ----
 ## Add one line by test you want to create
-usethis::use_data_raw("method_templates")
+
 
 # Documentation
 
