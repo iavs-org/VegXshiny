@@ -23,7 +23,7 @@ app_ui <- function(request) {
                ),
                
                # TODO TEMPLATE BUILDER?!
-               
+
                tabPanel(div(icon("leaf", class = "icon-padded"), "VegX Builder"),
                         mod_documentCreation_ui("documentCreation")
                ),

@@ -108,7 +108,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
 #' 
 #' @description This is a recursive function to build an R list from a VegX document. 
 #'
-#' @return A list with a structure corresponding to node
+#' @return A list with a hierarchy corresponding to `node`
 #'
 #' @noRd
 #' @import xml2

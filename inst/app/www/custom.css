@@ -3,6 +3,7 @@ TODO:
 - remove padding from text in radioGroupButton of mapping UI
 - prevent textoverflow in nav-pills
 - sidebar wider when display size is small
+- documentCreation sidebar is wider
 ...
 */
 
@@ -38,6 +39,12 @@ TODO:
   margin-bottom: 10px;
 }
 
-.btn-dropdown-input {
+.btn .btn-dropdown-input {
   margin-left: 6px!important;
+}
+
+.btn .btn-default .btn-sidebar {
+  width: 100%!important;
+  margin: 10px!important;
+  padding: 25px!important;
 }

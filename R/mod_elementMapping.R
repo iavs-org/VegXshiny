@@ -7,6 +7,7 @@
 #' @noRd 
 #' 
 #' @importFrom jsonlite fromJSON
+#' @importFrom DT renderDataTable
 #' @importFrom shinyTree shinyTree renderTree get_selected
 #' @importFrom shinyWidgets radioGroupButtons
 
@@ -32,9 +33,9 @@ mod_elementMapping_ui <- function(id){
       column(
         width = 12,
         tabsetPanel(
-          
-          ##### new mapping #####
+          id = ns("tabset"),
           tabPanel(
+            value = "create",
             title = "Create new",  
             tags$h4(tags$b("Elements")),
             div(class = "annotation text-info",
@@ -46,12 +47,7 @@ mod_elementMapping_ui <- function(id){
             ),
             br(),
             fluidRow(
-              column(7, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T)),
-              column(5, 
-                     div(class = "info-box",
-                         textOutput(ns("annotation_text"))
-                     )
-              )
+              column(12, shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T))
             ),
             
             hr(.noWS = c("before","after")),
@@ -91,22 +87,15 @@ mod_elementMapping_ui <- function(id){
             
             fluidRow(
               column(
-                tags$h4(tags$b("Submission")),
                 width = 12,
-                actionButton(ns("add_nodes"), label = "Add as new nodes", width = "250px", class = "btn-primary", style = "font-weight:bold"),
-                actionButton(ns("merge_nodes"), label = "Merge into existing nodes", width = "250px", class = "btn-primary", style = "font-weight:bold"),
-                actionButton(ns("replace_nodes"), label = "Replace existing nodes", width = "250px", class = "btn-primary", style = "font-weight:bold")
+                actionButton(ns("add_nodes"), label = "Add new node(s)", width = "250px", class = "btn-primary", style = "font-weight:bold"),
+                actionButton(ns("merge_nodes"), label = "Merge into existing node(s)", width = "250px", class = "btn-primary", style = "font-weight:bold"),
+                actionButton(ns("replace_nodes"), label = "Replace existing node(s)", width = "250px", class = "btn-primary", style = "font-weight:bold")
               )
             )
-          ),
-          
-          # ----------------- #
-          ##### templates #####
-          tabPanel(
-            title = "Templates",
-            tags$h1("templates")
           )
         )
+        # Templates Tab is build and inserted server-side
       )
     )
   )
@@ -115,7 +104,7 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, annotation_text, vegx_text, parent_session){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, vegx_txt, parent_session){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -135,11 +124,12 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     }
     
     output$tree = shinyTree::renderTree(elem_list)
-    output$annotation_text = renderText({annotation_text()})
-    
+  
     observeEvent(input$tree, {
       # TODO
       # prevent selection of multiple xsd:choice elements 
+      # Highlight ID elements (with a chain icon?)
+      # Render linked tree if ID element is selected?
       selected = shinyTree::get_selected(input$tree, "slices") # Get selected elements
       selected = names(unlist(selected)) %>% str_replace_all("\\.", " > ")
       is_leaf = stringr::str_extract(selected, "[^ > ]+$") %in% vegx_leaf_elements # Check which selected elements are leaf nodes
@@ -213,6 +203,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      # Check df
                      if(is.null(nodes_df)){
                        shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                       return
                      } else {
                        node_values_df(nodes_df) 
                      }
@@ -229,7 +220,8 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                                    hr(),
                                    tags$label("This action will:"),
                                    tags$li(paste0("Add ", n_nodes," new ", name_nodes," element(s) to your document")),
-                                   tags$li("Reset the mapping interface"),
+                                   tags$br(),
+                                   tags$p("All existing mappings will be reset."),
                                    size = "l",
                                    footer = tagList(
                                      tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
@@ -255,8 +247,9 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      # Check df
                      if(is.null(nodes_df)){
                        shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                       return()
                      } else {
-                       node_values_df(nodes_df) 
+                       node_values_df(nodes_df) # save as reactive
                      }
                      
                      # Extract basic information for modal dialog
@@ -299,7 +292,8 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      
                      # Check df
                      if(is.null(nodes_df)){
-                       shiny::showNotification("Mappings table could not build. Did you specify data columns of different length?", type = "error")
+                       shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                       return
                      } else {
                        node_values_df(nodes_df) 
                      }
@@ -325,12 +319,19 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
                      new_node = new_vegx_node(node_names, as.character(node_values_df[i,]))
-                     if(is.na(new_node)){next}
+                     if(is.null(new_node)){next}
                      
-                     # Append new node to VegX document
+                     # Append new node to VegX document, respect sequence order defined in schema
                      parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
                      if(parent_missing){
-                       xml_add_child(vegx_doc, tab_selected)
+                       elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
+                       if(length(elements_present) > 0){
+                         elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, tab_selected)]
+                         insert_position = which(elements_ordered == tab_selected) - 1
+                         xml_add_child(vegx_doc, tab_selected, .where = insert_position)  
+                       } else {
+                         xml_add_child(vegx_doc, tab_selected)  
+                       }
                      }
                      parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
                      xml_add_child(parent, new_node)
@@ -340,7 +341,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    tmp = tempfile(fileext = ".xml")
                    write_xml(vegx_doc, tmp, options = "format")
                    new_text = readChar(tmp, file.info(tmp)$size)
-                   vegx_text(new_text)
+                   vegx_txt(new_text)
                    
                    # TODO update action log and progress tab
                    #
@@ -348,11 +349,11 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # Update style
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                    
-                   # # Jump to next tab
-                   tabs = sort(tabs_visible())
-                   tab_index = which(tabs == tab_selected)
-                   next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
-                   nav_select("sidebar", selected = next_tab, session = parent_session)
+                   # Jump to next tab
+                   # tabs = sort(tabs_visible())
+                   # tab_index = which(tabs == tab_selected)
+                   # next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
+                   # nav_select("sidebar", selected = next_tab, session = parent_session)
                    
                    removeModal()
                  })
@@ -375,7 +376,6 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # loop over mappings
                    # TODO check for compliance with schema (maxOccurs)
                    for(i in 1:nrow(target_nodes_hot)){
-                     
                      merge_into_vegx_node(target_ids[i], node_names, as.character(node_values_df[i,]))
                    }
                    
@@ -383,7 +383,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    tmp = tempfile(fileext = ".xml")
                    write_xml(vegx_doc, tmp, options = "format")
                    new_text = readChar(tmp, file.info(tmp)$size)
-                   vegx_text(new_text)
+                   vegx_txt(new_text)
                    
                    # TODO update action log and progress tab
                    #
@@ -399,5 +399,136 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    
                    removeModal()
                  })
+    
+    
+    # --------------------------------------------------------------------------------------- #
+    #### Templates ####
+    # --------------------------------------------------------------------------------------- #
+    if(tab_selected %in% templates_lookup$target_element){
+      templates_elem_overview = templates_lookup %>% filter(target_element == tab_selected)
+      templates_elem = templates %>% filter(template_id %in% templates_elem_overview$template_id)
+      
+      output$templates = DT::renderDataTable(templates_elem_overview) # DT also creates and input object with a some values, including "<name>_rows_selected"
+      output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
+      
+      insertTab(
+        inputId = "tabset",
+        tab = tabPanel(
+          value= templates,
+          title = "Templates",
+          fluidRow(
+            column(
+              width = 12,
+              tags$h4(tags$b("Templates selected:")),
+              textOutput(ns("templates_selected")),
+              
+              hr(),
+              DT::dataTableOutput(ns("templates")),
+              hr(.noWS = c("before","after"))
+            )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              actionButton(ns("add_template"), label = "Add template(s)", width = "250px", class = "btn-primary", style = "font-weight:bold")
+            )
+          )
+        )
+      )
+      
+      observeEvent(eventExpr = input$add_template,
+                   handlerExpr = {
+                     if(length(input$templates_rows_selected) == 0){
+                       shiny::showNotification("Nothing to submit", type = "warning")
+                     } else {
+                       # Summarize selection
+                       nodes_summary = templates %>% 
+                         dplyr::filter(template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                         group_by(template_id, node_id, main_element) %>% 
+                         tally()
+                       
+                       # Extract basic information for modal dialog
+                       n_nodes = nrow(nodes_summary)
+                       node_elements = unique(nodes_summary$main_element) 
+                       
+                       # Show modal dialog
+                       showModal(
+                         modalDialog(tags$h3("Add template node"),
+                                     hr(),
+                                     tags$label("This action will:"),
+                                     tags$li(paste0("Add ", n_nodes," new element(s) to the following main elements: ", paste0(node_elements, collapse = ", "))),
+                                     tags$br(),
+                                     tags$p("All existing mappings will be reset."),
+                                     size = "l",
+                                     footer = tagList(
+                                       tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                                 actionButton(ns("confirm_add_template"), class = "pull-right btn-success", "Confirm", icon("check")))
+                                     ),
+                         )
+                       )
+                     }
+                   })
+      
+      observeEvent(eventExpr = input$confirm_add_template, 
+                   handlerExpr = {
+                     template_mappings = templates %>% 
+                       dplyr::filter(template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                       group_by(template_id) %>% 
+                       group_split()
+                     
+                     # loop over template_ids
+                     for(i in 1:length(template_mappings)){
+                       node_mappings = template_mappings[[i]] %>% 
+                         group_by(node_id) %>% 
+                         group_split()
+                       
+                       new_nodes = list()
+                       # loop over node_ids, create new nodes
+                       for(j in 1:length(node_mappings)){ 
+                         new_node = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value)
+                         leaf_nodes = xml_find_all(new_node, "//*[not(*)]")
+                         leaf_names = leaf_nodes %>% xml_name()
+                         if(any(str_detect(leaf_names, "ID$"))){  # ID links present, replace internal node_id with actual id generated for VegX output
+                           id_nodes = leaf_nodes[str_detect(leaf_names, "ID$")]
+                           for(id_node in id_nodes){
+                             node_id = as.numeric(xml_text(id_node))
+                             if(node_id > j){
+                               error(paste0("Ivalid ID reference with 'template_id=", node_mappings[[j]]$template_id[1], "'. 
+                                          Make sure to reference only earlier node_ids in a template"))
+                             } 
+                             vegx_id = xml_attr(new_nodes[[node_id]], "id")
+                             xml_text(id_node) = vegx_id
+                           }
+                         }
+                         
+                         # Save new node for lookup later
+                         new_nodes[[j]] = new_node
+                         
+                         # Append new node to VegX document
+                         parent_name = unique(node_mappings[[j]]$main_element)
+                         parent_missing = (length(xml_find_all(vegx_doc, paste0("./", parent_name))) == 0)
+                         if(parent_missing){
+                           xml_add_child(vegx_doc, parent_name)
+                         }
+                         parent = xml_find_all(vegx_doc, paste0("./", parent_name))
+                         xml_add_child(parent, new_node)
+                       }
+                     }
+                     
+                     # Update VegX text 
+                     tmp = tempfile(fileext = ".xml")
+                     write_xml(vegx_doc, tmp, options = "format")
+                     new_text = readChar(tmp, file.info(tmp)$size)
+                     vegx_txt(new_text)
+                     
+                     # TODO update action log and progress tab
+                     #
+                     
+                     # Update style
+                     shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
+                     
+                     removeModal()
+                   })
+    }
   })
 }
