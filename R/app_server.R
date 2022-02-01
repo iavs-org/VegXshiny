@@ -25,6 +25,28 @@ app_server <- function( input, output, session ) {
   })
   
   # --------------------------------------------------------------------------------------- #
+  # 
+  observe({
+    if(length(input$nodeHoveredInfo) != 0){
+      node_lineage = unlist(input$nodeHoveredInfo$nodeLineage)
+      if(node_lineage[1] != "choice"){
+        xpath = paste(sapply(rev(node_lineage), function(parent){
+          paste0("//*[@name='", parent, "']")
+        }), collapse = "")
+        node_hovered = xml_find_all(vegx_schema_simple, xpath)
+        
+        node_attributes = as.list(xml_attrs(node_hovered[[1]]))
+        node_info = list(
+          tree = input$nodeHoveredInfo$tree,
+          nodeId = input$nodeHoveredInfo$nodeId,
+          nodeAttributes = node_attributes
+        )
+        session$sendCustomMessage("node_tooltip", node_info)  
+      }
+    }
+  })
+  
+  # --------------------------------------------------------------------------------------- #
   # About page
   mod_about_server("about")
   
@@ -34,19 +56,8 @@ app_server <- function( input, output, session ) {
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  annotation_text = reactiveVal() # This reactive is populated by a custom JS observer on the shinyTree nodes; doesn't really work with modules, thus here
-  observeEvent(eventExpr = input$node_hovered_parents, 
-               handlerExpr = {
-                 xpath = paste(sapply(rev(input$node_hovered_parents), function(parent){
-                   paste0("//*[@name='", parent, "']")
-                 }), collapse = "")
-                 # TODO Add min/maxOccurs to tooltip
-                 annotation = xml_attr(xml_find_all(vegx_schema_simple, xpath), "annotation")
-                 annotation = ifelse(is.na(annotation), "No information available.", annotation)
-                 annotation_text(annotation)
-               })
   
-  mod_documentCreation_server("documentCreation", user_data, annotation_text, vegx_text)
+  mod_documentCreation_server("documentCreation", user_data, vegx_text)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
