@@ -88,14 +88,16 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-build_xml = function(root, node_names, node_values){
+build_xml = function(root, node_names, node_values){ # TODO proper logging of actions
   for(i in 1:length(node_names)){
     if(is.na(node_values[i]) | node_values[i] == ""){next} # Skip empty mappings
 
     parent = root
+    is_choice = FALSE
     for(j in 2:length(node_names[[i]])){ # ignore root node
       name = node_names[[i]][j]
       if(name == "choice"){
+        is_choice = TRUE # Next element is a choice element
         next
       }
       
@@ -124,7 +126,10 @@ build_xml = function(root, node_names, node_values){
         xml_children() %>% 
         xml_attr("name")
       
-      siblings_schema[is.na(siblings_schema)] = name # This is a bit hacky and will probably insert incorrectly when there are multiple unnamed elements at the same level
+      if(is_choice){
+        siblings_schema[is.na(siblings_schema)] = name # This is a bit hacky and will probably insert incorrectly when there are multiple unnamed elements at the same level
+        is_choice = FALSE    
+      }
       siblings_ordered = siblings_schema[siblings_schema %in% c(siblings, name)]
 
       insert_position = which(siblings_ordered == name) - 1
@@ -158,7 +163,6 @@ build_xml = function(root, node_names, node_values){
             break
           }
         }
-
         xml_add_child(parent, name, as.character(val), .where = insert_position)  
       }
     }
