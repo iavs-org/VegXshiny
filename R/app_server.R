@@ -17,33 +17,37 @@ app_server <- function( input, output, session ) {
   library(shinyBS)   # same
   
   # --------------------------------------------------------------------------------------- #
-  # Create reactive values
-  vegx_text = reactiveVal({
+  # Create global reactive values
+  vegx_txt = reactiveVal({
     tmp = tempfile(fileext = ".xml")
     write_xml(vegx_doc, tmp, options = "format")
     readChar(tmp, file.info(tmp)$size)
   })
   
   # --------------------------------------------------------------------------------------- #
-  # 
+  # Create global observers
   observe({
-    if(length(input$nodeHoveredInfo) != 0){
-      node_lineage = unlist(input$nodeHoveredInfo$nodeLineage)
-      if(node_lineage[1] != "choice"){
-        xpath = paste(sapply(rev(node_lineage), function(parent){
-          paste0("//*[@name='", parent, "']")
-        }), collapse = "")
-        node_hovered = xml_find_all(vegx_schema_simple, xpath)
-        
-        node_attributes = as.list(xml_attrs(node_hovered[[1]]))
-        node_info = list(
-          tree = input$nodeHoveredInfo$tree,
-          nodeId = input$nodeHoveredInfo$nodeId,
-          nodeAttributes = node_attributes
-        )
-        session$sendCustomMessage("node_tooltip", node_info)  
+    tryCatch({
+      if(length(input$nodeHoveredInfo) != 0){
+        node_lineage = unlist(input$nodeHoveredInfo$nodeLineage)
+        if(node_lineage[1] != "choice"){
+          xpath = paste(sapply(rev(node_lineage), function(parent){
+            paste0("//*[@name='", parent, "']")
+          }), collapse = "")
+          node_hovered = xml_find_all(vegx_schema_simple, xpath)
+          
+          node_attributes = as.list(xml_attrs(node_hovered[[1]]))
+          node_info = list(
+            tree = input$nodeHoveredInfo$tree,
+            nodeId = input$nodeHoveredInfo$nodeId,
+            nodeAttributes = node_attributes
+          )
+          session$sendCustomMessage("node_tooltip", node_info)  
+        }
       }
-    }
+    }, error = function(e){
+      print(e)
+    })
   })
   
   # --------------------------------------------------------------------------------------- #
@@ -56,10 +60,9 @@ app_server <- function( input, output, session ) {
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  
-  mod_documentCreation_server("documentCreation", user_data, vegx_text)
+  mod_documentCreation_server("documentCreation", user_data, vegx_txt)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
-  mod_viewXML_server("viewXML", vegx_text)
+  mod_viewXML_server("viewXML", vegx_txt)
 }

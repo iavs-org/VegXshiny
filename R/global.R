@@ -10,13 +10,7 @@ namespace_uris = list(
 # --------------------------------------------------------------------------------------- #
 ####      VegX schema preparation      ####
 # --------------------------------------------------------------------------------------- #
-# Link schema
-schema_files = load_schema() # read schema files
-vegx_schema_full = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
-link_vegx_schema(vegx_schema_full, "veg", schema_files, simplify = F)
-write_xml(vegx_schema_full, "~/Documents/schema.xml")
-
-# Simplify linked schema
+# Link and simplify schema
 schema_files = load_schema() # read fresh copy of schema files
 vegx_schema_simple = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
 link_vegx_schema(vegx_schema_simple, "veg", schema_files, simplify = T)

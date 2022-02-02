@@ -52,11 +52,12 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
       xml_attr(node, "id") = xml_attr(attributes, "use")[1]
     }
     
-    # Remove annotation and attribute elements (but not attributes of the root)
+    # Remove annotation and attribute elements (but not attributes!)
     xml_remove(children[xml_name(children) %in% c("attribute", "annotation")]) 
     children = xml_children(node)
+    
   } else {
-    # Don't remove but ignore annotation and attribute nodes
+    # Don't remove annotation and attribute nodes, leave as is
     children = xml_children(node)
     children = children[!xml_name(children) %in% c("attribute", "annotation")]
   }
@@ -84,6 +85,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
         link_vegx_schema(node, ns, schema_files, simplify)
       }
     } else {
+      xml_remove(node) # This avoids issues with xsd:simpleType nodes with unnamed children
       return()
     }
   } else if(simplify & (xml_name(node) %in% c("complexType", "sequence", "simpleContent", "extension"))){    # Not a leaf, but a container
