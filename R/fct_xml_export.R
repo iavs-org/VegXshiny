@@ -8,11 +8,12 @@
 #' @import dplyr
 #' @import xml2
 #' @importFrom stringr str_split
+#' @importFrom lubridate ymd
 #' 
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_node = function(node_paths, node_values, id = NULL){
+new_vegx_node = function(node_paths, node_values, id = NULL, session){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -23,7 +24,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL){
   
   # Build XML
   tmp_root = xml_new_root(root_name)
-  build_xml(tmp_root, node_names, node_values)
+  build_xml(tmp_root, node_names, node_values, session)
   
   # set ID for root node
   root_node = xml_find_all(tmp_root, ".")
@@ -59,7 +60,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(target_node_id, node_paths, node_values){
+merge_into_vegx_node = function(target_node_id, node_paths, node_values, session){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -69,7 +70,7 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values){
   
   # Build XML
   tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
-  build_xml(tmp_root, node_names, node_values)
+  build_xml(tmp_root, node_names, node_values, session)
   
   return(NULL)
 }
@@ -88,10 +89,13 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-build_xml = function(root, node_names, node_values){ # TODO proper logging of actions
+build_xml = function(root, node_names, node_values, session){ # TODO proper logging of actions
+  
+  log_path = paste0("inst/app/www/logs/log_", session$token, ".csv")
+  
   for(i in 1:length(node_names)){
-    if(is.na(node_values[i]) | node_values[i] == ""){next} # Skip empty mappings
-
+    if(is.na(node_values[i]) | node_values[i] == ""){next} # TODO: add to log ...Skip empty mappings
+    
     parent = root
     is_choice = FALSE
     for(j in 2:length(node_names[[i]])){ # ignore root node
@@ -109,12 +113,12 @@ build_xml = function(root, node_names, node_values){ # TODO proper logging of ac
         xml_find_all(xpath_node) %>% 
         xml_attrs() %>% 
         unlist()
-
+      
       # Check if adding new node is allowed      
       maxOccurs = ifelse("maxOccurs" %in% names(node_def), names(node_def)["maxOccurs"], "1")
       if(!is.na(as.numeric(maxOccurs))){ # max_occ not unbounded
         if(length(siblings[siblings == name]) >= as.numeric(maxOccurs)){
-          showNotification("Could not add node") # elaborate
+          log = new_action_log_record(type = "Warning", message = paste0("Skipped node at '", paste(node_names[[i]][1:j], collapse = " > "), "': maxOccurs reached.")) 
           break
         }
       }
@@ -131,7 +135,7 @@ build_xml = function(root, node_names, node_values){ # TODO proper logging of ac
         is_choice = FALSE    
       }
       siblings_ordered = siblings_schema[siblings_schema %in% c(siblings, name)]
-
+      
       insert_position = which(siblings_ordered == name) - 1
       if(length(insert_position) == 0){insert_position = 0}                     # If no siblings present, insert in the beginning
       
@@ -145,26 +149,28 @@ build_xml = function(root, node_names, node_values){ # TODO proper logging of ac
         type = ifelse("type" %in% names(node_def), node_def["type"], "xsd:string")
         
         if(type == "xsd:date"){
-          val = lubridate::ymd(val)
+          val = ymd(val)
           if(is.na(val)){
-            showNotification("Invalid date") # elaborate
+            log = new_action_log_record(type = "Warning", message = paste0("Skipped node at '", paste(node_names[[i]][1:j], collapse = " > "), "': invalid date format.")) 
             break
           }
         } else if (type == "xsd:decimal"){
           val = as.numeric(val)
           if(is.na(val)){
-            showNotification("Invalid decimal") # elaborate
+            log = new_action_log_record(type = "Warning", message = paste0("Skipped node at '", paste(node_names[[i]][1:j], collapse = " > "), "': invalid numeric format.")) 
             break
           }
         } else if (type == "xsd:integer"){
           val = as.integer(val)
           if(is.na(val)){
-            showNotification("Invalid integer", type = "error") # elaborate
+            log = new_action_log_record(type = "Warning", message = paste0("Skipped node at '", paste(node_names[[i]][1:j], collapse = " > "), "': invalid integer format.")) 
             break
           }
         }
         xml_add_child(parent, name, as.character(val), .where = insert_position)  
+        log = new_action_log_record(type = "Info", message = paste0("Node inserted under '", paste(node_names[[i]][1:j], collapse = " > "), "'."))
       }
     }
+    write.table(log, file = log_path, row.names = F, col.names = F, append = T)
   }
 }

@@ -104,7 +104,7 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, vegx_txt, parent_session){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, vegx_txt, action_log, parent_session){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -318,7 +318,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # loop over mappings
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
-                     new_node = new_vegx_node(node_names, as.character(node_values_df[i,]))
+                     new_node = new_vegx_node(node_names, as.character(node_values_df[i,]), session = session)
                      if(is.null(new_node)){next}
                      
                      # Append new node to VegX document, respect sequence order defined in schema
@@ -343,8 +343,9 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    new_text = readChar(tmp, file.info(tmp)$size)
                    vegx_txt(new_text)
                    
-                   # TODO update action log and progress tab
-                   #
+                   # Update Action log 
+                   log = read_action_log(session)
+                   action_log(log)
                    
                    # Update style
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
@@ -376,7 +377,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # loop over mappings
                    # TODO check for compliance with schema (maxOccurs)
                    for(i in 1:nrow(target_nodes_hot)){
-                     merge_into_vegx_node(target_ids[i], node_names, as.character(node_values_df[i,]))
+                     merge_into_vegx_node(target_ids[i], node_names, as.character(node_values_df[i,]), session)
                    }
                    
                    # Update VegX text 
@@ -385,17 +386,18 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    new_text = readChar(tmp, file.info(tmp)$size)
                    vegx_txt(new_text)
                    
-                   # TODO update action log and progress tab
-                   #
+                   # Update Action log 
+                   log = read_action_log(session)
+                   action_log(log)
                    
                    # Update style
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                    
                    # # Jump to next tab
-                   tabs = sort(tabs_visible())
-                   tab_index = which(tabs == tab_selected)
-                   next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
-                   nav_select("sidebar", selected = next_tab, session = parent_session)
+                   # tabs = sort(tabs_visible())
+                   # tab_index = which(tabs == tab_selected)
+                   # next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
+                   # nav_select("sidebar", selected = next_tab, session = parent_session)
                    
                    removeModal()
                  })
@@ -408,7 +410,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
       templates_elem_overview = templates_lookup %>% filter(target_element == tab_selected)
       templates_elem = templates %>% filter(template_id %in% templates_elem_overview$template_id)
       
-      output$templates = DT::renderDataTable(templates_elem_overview) # DT also creates and input object with a some values, including "<name>_rows_selected"
+      output$templates = DT::renderDataTable(templates_elem_overview, style = "bootstrap") # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
       output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
       
       insertTab(

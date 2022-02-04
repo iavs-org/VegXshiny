@@ -24,3 +24,28 @@ build_node_values_df = function(mappings, user_data){
     return(NULL)
   })
 }
+
+#' Read the action log
+#' @description Reads and returns the current action log
+#'
+#' @return A data.frame
+#'
+#' @noRd
+read_action_log = function(session){
+  log_path = paste0("inst/app/www/logs/log_", session$token, ".csv")
+  read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character")) %>% arrange(desc(timestamp))
+}
+
+#' Create a new log record
+#' @description Creates a new log record
+#'
+#' @return A data.frame
+#'
+#' @noRd
+new_action_log_record = function(type, message){
+  data.frame(
+    timestamp = as.character(Sys.time()),
+    type      = type,
+    message   = message
+  )
+}

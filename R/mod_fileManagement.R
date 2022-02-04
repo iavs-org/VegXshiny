@@ -31,7 +31,7 @@ mod_fileManagement_ui <- function(id){
 #' fileManagement Server Functions
 #'
 #' @noRd 
-mod_fileManagement_server <- function(id){
+mod_fileManagement_server <- function(id, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

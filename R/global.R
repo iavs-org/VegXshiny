@@ -1,12 +1,3 @@
-# Namespace definitions
-namespace_uris = list(
-  "http://iavs.org/vegX/misc-2.0.1" = "misc",
-  "http://iavs.org/vegX/plotobservation-2.0.1" = "obs", 
-  "http://iavs.org/vegX/plot-2.0.1" = "plot",
-  "http://iavs.org/vegX/organism-2.0.1" = "org",
-  "http://iavs.org/vegX/community-2.0.1" = "comm"
-)
-
 # --------------------------------------------------------------------------------------- #
 ####      VegX schema preparation      ####
 # --------------------------------------------------------------------------------------- #
@@ -31,8 +22,16 @@ vegx_leaf_elements = vegx_leaf_elements[!is.na(vegx_leaf_elements)]
 # Create empty VegX file
 vegx_doc = xml_new_root("vegX")
 
+# Define namespace identifiers
+ns_uris = c(
+  "http://iavs.org/vegX/misc-2.0.1" = "misc",
+  "http://iavs.org/vegX/plotobservation-2.0.1" = "obs", 
+  "http://iavs.org/vegX/plot-2.0.1" = "plot",
+  "http://iavs.org/vegX/organism-2.0.1" = "org",
+  "http://iavs.org/vegX/community-2.0.1" = "comm"
+)
+
 # create namespace attributes
-ns_uris = unlist(namespace_uris)
 ns_attrs_vegx = setNames(names(ns_uris), paste0("xmlns:", ns_uris))
 ns_attrs_w3c = c("xmlns:xsi"="http://www.w3.org/2001/XMLSchema-instance")
 ns_attrs = c(ns_attrs_vegx, ns_attrs_w3c)

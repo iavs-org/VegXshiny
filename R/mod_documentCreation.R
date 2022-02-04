@@ -55,7 +55,7 @@ mod_documentCreation_ui <- function(id){
 #' documentCreation Server Functions
 #'
 #' @noRd 
-mod_documentCreation_server <- function(id, user_data, vegx_txt){
+mod_documentCreation_server <- function(id, user_data, vegx_txt, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -87,7 +87,7 @@ mod_documentCreation_server <- function(id, user_data, vegx_txt){
     
     # Call modules
     lapply(vegx_main_elements, function(tab_name){
-      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, vegx_txt, session)
+      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, vegx_txt, action_log, session)
     })
   })
 }

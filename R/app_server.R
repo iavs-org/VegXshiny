@@ -15,13 +15,29 @@
 app_server <- function( input, output, session ) {
   library(shinyTree) # package doesn't work otherwise
   library(shinyBS)   # same
+
+  # Cleanup function
+  log_path = paste0("inst/app/www/logs/log_", session$token, ".csv")
+  onStop(function(){
+    unlink(log_path)
+  })
   
-  # --------------------------------------------------------------------------------------- #
+  # ----------------------<----------------------------------------------------------------- #
   # Create global reactive values
   vegx_txt = reactiveVal({
     tmp = tempfile(fileext = ".xml")
     write_xml(vegx_doc, tmp, options = "format")
     readChar(tmp, file.info(tmp)$size)
+  })
+  
+  action_log = reactiveVal({
+    log = data.frame(
+      timestamp = as.character(Sys.time()),
+      type      = "Info",
+      message   = "Session started."
+    )
+    write.table(log, file = paste0("inst/app/www/logs/log_", session$token, ".csv"), row.names = F)
+    log
   })
   
   # --------------------------------------------------------------------------------------- #
@@ -46,7 +62,7 @@ app_server <- function( input, output, session ) {
         }
       }
     }, error = function(e){
-      print(e)
+      print(e) # TODO add to action log
     })
   })
   
@@ -56,13 +72,17 @@ app_server <- function( input, output, session ) {
   
   # --------------------------------------------------------------------------------------- #
   # File Upload
-  user_data = mod_fileManagement_server("fileManagement")
+  user_data = mod_fileManagement_server("fileManagement", action_log)
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  mod_documentCreation_server("documentCreation", user_data, vegx_txt)
+  mod_documentCreation_server("documentCreation", user_data, vegx_txt, action_log)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
-  mod_viewXML_server("viewXML", vegx_txt)
+  mod_viewXML_server("viewXML", vegx_txt, action_log)
+  
+  # --------------------------------------------------------------------------------------- #
+  # Action Log
+  mod_actionLog_server("actionLog", action_log)
 }
