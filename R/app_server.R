@@ -53,6 +53,9 @@ app_server <- function( input, output, session ) {
           node_hovered = xml_find_all(vegx_schema_simple, xpath)
           
           node_attributes = as.list(xml_attrs(node_hovered[[1]]))
+          if(is.null(node_attributes[["minOccurs"]])){node_attributes$minOccurs = 1}
+          if(is.null(node_attributes[["maxOccurs"]])){node_attributes$maxOccurs = 1}
+          node_attributes = node_attributes[order(names(node_attributes))]
           node_info = list(
             tree = input$nodeHoveredInfo$tree,
             nodeId = input$nodeHoveredInfo$nodeId,

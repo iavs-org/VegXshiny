@@ -88,7 +88,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
       xml_remove(node) # This avoids issues with xsd:simpleType nodes with unnamed children
       return()
     }
-  } else if(simplify & (xml_name(node) %in% c("complexType", "sequence", "simpleContent", "extension"))){    # Not a leaf, but a container
+  } else if(simplify & (xml_name(node) %in% c("complexType", "sequence", "simpleContent", "complexContent", "extension"))){    # Not a leaf, but a container
     parent = xml_parent(node)
     sapply(children, function(child){xml_add_child(parent, child, .copy=F)}) # attach all children to node's parent
     xml_remove(node)
@@ -102,7 +102,7 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
 }
 
 # --------------------------------------------------------------------------------------- #
-#' Convert a VegX XML schema node and all its descendents to an R list object.
+#' Convert a VegX schema node and all its descendents to an R list object.
 #'
 #' @param node an xml_node or xml_nodeset of length 1
 #' @param name_attr the XML attribute used for naming list elements

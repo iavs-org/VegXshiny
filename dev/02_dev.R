@@ -54,7 +54,8 @@ usethis::use_data_raw("data_preparation")
 
 ## Tests ----
 ## Add one line by test you want to create
-
+usethis::use_testthat()
+testthat::
 
 # Documentation
 

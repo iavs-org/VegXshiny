@@ -25,9 +25,10 @@ mod_actionLog_ui <- function(id){
 mod_actionLog_server <- function(id, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    output$action_log <- DT::renderDataTable(action_log(), style = 'bootstrap', 
-                                             options = list(paging=FALSE,
-                                                            columnDefs = list(list(width = '200px', targets = c(0,1)))),
-                                             rownames = F)
+    output$action_log <- DT::renderDataTable(action_log(), 
+                                             style = 'bootstrap', 
+                                             selection = 'none',
+                                             rownames = F,
+                                             options = list(paging=FALSE, columnDefs = list(list(width = '200px', targets = c(0,1)))))
   })
 }

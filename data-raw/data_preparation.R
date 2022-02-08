@@ -88,16 +88,17 @@ id_lookup = c(
   "relatedProjectID"                = "projectID",
   "protocolID"                      = "protocolID",
   "relatedItemID"                   = "relatedItemID",
-  "taxonConceptID"                  = "taxonConceptID",
-  "taxonDetermination"              = "taxonDeterminationID",
-  "taxonNameID"                     = "taxonNameID",
-  "preferredTaxonNameID"            = "taxonNameID",
-  "taxonNameUsageConceptID"         = "taxonNameUsageConceptID",
   "siteObservationID"               = "siteObservationID",
   "stratumID"                       = "stratumID",
   "stratumObservationID"            = "stratumObservationID",
   "surfaceCoverObservationID"       = "surfaceCoverObservationID",
   "surfaceTypeID"                   = "surfaceTypeID",
+  "taxonConceptID"                  = "taxonConceptID",
+  "taxonDeterminationID"            = "taxonDeterminationID",
+  "taxonDetermination"              = "taxonDeterminationID",
+  "taxonNameID"                     = "taxonNameID",
+  "preferredTaxonNameID"            = "taxonNameID",
+  "taxonNameUsageConceptID"         = "taxonNameUsageConceptID",
   "vegXID"                          = "vegxID"
 )
 

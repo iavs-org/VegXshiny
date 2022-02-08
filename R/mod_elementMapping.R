@@ -124,7 +124,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     }
     
     output$tree = shinyTree::renderTree(elem_list)
-  
+    
     observeEvent(input$tree, {
       # TODO
       # prevent selection of multiple xsd:choice elements 
@@ -410,7 +410,11 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
       templates_elem_overview = templates_lookup %>% filter(target_element == tab_selected)
       templates_elem = templates %>% filter(template_id %in% templates_elem_overview$template_id)
       
-      output$templates = DT::renderDataTable(templates_elem_overview, style = "bootstrap") # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
+      output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
+                                             style = "bootstrap",
+                                             rownames = FALSE,
+                                             options = list(columnDefs = list(list(width = '80px', targets = 0)))) 
+  
       output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
       
       insertTab(
@@ -487,7 +491,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                        new_nodes = list()
                        # loop over node_ids, create new nodes
                        for(j in 1:length(node_mappings)){ 
-                         new_node = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value)
+                         new_node = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, session = session)
                          leaf_nodes = xml_find_all(new_node, "//*[not(*)]")
                          leaf_names = leaf_nodes %>% xml_name()
                          if(any(str_detect(leaf_names, "ID$"))){  # ID links present, replace internal node_id with actual id generated for VegX output
@@ -496,7 +500,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                              node_id = as.numeric(xml_text(id_node))
                              if(node_id > j){
                                error(paste0("Ivalid ID reference with 'template_id=", node_mappings[[j]]$template_id[1], "'. 
-                                          Make sure to reference only earlier node_ids in a template"))
+                                            Make sure to reference only earlier node_ids in a template"))
                              } 
                              vegx_id = xml_attr(new_nodes[[node_id]], "id")
                              xml_text(id_node) = vegx_id
@@ -523,8 +527,9 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      new_text = readChar(tmp, file.info(tmp)$size)
                      vegx_txt(new_text)
                      
-                     # TODO update action log and progress tab
-                     #
+                     # Update Action log 
+                     log = read_action_log(session)
+                     action_log(log)
                      
                      # Update style
                      shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
