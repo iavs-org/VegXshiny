@@ -29,6 +29,7 @@ mod_actionLog_server <- function(id, action_log){
                                              style = 'bootstrap', 
                                              selection = 'none',
                                              rownames = F,
-                                             options = list(paging=FALSE, columnDefs = list(list(width = '200px', targets = c(0,1)))))
+                                             escape = F,
+                                             options = list(paging=FALSE, columnDefs = list(list(width = '180px', targets = c(0,1)))))
   })
 }

@@ -202,7 +202,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      
                      # Check df
                      if(is.null(nodes_df)){
-                       shiny::showNotification("Mappings table could not be build. Did you specify data columns of different length?", type = "error")
+                       shiny::showNotification("Mappings table could not be build. Did you specify data columns with different lengths?", type = "error")
                        return
                      } else {
                        node_values_df(nodes_df) 
@@ -315,26 +315,38 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    node_values_df = isolate(node_values_df())
                    node_names = colnames(node_values_df)
                    
+                   n_insertions = 0
+                   n_failures = 0
+                   n_errors = 0
+                   n_warnings = 0
+                   
                    # loop over mappings
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
-                     new_node = new_vegx_node(node_names, as.character(node_values_df[i,]), session = session)
-                     if(is.null(new_node)){next}
+                     fct_result = new_vegx_node(node_names, as.character(node_values_df[i,]), token = session$token)
+                     new_node = fct_result$node
+                     n_errors = n_errors + fct_result$errors
+                     n_warnings = n_warnings + fct_result$warnings 
                      
-                     # Append new node to VegX document, respect sequence order defined in schema
-                     parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
-                     if(parent_missing){
-                       elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
-                       if(length(elements_present) > 0){
-                         elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, tab_selected)]
-                         insert_position = which(elements_ordered == tab_selected) - 1
-                         xml_add_child(vegx_doc, tab_selected, .where = insert_position)  
-                       } else {
-                         xml_add_child(vegx_doc, tab_selected)  
+                     if(is.null(new_node)){
+                       n_failures = n_failures + 1
+                     } else{
+                       # Append new node to VegX document, respect sequence order defined in schema
+                       parent_missing = (length(xml_find_all(vegx_doc, paste0("./", tab_selected))) == 0)
+                       if(parent_missing){
+                         elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
+                         if(length(elements_present) > 0){
+                           elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, tab_selected)]
+                           insert_position = which(elements_ordered == tab_selected) - 1
+                           xml_add_child(vegx_doc, tab_selected, .where = insert_position)  
+                         } else {
+                           xml_add_child(vegx_doc, tab_selected)  
+                         }
                        }
+                       parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
+                       xml_add_child(parent, new_node)
+                       n_insertions = n_insertions + 1
                      }
-                     parent = xml_find_all(vegx_doc, paste0("./", tab_selected))
-                     xml_add_child(parent, new_node)
                    }
                    
                    # Update VegX text 
@@ -343,9 +355,14 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    new_text = readChar(tmp, file.info(tmp)$size)
                    vegx_txt(new_text)
                    
-                   # Update Action log 
-                   log = read_action_log(session)
+                   # Update action log 
+                   log = read_action_log(session$token)
                    action_log(log)
+                   
+                   # Show notification
+                   if(n_insertions > 0){showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
+                   if(n_warnings > 0 | n_errors > 0){showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
+                   if(n_failures > 0){showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
                    
                    # Update style
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
@@ -414,7 +431,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                                              style = "bootstrap",
                                              rownames = FALSE,
                                              options = list(columnDefs = list(list(width = '80px', targets = 0)))) 
-  
+      
       output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
       
       insertTab(

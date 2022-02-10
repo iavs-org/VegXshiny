@@ -31,13 +31,8 @@ app_server <- function( input, output, session ) {
   })
   
   action_log = reactiveVal({
-    log = data.frame(
-      timestamp = as.character(Sys.time()),
-      type      = "Info",
-      message   = "Session started."
-    )
-    write.table(log, file = paste0("inst/app/www/logs/log_", session$token, ".csv"), row.names = F)
-    log
+    new_action_log_record("System info", "Session started.", session$token, append = F, col.names = T)
+    read_action_log(session$token)
   })
   
   # --------------------------------------------------------------------------------------- #

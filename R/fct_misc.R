@@ -31,9 +31,11 @@ build_node_values_df = function(mappings, user_data){
 #' @return A data.frame
 #'
 #' @noRd
-read_action_log = function(session){
-  log_path = paste0("inst/app/www/logs/log_", session$token, ".csv")
-  read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character")) %>% arrange(desc(timestamp))
+#' 
+#' @importFrom purrr map_df
+read_action_log = function(token){
+  log_path = paste0("inst/app/www/logs/log_", token, ".csv")
+  read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character"), strip.white = F) %>% purrr::map_df(rev)
 }
 
 #' Create a new log record
@@ -42,10 +44,11 @@ read_action_log = function(session){
 #' @return A data.frame
 #'
 #' @noRd
-new_action_log_record = function(type, message){
-  data.frame(
+new_action_log_record = function(type, message, token, append = T, col.names = F){
+  record = data.frame(
     timestamp = as.character(Sys.time()),
     type      = type,
     message   = message
   )
+  write.table(record, file = paste0("inst/app/www/logs/log_", token, ".csv"), append = append, col.names = col.names, row.names = F)
 }
