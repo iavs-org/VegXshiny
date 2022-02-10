@@ -50,17 +50,17 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
   if(length(xml_children(root_node)) == 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
-    message = paste0("<b>Could not add ", root_name, " node. No valid content.</b><br>", warnings, errors)
+    message = paste0("<b>Could not add ", root_name, " element. No valid content.</b><br>", warnings, errors)
     new_action_log_record("Insertion Error", message , token)
     conditions$errors = c(conditions$error, message)
     root_node = NULL
   } else if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
-    message = paste0("<b>New ", root_name, " node (id = ", id, ") added with the following exceptions:</b><br>", warnings, errors)
+    message = paste0("<b>New ", root_name, " element (id = ", id, ") added with the following exceptions:</b><br>", warnings, errors)
     new_action_log_record("Insertion warning", message, token)
   } else {
-    new_action_log_record("Insertion info", paste0("<b>New ", root_name, " node (id = ", id, ") successfully added.</b>"), token)
+    new_action_log_record("Insertion info", paste0("<b>New ", root_name, " element (id = ", id, ") successfully added.</b>"), token)
   }
   
   return(list(node = root_node, warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -84,13 +84,38 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
-  stopifnot("Node paths do not share the same root" = length(root_name) == 1)
+  conditions = list(warnings = c(), errors = c())
+  
+  if(length(root_name) != 1){
+    new_action_log_record("Merge Error", paste0("<b>Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root.</b>"), token)
+    return(list(warnings = 0, errors = 1))
+  }
   
   # Build XML
   tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
-  build_xml(tmp_root, node_names, node_values)
+  if(length(tmp_root) == 0){
+    new_action_log_record("Merge Error", paste0("<b>Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id.</b>"), token)
+    return(list(warnings = 0, errors = 1))
+  }
   
-  return(NULL)
+  withCallingHandlers({
+    build_xml(tmp_root, node_names, node_values)
+  }, warning = function(w){
+    conditions$warnings <<- c(conditions$warnings, w$message)
+  }, error = function(e){
+    conditions$errors <<- c(conditions$errors, e$message)
+  })
+ 
+  if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
+    warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
+    errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
+    message = paste0("<b>Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:</b><br>", warnings, errors)
+    new_action_log_record("Merge warning", message, token)
+  } else {
+    new_action_log_record("Merge info", paste0("<b>Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")</b>"), token)
+  }
+  
+  return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))
 }
 
 #' Build XML from vegx mappings

@@ -364,37 +364,35 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    if(n_warnings > 0 | n_errors > 0){showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
                    if(n_failures > 0){showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
                    
-                   # Update style
+                   # Update style and exit
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
-                   
-                   # Jump to next tab
-                   # tabs = sort(tabs_visible())
-                   # tab_index = which(tabs == tab_selected)
-                   # next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
-                   # nav_select("sidebar", selected = next_tab, session = parent_session)
-                   
                    removeModal()
                  })
     
     ###### Merge nodes ######
     observeEvent(eventExpr = input$confirm_merge_nodes, 
                  handlerExpr = {
-                   # Get existing ids from document
-                   existing_ids = xml_find_all(vegx_doc, paste0("//", tab_selected)) %>% 
-                     xml_children() %>% 
-                     xml_attr("id")
-                   
                    # Prepare data 
-                   target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot) %>% 
-                     filter(target_id %in% existing_ids)
-                   target_ids = target_nodes_hot$target_id
+                   target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot)
                    node_values_df = target_nodes_hot %>% dplyr::select(-target_id)
-                   node_names = colnames(node_values_df)
+                   target_ids = target_nodes_hot$target_id
+                   node_paths = colnames(node_values_df)
+                   
+                   n_merges = 0
+                   n_failures = 0
+                   n_warnings = 0
                    
                    # loop over mappings
-                   # TODO check for compliance with schema (maxOccurs)
                    for(i in 1:nrow(target_nodes_hot)){
-                     merge_into_vegx_node(target_ids[i], node_names, as.character(node_values_df[i,]), session)
+                     # Create new node
+                     node_values = as.character(node_values_df[i,])
+                     fct_result = merge_into_vegx_node(target_ids[i], node_paths, node_values, session$token)
+                     if(fct_result$errors == 0){
+                       n_merges = n_merges + 1
+                     } else {
+                       n_failures = n_failures + fct_result$errors  
+                     }
+                     n_warnings = n_warnings + fct_result$warnings 
                    }
                    
                    # Update VegX text 
@@ -404,18 +402,16 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    vegx_txt(new_text)
                    
                    # Update Action log 
-                   log = read_action_log(session)
+                   log = read_action_log(session$token)
                    action_log(log)
                    
-                   # Update style
+                   # Show notification
+                   if(n_merges > 0){showNotification(paste0("Successfully merged into", n_merges, " node(s)."), type = "default") }
+                   if(n_warnings > 0){showNotification(paste0(n_warnings, " warning(s) encountered. Please consult the log for more information."), type = "warning")} 
+                   if(n_failures > 0){showNotification(paste0("Merge failed for ", n_failures, " node(s). Please consult the log for more information."), type = "error") }
+                   
+                   # Update style and exit
                    shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
-                   
-                   # # Jump to next tab
-                   # tabs = sort(tabs_visible())
-                   # tab_index = which(tabs == tab_selected)
-                   # next_tab = stringr::str_replace(tabs[(tab_index  %% length(tabs)) + 1], "^.{1}", toupper) # TODO smart next tab if empty ids were added
-                   # nav_select("sidebar", selected = next_tab, session = parent_session)
-                   
                    removeModal()
                  })
     
