@@ -530,7 +530,7 @@
         <xsd:sequence>
             <xsd:element name="surfaceName" type="xsd:string">
                 <xsd:annotation>
-                    <xsd:documentation source="VegBank" xml:lang="en">Name associated with this stratum </xsd:documentation>
+                    <xsd:documentation source="VegBank" xml:lang="en">Name associated with this surface.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="definition" type="xsd:string" minOccurs="0">

@@ -330,7 +330,7 @@
                 <xsd:sequence>
                     <xsd:element name="relatedAbioticMeasurement" type="relatedItemType" minOccurs="0" maxOccurs="unbounded">
                         <xsd:annotation>
-                            <xsd:documentation xml:lang="en">An abiotic measurement may be related to a another.</xsd:documentation>
+                            <xsd:documentation xml:lang="en">An abiotic measurement may be related to another.</xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
                 </xsd:sequence>
