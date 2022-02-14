@@ -60,7 +60,7 @@ app_server <- function( input, output, session ) {
         }
       }
     }, error = function(e){
-      print(e) # TODO add to action log
+      shiny::showNotification("Error in tree selection. Please contact the authors.", type = "error")
     })
   })
   

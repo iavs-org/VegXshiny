@@ -30,7 +30,7 @@ mod_about_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     output$about_ui = renderUI({
-      shiny::HTML(markdown::markdownToHTML(knitr::knit('R/about.Rmd', quiet = TRUE), fragment.only = T))
+      shiny::HTML(markdown::markdownToHTML(knitr::knit('inst/rmd/about.Rmd', quiet = TRUE), fragment.only = T))
     })
   })
 }

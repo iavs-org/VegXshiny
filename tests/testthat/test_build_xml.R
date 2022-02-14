@@ -1,5 +1,17 @@
+test_that("Invalid node names are handled properly", {
+  root = xml_new_root("method")
+  expect_warning(build_xml(root, list(c("method","invalidNodeName")), "foo"), "invalid node name")
+  expect_equal(length(xml_children(root)), 0)
+  
+  expect_warning(build_xml(root, list(c("method","name"), c("method","invalidNodeName")), c("foo", "bar")), "invalid node name")
+  expect_equal(length(xml_children(root)), 1)
+  
+  expect_warning(build_xml(root, list(c("method","invalidNodeName"), c("method","description")), c("foo", "bar")), "invalid node name")
+  expect_equal(length(xml_children(root)), 2)
+})
+
 test_that("Node placement complies with schema definition", {
-  # Check at depth = 1 #
+  # Check at depth = 1 
   node_paths = list(c("party","choice", "individualName"), c("party", "address"), c("party","phone"), c("party", "electronicMailAddress"), c("party", "onlineURL"))
   names_ref = c("individualName",  "address", "phone", "electronicMailAddress", "onlineURL") # correct order according to schema
   
@@ -10,7 +22,7 @@ test_that("Node placement complies with schema definition", {
     expect_equal(names_ref, names_test)
   }
   
-  # Check at depths > 1 #
+  # Check at depths > 1 
   node_paths = list(c("plot", "plotName"), c("plot", "location", "horizontalCoordinates", "coordinates", "valueX"),  c("plot", "location", "authorLocation"), 
                     c("plot", "topography", "aspect", "value"), c("plot", "simpleUserDefined", "choice", "methodID"))
   names_ref = c("plotName", "valueX", "authorLocation","value", "methodID") # correct order according to schema

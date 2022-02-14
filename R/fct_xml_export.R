@@ -20,7 +20,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record("Insertion Error", paste0("<b>Could not add ", root_name, " node. Node paths do not share the same root.</b>"), token)
+    new_action_log_record("Insertion Error", paste0("Could not add ", root_name, " node. Node paths do not share the same root."), token)
     return(list(node = NULL, warnings = 0, errors = 1))
   }
   
@@ -39,10 +39,12 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
   root_node = xml_root(tmp_root)
   root_definition = xml_find_all(vegx_schema_simple, paste0("//*[@name='", root_name, "']"))
   if(xml_has_attr(root_definition, "id")){ # ID is required by schema
-    if(is.null(id)){                       # ...but not supplied
-      generator_name = id_lookup[paste0(root_name,"ID")]
-      id = id_factory[[generator_name]]()
-    } 
+    generator_name = id_lookup[paste0(root_name,"ID")]
+    if(is.null(id)){                      
+      id = id_factory[[generator_name]]()  # If id = NULL: generate a new one
+    } else {                              
+      id_factory[[generator_name]]()       # otherwise: burn one id to keep counter equal to number of added nodes
+    }
   }
   xml_set_attr(root_node, "id", id)
   
@@ -50,17 +52,17 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
   if(length(xml_children(root_node)) == 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
-    message = paste0("<b>Could not add ", root_name, " element. No valid content.</b><br>", warnings, errors)
+    message = paste0("Could not add ", root_name, " element. No valid content.<br>", warnings, errors)
     new_action_log_record("Insertion Error", message , token)
     conditions$errors = c(conditions$error, message)
     root_node = NULL
   } else if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
-    message = paste0("<b>New ", root_name, " element (id = ", id, ") added with the following exceptions:</b><br>", warnings, errors)
+    message = paste0("New ", root_name, " element (id = ", id, ") added with the following exceptions:<br>", warnings, errors)
     new_action_log_record("Insertion warning", message, token)
   } else {
-    new_action_log_record("Insertion info", paste0("<b>New ", root_name, " element (id = ", id, ") successfully added.</b>"), token)
+    new_action_log_record("Insertion info", paste0("New ", root_name, " element (id = ", id, ") successfully added."), token)
   }
   
   return(list(node = root_node, warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -87,14 +89,14 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record("Merge Error", paste0("<b>Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root.</b>"), token)
+    new_action_log_record("Merge Error", paste0("Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root."), token)
     return(list(warnings = 0, errors = 1))
   }
   
   # Build XML
   tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
   if(length(tmp_root) == 0){
-    new_action_log_record("Merge Error", paste0("<b>Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id.</b>"), token)
+    new_action_log_record("Merge Error", paste0("Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id."), token)
     return(list(warnings = 0, errors = 1))
   }
   
@@ -109,10 +111,10 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
   if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
-    message = paste0("<b>Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:</b><br>", warnings, errors)
+    message = paste0("Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:<br>", warnings, errors)
     new_action_log_record("Merge warning", message, token)
   } else {
-    new_action_log_record("Merge info", paste0("<b>Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")</b>"), token)
+    new_action_log_record("Merge info", paste0("Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")"), token)
   }
   
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -136,7 +138,7 @@ build_xml = function(root, node_paths, node_values){
   # Main loop
   for(i in 1:length(node_paths)){
     if(is.na(node_values[i]) | node_values[i] == ""){
-      warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': no node value found.")) 
+      warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: no node value found.")) 
       break  
     } 
     
@@ -154,6 +156,12 @@ build_xml = function(root, node_paths, node_values){
         next
       }
       
+      # Check if node name is valid
+      if(length(xml_find_all(vegx_schema_simple, node_xpath)) == 0){
+        warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: invalid node name.")) 
+        break  
+      }
+      
       # Determine insertion position
       siblings = xml_children(parent) %>% xml_name()
       if(is_choice){ # If node is child of a choice element
@@ -165,7 +173,7 @@ build_xml = function(root, node_paths, node_values){
         
         # Check other choice is present
         if(length(intersect(siblings, choices[choices != node_name])) != 0){ 
-          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': only one node allowed in this position.")) 
+          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: only one node allowed in this position.")) 
           break  
         }
         # If not, find siblings of choice element instead of siblings of the node

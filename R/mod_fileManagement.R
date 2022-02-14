@@ -49,14 +49,21 @@ mod_fileManagement_server <- function(id, action_log){
       })
     }) 
     
-    # render uploaded user data as rhandsontable
+    # Render uploaded user data as rhandsontable
     user_data = reactiveValues()
     observeEvent(input$upload, {
       lapply(file_names(), function(file_name){
+        # Create table
         tbl_path = input$upload$datapath[which(input$upload$name == file_name)]
         tbl = read.csv(tbl_path)
         user_data[[file_name]] = rhandsontable::rhandsontable(tbl, useTypes = F)
+        
+        # Write log entry
+        new_action_log_record("Upload info", paste0("File '", file_name,"' uploaded"), session$token)
       })
+      # Update log
+      log = read_action_log(session$token)
+      action_log(log)
     })
     
     # Observe Buttons
