@@ -5,16 +5,18 @@
 #' @return a list of xml2 documents
 #' 
 #' @importFrom xml2 read_xml
+#' @importFrom here here
 #' 
 #' @noRd
 load_schema = function(){
+  schema_path = here::here("inst", "app", "www", "vegxschema")
   list(
-    veg  = xml2::read_xml("inst/app/www/vegxschema/veg.xsd"),
-    misc = xml2::read_xml("inst/app/www/vegxschema/veg-misc.xsd"),
-    obs  = xml2::read_xml("inst/app/www/vegxschema/veg-plotobservation.xsd"),
-    plot = xml2::read_xml("inst/app/www/vegxschema/veg-plot.xsd"),
-    org  = xml2::read_xml("inst/app/www/vegxschema/veg-organism.xsd"),
-    comm = xml2::read_xml("inst/app/www/vegxschema/veg-community.xsd")
+    veg  = xml2::read_xml(paste0(schema_path, "/veg.xsd")),
+    misc = xml2::read_xml(paste0(schema_path, "/veg-misc.xsd")),
+    obs  = xml2::read_xml(paste0(schema_path, "/veg-plotobservation.xsd")),
+    plot = xml2::read_xml(paste0(schema_path, "/veg-plot.xsd")),
+    org  = xml2::read_xml(paste0(schema_path, "/veg-organism.xsd")),
+    comm = xml2::read_xml(paste0(schema_path, "/veg-community.xsd"))
   )
 }
 

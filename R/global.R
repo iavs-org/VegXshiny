@@ -1,3 +1,5 @@
+load("R/sysdata.rda")
+
 # --------------------------------------------------------------------------------------- #
 ####      VegX schema preparation      ####
 # --------------------------------------------------------------------------------------- #
@@ -5,7 +7,7 @@
 schema_files = load_schema() # read fresh copy of schema files
 vegx_schema_simple = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
 link_vegx_schema(vegx_schema_simple, "veg", schema_files, simplify = T)
-write_xml(vegx_schema_simple, "~/Documents/schema_simple.xml")
+#write_xml(vegx_schema_simple, "~/Documents/schema_simple.xml")
 
 # Collect VegX main element names
 vegx_main_elements = xml2::xml_attr(xml_children(vegx_schema_simple), "name")

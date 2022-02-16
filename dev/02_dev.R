@@ -11,21 +11,24 @@
 #### CURRENT FILE: DEV SCRIPT #####
 ###################################
 
-# Engineering
-
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
+usethis::use_package("bslib")
 usethis::use_package("dplyr")
+usethis::use_package("here")
+usethis::use_package("jsonlite")
 usethis::use_package("knitr")
+usethis::use_package("lubridate")
 usethis::use_package("markdown")
+usethis::use_package("purrr")
 usethis::use_package("rhandsontable")
 usethis::use_package("shinyAce")
 usethis::use_package("shinyBS")
 usethis::use_package("shinyjs")
 usethis::use_package("shinyTree")
 usethis::use_package("shinyWidgets")
+usethis::use_package("shinythemes")
 usethis::use_package("stringr")
-usethis::use_package("testthat")
 usethis::use_package("tidyr")
 usethis::use_package("xml2")
 
@@ -55,7 +58,6 @@ usethis::use_data_raw("data_preparation")
 ## Tests ----
 ## Add one line by test you want to create
 usethis::use_testthat()
-testthat::
 
 # Documentation
 
@@ -65,10 +67,10 @@ devtools::build_vignettes()
 
 ## Code Coverage----
 ## Set the code coverage service ("codecov" or "coveralls")
-usethis::use_coverage()
+usethis::use_coverage("test-coverage.yaml", type = "codecov")
 
 # Create a summary readme for the testthat subdirectory
-covrpage::covrpage()
+# covrpage::covrpage()
 
 ## CI ----
 ## Use this part of the script if you need to set up a CI
@@ -79,14 +81,13 @@ usethis::use_github()
 
 # GitHub Actions
 usethis::use_github_action() 
+
 # Chose one of the three
 # See https://usethis.r-lib.org/reference/use_github_action.html
-usethis::use_github_action_check_release() 
 usethis::use_github_action_check_standard() 
-usethis::use_github_action_check_full() 
+
 # Add action for PR
 usethis::use_github_action_pr_commands()
-
 
 # You're now set! ----
 # go to dev/03_deploy.R

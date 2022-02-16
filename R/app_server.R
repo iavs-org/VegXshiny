@@ -12,12 +12,11 @@
 #' 
 #' @noRd 
 
-app_server <- function( input, output, session ) {
-  library(shinyTree) # package doesn't work otherwise
-  library(shinyBS)   # same
-
+app_server <- function(input, output, session) {
+  library("shinyTree") # package doesn't work otherwise
+  
   # Cleanup function
-  log_path = paste0("inst/app/www/logs/log_", session$token, ".csv")
+  log_path = here::here("inst", "app", "www", "logs", paste0("log_", session$token, ".csv"))
   onStop(function(){
     unlink(log_path)
   })

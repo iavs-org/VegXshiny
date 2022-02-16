@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom rhandsontable rhandsontable renderRHandsontable
+#' @importFrom utils read.csv
 mod_fileManagement_ui <- function(id){
   ns <- NS(id)
   
@@ -74,6 +75,10 @@ mod_fileManagement_server <- function(id, action_log){
                      ignoreInit = F)
       })
     )
+    
+    # TODO allow repeated uploades
+    # TODO add new file option
+    # TODO Import TV2/TV3
     
     # Return reactive user data
     return(user_data)

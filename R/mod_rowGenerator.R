@@ -46,7 +46,12 @@ mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_column
     # SelectizeInput or TextInput for values to be mapped to VegX element
     output$value_ui   = renderUI({
       if(input$source == "File"){
-        selectInput(ns("value"), label = NULL, width = "100%", choices = c("Select columns from uploaded data" = "", data_columns()))
+        if(length(data_columns()) == 0){
+          dropdown_choices = c("No files found" = "")
+        } else {
+          dropdown_choices = c("Select columns from uploaded data" = "", data_columns())
+        }
+        selectInput(ns("value"), label = NULL, width = "100%", choices = dropdown_choices)
       } else {
         textAreaInput(ns("value"), label = NULL, placeholder = "Enter free text", height = "34px", width = "100%", resize = "vertical")
       }

@@ -6,6 +6,7 @@
 #'
 #' @noRd 
 #' 
+#' @importFrom stats setNames
 #' @importFrom jsonlite fromJSON
 #' @importFrom DT renderDataTable
 #' @importFrom shinyTree shinyTree renderTree get_selected
@@ -258,7 +259,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    
                    output$id_column = renderUI({
                      if(input$id_source == "file"){
-                       if(length(names(user_data)) == 0){
+                       if(length(data_columns()) == 0){
                          dropdown_choices = c("No files found" = "")
                        } else {
                          dropdown_choices = c("Select columns from uploaded data" = "", data_columns())
@@ -392,7 +393,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                        xml_children() %>%
                        xml_attr("name")
                      
-                     target_nodes_df = nodes_df %>% mutate(target_id = NA) %>% relocate("target_id")
+                     target_nodes_df = nodes_df %>% mutate("target_id" = NA) %>% relocate("target_id")
                      target_nodes_hot = rhandsontable::rhandsontable(target_nodes_df, useTypes = F)
                      output$target_nodes_hot = rhandsontable::renderRHandsontable(target_nodes_hot)
                      
@@ -593,7 +594,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                            }
                            parent = xml_find_all(vegx_doc, paste0("./", parent_name))
                            xml_add_child(parent, new_node)  
-                           n_instertions = n_insertions + 1
+                           n_insertions = n_insertions + 1
                          }
                        }
                      }

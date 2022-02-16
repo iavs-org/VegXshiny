@@ -32,9 +32,11 @@ build_node_values_df = function(mappings, user_data){
 #'
 #' @noRd
 #' 
+#' @importFrom here here
 #' @importFrom purrr map_df
+#' @importFrom utils read.table
 read_action_log = function(token){
-  log_path = paste0("inst/app/www/logs/log_", token, ".csv")
+  log_path = here::here("inst", "app", "www", "logs", paste0("log_", token, ".csv"))
   read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character"), strip.white = F) %>% purrr::map_df(rev)
 }
 
@@ -44,11 +46,14 @@ read_action_log = function(token){
 #' @return A data.frame
 #'
 #' @noRd
+#' @importFrom here here
+#' @importFrom utils write.table
 new_action_log_record = function(type, message, token, append = T, col.names = F){
   record = data.frame(
     timestamp = as.character(Sys.time()),
     type      = type,
     message   = message
   )
-  write.table(record, file = paste0("inst/app/www/logs/log_", token, ".csv"), append = append, col.names = col.names, row.names = F)
+  log_path = here::here("inst", "app", "www", "logs", paste0("log_", token, ".csv"))
+  write.table(record, file = log_path, append = append, col.names = col.names, row.names = F)
 }
