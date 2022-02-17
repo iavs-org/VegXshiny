@@ -33,14 +33,14 @@ new_vegx_document = function(schema_files){
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, token){
+new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_path){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record("Insertion Error", paste0("Could not add ", root_name, " node. Node paths do not share the same root."), token)
+    new_action_log_record(log_path, "Insertion Error", paste0("Could not add ", root_name, " node. Node paths do not share the same root."))
     return(list(node = NULL, warnings = 0, errors = 1))
   }
   
@@ -73,16 +73,16 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, token)
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
     message = paste0("Could not add ", root_name, " element. No valid content.<br>", warnings, errors)
-    new_action_log_record("Insertion Error", message , token)
+    new_action_log_record(log_path, "Insertion Error", message)
     conditions$errors = c(conditions$error, message)
     root_node = NULL
   } else if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
     message = paste0("New ", root_name, " element (id = ", id, ") added with the following exceptions:<br>", warnings, errors)
-    new_action_log_record("Insertion warning", message, token)
+    new_action_log_record(log_path, "Insertion warning", message)
   } else {
-    new_action_log_record("Insertion info", paste0("New ", root_name, " element (id = ", id, ") successfully added."), token)
+    new_action_log_record(log_path, "Insertion info", paste0("New ", root_name, " element (id = ", id, ") successfully added."))
   }
   
   return(list(node = root_node, warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -102,21 +102,21 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, token)
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_paths, node_values, token){
+merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_paths, node_values, log_path){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record("Merge Error", paste0("Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root."), token)
+    new_action_log_record(log_path, "Merge Error", paste0("Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root."))
     return(list(warnings = 0, errors = 1))
   }
   
   # Build XML
   tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
   if(length(tmp_root) == 0){
-    new_action_log_record("Merge Error", paste0("Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id."), token)
+    new_action_log_record(log_path, "Merge Error", paste0("Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id."))
     return(list(warnings = 0, errors = 1))
   }
   
@@ -132,9 +132,9 @@ merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_path
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
     message = paste0("Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:<br>", warnings, errors)
-    new_action_log_record("Merge warning", message, token)
+    new_action_log_record(log_path, "Merge warning", message)
   } else {
-    new_action_log_record("Merge info", paste0("Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")"), token)
+    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")"))
   }
   
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))

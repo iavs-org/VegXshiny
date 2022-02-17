@@ -5,7 +5,7 @@
 \title{Run the Shiny Application}
 \usage{
 run_app(
-  onStart = function() {     shiny::removeInputHandler("shinyTree") },
+  onStart = function() { },
   options = list(),
   enableBookmarking = NULL,
   uiPattern = "/",

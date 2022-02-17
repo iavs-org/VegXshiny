@@ -32,7 +32,7 @@ build_node_values_df = function(mappings, user_data){
     colnames(upload_df) = upload$x$rColHeaders
     node_values[[i]] = upload_df[,column_name]
   }
-
+  
   tryCatch({
     return(as.data.frame(node_values, check.names = F))
   }, error = function(e){
@@ -43,17 +43,15 @@ build_node_values_df = function(mappings, user_data){
 #' Read the action log
 #' @description Reads and returns the current action log
 #'
-#' @param token A unique identifier of the current R session (typically derived from the Shiny session object)
+#' @param log_path The path of the log file for the current session
 #' 
 #' @return A data.frame
 #'
 #' @noRd
 #' 
-#' @importFrom here here
 #' @importFrom purrr map_df
 #' @importFrom utils read.table
-read_action_log = function(token){
-  log_path = here::here("inst", "app", "www", "logs", paste0("log_", token, ".csv"))
+read_action_log = function(log_path){
   read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character"), strip.white = F) %>% purrr::map_df(rev)
 }
 
@@ -62,21 +60,19 @@ read_action_log = function(token){
 #' 
 #' @param type The type of the message (e.g. "Session info", "Insertion warning", etc)
 #' @param message The message text
-#' @param token A unique identifier of the current R session (typically derived from the Shiny session object)
+#' @param log_path The path of the log file for the current session
 #' @param append Parameter passed to write.table()
 #' @param col.names Parameter passed to write.table()
 #'
 #' @return This function is used for its side effects
 #'
 #' @noRd
-#' @importFrom here here
 #' @importFrom utils write.table
-new_action_log_record = function(type, message, token, append = T, col.names = F){
+new_action_log_record = function(log_path, type, message, append = T, col.names = F){
   record = data.frame(
     timestamp = as.character(Sys.time()),
     type      = type,
     message   = message
   )
-  log_path = here::here("inst", "app", "www", "logs", paste0("log_", token, ".csv"))
-  write.table(record, file = log_path, append = append, col.names = col.names, row.names = F)
+  write.table(record, log_path, append = append, col.names = col.names, row.names = F)
 }

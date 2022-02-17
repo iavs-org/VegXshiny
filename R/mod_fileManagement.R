@@ -32,7 +32,7 @@ mod_fileManagement_ui <- function(id){
 #' fileManagement Server Functions
 #'
 #' @noRd 
-mod_fileManagement_server <- function(id, action_log){
+mod_fileManagement_server <- function(id, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -60,10 +60,10 @@ mod_fileManagement_server <- function(id, action_log){
         user_data[[file_name]] = rhandsontable::rhandsontable(tbl, useTypes = F)
         
         # Write log entry
-        new_action_log_record("Upload info", paste0("File '", file_name,"' uploaded"), session$token)
+        new_action_log_record(log_path, "Upload info", paste0("File '", file_name,"' uploaded"))
       })
       # Update log
-      log = read_action_log(session$token)
+      log = read_action_log(log_path)
       action_log(log)
     })
     

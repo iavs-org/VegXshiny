@@ -36,7 +36,7 @@ mod_viewXML_ui <- function(id){
 #' viewXML Server Functions
 #'
 #' @noRd 
-mod_viewXML_server <- function(id, vegx_doc, vegx_txt, action_log){
+mod_viewXML_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

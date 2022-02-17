@@ -15,7 +15,6 @@
 ## Add one line by package you want to add as dependency
 usethis::use_package("bslib")
 usethis::use_package("dplyr")
-usethis::use_package("here")
 usethis::use_package("jsonlite")
 usethis::use_package("knitr")
 usethis::use_package("lubridate")

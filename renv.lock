@@ -648,10 +648,15 @@
     },
     "shinyTree": {
       "Package": "shinyTree",
-      "Version": "0.2.7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "efbefee324b88ed3d5b42f720e6fca8e"
+      "Version": "0.3.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "shinyTree",
+      "RemoteUsername": "shinyTree",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "91d33900747bebb82d34520fdd72bec1b4a163eb",
+      "Hash": "50032d519c776a7bf753cc4df1749fe9"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",

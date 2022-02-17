@@ -14,12 +14,8 @@
 
 app_server <- function(input, output, session) {
   library("shinyTree") # package doesn't work otherwise
-  
-  # Cleanup function
-  log_path = here::here("inst", "app", "www", "logs", paste0("log_", session$token, ".csv"))
-  onStop(function(){
-    unlink(log_path)
-  })
+  log_path = tempfile("log_", fileext = ".csv")
+  new_action_log_record(log_path, "System info", "Session started.", append = F, col.names = T)
   
   # ---------------------------------------------------------------------------------------- #
   # Create xml objects
@@ -38,8 +34,7 @@ app_server <- function(input, output, session) {
   })
   
   action_log = reactiveVal({
-    new_action_log_record("System info", "Session started.", session$token, append = F, col.names = T)
-    read_action_log(session$token)
+    read_action_log(log_path)
   })
   
   # --------------------------------------------------------------------------------------- #
@@ -77,15 +72,15 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # File Upload
-  user_data = mod_fileManagement_server("fileManagement", action_log)
+  user_data = mod_fileManagement_server("fileManagement", action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  mod_documentCreation_server("documentCreation", user_data, vegx_schema, vegx_doc, vegx_txt, action_log)
+  mod_documentCreation_server("documentCreation", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
-  mod_viewXML_server("viewXML", vegx_doc, vegx_txt, action_log)
+  mod_viewXML_server("viewXML", vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Action Log

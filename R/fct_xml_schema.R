@@ -5,18 +5,16 @@
 #' @return a list of xml2 documents
 #' 
 #' @importFrom xml2 read_xml
-#' @importFrom here here
 #' 
 #' @noRd
 load_schema = function(){
-  schema_path = here::here("inst", "app", "www", "vegxschema")
   list(
-    veg  = xml2::read_xml(paste0(schema_path, "/veg.xsd")),
-    misc = xml2::read_xml(paste0(schema_path, "/veg-misc.xsd")),
-    obs  = xml2::read_xml(paste0(schema_path, "/veg-plotobservation.xsd")),
-    plot = xml2::read_xml(paste0(schema_path, "/veg-plot.xsd")),
-    org  = xml2::read_xml(paste0(schema_path, "/veg-organism.xsd")),
-    comm = xml2::read_xml(paste0(schema_path, "/veg-community.xsd"))
+    veg  = xml2::read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny")),
+    misc = xml2::read_xml(system.file("extdata", "vegxschema", "veg-misc.xsd", package = "VegXshiny")),
+    obs  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plotobservation.xsd", package = "VegXshiny")),
+    plot = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plot.xsd", package = "VegXshiny")),
+    org  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-organism.xsd", package = "VegXshiny")),
+    comm = xml2::read_xml(system.file("extdata", "vegxschema", "veg-community.xsd", package = "VegXshiny"))
   )
 }
 

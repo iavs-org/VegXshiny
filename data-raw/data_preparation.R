@@ -40,8 +40,8 @@ templates = templates %>%
 
 #### ID_lookup ####
 # Get unique ID names in schema
-# vegx_schema_simple = read_xml("~/Documents/schema_simple.xml")
-# ID_names = xml_find_all(vegx_schema_simple, "//*[@name]") %>% 
+# vegx_schema = read_xml("~/Documents/schema_simple.xml")
+# ID_names = xml_find_all(vegx_schema, "//*[@name]") %>% 
 #   xml_attr("name") %>% 
 #   unique() %>% 
 #   stringr::str_subset("ID$")

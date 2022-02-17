@@ -244,7 +244,7 @@
                         <xsd:sequence>
                             <xsd:element name="individualOrganismObservation" type="obs:IndividualOrganismObservationType" maxOccurs="unbounded">
                                 <xsd:annotation>
-                                    <xsd:documentation xml:lang="en">An element individualOrganismObservation is an observation applying to one occurrence of an organism (or part of an organism). It is a container for measurements made on the organism (e.g. diameter, height, crown dimensions, biomass, growth form, number of stems). An individualOrganismObservation contains a reference to a unique plotObservation and to an individualOrganism. Optionally, the individualOrganismObservation may also link to a stratumObservation. </xsd:documentation>
+                                    <xsd:documentation xml:lang="en">An observation applying to one occurrence of an organism (or part of an organism). It is a container for measurements made on the organism (e.g. diameter, height, crown dimensions, biomass, growth form, number of stems). An individualOrganismObservation contains a reference to a unique plotObservation and to an individualOrganism. Optionally, the individualOrganismObservation may also link to a stratumObservation. </xsd:documentation>
                                 </xsd:annotation>
                             </xsd:element>
                         </xsd:sequence>
@@ -334,17 +334,25 @@
                         </xsd:sequence>
                     </xsd:complexType>
                 </xsd:element>
-                <xsd:element name="note" type="misc:noteType" minOccurs="0" maxOccurs="unbounded" />
-                <xsd:element name="simpleUserDefined" type="misc:simpleUserDefinedType" minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="note" type="misc:noteType" minOccurs="0" maxOccurs="unbounded">
                     <xsd:annotation>
-                        <xsd:documentation />
+                        <xsd:documentation>TO BE ADDED</xsd:documentation>
                     </xsd:annotation>
                 </xsd:element>
-                <xsd:element name="complexUserDefined" type="misc:complexUserDefinedType" minOccurs="0" maxOccurs="unbounded" />
+                <xsd:element name="simpleUserDefined" type="misc:simpleUserDefinedType" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:annotation>
+                        <xsd:documentation>TO BE ADDED</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="complexUserDefined" type="misc:complexUserDefinedType" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:annotation>
+                        <xsd:documentation>TO BE ADDED</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
             </xsd:sequence>
             <xsd:attribute name="id" type="misc:IDType" use="optional">
                 <xsd:annotation>
-                    <xsd:documentation>Unique identifier (key) of the element.  It can be unique locally to the data set for a given data element type (e.g., plots) or a GUID in which case it can be resolved to a location on the internet where the record is stored. This identifier is used elsewhere in a dataset instance to reference this specific element when it is referred to in a repeatable way by other part of the schema. For example, a single plot entity may be the basis for numerous measurements of different types (e.g., plot observation and aggregated organism observation). Therefore the plot entity is stored in a single location within schema and referenced by this identifier rather than repeating this information throughout the dataset instance. The identifier may have a specific system and scope.</xsd:documentation>
+                    <xsd:documentation>Unique identifier (key) of the element. It can be unique locally to the data set for a given data element type (e.g., plots) or a GUID in which case it can be resolved to a location on the internet where the record is stored. This identifier is used elsewhere in a dataset instance to reference this specific element when it is referred to in a repeatable way by other part of the schema. For example, a single plot entity may be the basis for numerous measurements of different types (e.g., plot observation and aggregated organism observation). Therefore the plot entity is stored in a single location within schema and referenced by this identifier rather than repeating this information throughout the dataset instance. The identifier may have a specific system and scope.</xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
             <xsd:attribute name="system" type="misc:SystemType" use="optional" />

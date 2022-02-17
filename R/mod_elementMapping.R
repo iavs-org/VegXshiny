@@ -107,7 +107,7 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
@@ -317,7 +317,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # loop over mappings
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
-                     fct_result = new_vegx_node(vegx_schema, node_names, as.character(node_values_df[i,]), id = ids[i], token = session$token)
+                     fct_result = new_vegx_node(vegx_schema, node_names, as.character(node_values_df[i,]), id = ids[i], log_path)
                      new_node = fct_result$node
                      n_errors = n_errors + fct_result$errors
                      n_warnings = n_warnings + fct_result$warnings 
@@ -353,7 +353,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    node_ids(NULL)
                    
                    # Update action log 
-                   log = read_action_log(session$token)
+                   log = read_action_log(log_path)
                    action_log(log)
                    
                    # Show notification
@@ -432,7 +432,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    for(i in 1:nrow(target_nodes_hot)){
                      # Create new node
                      node_values = as.character(node_values_df[i,])
-                     fct_result = merge_into_vegx_node(vegx_schema, vegx_doc, target_ids[i], node_paths, node_values, session$token)
+                     fct_result = merge_into_vegx_node(vegx_schema, vegx_doc, target_ids[i], node_paths, node_values, log_path)
                      if(fct_result$errors == 0){
                        n_merges = n_merges + 1
                      } else {
@@ -448,7 +448,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    vegx_txt(new_text)
                    
                    # Update Action log 
-                   log = read_action_log(session$token)
+                   log = read_action_log(log_path)
                    action_log(log)
                    
                    # Show notification
@@ -557,7 +557,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                        new_nodes = list()
                        # loop over node_ids, create new nodes
                        for(j in 1:length(node_mappings)){ 
-                         fct_result = new_vegx_node(vegx_schema, node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, token = session$token)
+                         fct_result = new_vegx_node(vegx_schema, node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, log_path)
                          new_node = fct_result$node
                          n_errors = n_errors + fct_result$errors
                          n_warnings = n_warnings + fct_result$warnings 
@@ -582,7 +582,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                          
                          # Append new node to VegX document
                          if(is.null(new_node)){
-                           new_action_log_record("Template Error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
+                           new_action_log_record(log_path, "Template Error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
                                                                           "'. Make sure to reference only earlier node_ids in a template"))
                            n_failures = n_failures + 1
                            next
@@ -606,7 +606,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      vegx_txt(new_text)
                      
                      # Update Action log 
-                     log = read_action_log(session$token)
+                     log = read_action_log(log_path)
                      action_log(log)
                      
                      # Show notification

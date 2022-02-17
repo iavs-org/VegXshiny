@@ -10,7 +10,7 @@
 
 run_app <- function(
   onStart = function(){
-    shiny::removeInputHandler("shinyTree")
+    #shiny::removeInputHandler("shinyTree")
   },
   options = list(), 
   enableBookmarking = NULL,
