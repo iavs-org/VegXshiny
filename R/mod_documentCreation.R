@@ -55,7 +55,7 @@ mod_documentCreation_ui <- function(id){
 #' documentCreation Server Functions
 #'
 #' @noRd 
-mod_documentCreation_server <- function(id, user_data, vegx_txt, action_log){
+mod_documentCreation_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -71,7 +71,7 @@ mod_documentCreation_server <- function(id, user_data, vegx_txt, action_log){
     
     # Define "global" reactive values
     elem_selected = reactiveValues() # Container for selected sub-elements per main element
-    vegx_mappings = reactiveValues() # Container for existing mappings  
+    elem_mappings = reactiveValues() # Container for existing mappings  
     tabs_visible  = reactiveVal()    # Currently shown tabs
     
     # Update sidebar depending on input_mode
@@ -87,7 +87,7 @@ mod_documentCreation_server <- function(id, user_data, vegx_txt, action_log){
     
     # Call modules
     lapply(vegx_main_elements, function(tab_name){
-      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, vegx_mappings, vegx_txt, action_log, session)
+      mod_elementMapping_server(id = tab_name, user_data, tabs_visible, tab_name, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log)
     })
   })
 }

@@ -107,26 +107,26 @@ mod_elementMapping_ui <- function(id){
 #' elementMapping Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, vegx_mappings, vegx_txt, action_log, parent_session){
+mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    
+
     # --------------------------------------------------------------------------------------- #
     #### Header ####
     # --------------------------------------------------------------------------------------- #
     output$tab_selected = renderText(stringr::str_replace(tab_selected, "^.{1}", toupper)) # Capitalize first letter
-    output$annotation_main_element = renderText(xml_attr(xml_find_all(vegx_schema_simple, paste0(".//*[@name='", tab_selected, "']")), "annotation"))
+    output$annotation_main_element = renderText(xml_attr(xml_find_all(vegx_schema, paste0(".//*[@name='", tab_selected, "']")), "annotation"))
     
     # --------------------------------------------------------------------------------------- #
     #### VegX element selection ####
     # --------------------------------------------------------------------------------------- #
-    if(isolate(tab_selected) %in% c("simpleUserDefined", "complexUserDefined")){
-      return()
-    } else {
-      elem_list = schema_to_list(xml_find_all(vegx_schema_simple, paste0(".//*[@name='", tab_selected, "']")), "name") 
-    }
-    
-    output$tree = shinyTree::renderTree(elem_list)
+    output$tree = shinyTree::renderTree(
+      if(isolate(tab_selected) %in% c("simpleUserDefined", "complexUserDefined")){
+        return()
+      } else {
+        schema_to_list(xml_find_all(vegx_schema, paste0(".//*[@name='", tab_selected, "']")), "name") 
+      }
+    )
     
     observeEvent(input$tree, {
       # TODO
@@ -162,7 +162,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                  handlerExpr = {
                    if(length(elem_selected[[tab_selected]]) > mapping_count() | mapping_count() == 0){ 
                      tmp_id = paste0("row", mapping_id())
-                     mod_rowGenerator_server(id = tmp_id, tab_selected, elem_selected, data_columns, fields_used, vegx_mappings, mapping_count)
+                     mod_rowGenerator_server(id = tmp_id, tab_selected, elem_selected, data_columns, fields_used, elem_mappings, mapping_count)
                      insertUI(selector = paste0("#", ns("placeholder")),
                               where = "beforeBegin",
                               ui = mod_rowGenerator_ui(ns(tmp_id))
@@ -179,10 +179,10 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     observeEvent(eventExpr = fields_used$elements,
                  handlerExpr = {
                    elem_used = unlist(fields_used[["elements"]])
-                   elem_mapped = names(vegx_mappings[[tab_selected]])
+                   elem_mapped = names(elem_mappings[[tab_selected]])
                    mappings_remove = setdiff(elem_mapped, elem_used)
                    lapply(mappings_remove, function(name){
-                     vegx_mappings[[tab_selected]][[name]] = NULL}
+                     elem_mappings[[tab_selected]][[name]] = NULL}
                    )
                  })
     
@@ -202,11 +202,11 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     ###### Dialogue ######
     observeEvent(eventExpr = input$add_nodes,
                  handlerExpr = {
-                   if(length(vegx_mappings[[tab_selected]]) == 0){
+                   if(length(elem_mappings[[tab_selected]]) == 0){
                      shiny::showNotification("Nothing to submit", type = "warning")
                    } else {
                      # Process mappings and build node table
-                     mappings = isolate(vegx_mappings[[tab_selected]])
+                     mappings = isolate(elem_mappings[[tab_selected]])
                      nodes_df = build_node_values_df(mappings, user_data)
                      
                      # Check df
@@ -219,7 +219,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      
                      # Extract basic information for modal dialog
                      n_nodes = nrow(nodes_df)
-                     name_nodes = xml_find_all(vegx_schema_simple, paste0("//*[@name='", tab_selected, "']")) %>%
+                     name_nodes = xml_find_all(vegx_schema, paste0("//*[@name='", tab_selected, "']")) %>%
                        xml_children() %>%
                        xml_attr("name")
                      
@@ -317,7 +317,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    # loop over mappings
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
-                     fct_result = new_vegx_node(node_names, as.character(node_values_df[i,]), id = ids[i], token = session$token)
+                     fct_result = new_vegx_node(vegx_schema, node_names, as.character(node_values_df[i,]), id = ids[i], token = session$token)
                      new_node = fct_result$node
                      n_errors = n_errors + fct_result$errors
                      n_warnings = n_warnings + fct_result$warnings 
@@ -370,13 +370,13 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     ###### Dialogue ######
     observeEvent(eventExpr = input$merge_nodes,
                  handlerExpr = {
-                   if(length(vegx_mappings[[tab_selected]]) == 0){
+                   if(length(elem_mappings[[tab_selected]]) == 0){
                      shiny::showNotification("Nothing to submit.", type = "warning")
                    } else if(length(xml_children(xml_find_all(vegx_doc, paste0("//", tab_selected)))) == 0){
                      shiny::showNotification("No nodes to merge with.", type = "warning")
                    } else {
                      # Process mappings and build node table
-                     mappings = isolate(vegx_mappings[[tab_selected]])
+                     mappings = isolate(elem_mappings[[tab_selected]])
                      nodes_df = build_node_values_df(mappings, user_data)
                      
                      # Check df
@@ -389,7 +389,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      
                      # Extract basic information for modal dialog
                      n_new_nodes = nrow(node_values_df())
-                     name_new_nodes = xml_find_all(vegx_schema_simple, paste0("//*[@name='", tab_selected, "']")) %>%
+                     name_new_nodes = xml_find_all(vegx_schema, paste0("//*[@name='", tab_selected, "']")) %>%
                        xml_children() %>%
                        xml_attr("name")
                      
@@ -432,7 +432,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    for(i in 1:nrow(target_nodes_hot)){
                      # Create new node
                      node_values = as.character(node_values_df[i,])
-                     fct_result = merge_into_vegx_node(target_ids[i], node_paths, node_values, session$token)
+                     fct_result = merge_into_vegx_node(vegx_schema, vegx_doc, target_ids[i], node_paths, node_values, session$token)
                      if(fct_result$errors == 0){
                        n_merges = n_merges + 1
                      } else {
@@ -557,7 +557,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                        new_nodes = list()
                        # loop over node_ids, create new nodes
                        for(j in 1:length(node_mappings)){ 
-                         fct_result = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, token = session$token)
+                         fct_result = new_vegx_node(vegx_schema, node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, token = session$token)
                          new_node = fct_result$node
                          n_errors = n_errors + fct_result$errors
                          n_warnings = n_warnings + fct_result$warnings 

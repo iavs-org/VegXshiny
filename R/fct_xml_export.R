@@ -1,3 +1,23 @@
+#' Initialize an empty VegX document
+#' @description Initializes an xml document with namespace definitions and a single root node 'vegX'
+#'
+#' @param schema_files A list with the original (unlinked) vegX schema definition
+#' 
+#' @import xml2
+#' 
+#' @noRd
+#' 
+#' @return xml_document
+new_vegx_document = function(schema_files){
+  ns_uris = xml_attrs(schema_files$veg)
+  ns_uris = ns_uris[names(ns_uris) != "xmlns:xsd"]
+  ns_uris["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+  
+  vegx_doc = xml_new_root("vegX")
+  xml_set_attrs(vegx_doc, ns_uris)
+  return(vegx_doc)
+}
+
 #' Create a VegX node
 #' @description Creates and populates an instance of a VegX main element
 #'
@@ -13,7 +33,7 @@
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_node = function(node_paths, node_values, id = NULL, token){
+new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, token){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -26,18 +46,18 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
   
   # Build XML
   tmp_root = xml_new_root(root_name)
-
+  
   withCallingHandlers({
-    build_xml(tmp_root, node_names, node_values)
+    build_xml(tmp_root, node_names, node_values, vegx_schema)
   }, warning = function(w){
     conditions$warnings <<- c(conditions$warnings, w$message)
   }, error = function(e){
     conditions$errors <<- c(conditions$errors, e$message)
   })
-
+  
   # set ID for root node
   root_node = xml_root(tmp_root)
-  root_definition = xml_find_all(vegx_schema_simple, paste0("//*[@name='", root_name, "']"))
+  root_definition = xml_find_all(vegx_schema, paste0("//*[@name='", root_name, "']"))
   if(xml_has_attr(root_definition, "id")){ # ID is required by schema
     generator_name = id_lookup[paste0(root_name,"ID")]
     if(is.null(id)){                      
@@ -82,7 +102,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, token){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
+merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_paths, node_values, token){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -101,13 +121,13 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
   }
   
   withCallingHandlers({
-    build_xml(tmp_root, node_names, node_values)
+    build_xml(tmp_root, node_names, node_values, vegx_schema)
   }, warning = function(w){
     conditions$warnings <<- c(conditions$warnings, w$message)
   }, error = function(e){
     conditions$errors <<- c(conditions$errors, e$message)
   })
- 
+  
   if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("&emsp;&emsp;Warning: ", conditions$warnings, collapse = "<br>"))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("&emsp;&emsp;Error: ", conditions$errors, collapse = "<br>"))
@@ -134,7 +154,7 @@ merge_into_vegx_node = function(target_node_id, node_paths, node_values, token){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-build_xml = function(root, node_paths, node_values){ 
+build_xml = function(root, node_paths, node_values, vegx_schema){ 
   # Main loop
   for(i in 1:length(node_paths)){
     if(is.na(node_values[i]) | node_values[i] == ""){
@@ -157,7 +177,7 @@ build_xml = function(root, node_paths, node_values){
       }
       
       # Check if node name is valid
-      if(length(xml_find_all(vegx_schema_simple, node_xpath)) == 0){
+      if(length(xml_find_all(vegx_schema, node_xpath)) == 0){
         warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: invalid node name.")) 
         break  
       }
@@ -165,7 +185,7 @@ build_xml = function(root, node_paths, node_values){
       # Determine insertion position
       siblings = xml_children(parent) %>% xml_name()
       if(is_choice){ # If node is child of a choice element
-        choices = vegx_schema_simple %>% 
+        choices = vegx_schema %>% 
           xml_find_all(node_xpath) %>% 
           xml_parent() %>% 
           xml_children %>% 
@@ -177,7 +197,7 @@ build_xml = function(root, node_paths, node_values){
           break  
         }
         # If not, find siblings of choice element instead of siblings of the node
-        siblings_schema = vegx_schema_simple %>% 
+        siblings_schema = vegx_schema %>% 
           xml_find_all(node_xpath) %>% 
           xml_parent() %>% 
           xml_parent() %>%  # Go up two levels to skip choice element
@@ -187,7 +207,7 @@ build_xml = function(root, node_paths, node_values){
         siblings_schema[which(is.na(siblings_schema))] = node_name # This is a bit hacky and will probably insert incorrectly when there are multiple unnamed elements at the same level, but there's no such case atm
         is_choice = FALSE    
       } else {
-        siblings_schema_nodes = vegx_schema_simple %>% 
+        siblings_schema_nodes = vegx_schema %>% 
           xml_find_all(node_xpath) %>% 
           xml_parent() %>% 
           xml_children() 
@@ -214,7 +234,7 @@ build_xml = function(root, node_paths, node_values){
         parent = xml_child(parent, node_name)
       } else {
         # Get node schema definition
-        node_def = vegx_schema_simple %>% 
+        node_def = vegx_schema %>% 
           xml_find_all(node_xpath) %>% 
           xml_attrs() %>% 
           unlist()

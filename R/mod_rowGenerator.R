@@ -25,7 +25,7 @@ mod_rowGenerator_ui <- function(id){
 #' rowGenerator Server Functions
 #' #'
 #' @noRd 
-mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_columns, fields_used, vegx_mappings, mapping_count){
+mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_columns, fields_used, elem_mappings, mapping_count){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
@@ -64,8 +64,8 @@ mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_column
                    
                    # Add mapping if element and value are supplied
                    if(input$element != "" & input$value != ""){
-                     vegx_mappings[[tab_selected]][[input$element]][["value"]] = input$value
-                     vegx_mappings[[tab_selected]][[input$element]][["source"]] = input$source
+                     elem_mappings[[tab_selected]][[input$element]][["value"]] = input$value
+                     elem_mappings[[tab_selected]][[input$element]][["source"]] = input$source
                    }
                  })
     
@@ -81,7 +81,7 @@ mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_column
                      # Update reactive values
                      fields_used[["elements"]][[id]] = NULL
                      fields_used[["values"]][[id]] = NULL
-                     vegx_mappings[[tab_selected]][[input$element]] = NULL
+                     elem_mappings[[tab_selected]][[input$element]] = NULL
                    } else {
                      shiny::showNotification("Can't remove last row.", type = "warning")
                    }

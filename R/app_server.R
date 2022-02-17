@@ -21,12 +21,20 @@ app_server <- function(input, output, session) {
     unlink(log_path)
   })
   
-  # ----------------------<----------------------------------------------------------------- #
+  # ---------------------------------------------------------------------------------------- #
+  # Create xml objects
+  # VegX schema
+  schema_files = load_schema()
+  vegx_schema = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
+  link_vegx_schema(vegx_schema, "veg", schema_files, simplify = T)
+  
+  # VegX document
+  vegx_doc = new_vegx_document(schema_files)
+
+  # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
   vegx_txt = reactiveVal({
-    tmp = tempfile(fileext = ".xml")
-    write_xml(vegx_doc, tmp, options = "format")
-    readChar(tmp, file.info(tmp)$size)
+    as.character(vegx_doc)
   })
   
   action_log = reactiveVal({
@@ -44,7 +52,7 @@ app_server <- function(input, output, session) {
           xpath = paste(sapply(rev(node_lineage), function(parent){
             paste0("//*[@name='", parent, "']")
           }), collapse = "")
-          node_hovered = xml_find_all(vegx_schema_simple, xpath)
+          node_hovered = xml_find_all(vegx_schema, xpath)
           
           node_attributes = as.list(xml_attrs(node_hovered[[1]]))
           if(is.null(node_attributes[["minOccurs"]])){node_attributes$minOccurs = 1}
@@ -73,11 +81,11 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  mod_documentCreation_server("documentCreation", user_data, vegx_txt, action_log)
+  mod_documentCreation_server("documentCreation", user_data, vegx_schema, vegx_doc, vegx_txt, action_log)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
-  mod_viewXML_server("viewXML", vegx_txt, action_log)
+  mod_viewXML_server("viewXML", vegx_doc, vegx_txt, action_log)
   
   # --------------------------------------------------------------------------------------- #
   # Action Log

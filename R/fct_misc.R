@@ -1,5 +1,20 @@
-#' Build n table 
-#' @description Builds a (wide) table of node path - node value pairs from existing mappings (as stored in the `vegx_mappings` reactiveVal). The number of columns corresponds to the number of mappings. The number of rows depends on the specified data sources: if all mappings point to text or id values, one row (corresponding to one node) will be generated. If there is at least one mapping to a column in user-supplied data, the output will have the equivalent number of rows and text and id values will be reused.
+# A generic id generator function 
+#' @description A closure that is used for storing and incrementing an id value. Each time the function is called, the id is incremented by 1. 
+#'
+#' @param value The initial value to be incremented 
+#' 
+#' @return The incremented value
+#'
+#' @noRd
+id_generator = function(value = 0){
+  function(){
+    value <<-value+1
+    return(value)
+  }
+}
+
+#' Build a table from element mappings
+#' @description Builds a (wide) table of node path - node value pairs from existing mappings (as stored in the `elem_mappings` reactiveVal). The number of columns corresponds to the number of mappings. The number of rows depends on the specified data sources: if all mappings point to text or id values, one row (corresponding to one node) will be generated. If there is at least one mapping to a column in user-supplied data, the output will have the equivalent number of rows and text and id values will be reused.
 #'
 #' @return A data.frame
 #'
@@ -28,6 +43,8 @@ build_node_values_df = function(mappings, user_data){
 #' Read the action log
 #' @description Reads and returns the current action log
 #'
+#' @param token A unique identifier of the current R session (typically derived from the Shiny session object)
+#' 
 #' @return A data.frame
 #'
 #' @noRd
@@ -42,8 +59,14 @@ read_action_log = function(token){
 
 #' Create a new log record
 #' @description Creates a new log record
+#' 
+#' @param type The type of the message (e.g. "Session info", "Insertion warning", etc)
+#' @param message The message text
+#' @param token A unique identifier of the current R session (typically derived from the Shiny session object)
+#' @param append Parameter passed to write.table()
+#' @param col.names Parameter passed to write.table()
 #'
-#' @return A data.frame
+#' @return This function is used for its side effects
 #'
 #' @noRd
 #' @importFrom here here
