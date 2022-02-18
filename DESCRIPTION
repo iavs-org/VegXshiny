@@ -8,6 +8,7 @@ Imports:
     bslib,
     dplyr,
     DT,
+    golem,
     jsonlite,
     knitr,
     lubridate,
@@ -26,7 +27,7 @@ LazyData: true
 RoxygenNote: 7.1.2
 Language: en-US
 Depends: 
-    R (>= 4.10)
+    R (>= 4.0)
 URL: https://github.com/ChrKoenig/VegXshiny
 BugReports: https://github.com/ChrKoenig/VegXshiny/issues
 VignetteBuilder: knitr

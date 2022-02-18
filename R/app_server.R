@@ -13,7 +13,6 @@
 #' @noRd 
 
 app_server <- function(input, output, session) {
-  library("shinyTree") # package doesn't work otherwise
   log_path = tempfile("log_", fileext = ".csv")
   new_action_log_record(log_path, "System info", "Session started.", append = F, col.names = T)
   

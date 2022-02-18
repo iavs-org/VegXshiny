@@ -16,6 +16,7 @@
 usethis::use_package("bslib")
 usethis::use_package("dplyr")
 usethis::use_package("DT")
+usethis::use_package("golem")
 usethis::use_package("jsonlite")
 usethis::use_package("lubridate")
 usethis::use_package("rhandsontable")
