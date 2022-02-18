@@ -15,21 +15,22 @@
 ## Add one line by package you want to add as dependency
 usethis::use_package("bslib")
 usethis::use_package("dplyr")
+usethis::use_package("DT")
 usethis::use_package("jsonlite")
-usethis::use_package("knitr")
 usethis::use_package("lubridate")
-usethis::use_package("markdown")
-usethis::use_package("purrr")
 usethis::use_package("rhandsontable")
+usethis::use_package("shiny")
 usethis::use_package("shinyAce")
-usethis::use_package("shinyBS")
 usethis::use_package("shinyjs")
-usethis::use_package("shinyTree")
+usethis::use_dev_package("shinyTree")
 usethis::use_package("shinyWidgets")
-usethis::use_package("shinythemes")
+usethis::use_package("shinythemes")   # Style with bslib and remove
 usethis::use_package("stringr")
-usethis::use_package("tidyr")
+usethis::use_package("tidyr")         # Style with bslib and remove
 usethis::use_package("xml2")
+
+usethis::use_package("covr", type = "Suggests")
+usethis::use_package("testthat", type = "Suggests")
 
 ## Add modules ----
 golem::add_module("about")

@@ -49,10 +49,10 @@ build_node_values_df = function(mappings, user_data){
 #'
 #' @noRd
 #' 
-#' @importFrom purrr map_df
 #' @importFrom utils read.table
 read_action_log = function(log_path){
-  read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character"), strip.white = F) %>% purrr::map_df(rev)
+  log = read.table(log_path, header = T, colClasses = c("POSIXct", "factor", "character"), strip.white = F)
+  log = log[order(nrow(log):1),]
 }
 
 #' Create a new log record
