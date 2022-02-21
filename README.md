@@ -7,9 +7,10 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
 [![Codecov test
 coverage](https://codecov.io/gh/test-coverage.yaml/branch/master/graph/badge.svg)](https://codecov.io/gh/test-coverage.yaml?branch=master)
-<!--[![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)-->
+
 <!-- badges: end -->
 
 ## Introduction
