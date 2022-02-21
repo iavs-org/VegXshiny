@@ -38,25 +38,25 @@ mod_about_ui <- function(id){
                       to the definitions and data structure of the standard."),
                tags$h2("An R package to use the Veg-X standard"),
                tags$p("A barrier to the use of a standard like Veg-X is its complexity. To make the exchange schema of Veg-X usable by the wider community requires the development 
-                      of informatics tools for mapping data from different input formats (e.g. relevé tables from different databases, forest inventory data or stem-mapped forest plots) 
+                      of informatics tools for mapping data from different input formats (e.g. releve tables from different databases, forest inventory data or stem-mapped forest plots) 
                       into Veg-X, mechanisms to create unique identifiers to allow source datasets to be combined, and tools to export data for data analysis and visualisation. 
-                      The **VegXshiny R package** has been designed for this purpose. It provides a user-friendly interface to import, integrate, harmonize and export vegetation 
+                      The VegXshiny R-package has been designed for this purpose. It provides a user-friendly interface to import, integrate, harmonize and export vegetation 
                       data using the Veg-X standard."),
                tags$h3("Acknowledgements"),
                tags$p("Developments endorsed and funded by the [International Association for Vegetation Science](http://iavs.org/)"),
                tags$h4("Package development"),
-               tags$ul(tags$li("Christian König:"),
+               tags$ul(tags$li("Christian K\\u00f6nig"),
                        tags$li("Sebastian Schmidtlein"),
-                       tags$li("Miquel De Cáceres")),
+                       tags$li("Miquel De C\\u00e1ceres")),
                tags$h4("Veg-X standard development:"),
-               tags$ul(tags$li("Miquel De Cáceres"),
+               tags$ul(tags$li("Miquel De C\\u00e1ceres"),
                        tags$li("Sebastian Schmidtlein"),
-                       tags$li("Christian König"),
                        tags$li("Susan K. Wiser"),
                        tags$li("Nick Spencer"),
                        tags$li("Robert K. Peet"),
                        tags$li("Martin Kleikamp"),
-                       tags$li("Brad Boyle"))
+                       tags$li("Brad Boyle")),
+                       tags$li("K\\u00f6nig"),
              )
       ),
       column(2)

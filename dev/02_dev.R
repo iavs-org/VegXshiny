@@ -27,10 +27,12 @@ usethis::use_dev_package("shinyTree")
 usethis::use_package("shinyWidgets")
 usethis::use_package("shinythemes")   # Style with bslib and remove
 usethis::use_package("stringr")
-usethis::use_package("tidyr")         # Style with bslib and remove
+usethis::use_package("tidyr")         # transform data using base r and remove
 usethis::use_package("xml2")
 
+usethis::use_package("config", type = "Suggests")
 usethis::use_package("covr", type = "Suggests")
+usethis::use_package("spelling", type = "Suggests")
 usethis::use_package("testthat", type = "Suggests")
 
 ## Add modules ----

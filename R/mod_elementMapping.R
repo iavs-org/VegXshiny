@@ -8,15 +8,15 @@
 #' 
 #' @importFrom stats setNames
 #' @importFrom jsonlite fromJSON
-#' @importFrom DT renderDataTable
 #' @importFrom shinyTree shinyTree renderTree get_selected
 #' @importFrom shinyWidgets radioGroupButtons
+#' @importFrom shinyjs enable disable addClass click useShinyjs
 
 mod_elementMapping_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     # ----------------- #
     #### Header ####
     fluidRow(
@@ -424,7 +424,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    
                    # Prepare data 
                    target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot)
-                   node_values_df = target_nodes_hot %>% dplyr::select(-target_id)
+                   node_values_df = target_nodes_hot %>% dplyr::select(-.data$target_id)
                    target_ids = target_nodes_hot$target_id
                    node_paths = colnames(node_values_df)
                    
@@ -466,8 +466,8 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
     # --------------------------------------------------------------------------------------- #
     ##### UI #####
     if(tab_selected %in% templates_lookup$target_element){
-      templates_elem_overview = templates_lookup %>% filter(target_element == tab_selected)
-      templates_elem = templates %>% filter(template_id %in% templates_elem_overview$template_id)
+      templates_elem_overview = templates_lookup %>% filter(.data$target_element == tab_selected)
+      templates_elem = templates %>% filter(.data$template_id %in% templates_elem_overview$template_id)
       
       output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
                                              style = "bootstrap",
@@ -509,8 +509,8 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      } else {
                        # Summarize selection
                        nodes_summary = templates %>% 
-                         dplyr::filter(template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
-                         group_by(template_id, node_id, main_element) %>% 
+                         dplyr::filter(.data$template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                         group_by(.data$template_id, .data$node_id, .data$main_element) %>% 
                          tally()
                        
                        # Extract basic information for modal dialog
@@ -544,8 +544,8 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      n_warnings = 0
                      
                      template_mappings = templates %>% 
-                       dplyr::filter(template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
-                       group_by(template_id) %>% 
+                       dplyr::filter(.data$template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                       group_by(.data$template_id) %>% 
                        group_split()
                      
                      # loop over template_ids

@@ -35,4 +35,6 @@ Remotes:
     shinyTree/shinyTree
 Suggests: 
     testthat,
-    covr
+    covr,
+    spelling,
+    config

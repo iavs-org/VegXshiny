@@ -7,7 +7,6 @@
 #' @import xml2 
 #' @import dplyr
 #' @import bslib
-#' @import shinyjs 
 #' @import stringr
 #' 
 #' @noRd 
