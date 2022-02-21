@@ -70,7 +70,8 @@ devtools::build_vignettes()
 
 ## Code Coverage----
 ## Set the code coverage service ("codecov" or "coveralls")
-usethis::use_coverage("test-coverage.yaml", type = "codecov")
+usethis::use_coverage(type = "codecov", repo_spec = "ChrKoenig/VegXshiny")
+usethis::use_github_action("test-coverage")
 
 # Create a summary readme for the testthat subdirectory
 # covrpage::covrpage()
@@ -95,4 +96,3 @@ usethis::use_github_action_pr_commands()
 # You're now set! ----
 # go to dev/03_deploy.R
 rstudioapi::navigateToFile("dev/03_deploy.R")
-

@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
 [![Codecov test coverage](https://codecov.io/gh/test-coverage.yaml/branch/master/graph/badge.svg)](https://codecov.io/gh/test-coverage.yaml?branch=master)
 
+[![Codecov test coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
 <!-- badges: end -->
 
 ## Introduction
