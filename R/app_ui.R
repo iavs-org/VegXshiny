@@ -29,7 +29,7 @@ app_ui <- function(request) {
                ),
                
                tabPanel(div(icon("file", class = "icon-padded"), "XML Viewer"),
-                        mod_viewXML_ui("viewXML")
+                        mod_xmlViewer_ui("xmlViewer")
                ),
                
                tabPanel(div(icon("history", class = "icon-padded"), "Action Log"),

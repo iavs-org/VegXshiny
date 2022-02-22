@@ -344,10 +344,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    }
                    
                    # Update VegX text 
-                   tmp = tempfile(fileext = ".xml")
-                   write_xml(vegx_doc, tmp, options = "format")
-                   new_text = readChar(tmp, file.info(tmp)$size)
-                   vegx_txt(new_text)
+                   vegx_txt(as.character(vegx_doc))
                    
                    # Reset node_ids reactiveVal
                    node_ids(NULL)
@@ -442,10 +439,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    }
                    
                    # Update VegX text 
-                   tmp = tempfile(fileext = ".xml")
-                   write_xml(vegx_doc, tmp, options = "format")
-                   new_text = readChar(tmp, file.info(tmp)$size)
-                   vegx_txt(new_text)
+                   vegx_txt(as.character(vegx_doc))
                    
                    # Update Action log 
                    log = read_action_log(log_path)
@@ -600,10 +594,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      }
                      
                      # Update VegX text 
-                     tmp = tempfile(fileext = ".xml")
-                     write_xml(vegx_doc, tmp, options = "format")
-                     new_text = readChar(tmp, file.info(tmp)$size)
-                     vegx_txt(new_text)
+                     vegx_txt(as.character(vegx_doc))
                      
                      # Update Action log 
                      log = read_action_log(log_path)

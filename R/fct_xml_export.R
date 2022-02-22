@@ -82,7 +82,7 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
     message = paste0("New ", root_name, " element (id = ", id, ") added with the following exceptions:<br>", warnings, errors)
     new_action_log_record(log_path, "Insertion warning", message)
   } else {
-    new_action_log_record(log_path, "Insertion info", paste0("New ", root_name, " element (id = ", id, ") successfully added."))
+    new_action_log_record(log_path, "Insertion info", paste0("New ", root_name, " (id = ", id, ") successfully added."))
   }
   
   return(list(node = root_node, warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -116,7 +116,7 @@ merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_path
   # Build XML
   tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
   if(length(tmp_root) == 0){
-    new_action_log_record(log_path, "Merge Error", paste0("Could not merge mappings into", root_name, " element (id = ", target_node_id, "). No such element id."))
+    new_action_log_record(log_path, "Merge Error", paste0("Could not merge mappings into ", root_name, " element (id = ", target_node_id, "). No such element id."))
     return(list(warnings = 0, errors = 1))
   }
   
@@ -134,7 +134,7 @@ merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_path
     message = paste0("Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:<br>", warnings, errors)
     new_action_log_record(log_path, "Merge warning", message)
   } else {
-    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " element (id = ", target_node_id, ")"))
+    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", target_node_id, ")"))
   }
   
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))

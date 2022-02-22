@@ -70,9 +70,9 @@ Vegetation Science](http://iavs.org/)
 
 -   Miquel De Cáceres
 -   Sebastian Schmidtlein
--   Christian König
 -   Susan K. Wiser
 -   Nick Spencer
 -   Robert K. Peet
 -   Martin Kleikamp
 -   Brad Boyle
+-   Christian König

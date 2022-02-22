@@ -41,7 +41,7 @@ golem::add_module("fileManagement")
 golem::add_module("documentCreation")
 golem::add_module("elementMapping")
 golem::add_module("rowGenerator")
-golem::add_module("viewXML")
+golem::add_module("xmlViewer")
 golem::add_module("actionLog")
 
 ## Add helper functions ----

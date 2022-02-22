@@ -45,18 +45,18 @@ mod_about_ui <- function(id){
                tags$h3("Acknowledgements"),
                tags$p("Developments endorsed and funded by the [International Association for Vegetation Science](http://iavs.org/)"),
                tags$h4("Package development"),
-               tags$ul(tags$li("Christian K\\u00f6nig"),
+               tags$ul(tags$li("Christian K\u00f6nig"),
                        tags$li("Sebastian Schmidtlein"),
-                       tags$li("Miquel De C\\u00e1ceres")),
+                       tags$li("Miquel De C\u00e1ceres")),
                tags$h4("Veg-X standard development:"),
-               tags$ul(tags$li("Miquel De C\\u00e1ceres"),
+               tags$ul(tags$li("Miquel De C\u00e1ceres"),
                        tags$li("Sebastian Schmidtlein"),
                        tags$li("Susan K. Wiser"),
                        tags$li("Nick Spencer"),
                        tags$li("Robert K. Peet"),
                        tags$li("Martin Kleikamp"),
-                       tags$li("Brad Boyle")),
-                       tags$li("K\\u00f6nig"),
+                       tags$li("Brad Boyle"),
+                       tags$li("Christian K\u00f6nig"))
              )
       ),
       column(2)

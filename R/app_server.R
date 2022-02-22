@@ -78,7 +78,7 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
-  mod_viewXML_server("viewXML", vegx_doc, vegx_txt, action_log, log_path)
+  mod_xmlViewer_server("xmlViewer", vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Action Log
