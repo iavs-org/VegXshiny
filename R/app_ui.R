@@ -13,7 +13,7 @@ app_ui <- function(request) {
     # Your application UI logic 
     navbarPage("VegXshiny",  
                position = "fixed-top",
-               theme = bslib::bs_theme(bootswatch = "journal"),
+               theme = bslib::bs_theme(bootswatch = "simplex"),
                header = tags$style(type="text/css", "body {padding-top: 70px;}"),
                
                tabPanel("About",
@@ -25,7 +25,7 @@ app_ui <- function(request) {
                ),
                
                navbarMenu("VegX Builder", icon = icon("leaf", class = "icon-padded"),
-                          tabPanel("Import helper", h1("import some shit")),
+                          tabPanel("Import helper", h1("import something")),
                           tabPanel("Element editor", mod_vegxBuilder_ui("vegxBuilder")),
                           tabPanel("Template editor", h1("Build a template"))
                ),

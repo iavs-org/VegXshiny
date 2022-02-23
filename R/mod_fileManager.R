@@ -63,8 +63,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
         new_action_log_record(log_path, "Upload info", paste0("File '", file_name,"' uploaded"))
       })
       # Update log
-      log = read_action_log(log_path)
-      action_log(log)
+      action_log(read_action_log(log_path))
     })
     
     # Observe Buttons

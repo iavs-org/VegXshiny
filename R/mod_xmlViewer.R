@@ -99,6 +99,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    }, error = function(e){
                      shiny::showNotification("Document error. Please consult the log for more information.")
                      new_action_log_record(log_path, "Document error", paste0("Document edit failed with the following exception:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
                    })
                  })
     
@@ -123,8 +124,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following exceptions: <ul>", 
                                                                                 paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>"))
                    }
-                   log = read_action_log(log_path)
-                   action_log(log)
+                   action_log(read_action_log(log_path))
                  })
     
     output$export = downloadHandler(

@@ -441,8 +441,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    vegx_txt(as.character(vegx_doc))
                    
                    # Update Action log 
-                   log = read_action_log(log_path)
-                   action_log(log)
+                   action_log(read_action_log(log_path))
                    
                    # Show notification
                    if(n_merges > 0){shiny::showNotification(paste0("Successfully merged into", n_merges, " node(s)."), type = "default") }
@@ -463,7 +462,6 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
       templates_elem = templates %>% filter(.data$template_id %in% templates_elem_overview$template_id)
       
       output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
-                                             style = "bootstrap",
                                              rownames = FALSE,
                                              options = list(columnDefs = list(list(width = '80px', targets = 0)))) 
       
@@ -596,8 +594,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                      vegx_txt(as.character(vegx_doc))
                      
                      # Update Action log 
-                     log = read_action_log(log_path)
-                     action_log(log)
+                     action_log(read_action_log(log_path))
                      
                      # Show notification
                      if(n_insertions > 0){shiny::showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
