@@ -25,7 +25,6 @@ usethis::use_package("shinyAce")
 usethis::use_package("shinyjs")
 usethis::use_dev_package("shinyTree")
 usethis::use_package("shinyWidgets")
-usethis::use_package("shinythemes")   # Style with bslib and remove
 usethis::use_package("stringr")
 usethis::use_package("tidyr")         # transform data using base r and remove
 usethis::use_package("xml2")
@@ -37,8 +36,8 @@ usethis::use_package("testthat", type = "Suggests")
 
 ## Add modules ----
 golem::add_module("about")
-golem::add_module("fileManagement")
-golem::add_module("documentCreation")
+golem::add_module("fileManager")
+golem::add_module("vegxBuilder")
 golem::add_module("elementMapping")
 golem::add_module("rowGenerator")
 golem::add_module("xmlViewer")

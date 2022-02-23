@@ -49,7 +49,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    showModal(
                      modalDialog(easyClose = T,
                                  tags$label("Warning", style = "color:red"),
-                                 tags$p("Editing raw XML may corrupt the document and is recommended for experts only."),
+                                 tags$p("Editing raw XML may corrupt the document and is recommended for expert use only."),
                                  footer = tagList(
                                    tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
                                              actionButton(ns("confirm_edit"), class = "pull-right btn-success", "Understood", icon("check")))
@@ -97,11 +97,9 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      removeUI(selector = paste0("#", ns("edit_controls"))) 
                      updateAceEditor(session, "xml_viewer", readOnly = T)
                    }, error = function(e){
-                     browser()
                      shiny::showNotification("Document error. Please consult the log for more information.")
-                     new_action_log_record(log_path, "Document error", paste0("Document edit failed with the following error message: ", e))
+                     new_action_log_record(log_path, "Document error", paste0("Document edit failed with the following exception:<ul><li>", e, "</li></ul>"))
                    })
-                   removeModal()
                  })
     
     observeEvent(eventExpr = input$discard_edits,
@@ -111,8 +109,6 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                             ui = actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"))
                    removeUI(selector = paste0("#", ns("edit_controls"))) 
                    updateAceEditor(session, "xml_viewer", value = vegx_txt(), readOnly = T)
-                   
-                   removeModal()
                  })
     
     observeEvent(eventExpr = input$validate,
@@ -124,7 +120,8 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      new_action_log_record(log_path, "Validation info", "Document validation successful")
                    } else {
                      shiny::showNotification("Validation error. Please consult the log for more information.", type = "error")
-                     new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following error message: ", attr(is_valid, "errors")))
+                     new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following exceptions: <ul>", 
+                                                                                paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>"))
                    }
                    log = read_action_log(log_path)
                    action_log(log)

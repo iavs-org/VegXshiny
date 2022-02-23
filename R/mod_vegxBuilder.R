@@ -1,6 +1,6 @@
-#' documentCreation UI Function
+#' vegxBuilder UI Function
 #'
-#' @description Parent module for the "Create a document" tab. Consists of submodules for the element navigation (sidebar), element selection, element mapping, and submission.
+#' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
@@ -8,7 +8,7 @@
 #'
 #' @importFrom shinyWidgets radioGroupButtons
 
-mod_documentCreation_ui <- function(id){
+mod_vegxBuilder_ui <- function(id){
   ns <- NS(id)
   tagList(
     navs_pill_list(
@@ -52,10 +52,10 @@ mod_documentCreation_ui <- function(id){
   )
 }
 
-#' documentCreation Server Functions
+#' vegxBuilder Server Functions
 #'
 #' @noRd 
-mod_documentCreation_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
+mod_vegxBuilder_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

@@ -2,7 +2,7 @@
 #' 
 #' @param request Internal parameter for `{shiny}`.
 #'  
-#' @importFrom shinythemes shinytheme
+#' @importFrom bslib bs_theme
 #' 
 #' @noRd
 app_ui <- function(request) {
@@ -12,20 +12,22 @@ app_ui <- function(request) {
     
     # Your application UI logic 
     navbarPage("VegXshiny",  
-               theme = shinytheme("darkly"),
+               position = "fixed-top",
+               theme = bslib::bs_theme(bootswatch = "journal"),
+               header = tags$style(type="text/css", "body {padding-top: 70px;}"),
                
                tabPanel("About",
                         mod_about_ui("about")
                ),
                
                tabPanel(div(icon("folder-open", class = "icon-padded"), "File Manager"),
-                        mod_fileManagement_ui("fileManagement")
+                        mod_fileManager_ui("fileManager")
                ),
                
-               # TODO TEMPLATE BUILDER?!
-
-               tabPanel(div(icon("leaf", class = "icon-padded"), "VegX Builder"),
-                        mod_documentCreation_ui("documentCreation")
+               navbarMenu("VegX Builder", icon = icon("leaf", class = "icon-padded"),
+                          tabPanel("Import helper", h1("import some shit")),
+                          tabPanel("Element editor", mod_vegxBuilder_ui("vegxBuilder")),
+                          tabPanel("Template editor", h1("Build a template"))
                ),
                
                tabPanel(div(icon("file", class = "icon-padded"), "XML Viewer"),

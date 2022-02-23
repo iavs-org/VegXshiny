@@ -16,7 +16,6 @@ Imports:
     shiny,
     shinyAce,
     shinyjs,
-    shinythemes,
     shinyTree (>= 0.3.0),
     shinyWidgets,
     stringr,

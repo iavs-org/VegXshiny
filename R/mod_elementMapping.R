@@ -230,7 +230,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                                    tags$label(paste0("This action will add ", n_nodes," new ", name_nodes," element(s) to your document.")),
                                    tags$br(),
                                    tags$br(),
-                                   tags$p("Please specify whether IDs should be generated automatically or from a data column in file."),
+                                   tags$p("Please specify whether IDs should be generated automatically or from a data column"),
                                    fluidRow(
                                      column(4, selectInput(ns("id_source"), label = "ID source", choices = list("Auto" = "auto", "File" = "file"), width = "100%")),
                                      column(8, uiOutput(ns("id_column")))
@@ -350,8 +350,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    node_ids(NULL)
                    
                    # Update action log 
-                   log = read_action_log(log_path)
-                   action_log(log)
+                   action_log(read_action_log(log_path))
                    
                    # Show notification
                    if(n_insertions > 0){shiny::showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
@@ -576,7 +575,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                          
                          # Append new node to VegX document
                          if(is.null(new_node)){
-                           new_action_log_record(log_path, "Template Error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
+                           new_action_log_record(log_path, "Template error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
                                                                           "'. Make sure to reference only earlier node_ids in a template"))
                            n_failures = n_failures + 1
                            next

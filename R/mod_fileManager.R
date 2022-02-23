@@ -1,4 +1,4 @@
-#' fileManagement UI Function
+#' fileManager UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -8,7 +8,7 @@
 #'
 #' @importFrom rhandsontable rhandsontable renderRHandsontable
 #' @importFrom utils read.csv
-mod_fileManagement_ui <- function(id){
+mod_fileManager_ui <- function(id){
   ns <- NS(id)
   
   sidebarLayout(
@@ -29,10 +29,10 @@ mod_fileManagement_ui <- function(id){
   )
 }
 
-#' fileManagement Server Functions
+#' fileManager Server Functions
 #'
 #' @noRd 
-mod_fileManagement_server <- function(id, action_log, log_path){
+mod_fileManager_server <- function(id, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

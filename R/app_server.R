@@ -70,11 +70,11 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # File Upload
-  user_data = mod_fileManagement_server("fileManagement", action_log, log_path)
+  user_data = mod_fileManager_server("fileManager", action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
-  mod_documentCreation_server("documentCreation", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
+  mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
