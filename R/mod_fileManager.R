@@ -12,11 +12,10 @@ mod_fileManager_ui <- function(id){
   ns <- NS(id)
   
   sidebarLayout(
-    sidebarPanel(width = 2,
-                 tagList(
-                   fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = ".csv")
-                 )
+    tags$div(class = "col-sm-2 well", role = "complementary", 
+             fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = ".csv")
     ),
+    
     # TODO Add edit button, save edits (hot_to_r(input$xxx))
     
     mainPanel(width = 10, 

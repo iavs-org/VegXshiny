@@ -23,7 +23,7 @@ mod_rowGenerator_ui <- function(id){
 }
 
 #' rowGenerator Server Functions
-#' #'
+#'
 #' @noRd 
 mod_rowGenerator_server <- function(id, tab_selected, elem_selected, data_columns, fields_used, elem_mappings, mapping_count){
   moduleServer(id, function(input, output, session){

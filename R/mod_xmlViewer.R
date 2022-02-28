@@ -84,13 +84,19 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
     observeEvent(eventExpr = input$save_edits,
                  handlerExpr = {
                    tryCatch({
+                     # Read edits
                      vegx_doc_edits = read_xml(isolate(input$xml_viewer)) %>% xml_find_all("//vegX") %>% xml_children()
+                     
+                     # Remove all nodes except root from vegx document
                      vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
+                     
+                     # Append all nodes from edited document to vegx document
                      sapply(vegx_doc_edits, function(node){
                        xml_add_child(vegx_doc, node)
                      })
                      vegx_txt(as.character(vegx_doc))
                      
+                     # Restore UI state
                      insertUI(selector = paste0("#", ns("edit_controls")), 
                               where = "afterEnd",
                               ui = actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"))
@@ -99,12 +105,15 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    }, error = function(e){
                      shiny::showNotification("Document error. Please consult the log for more information.")
                      new_action_log_record(log_path, "Document error", paste0("Document edit failed with the following exception:<ul><li>", e, "</li></ul>"))
+                     
+                     # Update action log
                      action_log(read_action_log(log_path))
                    })
                  })
     
     observeEvent(eventExpr = input$discard_edits,
                  handlerExpr = {
+                   # Restore UI state
                    insertUI(selector = paste0("#", ns("edit_controls")), 
                             where = "afterEnd",
                             ui = actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"))
@@ -120,10 +129,12 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      shiny::showNotification("Validation successful.", type = "message")
                      new_action_log_record(log_path, "Validation info", "Document validation successful")
                    } else {
-                     shiny::showNotification("Validation error. Please consult the log for more information.", type = "error")
+                     shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
                      new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following exceptions: <ul>", 
                                                                                 paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>"))
                    }
+                   
+                   # Update action log
                    action_log(read_action_log(log_path))
                  })
     

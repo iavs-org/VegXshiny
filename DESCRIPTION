@@ -10,7 +10,6 @@ Imports:
     DT,
     golem,
     jsonlite,
-    knitr,
     lubridate,
     rhandsontable,
     shiny,
@@ -35,5 +34,6 @@ Remotes:
 Suggests: 
     testthat,
     covr,
+    knitr,
     spelling,
     config

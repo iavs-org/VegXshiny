@@ -8,6 +8,10 @@ TODO:
 */
 
 /* set text color in handsontable to black*/
+body {
+   font-size: 16px;
+}
+
 .htCore {
   color:black!important;
 }
@@ -47,4 +51,8 @@ TODO:
   width: 100%!important;
   margin: 10px!important;
   padding: 25px!important;
+}
+
+tbody > ul {
+   margin-bottom: 0px!important;
 }

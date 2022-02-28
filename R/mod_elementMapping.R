@@ -46,8 +46,8 @@ mod_elementMapping_ui <- function(id){
                 div(class = "annotation text-info",
                     tags$span("Select the VegX elements you want to use."), 
                     shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                                 tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search 
-                                                    box to quickly identify the location of an element by its name. If available, additional documentation information 
+                                                 tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search
+                                                    box to quickly identify the location of an element by its name. If available, additional documentation information
                                                     from the VegX schema is presented on mouse-over."))
                 ),
                 br(),
@@ -66,11 +66,12 @@ mod_elementMapping_ui <- function(id){
                     tags$span("Associate the selected VegX elements with values."), 
                     shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
                                                  tags$p("There are two ways to map elements to values:"),
-                                                 tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will force the create 
-                                                             one VegX node per row for the entire VegX main element."),
+                                                 tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will create a new 
+                                                                 VegX node for each row in the data."),
                                                          tags$li("Provide a free text value. If all mappings in the main element are free text values, this will create a 
                                                              single new VegX node. This option may be useful, e.g., when entering new methods or attributes. If there 
-                                                             are mappings present that link to uploaded data, free text values will be copied to all newly created nodes."))
+                                                             are mappings present that link to uploaded data, free text values will be copied to all newly created nodes.")
+                                                 )
                     )
                 ),
                 fluidRow(
@@ -110,7 +111,6 @@ mod_elementMapping_ui <- function(id){
 mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-
     # --------------------------------------------------------------------------------------- #
     #### Header ####
     # --------------------------------------------------------------------------------------- #
@@ -574,7 +574,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                          # Append new node to VegX document
                          if(is.null(new_node)){
                            new_action_log_record(log_path, "Template error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
-                                                                          "'. Make sure to reference only earlier node_ids in a template"))
+                                                                                    "'. Make sure to reference only earlier node_ids in a template"))
                            n_failures = n_failures + 1
                            next
                          } else {

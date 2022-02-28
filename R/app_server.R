@@ -74,6 +74,7 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Main UI: Create mappings and build VegX document
+  mod_importWizard_server("importWizard", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
