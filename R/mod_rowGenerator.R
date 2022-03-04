@@ -10,14 +10,20 @@
 mod_rowGenerator_ui <- function(id){
   ns <- NS(id)
   div(id = ns("mapping"),
+      class = "form-group",
       fluidRow(
         column(5, uiOutput(ns("element_ui"))),
         column(5, uiOutput(ns("value_ui"))),
-        column(2,
-               align = "center",
-               column(9, shinyWidgets::radioGroupButtons(ns("source"), label = NULL, choices = c("Text", "File"), status = "info", size = "s", justified = T)),
-               column(3, actionButton(ns("remove"), label = NULL, icon = icon("times"), width = "34px", style = "height:34px; padding:0"))
-        )
+        column(
+          width = 2,
+          column(width = 9, style = "margin:0px",  align = "center",
+                 shinyWidgets::radioGroupButtons(ns("source"), label = NULL, choices = c("Text", "File"), status = "info", size = "s", width = "100px")
+          ),
+          column(width = 3, "style" = "margin:0px",
+                 actionButton(ns("remove"), label = NULL, icon = icon("times"), width = "34px", style = "height:34px; padding:0px;")
+          )
+          
+        )  
       )
   )
 }

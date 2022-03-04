@@ -20,6 +20,7 @@ id_generator = function(value = 0){
 #'
 #' @noRd
 build_node_values_df = function(mappings, user_data){
+  browser()
   node_values = lapply(mappings, function(mapping) return(mapping$value))  # list needed here for processing in next step
   node_sources = sapply(mappings, function(mapping) return(mapping$source))
   

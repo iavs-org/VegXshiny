@@ -10,25 +10,27 @@
 mod_xmlViewer_ui <- function(id){
   ns <- NS(id)
   
-  sidebarLayout(
-    sidebarPanel(width = 2,
-                 tagList(
-                   actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"),
-                   actionButton(ns("validate"), "Validate", class = "btn-sidebar", width = "100%"),
-                   downloadButton(ns("export"), "Export",  class = "btn-sidebar", style = "width:100%")
-                 )
-    ),
-    mainPanel(width = 10, 
-              tagList(
-                aceEditor(
-                  outputId = ns("xml_viewer"), 
-                  value = "",
-                  mode = "xml",
-                  theme = "tomorrow",
-                  readOnly = T,
-                  autoComplete = "disabled"
-                ),
-              )
+  fluidPage(
+    column(
+      width = 10, offset = 1,
+      fluidRow(
+        tagList(
+          actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "80px"),
+          actionButton(ns("validate"), "Validate", class = "btn-sidebar", width = "80px"),
+          downloadButton(ns("export"), "Export",  class = "btn-sidebar", style = "80px")
+        )
+      ),
+      fluidRow(
+        aceEditor(
+          outputId = ns("xml_viewer"), 
+          value = "",
+          height = "80vh",
+          mode = "xml",
+          theme = "tomorrow",
+          readOnly = T,
+          autoComplete = "disabled"
+        )
+      )
     )
   )
 }

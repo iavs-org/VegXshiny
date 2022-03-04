@@ -12,11 +12,42 @@ body {
    font-size: 16px;
 }
 
+.form-control {
+  height: 34px;
+}
+
+.frame {
+  border-style: solid;
+  border-radius: 0.5em;
+  border-width: 0.5px;
+  padding: 6px;
+  margin-bottom: 6px.;
+}
+
+.form-inline {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.form-inline .selectize-control{
+  margin: 0px 10px 0px 10px;
+}
+
+.form-inline .label{
+  margin: 0px;
+}
+
 .htCore {
   color:black!important;
 }
 
-.nav-stacked > li > a {
+.file-grid {
+ min-height:200px!important;
+}
+
+.nav-stacked li a {
   text-align:left !important; 
   vertical-align:middle!important;
   border-width:0px !important; 
@@ -24,7 +55,6 @@ body {
   padding-bottom:6px!important;
   overflow:hidden;
   white-space:nowrap;
-  display:inline-block;
   text-overflow:ellipsis;
 }
 
@@ -41,6 +71,11 @@ body {
   vertical-align:middle!important;
   font-style:italic;
   margin-bottom: 10px;
+}
+
+.btn-file {
+  height:34px!important;
+  line-height: 0.7;
 }
 
 .btn .btn-dropdown-input {

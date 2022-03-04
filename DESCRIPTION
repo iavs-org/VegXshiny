@@ -36,4 +36,5 @@ Suggests:
     covr,
     knitr,
     spelling,
-    config
+    config,
+    readxl

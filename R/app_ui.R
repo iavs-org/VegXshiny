@@ -20,7 +20,7 @@ app_ui <- function(request) {
                         mod_about_ui("about")
                ),
                
-               tabPanel(div(icon("folder-open", class = "icon-padded"), "File Manager"),
+               tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded"),
                         mod_fileManager_ui("fileManager")
                ),
                
@@ -30,11 +30,11 @@ app_ui <- function(request) {
                           tabPanel("Template editor", h1("Build a template"))
                ),
                
-               tabPanel(div(icon("file", class = "icon-padded"), "XML Viewer"),
+               tabPanel("XML Viewer", icon = icon("file", class = "icon-padded"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel(div(icon("history", class = "icon-padded"), "Action Log"),
+               tabPanel("Action Log", icon = icon("history", class = "icon-padded"),
                         mod_actionLog_ui("actionLog")
                )
     )

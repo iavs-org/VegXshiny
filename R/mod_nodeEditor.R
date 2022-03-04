@@ -1,4 +1,4 @@
-#' elementMapping UI Function
+#' nodeEditor UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -12,7 +12,7 @@
 #' @importFrom shinyWidgets radioGroupButtons
 #' @importFrom shinyjs enable disable addClass click useShinyjs
 
-mod_elementMapping_ui <- function(id){
+mod_nodeEditor_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
@@ -21,7 +21,7 @@ mod_elementMapping_ui <- function(id){
     #### Header ####
     fluidRow(
       column(
-        width = 12,
+        width = 10, offset = 1,
         tags$h2(textOutput(ns("tab_selected"))),
         div(textOutput(ns("annotation_main_element")), class = "text-info annotation")
         ## TODO insert small reminder if issues exist with this element
@@ -32,7 +32,7 @@ mod_elementMapping_ui <- function(id){
     #### Mappings ####
     fluidRow(
       column(
-        width = 12,
+        width = 10, offset = 1,
         tabsetPanel(
           id = ns("tabset"),
           tabPanel(
@@ -105,10 +105,10 @@ mod_elementMapping_ui <- function(id){
   )
 }
 
-#' elementMapping Server Functions
+#' nodeEditor Server Functions
 #'
 #' @noRd 
-mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
+mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, elem_mappings, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     # --------------------------------------------------------------------------------------- #
@@ -444,7 +444,7 @@ mod_elementMapping_server <- function(id, user_data, tabs_visible, tab_selected,
                    action_log(read_action_log(log_path))
                    
                    # Show notification
-                   if(n_merges > 0){shiny::showNotification(paste0("Successfully merged into", n_merges, " node(s)."), type = "default") }
+                   if(n_merges > 0){shiny::showNotification(paste0("Successfully merged into ", n_merges, " node(s)."), type = "default") }
                    if(n_warnings > 0){shiny::showNotification(paste0(n_warnings, " warning(s) encountered. Please consult the log for more information."), type = "warning")} 
                    if(n_failures > 0){shiny::showNotification(paste0("Merge failed for ", n_failures, " node(s). Please consult the log for more information."), type = "error") }
                    

@@ -12,8 +12,9 @@ mod_actionLog_ui <- function(id){
   
   fluidPage(
     fluidRow(
-      column(12,
-             DT::dataTableOutput(ns("action_log"))
+      column(
+        width = 10, offset = 1,
+        DT::dataTableOutput(ns("action_log"))
       )
     )
   )
