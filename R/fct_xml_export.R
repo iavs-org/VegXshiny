@@ -1,3 +1,30 @@
+#' Build a dataframe from list of element mappings
+#' @description Builds a (wide) table of node path - node value pairs from existing mappings (as e.g. stored in the `elem_mappings` reactiveVal). The number of columns corresponds to the number of mappings. The number of rows depends on the specified data sources: if all mappings point to text or id values, one row (corresponding to one node) will be generated. If there is at least one mapping to a column in user-supplied data, the output will have the equivalent number of rows and text and id values will be reused.
+#'
+#' @return A data.frame
+#'
+#' @noRd
+build_node_values_df = function(mappings, user_data){
+  node_values = lapply(mappings, function(mapping) return(mapping$value))  # list needed here for processing in next step
+  node_sources = sapply(mappings, function(mapping) return(mapping$source))
+  
+  # Replace 'value' with data column if source is "file"
+  for(i in which(node_sources == "File")){
+    file_name = str_split(node_values[[i]], "\\$", simplify = T)[1]
+    column_name = str_split(node_values[[i]], "\\$", simplify = T)[2]
+    upload = user_data[[file_name]]
+    upload_df = jsonlite::fromJSON(upload$x$data)
+    colnames(upload_df) = upload$x$rColHeaders
+    node_values[[i]] = upload_df[,column_name]
+  }
+  
+  tryCatch({
+    return(as.data.frame(node_values, check.names = F))
+  }, error = function(e){
+    return(NULL)
+  })
+}
+
 #' Initialize an empty VegX document
 #' @description Initializes an xml document with namespace definitions and a single root node 'vegX'
 #'
@@ -45,10 +72,10 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
   }
   
   # Build XML
-  tmp_root = xml_new_root(root_name)
+  target_root = xml_new_root(root_name)
   
   withCallingHandlers({
-    build_xml(tmp_root, node_names, node_values, vegx_schema)
+    build_xml(target_root, node_names, node_values, vegx_schema)
   }, warning = function(w){
     conditions$warnings <<- c(conditions$warnings, w$message)
   }, error = function(e){
@@ -56,7 +83,7 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
   })
   
   # set ID for root node
-  root_node = xml_root(tmp_root)
+  root_node = xml_root(target_root)
   root_definition = xml_find_all(vegx_schema, paste0("//*[@name='", root_name, "']"))
   if(xml_has_attr(root_definition, "id")){ # ID is required by schema
     generator_name = id_lookup[paste0(root_name,"ID")]
@@ -91,9 +118,11 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
 #' Merge mappings into a VegX node
 #' @description Merge mappings into an existing VegX node
 #'
-#' @param target_node_id The id of the node that mappings should be merged with
+#' @param vegx_schema
+#' @param target_root The root of the node the mappings should be merged with
 #' @param node_paths A character vector representing the positions of the nodes to be created starting with the VegX main element. Levels are separated with a " > "
 #' @param node_values A character vector containing the values of the nodes 
+#' @param log_path
 #' 
 #' @import dplyr
 #' @import xml2
@@ -102,26 +131,26 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_paths, node_values, log_path){
+merge_into_vegx_node = function(vegx_schema, target_root, node_paths, node_values, log_path){
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
+  root_id = xml_attr(target_root, "id")
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record(log_path, "Merge error", paste0("Could not merge with ", root_name, " element (id = ", target_node_id, "). Node paths do not share the same root."))
+    new_action_log_record(log_path, "Merge error", paste0("Could not merge with ", root_name, " element (id = ", root_id, "). Node paths do not share the same root."))
     return(list(warnings = 0, errors = 1))
   }
   
   # Build XML
-  tmp_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_node_id, "']"))
-  if(length(tmp_root) == 0){
-    new_action_log_record(log_path, "Merge error", paste0("Could not merge mappings into ", root_name, " element (id = ", target_node_id, "). No such element id."))
+  if(length(target_root) == 0){
+    new_action_log_record(log_path, "Merge error", paste0("Could not merge mappings into ", root_name, " element (id = ", root_id, "). No such element id."))
     return(list(warnings = 0, errors = 1))
   }
   
   withCallingHandlers({
-    build_xml(tmp_root, node_names, node_values, vegx_schema)
+    build_xml(target_root, node_names, node_values, vegx_schema)
   }, warning = function(w){
     conditions$warnings <<- c(conditions$warnings, w$message)
   }, error = function(e){
@@ -131,10 +160,10 @@ merge_into_vegx_node = function(vegx_schema, vegx_doc, target_node_id, node_path
   if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("<li>Warning: ", conditions$warnings, "</li>", collapse = ""))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("<li>Error: ", conditions$errors, "</li>", collapse = ""))
-    message = paste0("Merged mappings into", root_name, " node (id = ", target_node_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
+    message = paste0("Merged mappings into", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
     new_action_log_record(log_path, "Merge warning", message)
   } else {
-    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", target_node_id, ")"))
+    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")"))
   }
   
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -292,3 +321,28 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
     }
   }
 }
+
+#' Link VegX nodes
+#' @description Creates a link between related VegX nodes 
+#'
+#' @param target_root The root of the target node
+#' @param target_node_path The node path to the VegX element in target node that contains a reference
+#' @param linked_node The node that is referenced in target_node_path
+#' 
+#' @noRd
+#' 
+#' @return This function is used for its side effects.
+link_vegx_nodes = function(target_root, target_node_path, linked_node, vegx_schema, log_path){
+  
+  node_names = target_node_path %>% str_split(" > ", simplify = T)
+  node_names = node_names[node_names != "choice"]
+  link_id = xml2::xml_attr(linked_node, "id")
+  
+  target_position = xml2::xml_find_all(target_root, paste0("//", paste(node_names, collapse = "//")))
+  if(length(target_position) == 0){
+    merge_into_vegx_node(vegx_schema, target_root, target_node_path, link_id, log_path)
+  } else {
+    xml2::xml_set_text(target_root, link_id)
+  }
+}
+

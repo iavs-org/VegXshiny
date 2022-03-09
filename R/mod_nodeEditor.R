@@ -422,13 +422,17 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot)
                    node_values_df = target_nodes_hot %>% dplyr::select(-.data$target_id)
                    target_ids = target_nodes_hot$target_id
-                   node_paths = colnames(node_values_df)
                    
+                   node_paths = colnames(node_values_df)
+                   node_names = node_paths %>% str_split(" > ")
+                   root_name = unique(sapply(node_names, function(names){names[1]}))
+
                    # loop over mappings
                    for(i in 1:nrow(target_nodes_hot)){
                      # Create new node
+                     target_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_ids[i], "']")) ####
                      node_values = as.character(node_values_df[i,])
-                     fct_result = merge_into_vegx_node(vegx_schema, vegx_doc, target_ids[i], node_paths, node_values, log_path)
+                     fct_result = merge_into_vegx_node(vegx_schema, target_root, node_paths, node_values, log_path)
                      if(fct_result$errors == 0){
                        n_merges = n_merges + 1
                      } else {

@@ -17,7 +17,7 @@ mod_importWizard_ui <- function(id){
       selected = "Data",
       
       #### Data ####
-      nav("Data",
+      nav(title =  "1. Data", value = "Data",
           column(
             width = 10, offset = 1,
             h2("Data"),
@@ -36,7 +36,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Project ####
-      nav("Project",
+      nav(title = "2. Project", value = "Project",
           column(
             width = 10, offset = 1,
             h2("Project"),
@@ -47,7 +47,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Plots ####
-      nav("Plots",
+      nav(title = "3. Plots", value = "Plots",
           column(
             width = 10, offset = 1,
             h2("Plots"),
@@ -58,7 +58,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Strata ####
-      nav("Strata", 
+      nav(title = "4. Strata", value = "Strata",
           column(
             width = 10, offset = 1,
             h2("Strata"),
@@ -69,7 +69,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Species ####
-      nav("Species",         
+      nav(title = "5. Species", value = "Species",         
           column(
             width = 10, offset = 1,
             h2("Species"),
@@ -80,7 +80,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Observations ####
-      nav("Observations",  
+      nav(title = "6. Observations", value = "Observations",  
           column(
             width = 10, offset = 1,
             h2("Observations"),
@@ -91,7 +91,7 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Summary ####
-      nav("Summary",  
+      nav(title = "7. Summary", value = "Summary",
           column(
             width = 10, offset = 1,
             h2("Summary"),
@@ -396,13 +396,53 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(input$previous_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) - 1]))
     observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
     
+    #### Build Nodes ####
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
-        # build project node
-        # build citation nodes
-        # build party nodes
-        # ...
+        # TODO Message that this will overwrite all progress 
+        mappings = list()
+        nodes = list()
+        
+        if(!is.null(input$project_title)){
+          mapping = list(value = input$project_title, source = "text")
+          mappings$project[["project > title"]] = mapping
+        }
+        if(!is.null(input$project_abstract)){
+          mapping = list(value = input$project_abstract, source = "text")
+          mappings$project[["project > abstract"]]  = mapping
+        }
+        if(!is.null(input$project_citation)){
+          mapping = list(value = input$project_citation, source = "text")
+          mappings$literatureCitation[["literatureCitation > citationString"]] =  mapping
+        }
+        if(!is.null(input$party_name)){
+          mapping = list(value = input$party_name, source = "text")
+          mappings$party[[paste0("party > choice > ", input$party_type, "Name")]] = mapping
+          
+          mapping = list(value = input$party_role, source = "text")
+          mappings$project[["project > personnel > role"]] = mapping
+        }
+        
+        project_df = build_node_values_df(mappings$project, user_data)
+        nodes$projects = new_vegx_node(vegx_schema, colnames(project_df), project_df[1,], id = NULL, log_path)
+        
+        literatureCitation_df = build_node_values_df(mappings$literatureCitation, user_data)
+        nodes$literatureCitations = new_vegx_node(vegx_schema, colnames(literatureCitation_df), literatureCitation_df[1,], id = NULL, log_path)
+        
+        party_df = build_node_values_df(mappings$party, user_data)
+        nodes$parties = new_vegx_node(vegx_schema, colnames(party_df), party_df[1,], id = NULL, log_path)
+
+        link_vegx_nodes(nodes$projects$node, "project > documentCitationID", nodes$literatureCitations$node, vegx_schema, log_path)
+        
+        # Update VegX text 
+        vegx_txt(as.character(vegx_doc))
+        
+        # Reset node_ids reactiveVal
+        node_ids(NULL)
+        
+        # Update action log 
+        action_log(read_action_log(log_path))
       })
   })
 }
