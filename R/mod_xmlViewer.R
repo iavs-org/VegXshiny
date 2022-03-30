@@ -17,7 +17,7 @@ mod_xmlViewer_ui <- function(id){
         tagList(
           actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "80px"),
           actionButton(ns("validate"), "Validate", class = "btn-sidebar", width = "80px"),
-          downloadButton(ns("export"), "Export",  class = "btn-sidebar", style = "80px")
+          downloadButton(ns("export"), "Export", class = "btn-sidebar", style = "80px", icon = NULL)
         )
       ),
       fluidRow(

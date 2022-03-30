@@ -11,6 +11,7 @@
 mod_importWizard_ui <- function(id){
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     navs_pill_list(
       id=ns("sidebar"),
       widths = c(2, 10),
@@ -21,7 +22,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Data"),
-            tags$p("Describe your data", class = "text-info"),
+            tags$p("Describe your data", class = "text-info annotation no-margin"),
             hr(),
             tags$p("This import wizard helps you to convert plant community data from a spreadsheet format into VegX."),
             tags$p("Plant community data are usually organized in a table where rows correspond to species, columns correspond to plots and values reflect the cover
@@ -30,7 +31,7 @@ mod_importWizard_ui <- function(id){
                 tags$img(src = "www/images/veg_table.png", contentType = "image/png", alt = "Vegetation table", width = "100%"),
                 tags$p("Structure of a typical vegetation dataset.", class = "annotation")
             ),
-            tags$p("Please use the File Manager to upload separate header, abudance, and species datasets and assign their roles below."),
+            tags$p("Please use the File Manager to upload separate header, cover, and species datasets and assign their roles below."),
             uiOutput(ns("data_ui"))
           )
       ),
@@ -40,7 +41,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Project"),
-            tags$p("Describe your project and its contributors", class = "text-info"),
+            tags$p("Describe your project and its contributors", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("project_ui"))
           )
@@ -51,7 +52,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Plots"),
-            tags$p("Match your plot-related header data to VegX elements", class = "text-info"),
+            tags$p("Match your plot-related header data to VegX elements", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("plots_ui"))
           )
@@ -62,7 +63,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Strata"),
-            tags$p("Match your stratum-related header data to VegX elements", class = "text-info"),
+            tags$p("Match your stratum-related header data to VegX elements", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("strata_ui"))
           )
@@ -73,7 +74,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Species"),
-            tags$p("Match your species data data to VegX elements", class = "text-info"),
+            tags$p("Match your species data data to VegX elements", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("species_ui"))
           )
@@ -84,7 +85,7 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Observations"),
-            tags$p("Import your observation data", class = "text-info"),
+            tags$p("Import your observation data", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("observations_ui"))
           )
@@ -95,9 +96,50 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Summary"),
-            tags$p("Review your entries", class = "text-info"),
+            tags$p("Review your entries", class = "text-info annotation no-margin"),
             hr(),
-            uiOutput(ns("summary_ui"))
+            
+            h3("Data", style = "margin-bottom: 6px"),
+            div(class = "frame", tableOutput(ns("summary_data"))), 
+            
+            h3("Project", style = "margin-bottom: 6px"),
+            div(class = "frame",
+                tableOutput(ns("summary_project"))
+            ),
+            
+            h3("Plots"),
+            fluidRow(
+              column(
+                6,
+                div(class = "frame",
+                    h4("Identifier"), 
+                    tableOutput(ns("summary_plot_id"))
+                ),
+                div(class = "frame",
+                    h4("Coordinates"), 
+                    tableOutput(ns("summary_plot_coordinates"))
+                ),
+                div(class = "frame",
+                    h4("Elevation"), 
+                    tableOutput(ns("summary_plot_elevation"))
+                ),
+              ),
+              column(
+                6,
+                div(class = "frame",
+                    h4("Geometry"), 
+                    tableOutput(ns("summary_plot_geometry"))
+                ),
+                div(class = "frame",
+                    h4("Topography"), 
+                    tableOutput(ns("summary_plot_topography"))
+                ),
+                div(class = "frame",
+                    h4("Parent material"), 
+                    tableOutput(ns("summary_plot_parent_material"))
+                )
+              )
+            ),
           )
       )
     ),
@@ -124,10 +166,20 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           )
         )
       } else if(input$sidebar =="Summary") {
-        buttons = fluidRow(
-          column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-          column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block"))
-        )
+        if(isTruthy(input$header_data) &
+           isTruthy(input$cover_data) &
+           isTruthy(input$project_title)
+        ){
+          buttons = fluidRow(
+            column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
+            column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block"))
+          )  
+        } else {
+          buttons = fluidRow(
+            column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
+            column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block", disabled = "", title = "Please fill all mandatory fields"))
+          )
+        }
       } else {
         buttons = fluidRow(
           column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
@@ -148,6 +200,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       )      
     })
     
+    observeEvent(input$previous_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) - 1]))
+    observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
+    
     #### Data ####
     output$data_ui = renderUI({
       if(length(names(user_data)) == 0){
@@ -157,8 +212,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
       fluidRow(
         column(4, selectInput(ns("header_data"), label = "Header *", choices = c(dropdown_empty, names(user_data)))),
-        column(4, selectInput(ns("species_data"), label = "Species *", choices = c(dropdown_empty, names(user_data)))),
-        column(4, selectInput(ns("cover_data"), label = "Cover", choices = c(dropdown_empty, names(user_data))))
+        column(4, selectInput(ns("cover_data"), label = "Cover *", choices = c(dropdown_empty, names(user_data)))),
+        column(4, selectInput(ns("species_data"), label = "Species", choices = c(dropdown_empty, names(user_data))))
       )
     })
     
@@ -166,34 +221,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$project_ui = renderUI({
       tagList(
         textInput(inputId = ns("project_title"), label = "Project title *",  width = "100%"),
-        tags$div(
-          id = "projectAccordion", class = "panel-group", "role" = "tablist",
-          tags$div(
-            class = "panel panel-default",
-            tags$div(
-              class = "panel-heading" , "role" = "tab",
-              tags$h4(
-                class = "panel-title",
-                tags$a("More fields", class ="collapsed", 
-                       "role"="button", "data-toggle"="collapse", "data-parent"="#project_accordion", "href"="#projectDetails", 
-                )
-              )
-            ),
-            tags$div(
-              id="projectDetails", class="panel-collapse collapse", "role"="tabpanel",
-              tags$div(
-                class = "panel-body",
-                textInput(inputId = ns("project_abstract"), label = "Abstract", width = "100%"),
-                textInput(inputId = ns("project_citation"), label = "Citation", width = "100%"),
-                tags$label("Main Party"),
-                fluidRow(
-                  column(width = 4, radioButtons(ns("party_type"), label = "Type", choices = list("Individual", "Organization", "Position"), inline = T)),
-                  column(width = 4, textInput(ns("party_name"), "Name", width = "100%")),
-                  column(width = 4, textInput(ns("party_role"), "Role", width = "100%"))
-                )
-              )
-            )
-          )
+        textAreaInput(inputId = ns("project_abstract"), label = "Abstract", width = "100%", resize = "vertical"),
+        textInput(inputId = ns("project_citation"), label = "Citation", width = "100%"),
+        tags$label("Responsible Party"),
+        fluidRow(
+          column(width = 4, textInput(ns("party_name"), "Name", width = "100%")),
+          column(width = 4, textInput(ns("party_role"), "Role", width = "100%")),
+          column(width = 4, selectizeInput(ns("party_type"), label = "Type", choices = list("..." = "", "Individual", "Organization", "Position"), width = "100%"))
         )
       )
     })
@@ -207,7 +241,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
         aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
         slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
-        
+
         tagList(
           selectizeInput(inputId = ns("plot_unique_id"), label = "Unique identifier *", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders), width = "50%"),
           tags$div(
@@ -232,7 +266,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     column(3, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))), 
                     column(3, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
                     column(3, textInput(ns("plot_crs"), label = "Coordinate reference (CRS)")), 
-                    column(3, selectInput(ns("plot_location_method"), label = "Measurement method", choices = c("Select a template" = "", c("A", "B"))))  
+                    column(3, selectInput(ns("plot_location_method"), label = "Measurement method", choices = c("Select a template" = "", c("A", "B"))))  # TODO add template for coordinates
                   )
                 )
               )
@@ -256,7 +290,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   class = "panel-body",
                   fluidRow(
                     column(3, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),  
-                    column(3, selectInput(ns("plot_elevation_method"), label = "Measurement method", choices = c("Select a template" = "", elev_methods)))
+                    column(3, selectInput(ns("plot_elevation_method"), label = "Measurement method", choices = list("Select a template" = "", names(elev_methods))))
                   )
                 )
               )
@@ -278,7 +312,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 tags$div(
                   class = "panel-body",
                   fluidRow(
-                    column(3, selectInput(ns("plot_shape"), label = "Shape", choices =  c("linear", "rectangle", "polygon", "circle"))),
+                    column(3, selectInput(ns("plot_shape"), label = "Shape", choices =  list("..." = "", "linear", "rectangle", "polygon", "circle"))),
                     column(3, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
                     column(3, selectInput(ns("plot_area_method"), label = "Area Method", choices = c("Select a column" = "", area_methods)))
                   )
@@ -381,47 +415,103 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$label("No cover data assigned.")
       } else {
         tagList(
-          
+          # Plotobservations
+          # Individualorganismobservations
+          # Aggregateorganismobservations
+          # Speciesobservations 
+          # Stratumobservations
+          # Surfacecoverobservations
         )
       }
     })
     
     #### Summary ####
-    output$summary_ui = renderUI({
-      tagList()
+    ##### Data #####
+    output$summary_data = renderUI({
+      render_summary_table(c("Header data *", "Cover data *", "Species data"),
+                           c(input$header_data, input$cover_data, input$species_data))
     })
     
+    ##### Project #####
+    output$summary_project = renderUI({
+      render_summary_table(c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
+                           c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type))
+    })
     
-    #### Observers ####
-    observeEvent(input$previous_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) - 1]))
-    observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
+    ##### Plots #####
+    output$summary_plot_id = renderUI({
+      render_summary_table("Unique identifier *", input$plot_unique_id)
+    })
+    
+    output$summary_plot_coordinates = renderUI({
+      render_summary_table(c("X-Coordinate", "Y-Coordinate", "Coordinate Reference System (CRS)", "Measurement method"),
+                          c(input$plot_coordinates_x, input$plot_coordinates_y, input$plot_crs, templates_lookup$name[as.numeric(input$plot_location_method)]) )
+    })
+    
+    output$summary_plot_elevation = renderUI({
+      render_summary_table(c("Plot elevation", "Measurement method"),
+                          c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]))
+    })
+    
+    output$summary_plot_geometry = renderUI({
+      render_summary_table(c("Plot shape", "Plot area", "Measurement method"), 
+                          c(input$plot_shape, input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]))
+    })
+    
+    output$summary_plot_topography = renderUI({
+      render_summary_table(c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
+                          c(input$plot_aspect_value, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope_value, templates_lookup$name[as.numeric(input$plot_slope_method)]))
+    })
+    
+    output$summary_plot_parent_material= renderUI({
+      render_summary_table("Parent material", input$plot_parent_material)
+    })
     
     #### Build Nodes ####
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
-        # TODO Message that this will overwrite all progress 
+        showModal(
+          modalDialog(tags$h3("Import data"),
+                      hr(),
+                      div(class = "text-center",
+                          tags$p("This will create a new VegX document from your import mappings."),
+                          tags$br(),
+                          tags$b(tags$p("All existing progress will be overwritten!")),   
+                      ),
+                      size = "l",
+                      footer = tagList(
+                        tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                  actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
+                      )
+          )
+        )
+      }
+    )
+    
+    observeEvent(
+      eventExpr = input$dismiss_modal, 
+      handlerExpr = {
+        removeModal()
+      })
+    
+    observeEvent(
+      eventExpr = input$confirm_import,
+      handlerExpr = {
         mappings = list()
         nodes = list()
         
-        if(!is.null(input$project_title)){
-          mapping = list(value = input$project_title, source = "text")
-          mappings$project[["project > title"]] = mapping
-        }
+        mappings$project[["project > title"]] = mapping
+        
         if(!is.null(input$project_abstract)){
-          mapping = list(value = input$project_abstract, source = "text")
-          mappings$project[["project > abstract"]]  = mapping
+          mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "text")
         }
         if(!is.null(input$project_citation)){
-          mapping = list(value = input$project_citation, source = "text")
-          mappings$literatureCitation[["literatureCitation > citationString"]] =  mapping
+          mappings$literatureCitation[["literatureCitation > citationString"]] = list(value = input$project_citation, source = "text")
         }
         if(!is.null(input$party_name)){
-          mapping = list(value = input$party_name, source = "text")
-          mappings$party[[paste0("party > choice > ", input$party_type, "Name")]] = mapping
-          
-          mapping = list(value = input$party_role, source = "text")
-          mappings$project[["project > personnel > role"]] = mapping
+          mappings$party[[paste0("party > choice > ", input$party_type, "Name")]] = list(value = input$party_name, source = "text")
+          mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "text")
         }
         
         project_df = build_node_values_df(mappings$project, user_data)
@@ -432,17 +522,23 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         
         party_df = build_node_values_df(mappings$party, user_data)
         nodes$parties = new_vegx_node(vegx_schema, colnames(party_df), party_df[1,], id = NULL, log_path)
-
+        
         link_vegx_nodes(nodes$projects$node, "project > documentCitationID", nodes$literatureCitations$node, vegx_schema, log_path)
+        
+        
+        for(elem in vegx_main_elements){
+          
+          if(! elem %in% names(nodes)){next}
+          
+        }
+        
         
         # Update VegX text 
         vegx_txt(as.character(vegx_doc))
         
-        # Reset node_ids reactiveVal
-        node_ids(NULL)
-        
         # Update action log 
         action_log(read_action_log(log_path))
-      })
+      }
+    )
   })
 }

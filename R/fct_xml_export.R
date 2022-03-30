@@ -1,6 +1,9 @@
 #' Build a dataframe from list of element mappings
 #' @description Builds a (wide) table of node path - node value pairs from existing mappings (as e.g. stored in the `elem_mappings` reactiveVal). The number of columns corresponds to the number of mappings. The number of rows depends on the specified data sources: if all mappings point to text or id values, one row (corresponding to one node) will be generated. If there is at least one mapping to a column in user-supplied data, the output will have the equivalent number of rows and text and id values will be reused.
 #'
+#' @param mappings A named list. Root elements are named after VegX main elements. Each root element contains zero or more 2-element named lists that represent the mappings. The name of each child element is a valid VegX node path, the element `value` holds the corresponding input and the element `source` indicates whether `value` is to be taken literally ("Text") or points to a data column of values ("File").
+#' @param user_data `reactiveValues` of uploaded files
+#' 
 #' @return A data.frame
 #'
 #' @noRd
@@ -48,6 +51,7 @@ new_vegx_document = function(schema_files){
 #' Create a VegX node
 #' @description Creates and populates an instance of a VegX main element
 #'
+#' @param vegx_schema An `xml_document` of the vegx schema
 #' @param node_paths A character vector representing the positions of the nodes to be created starting with the VegX main element. Levels are separated with a " > "
 #' @param node_values A character vector containing the values of the nodes 
 #' @param id The id given to the new node. If NULL (default), a new id will be created.
@@ -118,11 +122,11 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
 #' Merge mappings into a VegX node
 #' @description Merge mappings into an existing VegX node
 #'
-#' @param vegx_schema
+#' @param vegx_schema An `xml_document` of the vegx schema
 #' @param target_root The root of the node the mappings should be merged with
 #' @param node_paths A character vector representing the positions of the nodes to be created starting with the VegX main element. Levels are separated with a " > "
 #' @param node_values A character vector containing the values of the nodes 
-#' @param log_path
+#' @param log_path The path to the sessions temporary log file
 #' 
 #' @import dplyr
 #' @import xml2
@@ -323,11 +327,13 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
 }
 
 #' Link VegX nodes
-#' @description Creates a link between related VegX nodes 
+#' @description Creates a link between related VegX nodes
 #'
 #' @param target_root The root of the target node
 #' @param target_node_path The node path to the VegX element in target node that contains a reference
 #' @param linked_node The node that is referenced in target_node_path
+#' @param vegx_schema An `xml_document` of the vegx schema
+#' @param log_path The path to the sessions temporary log file
 #' 
 #' @noRd
 #' 
@@ -345,4 +351,3 @@ link_vegx_nodes = function(target_root, target_node_path, linked_node, vegx_sche
     xml2::xml_set_text(target_root, link_id)
   }
 }
-

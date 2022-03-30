@@ -49,3 +49,19 @@ new_action_log_record = function(log_path, type, message, append = T, col.names 
   )
   write.table(record, log_path, append = append, col.names = col.names, row.names = F)
 }
+
+#' Build a html table to summarize a set of inputs
+#'
+#' @param input_names A character vector of names
+#' @param input_values The names of 
+#'
+#' @return a rendered UI element
+#' @noRd
+render_summary_table = function(labels, values){
+  if(length(values) == 0){ # All input values are NULL
+    renderText("-")
+  } else {
+    values[!sapply(values, isTruthy)] = "-"
+    renderTable(tibble(labels, values), spacing = "xs", rownames = F, colnames = F, bordered = F)
+  }
+}

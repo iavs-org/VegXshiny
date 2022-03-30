@@ -20,8 +20,9 @@ body {
   border-style: solid;
   border-radius: 0.5em;
   border-width: 0.5px;
-  padding: 6px;
-  margin-bottom: 6px.;
+  border-color: #666666;
+  padding: 10px;
+  margin-bottom: 6px;
 }
 
 .form-inline {
@@ -36,6 +37,10 @@ body {
 }
 
 .form-inline .label{
+  margin: 0px;
+}
+
+.table {
   margin: 0px;
 }
 
@@ -71,6 +76,10 @@ body {
   vertical-align:middle!important;
   font-style:italic;
   margin-bottom: 10px;
+}
+
+.no-margin {
+  margin-bottom: 0px;
 }
 
 .btn-file {
