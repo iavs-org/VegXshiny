@@ -13,7 +13,7 @@
 
 app_server <- function(input, output, session) {
   log_path = tempfile("log_", fileext = ".csv")
-  new_action_log_record(log_path, "System info", "Session started.", append = F, col.names = T)
+  new_action_log_record(log_path, "System info", "Session started", append = F, col.names = T)
   
   # ---------------------------------------------------------------------------------------- #
   # Create xml objects

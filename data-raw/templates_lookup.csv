@@ -1,0 +1,29 @@
+template_id,target_element,subject,name,description
+1,methods,plot area,Plot area/m2,Plot area measured in squared meters.
+2,methods,plot area,Plot area/cm2,Plot area measured in squared centimeters.
+3,methods,plot dimension,Plot dimension/m,"Plot dimension (radius, length, width) measured in meters."
+4,methods,plot dimension,Plot dimension/cm,"Plot dimension (radius, length, width) measured in centimeters."
+5,methods,plant cover,Plant cover/%,Plant cover as percentage of ground covered by the projection.
+6,methods,plant count,Individual plant counts,Number of plant individuals
+7,methods,plant frequency,Plant frequency/%,Frequency of occurrence in fixed subunits of the plot
+8,methods,basal area,Basal area/m2*ha-1,Basal area in square meters per hectare
+9,methods,stratum height,Stratum height/m,Stratum height in meters above the ground
+10,methods,stratum height,Stratum height/cm,Stratum height in cm above the ground
+11,methods,plant height,Plant height/m,Plant height in meters above the ground
+12,methods,plant height,Plant height/cm,Plant height in cm above the ground
+13,methods,stem diameter,DBH/cm,"Diameter at breast height, in cm"
+14,methods,surface cover,Surface cover/%,Surface covered by a surface type as percentage of ground covered by the projection.
+15,methods,pH,pH/0-14,pH scale from 0 to 14
+16,methods,slope,Slope/degrees,Slope measured using degrees
+17,methods,slope,Slope/percent,Slope measured using percent
+18,methods,aspect,Aspect/degrees,Aspect measured using degrees from North
+19,methods,aspect,Aspect/radians,Aspect measured using radians from North
+20,methods,elevation,Elevation/m,Elevation measured using meters above sea level
+21,methods,climate,Climate MAT/Celsius,Mean annual temperature
+22,methods,climate,Climate TWM/Celsius,Temperature of the warmest month
+23,methods,climate,Climate TCM/Celsius,Temperature of the coldest month
+24,methods,climate,Climate MDR/Celsius,Mean diurnal range
+25,methods,climate,Climate MAP/mm,Mean annual precipitation
+26,methods,climate,Climate PDM/mm,Precipitation of the driest month
+27,methods,climate,Climate PWM/mm,Precipitation of the wettest month
+28,strata,strata definition,Strata definition/Recce,Standard Recce stratum definition

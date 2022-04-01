@@ -14,11 +14,9 @@ mod_xmlViewer_ui <- function(id){
     column(
       width = 10, offset = 1,
       fluidRow(
-        tagList(
-          actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "80px"),
-          actionButton(ns("validate"), "Validate", class = "btn-sidebar", width = "80px"),
-          downloadButton(ns("export"), "Export", class = "btn-sidebar", style = "80px", icon = NULL)
-        )
+        actionButton(ns("edit"), "Edit", width = "80px"),
+        actionButton(ns("validate"), "Validate", width = "80px"),
+        downloadButton(ns("export"), "Export", style = "80px", icon = NULL)
       ),
       fluidRow(
         aceEditor(
@@ -71,11 +69,9 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                  handlerExpr = {
                    insertUI(selector = paste0("#", ns("edit")), 
                             where = "afterEnd",
-                            ui = div(
-                              id = ns("edit_controls"),
-                              tags$span(
-                                actionButton(ns("discard_edits"), "Discard", class = "btn-sidebar pull-left btn-danger", icon = icon("times"), width = "49%"),
-                                actionButton(ns("save_edits"), "Save edits", class = "btn-sidebar pull-right btn-success",  icon("check"), width = "49%"))
+                            ui = tagList(
+                              actionButton(ns("discard_edits"), "Discard", class = "btn-danger", icon = icon("times")),
+                              actionButton(ns("save_edits"), "Save edits", class = "btn-success",  icon("check"))
                             )
                    )
                    removeUI(selector = paste0("#", ns("edit"))) 
@@ -99,10 +95,11 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      vegx_txt(as.character(vegx_doc))
                      
                      # Restore UI state
-                     insertUI(selector = paste0("#", ns("edit_controls")), 
-                              where = "afterEnd",
-                              ui = actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"))
-                     removeUI(selector = paste0("#", ns("edit_controls"))) 
+                     insertUI(selector = paste0("#", ns("save_edits")),
+                              where = "beforeBegin",
+                              ui = actionButton(ns("edit"), "Edit", width = "80px"))
+                     removeUI(selector = paste0("#", ns("save_edits")))
+                     removeUI(selector = paste0("#", ns("discard_edits")))
                      updateAceEditor(session, "xml_viewer", readOnly = T)
                    }, error = function(e){
                      shiny::showNotification("Document error. Please consult the log for more information.")
@@ -116,10 +113,11 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
     observeEvent(eventExpr = input$discard_edits,
                  handlerExpr = {
                    # Restore UI state
-                   insertUI(selector = paste0("#", ns("edit_controls")), 
-                            where = "afterEnd",
-                            ui = actionButton(ns("edit"), "Edit", class = "btn-sidebar", width = "100%"))
-                   removeUI(selector = paste0("#", ns("edit_controls"))) 
+                   removeUI(selector = paste0("#", ns("save_edits")))
+                   removeUI(selector = paste0("#", ns("discard_edits")))
+                   insertUI(selector = paste0("#", ns("validate")),
+                            where = "beforeBegin",
+                            ui = actionButton(ns("edit"), "Edit", width = "80px"))
                    updateAceEditor(session, "xml_viewer", value = vegx_txt(), readOnly = T)
                  })
     

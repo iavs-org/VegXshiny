@@ -312,6 +312,7 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    
                    # Get IDs
                    ids = isolate(node_ids())
+                   node_ids(NULL)
                    if(length(ids) == 0){ids = NULL}
                    
                    # loop over mappings
@@ -503,8 +504,12 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                        shiny::showNotification("Nothing to submit", type = "warning")
                      } else {
                        # Summarize selection
+                       templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+                         slice(input$templates_rows_selected) %>% 
+                         pull(template_id)
+                       
                        nodes_summary = templates %>% 
-                         dplyr::filter(.data$template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                         dplyr::filter(.data$template_id %in% templates_selected) %>% 
                          group_by(.data$template_id, .data$node_id, .data$main_element) %>% 
                          tally()
                        
@@ -538,8 +543,12 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                      n_errors = 0
                      n_warnings = 0
                      
+                     templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+                       slice(input$templates_rows_selected) %>% 
+                       pull(template_id)
+                     
                      template_mappings = templates %>% 
-                       dplyr::filter(.data$template_id %in% templates_lookup$template_id[input$templates_rows_selected]) %>% 
+                       dplyr::filter(template_id %in% templates_selected) %>% 
                        group_by(.data$template_id) %>% 
                        group_split()
                      

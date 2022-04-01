@@ -339,7 +339,6 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
 #' 
 #' @return This function is used for its side effects.
 link_vegx_nodes = function(target_root, target_node_path, linked_node, vegx_schema, log_path){
-  
   node_names = target_node_path %>% str_split(" > ", simplify = T)
   node_names = node_names[node_names != "choice"]
   link_id = xml2::xml_attr(linked_node, "id")
