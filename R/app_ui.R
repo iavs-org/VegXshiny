@@ -24,13 +24,15 @@ app_ui <- function(request) {
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu("VegX Builder", icon = icon("leaf", class = "icon-padded"),
-                          tabPanel("Import wizard ", mod_importWizard_ui("importWizard")),
-                          tabPanel("Node editor", mod_vegxBuilder_ui("vegxBuilder")),
-                          tabPanel("Template editor", h1("Build a template"))
+               tabPanel("Import wizard ", icon = icon("magic", class = "icon-padded"), 
+                        mod_importWizard_ui("importWizard")
                ),
                
-               tabPanel("XML Viewer", icon = icon("file", class = "icon-padded"),
+               tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded"),
+                        mod_vegxBuilder_ui("vegxBuilder")
+               ),
+               
+               tabPanel("XML Viewer", icon = icon("code", class = "icon-padded"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
