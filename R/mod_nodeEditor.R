@@ -10,7 +10,7 @@
 #' @importFrom jsonlite fromJSON
 #' @importFrom shinyTree shinyTree renderTree get_selected
 #' @importFrom shinyWidgets radioGroupButtons
-#' @importFrom shinyjs enable disable addClass click useShinyjs
+#' @importFrom shinyjs enable disable click useShinyjs
 
 mod_nodeEditor_ui <- function(id){
   ns <- NS(id)
@@ -24,7 +24,6 @@ mod_nodeEditor_ui <- function(id){
         width = 10, offset = 1,
         tags$h2(textOutput(ns("tab_selected"))),
         div(textOutput(ns("annotation_main_element")), class = "text-info annotation")
-        ## TODO insert small reminder if issues exist with this element
       )
     ),
     
@@ -147,7 +146,7 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
     fields_used = reactiveValues(elements = list(), values = list()) # Elements and values currently selected
     
     data_columns = reactive({
-      col_vectors = sapply(names(user_data), simplify = F, USE.NAMES = T, function(file_name){
+      sapply(names(user_data), simplify = F, USE.NAMES = T, function(file_name){
         name_vec = user_data[[file_name]]$x$rColHeaders
         name_vec = setNames(paste(file_name, name_vec, sep = "$"), name_vec)
       })
@@ -358,8 +357,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    if(n_warnings > 0 | n_errors > 0){shiny::showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
                    if(n_failures > 0){shiny::showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
                    
-                   # Update style and exit
-                   shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                    removeModal()
                  })
     
@@ -453,8 +450,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    if(n_warnings > 0){shiny::showNotification(paste0(n_warnings, " warning(s) encountered. Please consult the log for more information."), type = "warning")} 
                    if(n_failures > 0){shiny::showNotification(paste0("Merge failed for ", n_failures, " node(s). Please consult the log for more information."), type = "error") }
                    
-                   # Update style and exit
-                   shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                    removeModal()
                  })
     
@@ -613,9 +608,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                      if(n_insertions > 0){shiny::showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
                      if(n_warnings > 0 | n_errors > 0){shiny::showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
                      if(n_failures > 0){shiny::showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
-                     
-                     # Update style and exit
-                     shinyjs::addClass(class = "bg-success", selector = paste0("a[data-value=", stringr::str_replace(tab_selected, "^.{1}", toupper), "]"))
                      
                      removeModal()
                    })

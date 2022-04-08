@@ -22,7 +22,6 @@ mod_rowGenerator_ui <- function(id){
           column(width = 3, "style" = "margin:0px",
                  actionButton(ns("remove"), label = NULL, icon = icon("times"), width = "34px", style = "height:34px; padding:0px;")
           )
-          
         )  
       )
   )

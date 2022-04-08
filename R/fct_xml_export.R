@@ -12,7 +12,7 @@ build_node_values_df = function(mappings, user_data){
   node_sources = sapply(mappings, function(mapping) return(mapping$source))
   
   # Replace 'value' with data column if source is "file"
-  for(i in which(node_sources == "File")){
+  for(i in which(node_sources %in% c("file", "File"))){
     file_name = str_split(node_values[[i]], "\\$", simplify = T)[1]
     column_name = str_split(node_values[[i]], "\\$", simplify = T)[2]
     upload = user_data[[file_name]]
@@ -55,6 +55,7 @@ new_vegx_document = function(schema_files){
 #' @param node_paths A character vector representing the positions of the nodes to be created starting with the VegX main element. Levels are separated with a " > "
 #' @param node_values A character vector containing the values of the nodes 
 #' @param id The id given to the new node. If NULL (default), a new id will be created.
+#' @param log_path The path to the sessions temporary log file
 #' 
 #' @import dplyr
 #' @import xml2
@@ -64,7 +65,7 @@ new_vegx_document = function(schema_files){
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_path){
+new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_path){ # TODO change param order for consistency, move vegx_schema to end 
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -135,7 +136,7 @@ new_vegx_node = function(vegx_schema, node_paths, node_values, id = NULL, log_pa
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(vegx_schema, target_root, node_paths, node_values, log_path){
+merge_into_vegx_node = function(vegx_schema, target_root, node_paths, node_values, log_path){ # TODO change param order for consistency, move vegx_schema to end 
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -191,7 +192,7 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
   # Main loop
   for(i in 1:length(node_paths)){
     if(is.na(node_values[i]) | node_values[i] == ""){
-      warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: no node value found.")) 
+      warning(paste0("Skipped node at '", paste(node_paths[[i]][1], collapse = " > "), "' and descendents: no node value found.")) 
       break  
     } 
     
@@ -347,6 +348,48 @@ link_vegx_nodes = function(target_root, target_node_path, linked_node, vegx_sche
   if(length(target_position) == 0){
     merge_into_vegx_node(vegx_schema, target_root, target_node_path, link_id, log_path)
   } else {
-    xml2::xml_set_text(target_root, link_id)
+    xml2::xml_set_text(target_position, link_id)
   }
+}
+
+#' Build `xml_nodes` from a VegX template data frame
+#' @description Creates a link between related VegX `xml_nodes`. The function takes advantage of the fact, that `xml_nodes` in R are stored as external pointers to C objects. That means an established link between two `xml_nodes` will remain intact, even 
+#'
+#' @param templates_selected A dataframe of VegX node templates. See 
+#' @param vegx_schema An `xml_document` of the vegx schema
+#' @param log_path The path to the sessions temporary log file
+#' 
+#' @noRd
+#' 
+#' @return A nested list of `xml_node` objects grouped by VegX main elements
+templates_to_nodes = function(templates_selected, vegx_schema, log_path){                     
+  templates_split = templates_selected %>% 
+    group_by(template_id) %>% 
+    group_split()
+  
+  node_list = list()
+  # loop over template_ids
+  for(i in 1:length(templates_split)){
+    nodes_split = templates_split[[i]] %>% 
+      group_by(node_id) %>% 
+      group_split()
+    
+    new_nodes = list() # Temporarily save new nodes in case they need to be linked
+    # loop over node_ids, create new nodes
+    for(j in 1:length(nodes_split)){ 
+      link_template = nodes_split[[j]] %>% dplyr::filter(str_detect(node_path, "ID$"))
+      node_template = anti_join(nodes_split[[j]], link_template, by = "node_path")
+      
+      new_node = new_vegx_node(vegx_schema, node_template$node_path, node_template$node_value, id = NULL, log_path)
+      if(nrow(link_template) != 0){ # ID links present --> link corresponding nodes
+        for(k in 1:nrow(link_template)){
+          link_vegx_nodes(new_node$node, link_template$node_path, new_nodes[[as.numeric(link_template$node_value)]], vegx_schema, log_path)
+        }
+      }
+      
+      new_nodes[[j]] = new_node$node
+      node_list[[unique(node_template$main_element)]] = append(node_list[[unique(node_template$main_element)]], list(new_node))
+    }
+  }
+  return(node_list)
 }
