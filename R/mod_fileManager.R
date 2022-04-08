@@ -37,6 +37,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     
     user_data = reactiveValues()
     file_focus = reactiveVal()
+    data_unedited = reactiveVal()
     
     #### Upload ####
     # Process and render uploaded files
@@ -80,10 +81,12 @@ mod_fileManager_server <- function(id, action_log, log_path){
           class = "file-grid",
           column(
             12,
+            # Loop over file names in user_data()
             lapply(names(user_data), function(file_name){
               if(is.null(user_data[[file_name]])){
                 return()
               }
+              # Assign appropriate file icon
               file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
               icon = switch(file_ext,
                             "csv" = icon("file-csv", "fa-9x black"),
@@ -91,6 +94,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                             "xlsx" = icon("file-excel", "fa-9x black"),
                             icon("file-spreadsheet", "fa-9x black"))
               
+              # Create Button and Event listener
               file_button = actionButton(ns(paste0("button_", file_name)),
                                          width = "200px", height = "200px", class = "btn-success",
                                          label = div(icon, tags$br(), file_name))
@@ -114,9 +118,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
         id = ns(paste0("editor_", file_focus())),
         fluidRow(
           column(width = 12,
-                 actionButton(ns("edit"), "Edit", width = "80px"),
-                 actionButton(ns("transpose"), "Transpose", width = "120px"),
-                 actionButton(ns("delete"), "Delete", width = "80px")
+                 actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
+                 actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs")
           )
         ),
         rhandsontable::rHandsontableOutput(ns("hot_table"))
@@ -132,17 +135,29 @@ mod_fileManager_server <- function(id, action_log, log_path){
     observeEvent(
       eventExpr = input$edit,
       handlerExpr = {
+        # Modify UI
         insertUI(selector = paste0("#", ns("edit")),
-                 where = "afterEnd",
+                 where = "beforeBegin",
                  ui = tagList(
-                   actionButton(ns("save_edits"), "Save edits", class = "btn-success",  icon("check")),
-                   actionButton(ns("discard_edits"), "Discard edits", class = "btn-danger", icon = icon("times")),
+                   actionButton(ns("save_edits"), "Save edits",  width = "120px", class = "btn-success btn-xs",  icon("check")),
+                   actionButton(ns("transpose"), "Transpose", width = "120px", class = "btn-info btn-xs"),
+                   actionButton(ns("add_names"), "Add col-names", width = "120px", class = "btn-info btn-xs"),
+                   actionButton(ns("discard_edits"), "Discard edits", width = "120px", class = "btn-danger btn-xs", icon = icon("times")),
                  )
         )
         removeUI(selector = paste0("#", ns("edit")))
+        removeUI(selector = paste0("#", ns("delete")))
         
+        # Save current state of user data
+        data_unedited(user_data[[file_focus()]])
+        
+        # Make user_data editable
         user_data[[file_focus()]] = user_data[[file_focus()]] %>% 
           rhandsontable::hot_cols(readOnly = F)
+        
+        # Update action log
+        new_action_log_record(log_path, "File info", paste0("Entered edit mode for file '", file_focus(),"'"))
+        action_log(read_action_log(log_path))
       })
     
     ##### Save edits #####
@@ -160,13 +175,18 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      # Restore UI state
                      insertUI(selector = paste0("#", ns("save_edits")),
                               where = "beforeBegin",
-                              ui = actionButton(ns("edit"), "Edit"))
+                              ui = actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"))
+                     insertUI(selector = paste0("#", ns("save_edits")),
+                              where = "beforeBegin",
+                              ui = actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs"))
                      removeUI(selector = paste0("#", ns("save_edits")))
+                     removeUI(selector = paste0("#", ns("transpose")))
+                     removeUI(selector = paste0("#", ns("add_names")))
                      removeUI(selector = paste0("#", ns("discard_edits")))
                      
                      # Update action log
                      shiny::showNotification("Edits saved")
-                     new_action_log_record(log_path, "File info", paste0("Saved user modifications for file '", file_focus(),"'"))
+                     new_action_log_record(log_path, "File info", paste0("Left edit mode for file for file '", file_focus(),"'. All edits were saved."))
                      action_log(read_action_log(log_path))
                    })
                  })
@@ -179,30 +199,96 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    # Restore UI state
                    insertUI(selector = paste0("#", ns("save_edits")),
                             where = "beforeBegin",
-                            ui = actionButton(ns("edit"), "Edit"))
+                            ui = actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"))
+                   insertUI(selector = paste0("#", ns("save_edits")),
+                            where = "beforeBegin",
+                            ui = actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs"))
                    removeUI(selector = paste0("#", ns("save_edits")))
+                   removeUI(selector = paste0("#", ns("transpose")))
+                   removeUI(selector = paste0("#", ns("add_names")))
                    removeUI(selector = paste0("#", ns("discard_edits")))
                    
-                   user_data[[file_focus()]]$x$contextMenu = F
-                   for(i in 1:length(user_data[[file_focus()]]$x$columns)){
-                     user_data[[file_focus()]]$x$columns[[i]]$readOnly = T
-                   }
+                   # Restore data
+                   user_data[[file_focus()]] = data_unedited()
+                   
+                   # Update action log
+                   new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded"))
+                   action_log(read_action_log(log_path))
                  })
     
     ##### Transpose table #####
     observeEvent(eventExpr = input$transpose,
                  handlerExpr = {
+                   # Transpose data
                    data_df = rhandsontable::hot_to_r(input$hot_table)
                    data_df_tr = data.frame(t(data_df))
                    
                    # Overwrite user data
-                   user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df_tr, useTypes = FALSE, readOnly = T)
+                   user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df_tr)
                    output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                    
                    # Update action log 
                    shiny::showNotification("File transposed")
                    new_action_log_record(log_path, "File info", paste0("File '", file_focus(),"' transposed"))
                    action_log(read_action_log(log_path))
+                 })
+    
+    ##### Add colnames #####
+    ###### Modal dialogue #####
+    observeEvent(eventExpr = input$add_names,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       selectInput(ns("name_source"), label = "Create column names from row", user_data[[file_focus()]]$x$rowHeaders),
+                       tags$label("Names:"),
+                       renderText(paste(rhandsontable::hot_to_r(input$hot_table)[input$name_source,], collapse = ", ")),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                   actionButton(ns("confirm_add_names"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       ),
+                     )
+                   )
+                 })
+    
+    ###### Confirm  #####
+    observeEvent(eventExpr = input$confirm_add_names, 
+                 handlerExpr = {
+                   tryCatch({
+                     # Modify data
+                     data_df = rhandsontable::hot_to_r(input$hot_table)
+                     if(nrow(data_df) <= 1){
+                       shiny::showNotification("Can't remove last row.", type = "warning")
+                       return()
+                     }
+                     if(length(as.character(data_df[input$name_source,])) != length(unique(as.character(data_df[input$name_source,])))){
+                       shiny::showNotification("Column names must be unique", type = "warning")
+                       return()
+                     }
+                     
+                     colnames(data_df) = data_df[input$name_source,]
+                     data_df = data_df[rownames(data_df) != input$name_source,]
+                     
+                     # Overwrite user data
+                     user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df)
+                     output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     
+                     # Update action log 
+                     shiny::showNotification("Names added")
+                     new_action_log_record(log_path, "File info", paste0("Column names added to file '", file_focus(),"'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File edit error", paste0("Adding colnames to file '", file_focus(),"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                   }, finally = {
+                     removeModal()  
+                   })
+                 })
+    
+    ###### Dismiss modal  #####
+    observeEvent(eventExpr = input$dismiss_modal, 
+                 handlerExpr = {
+                   removeModal()
                  })
     
     ##### Delete file #####
