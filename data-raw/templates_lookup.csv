@@ -19,11 +19,12 @@ template_id,target_element,subject,name,description
 18,methods,aspect,Aspect/degrees,Aspect measured using degrees from North
 19,methods,aspect,Aspect/radians,Aspect measured using radians from North
 20,methods,elevation,Elevation/m,Elevation measured using meters above sea level
-21,methods,climate,Climate MAT/Celsius,Mean annual temperature
-22,methods,climate,Climate TWM/Celsius,Temperature of the warmest month
-23,methods,climate,Climate TCM/Celsius,Temperature of the coldest month
-24,methods,climate,Climate MDR/Celsius,Mean diurnal range
-25,methods,climate,Climate MAP/mm,Mean annual precipitation
-26,methods,climate,Climate PDM/mm,Precipitation of the driest month
-27,methods,climate,Climate PWM/mm,Precipitation of the wettest month
-28,strata,strata definition,Strata definition/Recce,Standard Recce stratum definition
+21,methods,location,LonLat/degrees,"Longitude/Latitude of a specific location, measured in degrees"
+22,methods,climate,Climate MAT/Celsius,Mean annual temperature
+23,methods,climate,Climate TWM/Celsius,Temperature of the warmest month
+24,methods,climate,Climate TCM/Celsius,Temperature of the coldest month
+25,methods,climate,Climate MDR/Celsius,Mean diurnal range
+26,methods,climate,Climate MAP/mm,Mean annual precipitation
+27,methods,climate,Climate PDM/mm,Precipitation of the driest month
+28,methods,climate,Climate PWM/mm,Precipitation of the wettest month
+29,strata,strata definition,Strata definition/Recce,Standard Recce stratum definition

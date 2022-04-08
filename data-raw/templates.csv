@@ -89,6 +89,7 @@ template_id,node_id,main_element,node_path,node_value
 15,1,methods,method > subject,pH
 15,1,methods,method > name,pH/0-14
 15,1,methods,method > description,pH scale from 0 to 14
+15,2,attributes,attribute > quantitative > unit,dimensionless
 15,2,attributes,attribute > quantitative > lowerLimit,0
 15,2,attributes,attribute > quantitative > upperLimit,14
 15,2,attributes,attribute > quantitative > methodID,1
@@ -125,83 +126,90 @@ template_id,node_id,main_element,node_path,node_value
 20,1,methods,method > description,Elevation measured using meters above sea level
 20,2,attributes,attribute > quantitative > unit,m
 20,2,attributes,attribute > quantitative > methodID,1
-21,1,methods,method > subject,climate
-21,1,methods,method > name,Climate MAT/Celsius
-21,1,methods,method > description,Mean annual temperature
-21,2,attributes,attribute > quantitative > unit,Celsius
+21,1,methods,method > subject,location
+21,1,methods,method > name,LonLat/degrees
+21,1,methods,method > description,"Longitude and latitude of a specific location, measured in degrees"
+21,2,attributes,attribute > quantitative > unit,degrees
+21,2,attributes,attribute > quantitative > lowerLimit,-180
+21,2,attributes,attribute > quantitative > upperLimit,180
 21,2,attributes,attribute > quantitative > methodID,1
 22,1,methods,method > subject,climate
-22,1,methods,method > name,Climate TWM/Celsius
-22,1,methods,method > description,Temperature of the warmest month
+22,1,methods,method > name,Climate MAT/Celsius
+22,1,methods,method > description,Mean annual temperature
 22,2,attributes,attribute > quantitative > unit,Celsius
 22,2,attributes,attribute > quantitative > methodID,1
 23,1,methods,method > subject,climate
-23,1,methods,method > name,Climate TCM/Celsius
-23,1,methods,method > description,Temperature of the coldest month
+23,1,methods,method > name,Climate TWM/Celsius
+23,1,methods,method > description,Temperature of the warmest month
 23,2,attributes,attribute > quantitative > unit,Celsius
 23,2,attributes,attribute > quantitative > methodID,1
 24,1,methods,method > subject,climate
-24,1,methods,method > name,Climate MDR/Celsius
-24,1,methods,method > description,Mean diurnal range
+24,1,methods,method > name,Climate TCM/Celsius
+24,1,methods,method > description,Temperature of the coldest month
 24,2,attributes,attribute > quantitative > unit,Celsius
-24,2,attributes,attribute > quantitative > lowerLimit,0
 24,2,attributes,attribute > quantitative > methodID,1
 25,1,methods,method > subject,climate
-25,1,methods,method > name,Climate MAP/mm
-25,1,methods,method > description,Mean annual precipitation
-25,2,attributes,attribute > quantitative > unit,mm
+25,1,methods,method > name,Climate MDR/Celsius
+25,1,methods,method > description,Mean diurnal range
+25,2,attributes,attribute > quantitative > unit,Celsius
 25,2,attributes,attribute > quantitative > lowerLimit,0
 25,2,attributes,attribute > quantitative > methodID,1
 26,1,methods,method > subject,climate
-26,1,methods,method > name,Climate PDM/mm
-26,1,methods,method > description,Precipitation of the driest month
+26,1,methods,method > name,Climate MAP/mm
+26,1,methods,method > description,Mean annual precipitation
 26,2,attributes,attribute > quantitative > unit,mm
 26,2,attributes,attribute > quantitative > lowerLimit,0
 26,2,attributes,attribute > quantitative > methodID,1
 27,1,methods,method > subject,climate
-27,1,methods,method > name,Climate PWM/mm
-27,1,methods,method > description,Precipitation of the wettest month
+27,1,methods,method > name,Climate PDM/mm
+27,1,methods,method > description,Precipitation of the driest month
 27,2,attributes,attribute > quantitative > unit,mm
 27,2,attributes,attribute > quantitative > lowerLimit,0
 27,2,attributes,attribute > quantitative > methodID,1
-28,1,methods,method > subject,stratum definition
-28,1,methods,method > name,Recce strata
-28,1,methods,method > description,Standard Recce stratum definition
-28,1,methods,method > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation &#x2013; Field protocols. Landcare Research, Lincoln."
-28,2,attributes,attribute > quantitative > methodID,1
-28,2,attributes,attribute > quantitative > unit,m
+28,1,methods,method > subject,climate
+28,1,methods,method > name,Climate PWM/mm
+28,1,methods,method > description,Precipitation of the wettest month
+28,2,attributes,attribute > quantitative > unit,mm
 28,2,attributes,attribute > quantitative > lowerLimit,0
-28,2,attributes,attribute > quantitative > upperLimit,999
-28,3,strata,stratum > stratumName,Tier 1
-28,3,strata,stratum > methodID,1
-28,3,strata,stratum > order,1
-28,3,strata,stratum > lowerLimit,0
-28,3,strata,stratum > upperLimit,0.3
-28,4,strata,stratum > stratumName,Tier 2
-28,4,strata,stratum > methodID,1
-28,4,strata,stratum > order,2
-28,4,strata,stratum > lowerLimit,0.3
-28,4,strata,stratum > upperLimit,2
-28,5,strata,stratum > stratumName,Tier 3
-28,5,strata,stratum > methodID,1
-28,5,strata,stratum > order,3
-28,5,strata,stratum > lowerLimit,2
-28,5,strata,stratum > upperLimit,5
-28,6,strata,stratum > stratumName,Tier 4
-28,6,strata,stratum > methodID,1
-28,6,strata,stratum > order,4
-28,6,strata,stratum > lowerLimit,5
-28,6,strata,stratum > upperLimit,12
-28,7,strata,stratum > stratumName,Tier 5
-28,7,strata,stratum > methodID,1
-28,7,strata,stratum > order,5
-28,7,strata,stratum > lowerLimit,12
-28,7,strata,stratum > upperLimit,25
-28,8,strata,stratum > stratumName,Tier 6
-28,8,strata,stratum > methodID,1
-28,8,strata,stratum > order,6
-28,8,strata,stratum > lowerLimit,25
-28,8,strata,stratum > upperLimit,50
-28,9,strata,stratum > stratumName,Tier 7
-28,9,strata,stratum > methodID,1
-28,9,strata,stratum > order,7
+28,2,attributes,attribute > quantitative > methodID,1
+29,1,methods,method > subject,stratum definition
+29,1,methods,method > name,Recce strata
+29,1,methods,method > description,Standard Recce stratum definition
+29,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation &#x2013; Field protocols. Landcare Research, Lincoln."
+29,2,attributes,attribute > quantitative > methodID,1
+29,2,attributes,attribute > quantitative > unit,m
+29,2,attributes,attribute > quantitative > lowerLimit,0
+29,2,attributes,attribute > quantitative > upperLimit,999
+29,3,strata,stratum > stratumName,Tier 1
+29,3,strata,stratum > methodID,1
+29,3,strata,stratum > order,1
+29,3,strata,stratum > lowerLimit,0
+29,3,strata,stratum > upperLimit,0.3
+29,4,strata,stratum > stratumName,Tier 2
+29,4,strata,stratum > methodID,1
+29,4,strata,stratum > order,2
+29,4,strata,stratum > lowerLimit,0.3
+29,4,strata,stratum > upperLimit,2
+29,5,strata,stratum > stratumName,Tier 3
+29,5,strata,stratum > methodID,1
+29,5,strata,stratum > order,3
+29,5,strata,stratum > lowerLimit,2
+29,5,strata,stratum > upperLimit,5
+29,6,strata,stratum > stratumName,Tier 4
+29,6,strata,stratum > methodID,1
+29,6,strata,stratum > order,4
+29,6,strata,stratum > lowerLimit,5
+29,6,strata,stratum > upperLimit,12
+29,7,strata,stratum > stratumName,Tier 5
+29,7,strata,stratum > methodID,1
+29,7,strata,stratum > order,5
+29,7,strata,stratum > lowerLimit,12
+29,7,strata,stratum > upperLimit,25
+29,8,strata,stratum > stratumName,Tier 6
+29,8,strata,stratum > methodID,1
+29,8,strata,stratum > order,6
+29,8,strata,stratum > lowerLimit,25
+29,8,strata,stratum > upperLimit,50
+29,9,strata,stratum > stratumName,Tier 7
+29,9,strata,stratum > methodID,1
+29,9,strata,stratum > order,7
