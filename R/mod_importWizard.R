@@ -54,20 +54,19 @@ mod_importWizard_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Plots"),
-            tags$p("Match your plot-related header data to VegX elements", class = "text-info annotation no-margin"),
-            hr(),
             uiOutput(ns("plots_ui"))
           )
       ),
       
-      #### Strata ####
-      nav(title = "4. Strata", value = "Strata",
+      
+      #### Observations ####
+      nav(title = "4. Observations", value = "Observations",  
           column(
             width = 10, offset = 1,
-            h2("Strata"),
-            tags$p("Match your stratum-related header data to VegX elements", class = "text-info annotation no-margin"),
+            h2("Observations"),
+            tags$p("Import your observation data", class = "text-info annotation no-margin"),
             hr(),
-            uiOutput(ns("strata_ui"))
+            uiOutput(ns("observations_ui"))
           )
       ),
       
@@ -82,19 +81,8 @@ mod_importWizard_ui <- function(id){
           )
       ),
       
-      #### Observations ####
-      nav(title = "6. Observations", value = "Observations",  
-          column(
-            width = 10, offset = 1,
-            h2("Observations"),
-            tags$p("Import your observation data", class = "text-info annotation no-margin"),
-            hr(),
-            uiOutput(ns("observations_ui"))
-          )
-      ),
-      
       #### Summary ####
-      nav(title = "7. Summary", value = "Summary",
+      nav(title = "6. Summary", value = "Summary",
           column(
             width = 10, offset = 1,
             h2("Summary"),
@@ -207,7 +195,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
     
     #### Data ####
-    output$data_ui = renderUI({  # TODO check if user data is has been deleted --> reset dropdown menu
+    output$data_ui = renderUI({  # TODO check if user data is has been deleted --> reset dropdown menu!!
       if(length(names(user_data)) == 0){
         dropdown_empty = c("No files found" = "")
       } else {
@@ -236,34 +224,40 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     })
     
     #### Plots ####
+    location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
+    elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
+    area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
+    aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
+    slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
+    
     output$plots_ui = renderUI({
       if(input$header_data == ""){
         tags$label("No header data assigned.")
       } else {
-        location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
-        elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
-        area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
-        aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
-        slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
-        
         tagList(
+          tags$p("Match your data describing persistent plot properties to VegX elements", class = "text-info annotation no-margin"),
+          hr(),
           selectizeInput(inputId = ns("plot_unique_id"), label = "Unique identifier *", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders), width = "50%"),
+          checkboxGroupInput(ns("plot_input_control"), label = "Additional plot information", inline = T,
+                             choiceNames = c("Coordinates", "Elevation", "Geometry/Area", "Topography", "Parent Material", "Observation data"),
+                             choiceValues = c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial", "PlotObservations")),
           tags$div(
-            id = "plotsAccordion", class = "panel-group", "role" = "tablist",
+            id = ns("plotsAccordion"), class = "panel-group", "role" = "tablist",
             ##### Coordinates #####
             tags$div(
+              id = ns("plotsCoordinates"),
               class = "panel panel-default",
               tags$div(
-                id = "plotsCoordinatesHeading", class = "panel-heading" , "role" = "tab",
+                id = ns("plotsCoordinatesHeading") , class = "panel-heading" , "role" = "tab",
                 tags$h4(
                   class = "panel-title",
                   tags$a("Coordinates",
-                         "role"="button", "data-toggle"="collapse", "data-parent"="#plotsAccordion", "href"="#plotsCoordinatesBody",
+                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsCoordinatesBody"))
                   )
                 )
               ),
               tags$div(
-                id="plotsCoordinatesBody", class="panel-collapse collapse in", "role"="tabpanel",
+                id = ns("plotsCoordinatesBody"), class="panel-collapse collapse", "role"="tabpanel",
                 tags$div(
                   class = "panel-body",
                   fluidRow(
@@ -273,7 +267,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                                           choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
                   ), 
                   fluidRow(
-                    column(9, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
+                    column(10, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
                   )
                 )
               )
@@ -281,18 +275,19 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             
             #### Elevation ####
             tags$div(
+              id = ns("plotsElevation"),
               class = "panel panel-default",
               tags$div(
-                id = "plotsElevationHeading", class = "panel-heading" , "role" = "tab",
+                id = ns("plotsElevationHeading"), class = "panel-heading" , "role" = "tab",
                 tags$h4(
                   class = "panel-title",
                   tags$a("Elevation",
-                         "role"="button", "data-toggle"="collapse", "data-parent"="#plotsAccordion", "href"="#plotsElevationBody",
+                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsElevationBody"))
                   )
                 )
               ),
               tags$div(
-                id="plotsElevationBody", class="panel-collapse collapse", "role"="tabpanel",
+                id = ns("plotsElevationBody"), class="panel-collapse collapse", "role"="tabpanel",
                 tags$div(
                   class = "panel-body",
                   fluidRow(
@@ -303,20 +298,22 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 )
               )
             ),
+            
             #### Geometry ####
             tags$div(
+              id = ns("plotsGeometry"),
               class = "panel panel-default",
               tags$div(
-                id = "plotsGeometryHeading", class = "panel-heading" , "role" = "tab",
+                id = ns("plotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
                 tags$h4(
                   class = "panel-title",
                   tags$a("Geometry", class = "collapsed", 
-                         "role"="button", "data-toggle"="collapse", "data-parent"="#plotsAccordion", "href"="#plotsGeometryBody", 
+                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsGeometryBody"))
                   )
                 )
               ),
               tags$div(
-                id="plotsGeometryBody", class="panel-collapse collapse", "role"="tabpanel",
+                id = ns("plotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
                 tags$div(
                   class = "panel-body",
                   fluidRow(
@@ -330,18 +327,19 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             ),
             #### Topography ####
             tags$div(
+              id = ns("plotsTopography"),
               class = "panel panel-default",
               tags$div(
-                id = "plotsTopographyHeading", class = "panel-heading" , "role" = "tab",
+                id = ns("plotsTopographyHeading"), class = "panel-heading" , "role" = "tab",
                 tags$h4(
                   class = "panel-title",
                   tags$a("Topography", class = "collapsed", 
-                         "role"="button", "data-toggle"="collapse", "data-parent"="#plotsAccordion", "href"="#plotsTopographyBody",
+                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsTopographyBody"))
                   )
                 )
               ),
               tags$div(
-                id="plotsTopographyBody", class="panel-collapse collapse", "role"="tabpanel",
+                id = ns("plotsTopographyBody"), class="panel-collapse collapse", "role"="tabpanel",
                 tags$div(
                   class = "panel-body",
                   tags$label("Aspect"),
@@ -349,8 +347,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     class="form-inline frame",
                     tags$div(
                       class = "form-group",
-                      tags$label("Value", "for" = ns("plot_aspect_value")),
-                      selectInput(ns("plot_aspect_value"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                      tags$label("Value", "for" = ns("plot_aspect")),
+                      selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
                     ),
                     tags$div(
                       class = "form-group",
@@ -364,8 +362,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     class="form-inline frame",
                     tags$div(
                       class = "form-group",
-                      tags$label("Value", "for" = ns("plot_slope_value")),
-                      selectInput(ns("plot_slope_value"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                      tags$label("Value", "for" = ns("plot_slope")),
+                      selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
                     ),
                     tags$div(
                       class = "form-group",
@@ -379,36 +377,99 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             ),
             #### Parent material ####
             tags$div(
+              id = ns("plotsParentMaterial"),
               class = "panel panel-default",
               tags$div(
-                id = "plotsTopographyHeading", class = "panel-heading" , "role" = "tab",
+                id = ns("plotsParentMaterialHeading"), class = "panel-heading" , "role" = "tab",
                 tags$h4(
                   class = "panel-title",
-                  tags$a("ParentMaterial", class = "collapsed", "role"="button", "data-toggle"="collapse", "data-parent"="#plotsAccordion", "href"="#plotsParentMaterialBody")
+                  tags$a("Parent Material", class = "collapsed", 
+                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsParentMaterialBody"))
+                  )
                 )
               ),
               tags$div(
-                id="plotsParentMaterialBody", class="panel-collapse collapse", "role"="tabpanel",
+                id = ns("plotsParentMaterialBody"), class="panel-collapse collapse", "role"="tabpanel",
                 tags$div(
                   class = "panel-body",
                   fluidRow(
                     column(3, selectInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
-                  ),
+                  )
                 )
               )
             )
-          )
+          ),
+          
+          
+          
         )
       }
     })
     
-    #### Strata ####
-    output$strata_ui = renderUI({
-      if(input$header_data == ""){
-        tags$label("No header data assigned.")
-      } else {
-        tagList()
+    observe({
+      panel_names =  c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial", "PlotObservations")
+      for(panel_name in panel_names){
+        if(panel_name %in% input$plot_input_control){
+          shinyjs::show(paste0("plots", panel_name))
+        } else {
+          shinyjs::hide(paste0("plots", panel_name))
+        }
       }
+    })
+    
+    #### Observations ####
+    output$observations_ui = renderUI({
+      tagList(
+        tags$div(
+          id = ns("plotObservations"),
+          tagList(
+            h3("Plot Observations"),
+            fluidRow(
+             # column(6, selectizeInput(inputId = ns("plotObs_unique_id"), label = "Unique identifier", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders), width = "100%"))
+            ),
+            fluidRow(
+              #column(3, selectInput(ns("plotObs_start_date *"), label = "Start date", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+              #column(3, selectInput(ns("plotObs_end_date"), label = "End date", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders)))
+            )
+          )
+        ),
+        
+        checkboxGroupInput(ns("observations_input_control"), label = "Observation Categories", inline = T,
+                           choiceNames = c("Individual organism", "Aggregate organism", "Species", "Stratum", "Community"),
+                           choiceValues = c("IndividualOrganism", "AggregateOrganism", "Species", "Stratum", "Community")),
+        
+        tags$div(
+          id = ns("observationsAccordion"), class = "panel-group", "role" = "tablist",
+          tags$div(
+            id = ns("aggregateOrganismObservations"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("aggregateOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("AggregateOrganismObservations", class = "collapsed",
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                tags$p("HELLO!")
+              )
+            )
+          )
+          
+          ##### Individualorganismobservations ####
+          ##### Aggregateorganismobservations ####
+          
+          ##### Speciesobservations ####
+          ##### Stratumobservations ####
+          ##### Surfacecoverobservations ####
+          
+        )
+      )
     })
     
     #### Species ####
@@ -417,22 +478,6 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$label("No species data assigned.")
       } else {
         tagList()
-      }
-    })
-    
-    #### Observations ####
-    output$observations_ui = renderUI({
-      if(input$cover_data == ""){
-        tags$label("No cover data assigned.")
-      } else {
-        tagList(
-          # Plotobservations
-          # Individualorganismobservations
-          # Aggregateorganismobservations
-          # Speciesobservations 
-          # Stratumobservations
-          # Surfacecoverobservations
-        )
       }
     })
     
@@ -471,7 +516,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_plot_topography = renderUI({
       render_summary_table(c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
-                           c(input$plot_aspect_value, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope_value, templates_lookup$name[as.numeric(input$plot_slope_method)]))
+                           c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]))
     })
     
     output$summary_plot_parent_material= renderUI({
@@ -486,9 +531,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           modalDialog(tags$h3("Import data"),
                       hr(),
                       div(class = "text-center",
-                          tags$p("This will create a new VegX document from your import mappings."),
-                          tags$br(),
-                          tags$b(tags$p("All existing progress will be overwritten!")),   
+                          tags$p("This will add all mappings to your VegX document."),
                       ),
                       size = "l",
                       footer = tagList(
@@ -513,12 +556,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         nodes = list()
         
         ##### Project ####
+        
         mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
         mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
         mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
         
-        project_df = build_node_values_df(mappings$project, user_data)
-        project_df = project_df[, project_df[1,] != ""]
+        project_df = build_node_values_df(mappings$project, user_data) %>% 
+          dplyr::select(where(~ !all(. == "")))
         nodes$projects = list(new_vegx_node(vegx_schema, colnames(project_df), project_df[1,], id = NULL, log_path))
         
         if(isTruthy(input$project_citation)){
@@ -535,73 +579,83 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, vegx_schema, log_path)
         }
         
-        ##### Plots ####
+        ##### Plots #####
         if(isTruthy(input$plot_unique_id)){ # Check if UI has been rendered already
-          # Template mappings
-          plots_methods = c(
-            "plot > location > horizontalCoordinates > coordinates" = input$plot_location_method,
-            "plot > location > verticalCoordinates > elevation" = input$plot_elevation_method,
-            "plot > geometry > area" = input$plot_area_method,
-            "plot > topography > aspect" = input$plot_aspect_method,
-            "plot > topography > slope" = input$plot_slope_method
-          )
+          # TODO error and warning handling
+          plots_method_links = c()
           
-          # Build template nodes
-          plots_templates = templates %>% 
-            dplyr::filter(template_id %in% plots_methods) 
-          plots_template_nodes = templates_to_nodes(plots_templates, vegx_schema, log_path)
-
-          browser()
           # Input mappings
-          if(isTruthy(input$plot_unique_id)){
-            mappings$plots[["plot > plotName"]] = list(value = input$plot_unique_id, source = "File")}
-          if(isTruthy(input$plot_unique_id)){
-            mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = input$plot_unique_id, source = "File")}
-          if(isTruthy(input$plot_coordinates_x)){
-            mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueX"]] = list(value = input$plot_coordinates_x, source = "File")}
-          if(isTruthy(input$plot_coordinates_y)){
-            mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueY"]] = list(value = input$plot_coordinates_y, source = "File")}
-          if(isTruthy(input$plot_crs)){
-            mappings$plots[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = list(value = input$plot_crs, source = "Text")}
-          if(isTruthy(input$plot_elevation)){
-            mappings$plots[["plot > location > verticalCoordinates > elevation > value"]] = list(value = input$plot_elevation, source = "File")}
-          if(isTruthy(input$plot_shape)){
-            mappings$plots[["plot > geometry > shape"]] = list(value = input$plot_shape, source = "Text")}
-          if(isTruthy(input$plot_area)){
-            mappings$plots[["plot > geometry > area > value"]] = list(value = input$plot_area, source = "File")}
-          if(isTruthy(input$plot_aspect)){
-            mappings$plots[["plot > topography > aspect > value"]] = list(value = input$plot_aspect, source = "File")}
-          if(isTruthy(input$plot_slope)){
-            mappings$plots[["plot > topography > slope > value"]] = list(value = input$plot_slope, source = "File")}
-          if(isTruthy(input$plot_parent_material)){
-            mappings$plots[["plot > parentMaterial > value"]] = list(value = input$plot_parent_material, source = "File")}
+          mappings$plots[["plot > plotName"]] = list(value = paste0(input$header_data, "$",input$plot_unique_id), source = "File")
+          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$header_data, "$", input$plot_unique_id), source = "File")
           
-          mappings$plots = lapply(mappings$plots, function(mapping){ # Add file name to value if source == File
-            if(mapping$source == "File"){
-              mapping$value = paste0(input$header_data, "$", mapping$value)}
-            return(mapping)
-          })
-          
-          # Build mapping nodes
-          plots_df = build_node_values_df(mappings$plots, user_data)
-          plots_method_links = sort(plots_methods[plots_methods != ""])
-          
-          plots_mapping_nodes = lapply(1:nrow(plots_df), function(i){
-            new_node = new_vegx_node(vegx_schema, colnames(plots_df), plots_df[i,], id = NULL, log_path)
-            for(j in 1:length(plots_method_links)){
-              link_vegx_nodes(new_node$node, paste0(names(plots_method_links)[[j]], " > attributeID"), plots_template_nodes$attributes[[j]]$node, vegx_schema, log_path)  
+          if("Coordinates" %in% input$plot_input_control){
+            if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
+              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueX"]] = list(value = paste0(input$header_data, "$", input$plot_coordinates_x), source = "File")
+              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueY"]] = list(value = paste0(input$header_data, "$", input$plot_coordinates_y), source = "File")
+              mappings$plots[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = list(value = input$plot_crs, source = "Text")
+              plots_method_links["plot > location > horizontalCoordinates > coordinates > attributeID"] = input$plot_location_method
             }
-            return(new_node)
+          }
+          
+          if("Elevation" %in% input$plot_input_control){
+            if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
+              mappings$plots[["plot > location > verticalCoordinates > elevation > value"]] = list(value = paste0(input$header_data, "$", input$plot_elevation), source = "File")
+              plots_method_links["plot > location > verticalCoordinates > elevation > attributeID"] = input$plot_elevation_method}
+          }
+          
+          if("Geometry" %in% input$plot_input_control){
+            if(isTruthy(input$plot_shape)){
+              mappings$plots[["plot > geometry > shape"]] = list(value = input$plot_shape, source = "Text")}
+            if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
+              mappings$plots[["plot > geometry > area > value"]] = list(value = paste0(input$header_data, "$", input$plot_area), source = "File")
+              plots_method_links["plot > geometry > area > attributeID"] = input$plot_area_method}
+          }
+          
+          if("Topography" %in% input$plot_input_control){
+            if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
+              mappings$plots[["plot > topography > aspect > value"]] = list(value = paste0(input$header_data, "$", input$plot_aspect), source = "File")
+              plots_method_links["plot > topography > aspect > attributeID"] = input$plot_aspect_method}
+            if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
+              mappings$plots[["plot > topography > slope > value"]] = list(value = paste0(input$header_data, "$", input$plot_slope), source = "File")
+              plots_method_links["plot > topography > slope > attributeID"] = input$plot_slope_method}
+          }
+          
+          if("Parent material" %in% input$plot_input_control){
+            if(isTruthy(input$plot_parent_material)){
+              mappings$plots[["plot > parentMaterial > value"]] = list(value = paste0(input$header_data, "$", input$plot_parent_material), source = "File")}
+          }
+          
+          # Build plot nodes 
+          plots_df = build_node_values_df(mappings$plots, user_data) 
+          plots_mapping_nodes = lapply(1:nrow(plots_df), function(i){
+            new_vegx_node(vegx_schema, colnames(plots_df), plots_df[i,], id = NULL, log_path)
           })
           
-          # Add nodes to nodes list
-          nodes$methods = append(nodes$methods, plots_template_nodes$methods)
-          nodes$attributes = append(nodes$attributes, plots_template_nodes$attributes)
           nodes$plots = append(nodes$plots, plots_mapping_nodes)
+          
+          # If existing, build method/attribute nodes and link to plots
+          if(length(plots_method_links) != 0){
+            plots_method_links = sort(plots_method_links) # important for correct order of links
+            plots_templates = templates %>% dplyr::filter(template_id %in% plots_method_links)
+            plots_method_nodes = templates_to_nodes(plots_templates, vegx_schema, log_path)
+            
+            # Loop over plot nodes
+            lapply(plots_mapping_nodes, function(plot_node){
+              for(j in 1:length(plots_method_links)){ # Set links
+                link_vegx_nodes(plot_node$node, names(plots_method_links)[j], plots_method_nodes$attributes[[j]]$node, vegx_schema, log_path)   
+              }
+            })
+            nodes$methods = append(nodes$methods,  plots_method_nodes$methods)
+            nodes$attributes = append(nodes$attributes,  plots_method_nodes$attributes)  
+          }
         }
         
+        ##### Observations ####
+        
+        # TODO: Crashes when new importing project only with unique ID
+        # Error in : Invalid index: out of bounds
         #### Update app state ####
-        # Update VegX document
+        # Update VegX document 
         for(element_name in names(nodes)){
           element_nodes = nodes[[element_name]]
           parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
@@ -618,7 +672,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           parent = xml_find_all(vegx_doc, paste0("./",  element_name))
           
           for(node in element_nodes){
-            xml_add_child(parent, node$node)
+            if(!is.null(node$node)){
+              xml_add_child(parent, node$node)
+            }
           }
         }
         

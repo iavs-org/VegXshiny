@@ -97,8 +97,7 @@ test_that("Element types are checked properly", {
 
 test_that("Siblings are from the correct level", {
   node_paths = list(c("plot", "plotName"), c("plot", "location", "horizontalCoordinates", "coordinates", "attributeID"))
-  names_ref = c("plotName", "attributeID") # correct order according to schema
-  
+  names_ref = c("plotName", "attributeID") 
 
   root = xml_new_root("plot")
   build_xml(root, node_paths, c("foo", "bar"), vegx_schema)

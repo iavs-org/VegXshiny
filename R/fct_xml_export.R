@@ -38,7 +38,8 @@ build_node_values_df = function(mappings, user_data){
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_document = function(schema_files){
+new_vegx_document = function(){
+  schema_files = load_schema()
   ns_uris = xml_attrs(schema_files$veg)
   ns_uris = ns_uris[names(ns_uris) != "xmlns:xsd"]
   ns_uris["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
@@ -165,7 +166,7 @@ merge_into_vegx_node = function(vegx_schema, target_root, node_paths, node_value
   if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
     warnings = ifelse(length(conditions$warnings) == 0, "", paste0("<li>Warning: ", conditions$warnings, "</li>", collapse = ""))
     errors = ifelse(length(conditions$errors) == 0, "", paste0("<li>Error: ", conditions$errors, "</li>", collapse = ""))
-    message = paste0("Merged mappings into", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
+    message = paste0("Merged mappings into ", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
     new_action_log_record(log_path, "Merge warning", message)
   } else {
     new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")"))
@@ -201,14 +202,14 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
     
     for(j in 2:length(node_paths[[i]])){ # ignore root node
       node_name = node_paths[[i]][j]
-      node_xpath = paste0("..//*[@name='", paste(node_paths[[i]][1:j], collapse = "']//*[@name='"), "']") %>% 
-        str_replace_all("\\*\\[@name='choice']", "xsd:choice")
-      
       # Skip choices
       if(node_name == "choice"){
         is_choice = TRUE # Next element is a choice element, leave parent as is
         next
       }
+      
+      node_xpath = paste0("..//*[@name='", paste(node_paths[[i]][1:j], collapse = "']/*[@name='"), "']") %>% 
+        str_replace_all("\\*\\[@name='choice']", "xsd:choice")
       
       # Check if node name is valid
       if(length(xml_find_all(vegx_schema, node_xpath)) == 0){
@@ -258,7 +259,14 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
       siblings_ordered = siblings_schema[siblings_schema %in% c(siblings, node_name)]
       
       insert_position = which(siblings_ordered == node_name) - 1
-      if(length(insert_position) == 0){insert_position = 0}
+      if(length(insert_position) == 0){
+        insert_position = 0
+      }
+      if(length(insert_position) > 1){
+        #browser()
+        warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': Multiple matches in VegX schema.")) 
+        # break
+      }
       
       # Insert node
       if(j < length(node_paths[[i]])){

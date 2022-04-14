@@ -2,184 +2,184 @@ template_id,node_id,main_element,node_path,node_value
 1,1,methods,method > subject,plot area
 1,1,methods,method > name,Plot area/m2
 1,1,methods,method > description,Plot area measured in squared meters.
-1,2,attributes,attribute > quantitative > unit,m2
-1,2,attributes,attribute > quantitative > lowerLimit,0
-1,2,attributes,attribute > quantitative > methodID,1
+1,2,attributes,attribute > choice > quantitative > unit,m2
+1,2,attributes,attribute > choice > quantitative > lowerLimit,0
+1,2,attributes,attribute > choice > quantitative > methodID,1
 2,1,methods,method > subject,plot area
 2,1,methods,method > name,Plot area/cm2
 2,1,methods,method > description,Plot area measured in squared centimeters.
-2,2,attributes,attribute > quantitative > unit,cm2
-2,2,attributes,attribute > quantitative > lowerLimit,0
-2,2,attributes,attribute > quantitative > methodID,1
+2,2,attributes,attribute > choice > quantitative > unit,cm2
+2,2,attributes,attribute > choice > quantitative > lowerLimit,0
+2,2,attributes,attribute > choice > quantitative > methodID,1
 3,1,methods,method > subject,plot dimension
 3,1,methods,method > name,Plot dimension/m
 3,1,methods,method > description,"Plot dimension (radius, length, width) measured in meters."
-3,2,attributes,attribute > quantitative > unit,m
-3,2,attributes,attribute > quantitative > lowerLimit,0
-3,2,attributes,attribute > quantitative > methodID,1
+3,2,attributes,attribute > choice > quantitative > unit,m
+3,2,attributes,attribute > choice > quantitative > lowerLimit,0
+3,2,attributes,attribute > choice > quantitative > methodID,1
 4,1,methods,method > subject,plot dimension
 4,1,methods,method > name,Plot dimension/cm
 4,1,methods,method > description,"Plot dimension (radius, length, width) measured in centimeters."
-4,2,attributes,attribute > quantitative > unit,cm
-4,2,attributes,attribute > quantitative > lowerLimit,0
-4,2,attributes,attribute > quantitative > methodID,1
+4,2,attributes,attribute > choice > quantitative > unit,cm
+4,2,attributes,attribute > choice > quantitative > lowerLimit,0
+4,2,attributes,attribute > choice > quantitative > methodID,1
 5,1,methods,method > subject,plant cover
 5,1,methods,method > name,Plant cover/%
 5,1,methods,method > description,Plant cover as percentage of ground covered by the projection.
-5,2,attributes,attribute > quantitative > unit,%
-5,2,attributes,attribute > quantitative > lowerLimit,0
-5,2,attributes,attribute > quantitative > upperLimit,100
-5,2,attributes,attribute > quantitative > methodID,1
+5,2,attributes,attribute > choice > quantitative > unit,%
+5,2,attributes,attribute > choice > quantitative > lowerLimit,0
+5,2,attributes,attribute > choice > quantitative > upperLimit,100
+5,2,attributes,attribute > choice > quantitative > methodID,1
 6,1,methods,method > subject,plant count
 6,1,methods,method > name,Individual plant counts
 6,1,methods,method > description,Number of plant individuals
-6,2,attributes,attribute > quantitative > unit,individuals
-6,2,attributes,attribute > quantitative > lowerLimit,0
-6,2,attributes,attribute > quantitative > methodID,1
+6,2,attributes,attribute > choice > quantitative > unit,individuals
+6,2,attributes,attribute > choice > quantitative > lowerLimit,0
+6,2,attributes,attribute > choice > quantitative > methodID,1
 7,1,methods,method > subject,plant frequency
 7,1,methods,method > name,Plant frequency/%
 7,1,methods,method > description,Frequency of occurrence in fixed subunits of the plot
-7,2,attributes,attribute > quantitative > unit,%
-7,2,attributes,attribute > quantitative > lowerLimit,0
-7,2,attributes,attribute > quantitative > upperLimit,100
-7,2,attributes,attribute > quantitative > methodID,1
+7,2,attributes,attribute > choice > quantitative > unit,%
+7,2,attributes,attribute > choice > quantitative > lowerLimit,0
+7,2,attributes,attribute > choice > quantitative > upperLimit,100
+7,2,attributes,attribute > choice > quantitative > methodID,1
 8,1,methods,method > subject,basal area
 8,1,methods,method > name,Basal area/m2*ha-1
 8,1,methods,method > description,Basal area in square meters per hectare
-8,2,attributes,attribute > quantitative > unit,m2*ha-1
-8,2,attributes,attribute > quantitative > lowerLimit,0
-8,2,attributes,attribute > quantitative > methodID,1
+8,2,attributes,attribute > choice > quantitative > unit,m2*ha-1
+8,2,attributes,attribute > choice > quantitative > lowerLimit,0
+8,2,attributes,attribute > choice > quantitative > methodID,1
 9,1,methods,method > subject,stratum height
 9,1,methods,method > name,Stratum height/m
 9,1,methods,method > description,Stratum height in meters above the ground
-9,2,attributes,attribute > quantitative > unit,m
-9,2,attributes,attribute > quantitative > lowerLimit,0
-9,2,attributes,attribute > quantitative > methodID,1
+9,2,attributes,attribute > choice > quantitative > unit,m
+9,2,attributes,attribute > choice > quantitative > lowerLimit,0
+9,2,attributes,attribute > choice > quantitative > methodID,1
 10,1,methods,method > subject,stratum height
 10,1,methods,method > name,Stratum height/cm
 10,1,methods,method > description,Stratum height in cm above the ground
-10,2,attributes,attribute > quantitative > unit,cm
-10,2,attributes,attribute > quantitative > lowerLimit,0
-10,2,attributes,attribute > quantitative > methodID,1
+10,2,attributes,attribute > choice > quantitative > unit,cm
+10,2,attributes,attribute > choice > quantitative > lowerLimit,0
+10,2,attributes,attribute > choice > quantitative > methodID,1
 11,1,methods,method > subject,plant height
 11,1,methods,method > name,Plant height/m
 11,1,methods,method > description,Plant height in meters above the ground
-11,2,attributes,attribute > quantitative > unit,m
-11,2,attributes,attribute > quantitative > lowerLimit,0
-11,2,attributes,attribute > quantitative > methodID,1
+11,2,attributes,attribute > choice > quantitative > unit,m
+11,2,attributes,attribute > choice > quantitative > lowerLimit,0
+11,2,attributes,attribute > choice > quantitative > methodID,1
 12,1,methods,method > subject,plant height
 12,1,methods,method > name,Plant height/cm
 12,1,methods,method > description,Plant height in cm above the ground
-12,2,attributes,attribute > quantitative > unit,cm
-12,2,attributes,attribute > quantitative > lowerLimit,0
-12,2,attributes,attribute > quantitative > methodID,1
+12,2,attributes,attribute > choice > quantitative > unit,cm
+12,2,attributes,attribute > choice > quantitative > lowerLimit,0
+12,2,attributes,attribute > choice > quantitative > methodID,1
 13,1,methods,method > subject,stem diameter
 13,1,methods,method > name,DBH/cm
 13,1,methods,method > description,"Diameter at breast height, in cm"
-13,2,attributes,attribute > quantitative > unit,cm
-13,2,attributes,attribute > quantitative > lowerLimit,0
-13,2,attributes,attribute > quantitative > methodID,1
+13,2,attributes,attribute > choice > quantitative > unit,cm
+13,2,attributes,attribute > choice > quantitative > lowerLimit,0
+13,2,attributes,attribute > choice > quantitative > methodID,1
 14,1,methods,method > subject,surface cover
 14,1,methods,method > name,Surface cover/%
 14,1,methods,method > description,Surface covered by a surface type as percentage of ground covered by the projection.
-14,2,attributes,attribute > quantitative > unit,%
-14,2,attributes,attribute > quantitative > lowerLimit,0
-14,2,attributes,attribute > quantitative > upperLimit,100
-14,2,attributes,attribute > quantitative > methodID,1
+14,2,attributes,attribute > choice > quantitative > unit,%
+14,2,attributes,attribute > choice > quantitative > lowerLimit,0
+14,2,attributes,attribute > choice > quantitative > upperLimit,100
+14,2,attributes,attribute > choice > quantitative > methodID,1
 15,1,methods,method > subject,pH
 15,1,methods,method > name,pH/0-14
 15,1,methods,method > description,pH scale from 0 to 14
-15,2,attributes,attribute > quantitative > unit,dimensionless
-15,2,attributes,attribute > quantitative > lowerLimit,0
-15,2,attributes,attribute > quantitative > upperLimit,14
-15,2,attributes,attribute > quantitative > methodID,1
+15,2,attributes,attribute > choice > quantitative > unit,dimensionless
+15,2,attributes,attribute > choice > quantitative > lowerLimit,0
+15,2,attributes,attribute > choice > quantitative > upperLimit,14
+15,2,attributes,attribute > choice > quantitative > methodID,1
 16,1,methods,method > subject,slope
 16,1,methods,method > name,Slope/degrees
 16,1,methods,method > description,Slope measured using degrees
-16,2,attributes,attribute > quantitative > unit,degrees
-16,2,attributes,attribute > quantitative > lowerLimit,0
-16,2,attributes,attribute > quantitative > upperLimit,90
-16,2,attributes,attribute > quantitative > methodID,1
+16,2,attributes,attribute > choice > quantitative > unit,degrees
+16,2,attributes,attribute > choice > quantitative > lowerLimit,0
+16,2,attributes,attribute > choice > quantitative > upperLimit,90
+16,2,attributes,attribute > choice > quantitative > methodID,1
 17,1,methods,method > subject,slope
 17,1,methods,method > name,Slope/percent
 17,1,methods,method > description,Slope measured using percent
-17,2,attributes,attribute > quantitative > unit,%
-17,2,attributes,attribute > quantitative > lowerLimit,0
-17,2,attributes,attribute > quantitative > upperLimit,100
-17,2,attributes,attribute > quantitative > methodID,1
+17,2,attributes,attribute > choice > quantitative > unit,%
+17,2,attributes,attribute > choice > quantitative > lowerLimit,0
+17,2,attributes,attribute > choice > quantitative > upperLimit,100
+17,2,attributes,attribute > choice > quantitative > methodID,1
 18,1,methods,method > subject,aspect
 18,1,methods,method > name,Aspect/degrees
 18,1,methods,method > description,Aspect measured using degrees from North
-18,2,attributes,attribute > quantitative > unit,degrees
-18,2,attributes,attribute > quantitative > lowerLimit,-360
-18,2,attributes,attribute > quantitative > upperLimit,360
-18,2,attributes,attribute > quantitative > methodID,1
+18,2,attributes,attribute > choice > quantitative > unit,degrees
+18,2,attributes,attribute > choice > quantitative > lowerLimit,-360
+18,2,attributes,attribute > choice > quantitative > upperLimit,360
+18,2,attributes,attribute > choice > quantitative > methodID,1
 19,1,methods,method > subject,aspect
 19,1,methods,method > name,Aspect/radians
 19,1,methods,method > description,Aspect measured using radians from North
-19,2,attributes,attribute > quantitative > unit,radians
-19,2,attributes,attribute > quantitative > lowerLimit,-6.2832
-19,2,attributes,attribute > quantitative > upperLimit,6.2832
-19,2,attributes,attribute > quantitative > methodID,1
+19,2,attributes,attribute > choice > quantitative > unit,radians
+19,2,attributes,attribute > choice > quantitative > lowerLimit,-6.2832
+19,2,attributes,attribute > choice > quantitative > upperLimit,6.2832
+19,2,attributes,attribute > choice > quantitative > methodID,1
 20,1,methods,method > subject,elevation
 20,1,methods,method > name,Elevation/m
 20,1,methods,method > description,Elevation measured using meters above sea level
-20,2,attributes,attribute > quantitative > unit,m
-20,2,attributes,attribute > quantitative > methodID,1
+20,2,attributes,attribute > choice > quantitative > unit,m
+20,2,attributes,attribute > choice > quantitative > methodID,1
 21,1,methods,method > subject,location
 21,1,methods,method > name,LonLat/degrees
 21,1,methods,method > description,"Longitude and latitude of a specific location, measured in degrees"
-21,2,attributes,attribute > quantitative > unit,degrees
-21,2,attributes,attribute > quantitative > lowerLimit,-180
-21,2,attributes,attribute > quantitative > upperLimit,180
-21,2,attributes,attribute > quantitative > methodID,1
+21,2,attributes,attribute > choice > quantitative > unit,degrees
+21,2,attributes,attribute > choice > quantitative > lowerLimit,-180
+21,2,attributes,attribute > choice > quantitative > upperLimit,180
+21,2,attributes,attribute > choice > quantitative > methodID,1
 22,1,methods,method > subject,climate
 22,1,methods,method > name,Climate MAT/Celsius
 22,1,methods,method > description,Mean annual temperature
-22,2,attributes,attribute > quantitative > unit,Celsius
-22,2,attributes,attribute > quantitative > methodID,1
+22,2,attributes,attribute > choice > quantitative > unit,Celsius
+22,2,attributes,attribute > choice > quantitative > methodID,1
 23,1,methods,method > subject,climate
 23,1,methods,method > name,Climate TWM/Celsius
 23,1,methods,method > description,Temperature of the warmest month
-23,2,attributes,attribute > quantitative > unit,Celsius
-23,2,attributes,attribute > quantitative > methodID,1
+23,2,attributes,attribute > choice > quantitative > unit,Celsius
+23,2,attributes,attribute > choice > quantitative > methodID,1
 24,1,methods,method > subject,climate
 24,1,methods,method > name,Climate TCM/Celsius
 24,1,methods,method > description,Temperature of the coldest month
-24,2,attributes,attribute > quantitative > unit,Celsius
-24,2,attributes,attribute > quantitative > methodID,1
+24,2,attributes,attribute > choice > quantitative > unit,Celsius
+24,2,attributes,attribute > choice > quantitative > methodID,1
 25,1,methods,method > subject,climate
 25,1,methods,method > name,Climate MDR/Celsius
 25,1,methods,method > description,Mean diurnal range
-25,2,attributes,attribute > quantitative > unit,Celsius
-25,2,attributes,attribute > quantitative > lowerLimit,0
-25,2,attributes,attribute > quantitative > methodID,1
+25,2,attributes,attribute > choice > quantitative > unit,Celsius
+25,2,attributes,attribute > choice > quantitative > lowerLimit,0
+25,2,attributes,attribute > choice > quantitative > methodID,1
 26,1,methods,method > subject,climate
 26,1,methods,method > name,Climate MAP/mm
 26,1,methods,method > description,Mean annual precipitation
-26,2,attributes,attribute > quantitative > unit,mm
-26,2,attributes,attribute > quantitative > lowerLimit,0
-26,2,attributes,attribute > quantitative > methodID,1
+26,2,attributes,attribute > choice > quantitative > unit,mm
+26,2,attributes,attribute > choice > quantitative > lowerLimit,0
+26,2,attributes,attribute > choice > quantitative > methodID,1
 27,1,methods,method > subject,climate
 27,1,methods,method > name,Climate PDM/mm
 27,1,methods,method > description,Precipitation of the driest month
-27,2,attributes,attribute > quantitative > unit,mm
-27,2,attributes,attribute > quantitative > lowerLimit,0
-27,2,attributes,attribute > quantitative > methodID,1
+27,2,attributes,attribute > choice > quantitative > unit,mm
+27,2,attributes,attribute > choice > quantitative > lowerLimit,0
+27,2,attributes,attribute > choice > quantitative > methodID,1
 28,1,methods,method > subject,climate
 28,1,methods,method > name,Climate PWM/mm
 28,1,methods,method > description,Precipitation of the wettest month
-28,2,attributes,attribute > quantitative > unit,mm
-28,2,attributes,attribute > quantitative > lowerLimit,0
-28,2,attributes,attribute > quantitative > methodID,1
+28,2,attributes,attribute > choice > quantitative > unit,mm
+28,2,attributes,attribute > choice > quantitative > lowerLimit,0
+28,2,attributes,attribute > choice > quantitative > methodID,1
 29,1,methods,method > subject,stratum definition
 29,1,methods,method > name,Recce strata
 29,1,methods,method > description,Standard Recce stratum definition
-29,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation &#x2013; Field protocols. Landcare Research, Lincoln."
-29,2,attributes,attribute > quantitative > methodID,1
-29,2,attributes,attribute > quantitative > unit,m
-29,2,attributes,attribute > quantitative > lowerLimit,0
-29,2,attributes,attribute > quantitative > upperLimit,999
+29,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation 2013; Field protocols. Landcare Research, Lincoln."
+29,2,attributes,attribute > choice > quantitative > methodID,1
+29,2,attributes,attribute > choice > quantitative > unit,m
+29,2,attributes,attribute > choice > quantitative > lowerLimit,0
+29,2,attributes,attribute > choice > quantitative > upperLimit,999
 29,3,strata,stratum > stratumName,Tier 1
 29,3,strata,stratum > methodID,1
 29,3,strata,stratum > order,1

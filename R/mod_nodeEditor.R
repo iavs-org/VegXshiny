@@ -381,12 +381,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                        node_values_df(nodes_df) # save as reactive
                      }
                      
-                     # Extract basic information for modal dialog
-                     n_new_nodes = nrow(node_values_df())
-                     name_new_nodes = xml_find_all(vegx_schema, paste0("//*[@name='", tab_selected, "']")) %>%
-                       xml_children() %>%
-                       xml_attr("name")
-                     
                      target_nodes_df = nodes_df %>% mutate("target_id" = NA) %>% relocate("target_id")
                      target_nodes_hot = rhandsontable::rhandsontable(target_nodes_df, useTypes = F)
                      output$target_nodes_hot = rhandsontable::renderRHandsontable(target_nodes_hot)
@@ -395,10 +389,14 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                      showModal(
                        modalDialog(tags$h3("Merge with existing nodes"),
                                    hr(),
-                                   tags$label("This action will merge the mappings into the target specified below nodes."),
-                                   rhandsontable::rHandsontableOutput(ns("target_nodes_hot")),
-                                   tags$br(),
-                                   tags$p("All mappings will be reset."),
+                                   if(nrow(nodes_df) == 1){
+                                     tagList(
+                                       tags$p(paste0("All mappings point to a scalar value. Do you want to merge them into all existing ",
+                                                     substr(tab_selected, 1, nchar(tab_selected)-1), " nodes or into a specific one.")),
+                                       selectizeInput(ns("merging_strategy"), label = "Merging strategy", choices = c("all nodes", "specific node"))
+                                     )
+                                   },
+                                   uiOutput(ns("merge_nodes_modal")),
                                    size = "l",
                                    footer = tagList(
                                      tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
@@ -409,6 +407,14 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    }
                  })
     
+    output$merge_nodes_modal = renderUI(
+      if(is.null(input$merging_strategy) || input$merging_strategy == "specific node"){
+        tagList(
+          tags$p("Specify the ids of the target nodes below."),
+          rhandsontable::rHandsontableOutput(ns("target_nodes_hot"))
+        )
+      } 
+    )
     ###### Update ######
     observeEvent(eventExpr = input$confirm_merge_nodes, 
                  handlerExpr = {
@@ -417,16 +423,21 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    n_warnings = 0
                    
                    # Prepare data 
-                   target_nodes_hot =  rhandsontable::hot_to_r(input$target_nodes_hot)
-                   node_values_df = target_nodes_hot %>% dplyr::select(-.data$target_id)
-                   target_ids = target_nodes_hot$target_id
+                   if(isTruthy(input$merging_strategy) && input$merging_strategy == "all nodes"){ # TODO handle merge all()
+                     target_ids = xml2::xml_find_all(vegx_doc, tab_selected) %>% xml2::xml_children() %>% xml2::xml_attrs("id") %>% unlist()
+                     node_values_df = isolate(node_values_df()) %>% slice(rep(1, each = length(target_ids)))
+                   } else {
+                     target_nodes_hot = rhandsontable::hot_to_r(input$target_nodes_hot)
+                     target_ids = target_nodes_hot$target_id
+                     node_values_df = target_nodes_hot %>% dplyr::select(-.data$target_id)
+                   }
                    
                    node_paths = colnames(node_values_df)
                    node_names = node_paths %>% str_split(" > ")
                    root_name = unique(sapply(node_names, function(names){names[1]}))
-
-                   # loop over mappings
-                   for(i in 1:nrow(target_nodes_hot)){
+                   
+                   # Loop over mappings
+                   for(i in 1:length(target_ids)){
                      # Create new node
                      target_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_ids[i], "']")) ####
                      node_values = as.character(node_values_df[i,])
