@@ -23,7 +23,8 @@ app_server <- function(input, output, session) {
   link_vegx_schema(vegx_schema, "veg", schema_files, simplify = T)
   
   # VegX document
-  vegx_doc = new_vegx_document(schema_files)
+  vegx_doc = new_vegx_document()
+  vegx_doc_history = list(vegx_doc)
 
   # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
