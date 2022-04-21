@@ -15,31 +15,31 @@ mod_importWizard_ui <- function(id){
     navs_pill_list(
       id=ns("sidebar"),
       widths = c(2, 10),
-      selected = "Data",
+      selected = "Project",
       
       #### Data ####
-      nav(title =  "1. Data", value = "Data",
-          column(
-            width = 10, offset = 1,
-            h2("Data"),
-            tags$p("Describe your data", class = "text-info annotation no-margin"),
-            hr(),
-            tags$p("This import wizard helps you to convert plant community data from a spreadsheet format into VegX."),
-            tags$p("Plant community data are usually organized in a table where rows correspond to species, columns correspond to plots and values reflect the cover
-                 of a given species in a given plot. Meta data about species or plots may be appended as additional columns or rows, respectively."),
-            div(class = "text-center", style = "max-width: 700px; margin-left: auto; margin-right: auto",
-                tags$img(src = "www/images/veg_table.png", contentType = "image/png", alt = "Vegetation table", width = "100%"),
-                tags$p("Structure of a typical vegetation dataset.", class = "annotation")
-            ),
-            tags$p("Please use the File Manager to upload separate header, cover, and species datasets and assign their roles below.",
-                   tags$b("Note that, contrary to the depiction above, header data should be organized in columns.", class = "text-info"),
-                   "You can use the File Manager to edit your data accordingly."),
-            uiOutput(ns("data_ui"))
-          )
-      ),
-      
+      # nav(title =  "1. Data", value = "Data",
+      #     column(
+      #       width = 10, offset = 1,
+      #       h2("Data"),
+      #       tags$p("Describe your data", class = "text-info annotation no-margin"),
+      #       hr(),
+      #       tags$p("This import wizard helps you to convert plant community data from a spreadsheet format into VegX."),
+      #       tags$p("Plant community data are usually organized in a table where rows correspond to species, columns correspond to plots and values reflect the cover
+      #            of a given species in a given plot. Meta data about species or plots may be appended as additional columns or rows, respectively."),
+      #       div(class = "text-center", style = "max-width: 700px; margin-left: auto; margin-right: auto",
+      #           tags$img(src = "www/images/veg_table.png", contentType = "image/png", alt = "Vegetation table", width = "100%"),
+      #           tags$p("Structure of a typical vegetation dataset.", class = "annotation")
+      #       ),
+      #       tags$p("Please use the File Manager to upload separate header, cover, and species datasets and assign their roles below.",
+      #              tags$b("Note that, contrary to the depiction above, header data should be organized in columns.", class = "text-info"),
+      #              "You can use the File Manager to edit your data accordingly."),
+      #       uiOutput(ns("data_ui"))
+      #     )
+      # ),
+      # 
       #### Project ####
-      nav(title = "2. Project", value = "Project",
+      nav(title = "1. Project", value = "Project",
           column(
             width = 10, offset = 1,
             h2("Project"),
@@ -50,47 +50,179 @@ mod_importWizard_ui <- function(id){
       ),
       
       #### Plots ####
-      nav(title = "3. Plots", value = "Plots",
+      nav(title = "2. Plots", value = "Plots",
           column(
             width = 10, offset = 1,
             h2("Plots"),
+            tags$p("Describe static plot properties", class = "text-info annotation no-margin"),
+            hr(),
             uiOutput(ns("plots_ui"))
           )
       ),
       
       
       #### Observations ####
-      nav(title = "4. Observations", value = "Observations",  
+      nav(title = "3. Observations", value = "Observations",  
           column(
             width = 10, offset = 1,
             h2("Observations"),
             tags$p("Import your observation data", class = "text-info annotation no-margin"),
             hr(),
-            uiOutput(ns("observations_ui"))
+            
+            checkboxGroupInput(ns("observations_input_control"), label = "Observation Categories", inline = T, 
+                               choiceNames = c("Individual organisms", "Aggregate organisms", "Species", "Stratum", "Community", "Surface cover"),
+                               choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", 
+                                                "stratumObservations", "communityObservations", "surfaceCoverObservations")),
+            
+            tags$div(
+              id = ns("observationsAccordion"), class = "panel-group", "role" = "tablist",
+              tags$div(
+                id = ns("individualOrganismObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("individualOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("IndividualOrganismObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("individualOrganismObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("individualOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("individualOrganismObservation_ui"))
+                  )
+                )
+              ),
+              
+              tags$div(
+                id = ns("aggregateOrganismObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("aggregateOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("AggregateOrganismObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("aggregateOrganismObservations_ui"))
+                  )
+                )
+              ),
+              
+              tags$div(
+                id = ns("speciesObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("speciesObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("SpeciesObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("speciesObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("speciesObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("speciesObservations_ui"))
+                  )
+                )
+              ),
+              
+              tags$div(
+                id = ns("stratumObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("stratumObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("StratumObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("stratumObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("stratumObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("stratumObservations_ui"))
+                  )
+                )
+              ),
+              
+              tags$div(
+                id = ns("communityObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("communityObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("CommunityObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("communityObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("communityObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("communityObservations_ui"))
+                  )
+                )
+              ),
+              
+              tags$div(
+                id = ns("surfaceCoverObservations"),
+                class = "panel panel-default",
+                tags$div(
+                  id = ns("surfaceCoverObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                  tags$h4(
+                    class = "panel-title",
+                    tags$a("SurfaceCoverObservations", class = "collapsed",
+                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("surfaceCoverObservationsBody"))
+                    )
+                  )
+                ),
+                tags$div(
+                  id = ns("surfaceCoverObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  tags$div(
+                    class = "panel-body",
+                    uiOutput(ns("surfaceCoverObservations_ui"))
+                  )
+                )
+              )
+            )
           )
       ),
       
       #### Species ####
-      nav(title = "5. Species", value = "Species",         
+      nav(title = "4. Species", value = "Species",         
           column(
             width = 10, offset = 1,
             h2("Species"),
-            tags$p("Match your species data data to VegX elements", class = "text-info annotation no-margin"),
+            tags$p("Provide further details on the observed species", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("species_ui"))
           )
       ),
       
       #### Summary ####
-      nav(title = "6. Summary", value = "Summary",
+      nav(title = "5. Summary", value = "Summary",
           column(
             width = 10, offset = 1,
             h2("Summary"),
             tags$p("Review your entries", class = "text-info annotation no-margin"),
             hr(),
-            
-            h3("Data", style = "margin-bottom: 6px"),
-            div(class = "frame", tableOutput(ns("summary_data"))), 
             
             h3("Project", style = "margin-bottom: 6px"),
             div(class = "frame",
@@ -129,7 +261,7 @@ mod_importWizard_ui <- function(id){
                     tableOutput(ns("summary_plot_parent_material"))
                 )
               )
-            ),
+            )
           )
       )
     ),
@@ -146,8 +278,17 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    dropdown_empty = reactive({
+      user_data = isolate(user_data)
+      if(length(names(user_data)) == 0){
+        c("No files found" = "")
+      } else {
+        c("Choose a file" = "")
+      }
+    })
+    
     #### Navigation ####
-    sidebar_tabs = c("Data", "Project", "Plots", "Strata", "Species", "Observations", "Summary")
+    sidebar_tabs = c("Data", "Project", "Plots", "Observations", "Species", "Summary")
     
     output$navigation_ui = renderUI({
       if(input$sidebar == "Data"){
@@ -194,20 +335,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(input$previous_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) - 1]))
     observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
     
-    #### Data ####
-    output$data_ui = renderUI({  # TODO check if user data is has been deleted --> reset dropdown menu!!
-      if(length(names(user_data)) == 0){
-        dropdown_empty = c("No files found" = "")
-      } else {
-        dropdown_empty = c("Choose a file" = "")
-      }
-      fluidRow(
-        column(4, selectInput(ns("header_data"), label = "Header *", choices = c(dropdown_empty, names(user_data)))),
-        column(4, selectInput(ns("cover_data"), label = "Cover *", choices = c(dropdown_empty, names(user_data)))),
-        column(4, selectInput(ns("species_data"), label = "Species", choices = c(dropdown_empty, names(user_data))))
-      )
-    })
-    
+    #-------------------------------------------------------------------------#
     #### Project ####
     output$project_ui = renderUI({
       tagList(
@@ -223,6 +351,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       )
     })
     
+    #-------------------------------------------------------------------------#
     #### Plots ####
     location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
     elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
@@ -230,184 +359,195 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
     slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
     
+    observe({  # This observer prevents re-rendering of the entire UI when user_data changes
+      if(!is.null(input$header_data) & length(names(user_data)) != 0){
+        file_selected = input$header_data
+        updateSelectizeInput(session, inputId = "header_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+      }
+    })
+    
     output$plots_ui = renderUI({
-      if(input$header_data == ""){
-        tags$label("No header data assigned.")
-      } else {
-        tagList(
-          tags$p("Match your data describing persistent plot properties to VegX elements", class = "text-info annotation no-margin"),
-          hr(),
-          selectizeInput(inputId = ns("plot_unique_id"), label = "Unique identifier *", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders), width = "50%"),
-          checkboxGroupInput(ns("plot_input_control"), label = "Additional plot information", inline = T,
-                             choiceNames = c("Coordinates", "Elevation", "Geometry/Area", "Topography", "Parent Material", "Observation data"),
-                             choiceValues = c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial", "PlotObservations")),
+      tagList(
+        tags$p("Assign a dataset", class = "text-info annotation"),
+        selectizeInput(ns("header_data"), label = NULL, choices = c("No files found" = "")),
+        uiOutput(ns("plots_mappings_ui"))
+      )
+    })
+    
+    output$plots_mappings_ui = renderUI({
+      req(input$header_data)
+      
+      tagList(
+        selectizeInput(inputId = ns("plot_unique_id"), label = "Plot ID *", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders)),
+        
+        checkboxGroupInput(ns("plot_input_control"), label = "Additional plot information", inline = T,
+                           choiceNames = c("Coordinates", "Elevation", "Geometry/Area", "Topography", "Parent Material"),
+                           choiceValues = c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial")),
+        
+        tags$div(
+          id = ns("plotsAccordion"), class = "panel-group", "role" = "tablist",
+          
+          ##### Coordinates ####
           tags$div(
-            id = ns("plotsAccordion"), class = "panel-group", "role" = "tablist",
-            ##### Coordinates #####
+            id = ns("plotsCoordinates"),
+            class = "panel panel-default",
             tags$div(
-              id = ns("plotsCoordinates"),
-              class = "panel panel-default",
-              tags$div(
-                id = ns("plotsCoordinatesHeading") , class = "panel-heading" , "role" = "tab",
-                tags$h4(
-                  class = "panel-title",
-                  tags$a("Coordinates",
-                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsCoordinatesBody"))
-                  )
-                )
-              ),
-              tags$div(
-                id = ns("plotsCoordinatesBody"), class="panel-collapse collapse", "role"="tabpanel",
-                tags$div(
-                  class = "panel-body",
-                  fluidRow(
-                    column(3, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))), 
-                    column(3, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
-                    column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
-                                          choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
-                  ), 
-                  fluidRow(
-                    column(10, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
-                  )
+              id = ns("plotsCoordinatesHeading") , class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Coordinates",
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsCoordinatesBody"))
                 )
               )
             ),
-            
-            #### Elevation ####
             tags$div(
-              id = ns("plotsElevation"),
-              class = "panel panel-default",
+              id = ns("plotsCoordinatesBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
-                id = ns("plotsElevationHeading"), class = "panel-heading" , "role" = "tab",
-                tags$h4(
-                  class = "panel-title",
-                  tags$a("Elevation",
-                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsElevationBody"))
-                  )
-                )
-              ),
-              tags$div(
-                id = ns("plotsElevationBody"), class="panel-collapse collapse", "role"="tabpanel",
-                tags$div(
-                  class = "panel-body",
-                  fluidRow(
-                    column(3, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),  
-                    column(4, selectInput(ns("plot_elevation_method"), label = "Measurement method",
-                                          choices = append(list("Select a template" = ""), setNames(as.list(elevation_methods), names(elevation_methods))))) 
-                  )
-                )
-              )
-            ),
-            
-            #### Geometry ####
-            tags$div(
-              id = ns("plotsGeometry"),
-              class = "panel panel-default",
-              tags$div(
-                id = ns("plotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
-                tags$h4(
-                  class = "panel-title",
-                  tags$a("Geometry", class = "collapsed", 
-                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsGeometryBody"))
-                  )
-                )
-              ),
-              tags$div(
-                id = ns("plotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
-                tags$div(
-                  class = "panel-body",
-                  fluidRow(
-                    column(3, selectInput(ns("plot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
-                    column(3, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
-                    column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
-                                          choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
-                  )
-                )
-              )
-            ),
-            #### Topography ####
-            tags$div(
-              id = ns("plotsTopography"),
-              class = "panel panel-default",
-              tags$div(
-                id = ns("plotsTopographyHeading"), class = "panel-heading" , "role" = "tab",
-                tags$h4(
-                  class = "panel-title",
-                  tags$a("Topography", class = "collapsed", 
-                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsTopographyBody"))
-                  )
-                )
-              ),
-              tags$div(
-                id = ns("plotsTopographyBody"), class="panel-collapse collapse", "role"="tabpanel",
-                tags$div(
-                  class = "panel-body",
-                  tags$label("Aspect"),
-                  tags$div(
-                    class="form-inline frame",
-                    tags$div(
-                      class = "form-group",
-                      tags$label("Value", "for" = ns("plot_aspect")),
-                      selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
-                    ),
-                    tags$div(
-                      class = "form-group",
-                      tags$label("Measurement method", "for" = ns("plot_aspect_method")),
-                      selectInput(ns("plot_aspect_method"), label = NULL, 
-                                  choices = append(list("Select a template" = ""), setNames(as.list(aspect_methods), names(aspect_methods)))) 
-                    )
-                  ), 
-                  tags$label("Slope"),
-                  tags$div(
-                    class="form-inline frame",
-                    tags$div(
-                      class = "form-group",
-                      tags$label("Value", "for" = ns("plot_slope")),
-                      selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
-                    ),
-                    tags$div(
-                      class = "form-group",
-                      tags$label("Measurement method", "for" = ns("plot_slope_method")),
-                      selectInput(ns("plot_slope_method"), label = NULL, 
-                                  choices = append(list("Select a template" = ""), setNames(as.list(slope_methods), names(slope_methods))))
-                    )
-                  )
-                )
-              )
-            ),
-            #### Parent material ####
-            tags$div(
-              id = ns("plotsParentMaterial"),
-              class = "panel panel-default",
-              tags$div(
-                id = ns("plotsParentMaterialHeading"), class = "panel-heading" , "role" = "tab",
-                tags$h4(
-                  class = "panel-title",
-                  tags$a("Parent Material", class = "collapsed", 
-                         "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsParentMaterialBody"))
-                  )
-                )
-              ),
-              tags$div(
-                id = ns("plotsParentMaterialBody"), class="panel-collapse collapse", "role"="tabpanel",
-                tags$div(
-                  class = "panel-body",
-                  fluidRow(
-                    column(3, selectInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
-                  )
+                class = "panel-body",
+                fluidRow(
+                  column(4, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))), 
+                  column(4, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
+                ), 
+                fluidRow(
+                  column(12, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
                 )
               )
             )
           ),
           
+          ##### Elevation ####
+          tags$div(
+            id = ns("plotsElevation"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("plotsElevationHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Elevation",
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsElevationBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("plotsElevationBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                fluidRow(
+                  column(4, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),  
+                  column(4, selectInput(ns("plot_elevation_method"), label = "Measurement method",
+                                        choices = append(list("Select a template" = ""), setNames(as.list(elevation_methods), names(elevation_methods))))) 
+                )
+              )
+            )
+          ),
           
-          
+          ##### Geometry ####
+          tags$div(
+            id = ns("plotsGeometry"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("plotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Geometry", class = "collapsed", 
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsGeometryBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("plotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                fluidRow(
+                  column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                )
+              )
+            )
+          ),
+          ##### Topography ####
+          tags$div(
+            id = ns("plotsTopography"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("plotsTopographyHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Topography", class = "collapsed", 
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsTopographyBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("plotsTopographyBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                tags$label("Aspect"),
+                tags$div(
+                  class="form-inline frame",
+                  tags$div(
+                    class = "form-group",
+                    tags$label("Value", "for" = ns("plot_aspect")),
+                    selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                  ),
+                  tags$div(
+                    class = "form-group",
+                    tags$label("Measurement method", "for" = ns("plot_aspect_method")),
+                    selectInput(ns("plot_aspect_method"), label = NULL, 
+                                choices = append(list("Select a template" = ""), setNames(as.list(aspect_methods), names(aspect_methods)))) 
+                  )
+                ), 
+                tags$label("Slope"),
+                tags$div(
+                  class="form-inline frame",
+                  tags$div(
+                    class = "form-group",
+                    tags$label("Value", "for" = ns("plot_slope")),
+                    selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                  ),
+                  tags$div(
+                    class = "form-group",
+                    tags$label("Measurement method", "for" = ns("plot_slope_method")),
+                    selectInput(ns("plot_slope_method"), label = NULL, 
+                                choices = append(list("Select a template" = ""), setNames(as.list(slope_methods), names(slope_methods))))
+                  )
+                )
+              )
+            )
+          ),
+          ##### Parent material ####
+          tags$div(
+            id = ns("plotsParentMaterial"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("plotsParentMaterialHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Parent Material", class = "collapsed", 
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsParentMaterialBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("plotsParentMaterialBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                fluidRow(
+                  column(3, selectInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                )
+              )
+            )
+          )
         )
-      }
+      )
     })
     
     observe({
-      panel_names =  c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial", "PlotObservations")
+      panel_names =  c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial")
       for(panel_name in panel_names){
         if(panel_name %in% input$plot_input_control){
           shinyjs::show(paste0("plots", panel_name))
@@ -417,77 +557,119 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
     })
     
+    #-------------------------------------------------------------------------#
     #### Observations ####
-    output$observations_ui = renderUI({
+    
+    observe({
+      panel_names =  c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", "stratumObservations", "communityObservations", "surfaceCoverObservations")
+      for(panel_name in panel_names){
+        if(panel_name %in% input$observations_input_control){
+          shinyjs::show(panel_name)
+        } else {
+          shinyjs::hide(panel_name)
+        }
+      }
+    })
+    
+    ##### IndividualOrganismObservations ####
+    output$individualOrganismObservations_ui = renderUI({
+      tags$p("not implemented")
+    })
+    
+    ##### AggregateOrganismObservations ####
+    strata_methods = templates_lookup %>% filter(subject == "strata definition") %>% pull(template_id, name)
+    cover_methods = templates_lookup %>% filter(subject == "plant cover") %>% pull(template_id, name)
+    
+    observe({  # This observer prevents re-rendering of the entire UI when user_data changes
+      if(!is.null(input$aggOrgObs_data) & length(names(user_data)) != 0){
+        file_selected = input$aggOrgObs_data
+        updateSelectizeInput(session, inputId = "aggOrgObs_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+      }
+    })
+    
+    output$aggregateOrganismObservations_ui = renderUI({
       tagList(
-        tags$div(
-          id = ns("plotObservations"),
-          tagList(
-            h3("Plot Observations"),
-            fluidRow(
-             # column(6, selectizeInput(inputId = ns("plotObs_unique_id"), label = "Unique identifier", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders), width = "100%"))
-            ),
-            fluidRow(
-              #column(3, selectInput(ns("plotObs_start_date *"), label = "Start date", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
-              #column(3, selectInput(ns("plotObs_end_date"), label = "End date", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders)))
-            )
-          )
+        tags$label("Strata definitions"),
+        br(),
+        tags$p("Are observations structured into strata?", class = "text-info annotation"),
+        radioButtons(ns("aggOrgObs_hasStrata"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
+        uiOutput(ns("aggOrgObs_strata_ui")),
+        
+        hr(),
+        tags$label("Cover scale"),
+        br(),
+        tags$p("Which scale was used to measure plant cover?", class = "text-info annotation"),
+        selectizeInput(ns("aggOrgObs_coverScale"), label = NULL, choices = append(list("Select a template" = ""), setNames(as.list(cover_methods), names(cover_methods)))),
+        
+        hr(),
+        tags$label("Observations"),
+        br(),
+        tags$p("Assign a dataset", class = "text-info annotation"),
+        selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
+        uiOutput(ns("aggOrgObs_observations_ui"))
+      )
+    })
+    
+    output$aggOrgObs_strata_ui = renderUI({
+      if(input$aggOrgObs_hasStrata == "yes"){
+        tagList(
+          tags$p("Which definition was used?", class = "text-info annotation"),
+          selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, choices = append(list("Select a template" = ""), setNames(as.list(strata_methods), names(strata_methods))))  
+        )
+      }
+    })
+    
+    output$aggOrgObs_observations_ui = renderUI({
+      req(input$aggOrgObs_data)
+      tagList(
+        fluidRow(
+          column(4, selectInput(ns("aggOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
+          column(4, selectInput(ns("aggOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
         ),
-        
-        checkboxGroupInput(ns("observations_input_control"), label = "Observation Categories", inline = T,
-                           choiceNames = c("Individual organism", "Aggregate organism", "Species", "Stratum", "Community"),
-                           choiceValues = c("IndividualOrganism", "AggregateOrganism", "Species", "Stratum", "Community")),
-        
-        tags$div(
-          id = ns("observationsAccordion"), class = "panel-group", "role" = "tablist",
-          tags$div(
-            id = ns("aggregateOrganismObservations"),
-            class = "panel panel-default",
-            tags$div(
-              id = ns("aggregateOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
-              tags$h4(
-                class = "panel-title",
-                tags$a("AggregateOrganismObservations", class = "collapsed",
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
-                )
-              )
-            ),
-            tags$div(
-              id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
-              tags$div(
-                class = "panel-body",
-                tags$p("HELLO!")
-              )
-            )
-          )
-          
-          ##### Individualorganismobservations ####
-          ##### Aggregateorganismobservations ####
-          
-          ##### Speciesobservations ####
-          ##### Stratumobservations ####
-          ##### Surfacecoverobservations ####
-          
+        fluidRow(
+          column(4, selectInput(ns("aggOrgObs_taxonName"), label = "Taxon name *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
+          uiOutput(ns("aggOrgObs_taxonStratum_ui")),
+          column(4, selectInput(ns("aggOrgObs_taxonCover"), label = "Cover value *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))    
         )
       )
     })
     
-    #### Species ####
-    output$species_ui = renderUI({
-      if(input$species_data == ""){
-        tags$label("No species data assigned.")
-      } else {
-        tagList()
+    output$aggOrgObs_taxonStratum_ui = renderUI({
+      if(input$aggOrgObs_hasStrata == "yes"){
+        column(4, selectInput(ns("aggOrgObs_taxonStratum"), label = "Taxon stratum *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
     
-    #### Summary ####
-    ##### Data ####
-    output$summary_data = renderUI({
-      render_summary_table(c("Header data *", "Cover data *", "Species data"),
-                           c(input$header_data, input$cover_data, input$species_data))
+    ##### SpeciesObservations ####
+    output$speciesObservations_ui = renderUI({
+      tags$p("not implemented")
     })
     
+    ##### stratumObservations ####
+    output$stratumObservations_ui = renderUI({
+      tags$p("not implemented")
+    })
+    
+    ##### communityObservations ####
+    output$communityObservations_ui = renderUI({
+      tags$p("not implemented")
+    })
+    
+    ##### surfaceCoverObservations ####
+    output$surfaceCoverObservations_ui = renderUI({
+      tags$p("not implemented")
+    })
+    
+    #-------------------------------------------------------------------------#
+    #### Species ####
+    output$species_ui = renderUI({
+      tagList(
+        h3("Species UI")
+      )
+    })
+    
+    #-------------------------------------------------------------------------#
+    #### Summary ####
     ##### Project ####
     output$summary_project = renderUI({
       render_summary_table(c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
@@ -547,7 +729,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       eventExpr = input$dismiss_modal, 
       handlerExpr = {
         removeModal()
-      })
+      }
+    )
     
     observeEvent(
       eventExpr = input$confirm_import,
@@ -555,15 +738,21 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         mappings = list()
         nodes = list()
         
+        #-------------------------------------------------------------------------#
         ##### Project ####
-        
-        mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
-        mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
-        mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
-        
-        project_df = build_node_values_df(mappings$project, user_data) %>% 
-          dplyr::select(where(~ !all(. == "")))
-        nodes$projects = list(new_vegx_node(vegx_schema, colnames(project_df), project_df[1,], id = NULL, log_path))
+        if(isTruthy(input$project_title)){
+          mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
+        }
+        if(isTruthy(input$project_abstract)){
+          mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
+        }
+        if(isTruthy(input$party_name) & isTruthy(input$party_role)){
+          mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
+        }
+        if(length(mappings$project) != 0){
+          project_df = build_node_values_df(mappings$project, user_data) 
+          nodes$projects = list(new_vegx_node(vegx_schema, colnames(project_df), project_df[1,], id = NULL, log_path))  
+        }
         
         if(isTruthy(input$project_citation)){
           mappings$literatureCitations[["literatureCitation > citationString"]]  = list(value = input$project_citation, source = "Text")
@@ -579,14 +768,16 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, vegx_schema, log_path)
         }
         
-        ##### Plots #####
-        if(isTruthy(input$plot_unique_id)){ # Check if UI has been rendered already
+        #-------------------------------------------------------------------------#
+        ##### Plots ####
+        if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
           # TODO error and warning handling
           plots_method_links = c()
           
           # Input mappings
           mappings$plots[["plot > plotName"]] = list(value = paste0(input$header_data, "$",input$plot_unique_id), source = "File")
-          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$header_data, "$", input$plot_unique_id), source = "File")
+          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$header_data, "$", input$plot_unique_id), source = "File")  
+          
           
           if("Coordinates" %in% input$plot_input_control){
             if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
@@ -633,7 +824,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           
           nodes$plots = append(nodes$plots, plots_mapping_nodes)
           
-          # If existing, build method/attribute nodes and link to plots
+          # Build method/attribute nodes and link to plots
           if(length(plots_method_links) != 0){
             plots_method_links = sort(plots_method_links) # important for correct order of links
             plots_templates = templates %>% dplyr::filter(template_id %in% plots_method_links)
@@ -650,11 +841,65 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           }
         }
         
-        ##### Observations ####
+        #-------------------------------------------------------------------------#
+        ##### Observations #####
+        browser()
+        if("aggregateOrganismObservations" %in% input$observations_input_control){
+          aggOrgObs_mappings = data.frame(
+            observation_type = "aggregateOrganismObservation",
+            plot_id = input$aggOrgObs_plot_id,
+            date = input$aggOrgObs_date,
+            taxon_name = input$aggOrgObs_taxonName,
+            taxon_cover = input$aggOrgObs_taxonCover
+          )
+          
+          if(input$aggOrgObs_hasStrata == "yes"){
+            aggOrgObs_mappings$taxonStratum = input$aggOrgObs_taxonStratum
+            aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
+            aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
+          }
+          
+          if(isTruthy(input$aggOrgObs_coverScale)){
+            aggOrgObs_coverScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_coverScale)
+            aggOrgObs_coverScale_nodes = templates_to_nodes(aggOrgObs_coverScale_template, vegx_schema = vegx_schema, log_path = log_path)
+          }
+        }
         
-        # TODO: Crashes when new importing project only with unique ID
-        # Error in : Invalid index: out of bounds
-        #### Update app state ####
+        if("individualOrganismObservations" %in% input$observations_input_control){}
+        if("speciesObservations" %in% input$observations_input_control){}
+        if("stratumObservations" %in% input$observations_input_control){}
+        if("communityObservations" %in% input$observations_input_control){}
+        if("surfaceCoverObservations" %in% input$observations_input_control){}
+        
+        # Build plotObservations
+        # "plotObservation > plotID" = paste0(input$aggOrgObs_data, "$", input$aggOrgObs$), source = "File")
+        # "plotObservation > obsStartDate" = paste0(input$aggOrgObs_data, "$",input$), source = "File")
+        # "plotObservation > obsEndDate" = paste0(input$aggOrgObs_data, "$",input$), source = "File")
+        # "plotObservation > projectID" = xml_attr(nodes$project, "id"), source = "Text")
+        
+        build_node_values_df()
+        
+        # Build organismNames
+        
+        # Build organismIdentities, link to organismNames
+        
+        # Build Strata, if available
+        
+        # Build Observations
+        ## AggregatOrganismObservations
+        
+        # <aggregateOrganismObservation id="570">
+        #   <plotObservationID>6</plotObservationID>
+        #   <organismIdentityID>51</organismIdentityID>
+        #   <stratumObservationID>33</stratumObservationID>
+        #   <aggregateOrganismMeasurement>
+        #     <value>P</value>
+        #     <attributeID>6</attributeID>
+        #   </aggregateOrganismMeasurement>
+        # </aggregateOrganismObservation>
+        
+        #-------------------------------------------------------------------------#
+        ##### Update app state ####
         # Update VegX document 
         for(element_name in names(nodes)){
           element_nodes = nodes[[element_name]]

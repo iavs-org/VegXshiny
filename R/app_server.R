@@ -24,7 +24,7 @@ app_server <- function(input, output, session) {
   
   # VegX document
   vegx_doc = new_vegx_document()
-  vegx_doc_history = list(vegx_doc)
+  # vegx_doc_history = list(vegx_doc)
 
   # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
