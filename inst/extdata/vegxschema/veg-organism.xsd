@@ -247,13 +247,9 @@
     <xsd:complexType name="OrganismNameType">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="id" type="misc:IDType" use="required">
-                    <xsd:annotation>
-                        <xsd:documentation>Unique internal identifier (key) of the element. This identifier is used elsewhere in a dataset instance to reference this specific element when it is referred to in a repeatable way by other part of the schema. </xsd:documentation>
-                    </xsd:annotation>
-                </xsd:attribute>
-                <xsd:attribute name="scope" default="document" type="misc:ScopeType" use="optional" />
+                <xsd:attribute name="id" type="misc:IDType" use="required" />
                 <xsd:attribute name="system" type="misc:SystemType" use="optional" />
+                <xsd:attribute name="scope" default="document" type="misc:ScopeType" use="optional" />
                 <xsd:attribute name="taxonName" type="xsd:boolean" use="required">
                     <xsd:annotation>
                         <xsd:documentation>A flag to identify that the organism name is a taxon name (i.e. a name according to a nomenclature code)</xsd:documentation>

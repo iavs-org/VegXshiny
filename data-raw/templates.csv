@@ -213,3 +213,61 @@ template_id,node_id,main_element,node_path,node_value
 29,9,strata,stratum > stratumName,Tier 7
 29,9,strata,stratum > methodID,1
 29,9,strata,stratum > order,7
+30,1,methods,method > subject,plant cover
+30,1,methods,method > name,Plant cover/Braun-Blanquet
+30,1,methods,method > description,"Standard Braun-Blanquet scala (levels: r,+,1,2,3,4,5)"
+30,2,attributes,attribute > choice > ordinal > methodID,1
+30,2,attributes,attribute > choice > ordinal > code,r
+30,2,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; very few individuals
+30,2,attributes,attribute > choice > ordinal > order,1
+30,3,attributes,attribute > choice > ordinal > methodID,1
+30,3,attributes,attribute > choice > ordinal > code,+
+30,3,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; few individuals
+30,3,attributes,attribute > choice > ordinal > order,2
+30,4,attributes,attribute > choice > ordinal > methodID,1
+30,4,attributes,attribute > choice > ordinal > code,1
+30,4,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; numerous individuals
+30,4,attributes,attribute > choice > ordinal > order,3
+30,5,attributes,attribute > choice > ordinal > methodID,1
+30,5,attributes,attribute > choice > ordinal > code,2
+30,5,attributes,attribute > choice > ordinal > definition,5-25 percent cover
+30,5,attributes,attribute > choice > ordinal > order,4
+30,6,attributes,attribute > choice > ordinal > methodID,1
+30,6,attributes,attribute > choice > ordinal > code,3
+30,6,attributes,attribute > choice > ordinal > definition,26-50 percent cover
+30,6,attributes,attribute > choice > ordinal > order,5
+30,7,attributes,attribute > choice > ordinal > methodID,1
+30,7,attributes,attribute > choice > ordinal > code,4
+30,7,attributes,attribute > choice > ordinal > definition,51-75 percent cover
+30,7,attributes,attribute > choice > ordinal > order,6
+30,8,attributes,attribute > choice > ordinal > methodID,1
+30,8,attributes,attribute > choice > ordinal > code,5
+30,8,attributes,attribute > choice > ordinal > definition,76-100 percent cover
+30,8,attributes,attribute > choice > ordinal > order,7
+31,1,methods,method > subject,plant cover
+31,1,methods,method > name,Plant cover/Recce
+31,1,methods,method > description,"Standard Recce scala (levels: 1,2,3,4,5,6)"
+31,2,attributes,attribute > choice > ordinal > methodID,1
+31,2,attributes,attribute > choice > ordinal > code,1
+31,2,attributes,attribute > choice > ordinal > definition,less than one percent cover
+31,2,attributes,attribute > choice > ordinal > order,1
+31,3,attributes,attribute > choice > ordinal > methodID,1
+31,3,attributes,attribute > choice > ordinal > code,2
+31,3,attributes,attribute > choice > ordinal > definition,1-5 percent cover
+31,3,attributes,attribute > choice > ordinal > order,2
+31,4,attributes,attribute > choice > ordinal > methodID,1
+31,4,attributes,attribute > choice > ordinal > code,3
+31,4,attributes,attribute > choice > ordinal > definition,6-25 percent cover
+31,4,attributes,attribute > choice > ordinal > order,3
+31,5,attributes,attribute > choice > ordinal > methodID,1
+31,5,attributes,attribute > choice > ordinal > code,4
+31,5,attributes,attribute > choice > ordinal > definition,26-50 percent cover
+31,5,attributes,attribute > choice > ordinal > order,4
+31,6,attributes,attribute > choice > ordinal > methodID,1
+31,6,attributes,attribute > choice > ordinal > code,5
+31,6,attributes,attribute > choice > ordinal > definition,51-75 percent cover
+31,6,attributes,attribute > choice > ordinal > order,5
+31,7,attributes,attribute > choice > ordinal > methodID,1
+31,7,attributes,attribute > choice > ordinal > code,6
+31,7,attributes,attribute > choice > ordinal > definition,76-100 percent cover
+31,7,attributes,attribute > choice > ordinal > order,6
