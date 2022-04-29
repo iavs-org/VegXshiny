@@ -17,7 +17,7 @@ mod_importWizard_ui <- function(id){
       widths = c(2, 10),
       selected = "Project",
       
-      #### Data ####
+      # Data ####
       # nav(title =  "1. Data", value = "Data",
       #     column(
       #       width = 10, offset = 1,
@@ -38,7 +38,7 @@ mod_importWizard_ui <- function(id){
       #     )
       # ),
       # 
-      #### Project ####
+      # Project ####
       nav(title = "1. Project", value = "Project",
           column(
             width = 10, offset = 1,
@@ -49,7 +49,7 @@ mod_importWizard_ui <- function(id){
           )
       ),
       
-      #### Plots ####
+      # Plots ####
       nav(title = "2. Plots", value = "Plots",
           column(
             width = 10, offset = 1,
@@ -61,15 +61,15 @@ mod_importWizard_ui <- function(id){
       ),
       
       
-      #### Observations ####
+      # Observations ####
       nav(title = "3. Observations", value = "Observations",  
           column(
             width = 10, offset = 1,
             h2("Observations"),
             tags$p("Import your observation data", class = "text-info annotation no-margin"),
             hr(),
-            
-            checkboxGroupInput(ns("observations_input_control"), label = "Observation Categories", inline = T, 
+            tags$h4("Observation categories"),
+            checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = T, 
                                choiceNames = c("Individual organisms", "Aggregate organisms", "Species", "Stratum", "Community", "Surface cover"),
                                choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", 
                                                 "stratumObservations", "communityObservations", "surfaceCoverObservations")),
@@ -92,7 +92,7 @@ mod_importWizard_ui <- function(id){
                   id = ns("individualOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
                   tags$div(
                     class = "panel-body",
-                    uiOutput(ns("individualOrganismObservation_ui"))
+                    uiOutput(ns("individualOrganismObservations_ui"))
                   )
                 )
               ),
@@ -205,19 +205,8 @@ mod_importWizard_ui <- function(id){
           )
       ),
       
-      #### Species ####
-      nav(title = "4. Species", value = "Species",         
-          column(
-            width = 10, offset = 1,
-            h2("Species"),
-            tags$p("Provide further details on the observed species", class = "text-info annotation no-margin"),
-            hr(),
-            uiOutput(ns("species_ui"))
-          )
-      ),
-      
-      #### Summary ####
-      nav(title = "5. Summary", value = "Summary",
+      # Summary ####
+      nav(title = "4. Summary", value = "Summary",
           column(
             width = 10, offset = 1,
             h2("Summary"),
@@ -266,7 +255,7 @@ mod_importWizard_ui <- function(id){
       )
     ),
     
-    #### Navigation bar ####
+    # Navigation bar ####
     uiOutput(ns("navigation_ui"))
   )
 }
@@ -277,7 +266,18 @@ mod_importWizard_ui <- function(id){
 mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+    # Server-wide observers & reactives ####
+    # Pull method templates
+    location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
+    elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
+    dimension_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot dimension") %>% pull(template_id, name)
+    area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
+    aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
+    slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
+    strata_methods = templates_lookup %>% filter(target_element == "methods", subject == "strata definition") %>% pull(template_id, name)
+    cover_methods = templates_lookup %>% filter(target_element == "methods", subject == "plant cover") %>% pull(template_id, name)
     
+    # Dynamic display text for data dropdown menus
     dropdown_empty = reactive({
       user_data = isolate(user_data)
       if(length(names(user_data)) == 0){
@@ -287,7 +287,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
     })
     
-    #### Navigation ####
+    #-------------------------------------------------------------------------#
+    # Navigation ####
     sidebar_tabs = c("Data", "Project", "Plots", "Observations", "Species", "Summary")
     
     output$navigation_ui = renderUI({
@@ -298,7 +299,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         )
       } else if(input$sidebar =="Summary") {
         if(TRUE
-           # isTruthy(input$header_data) &
+           # isTruthy(input$plot_data) &
            # isTruthy(input$cover_data) &
            # isTruthy(input$project_title)
         ){
@@ -336,7 +337,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(input$next_tab, nav_select("sidebar", selected = sidebar_tabs[which(sidebar_tabs == input$sidebar) + 1]))
     
     #-------------------------------------------------------------------------#
-    #### Project ####
+    # Project ####
     output$project_ui = renderUI({
       tagList(
         textInput(inputId = ns("project_title"), label = "Project title *",  width = "100%"),
@@ -352,33 +353,28 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     })
     
     #-------------------------------------------------------------------------#
-    #### Plots ####
-    location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
-    elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
-    area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
-    aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
-    slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
-    
+    # Plots ####
     observe({  # This observer prevents re-rendering of the entire UI when user_data changes
-      if(!is.null(input$header_data) & length(names(user_data)) != 0){
-        file_selected = input$header_data
-        updateSelectizeInput(session, inputId = "header_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+      if(!is.null(input$plot_data) & length(names(user_data)) != 0){
+        file_selected = input$plot_data
+        updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
       }
     })
     
     output$plots_ui = renderUI({
       tagList(
+        tags$h4("Main plots"),
         tags$p("Assign a dataset", class = "text-info annotation"),
-        selectizeInput(ns("header_data"), label = NULL, choices = c("No files found" = "")),
+        selectizeInput(ns("plot_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plots_mappings_ui"))
       )
     })
     
     output$plots_mappings_ui = renderUI({
-      req(input$header_data)
+      req(input$plot_data)
       
       tagList(
-        selectizeInput(inputId = ns("plot_unique_id"), label = "Plot ID *", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders)),
+        selectizeInput(inputId = ns("plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders)),
         
         checkboxGroupInput(ns("plot_input_control"), label = "Additional plot information", inline = T,
                            choiceNames = c("Coordinates", "Elevation", "Geometry/Area", "Topography", "Parent Material"),
@@ -387,7 +383,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$div(
           id = ns("plotsAccordion"), class = "panel-group", "role" = "tablist",
           
-          ##### Coordinates ####
+          ## Coordinates ####
           tags$div(
             id = ns("plotsCoordinates"),
             class = "panel panel-default",
@@ -405,8 +401,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))), 
-                  column(4, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
+                  column(4, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
                                         choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
                 ), 
@@ -417,7 +413,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             )
           ),
           
-          ##### Elevation ####
+          # Elevation ####
           tags$div(
             id = ns("plotsElevation"),
             class = "panel panel-default",
@@ -435,7 +431,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),  
+                  column(4, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
                   column(4, selectInput(ns("plot_elevation_method"), label = "Measurement method",
                                         choices = append(list("Select a template" = ""), setNames(as.list(elevation_methods), names(elevation_methods))))) 
                 )
@@ -443,7 +439,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             )
           ),
           
-          ##### Geometry ####
+          # Geometry ####
           tags$div(
             id = ns("plotsGeometry"),
             class = "panel panel-default",
@@ -462,14 +458,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 class = "panel-body",
                 fluidRow(
                   column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
-                  column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
                                         choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
                 )
               )
             )
           ),
-          ##### Topography ####
+          # Topography ####
           tags$div(
             id = ns("plotsTopography"),
             class = "panel panel-default",
@@ -492,7 +488,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   tags$div(
                     class = "form-group",
                     tags$label("Value", "for" = ns("plot_aspect")),
-                    selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                    selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))
                   ),
                   tags$div(
                     class = "form-group",
@@ -507,7 +503,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   tags$div(
                     class = "form-group",
                     tags$label("Value", "for" = ns("plot_slope")),
-                    selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))
+                    selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))
                   ),
                   tags$div(
                     class = "form-group",
@@ -519,7 +515,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               )
             )
           ),
-          ##### Parent material ####
+          # Parent material ####
           tags$div(
             id = ns("plotsParentMaterial"),
             class = "panel panel-default",
@@ -537,12 +533,17 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(3, selectInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$header_data]]$x$rColHeaders))),
+                  column(3, selectInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 )
               )
             )
           )
-        )
+        ),
+        hr(),
+        tags$h4("Subplots"),
+        tags$p("Are plots structured into subplots?", class = "text-info annotation"),
+        radioButtons(ns("plots_hasSubplots"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
+        uiOutput(ns("subPlots_ui")),
       )
     })
     
@@ -557,10 +558,111 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
     })
     
-    #-------------------------------------------------------------------------#
-    #### Observations ####
+    ## Subplots ####
+    output$subPlots_ui = renderUI({
+      if(input$plots_hasSubplots == "yes"){
+        tagList(
+          tags$p("Assign a dataset", class = "text-info annotation"),
+          selectizeInput(ns("subPlot_data"), label = NULL, choices = c(dropdown_empty(), names(user_data))),
+          uiOutput(ns("subPlots_mappings_ui"))
+        )
+      }
+    })
+    
+    output$subPlots_mappings_ui = renderUI({
+      req(input$subPlot_data)
+      
+      tagList(
+        fluidRow(
+          column(4, selectizeInput(inputId = ns("subPlot_plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
+          column(4, selectizeInput(inputId = ns("subPlot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders)))
+        ),
+        checkboxGroupInput(ns("subPlots_input_control"), label = "Additional sub-plot information", inline = T,
+                           choiceNames = c("Dimensions", "Geometry/Area"),
+                           choiceValues = c("Dimensions", "Geometry")),
+        
+        tags$div(
+          id = ns("subPlotsAccordion"), class = "panel-group", "role" = "tablist",
+          
+          ## Coordinates ####
+          tags$div(
+            id = ns("subPlotsDimensions"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("subPlotsDimensionsHeading") , class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Dimensions",
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("subPlotsAccordion")), "href"=paste0("#", ns("subPlotsDimensionsBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("subPlotsDimensionsBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                fluidRow(
+                  column(4, selectInput(ns("subPlot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))), 
+                  column(4, selectInput(ns("subPlot_width"), label = "Width", choices =  c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("subPlot_dimension_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(dimension_methods), names(dimension_methods))))) 
+                )
+              )
+            )
+          ),
+          tags$div(
+            id = ns("subPlotsGeometry"),
+            class = "panel panel-default",
+            tags$div(
+              id = ns("subPlotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
+              tags$h4(
+                class = "panel-title",
+                tags$a("Geometry", class = "collapsed", 
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("subPlotsAccordion")), "href"=paste0("#", ns("subPlotsGeometryBody"))
+                )
+              )
+            ),
+            tags$div(
+              id = ns("subPlotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
+              tags$div(
+                class = "panel-body",
+                fluidRow(
+                  column(4, selectInput(ns("subPlot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("subPlot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("subPlot_area_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                )
+              )
+            )
+          )
+        )
+      )
+    })
     
     observe({
+      panel_names =  c("Dimensions", "Geometry")
+      for(panel_name in panel_names){
+        if(panel_name %in% input$subPlots_input_control){
+          shinyjs::show(paste0("subPlots", panel_name))
+        } else {
+          shinyjs::hide(paste0("subPlots", panel_name))
+        }
+      }
+    })
+    
+    
+    #-------------------------------------------------------------------------#
+    # Observations ####
+    abbreviations = c(
+      "individualOrganismObservations" = "indOrgObs",
+      "aggregateOrganismObservations" = "aggOrgObs",
+      "speciesObservations" = "specObs",
+      "stratumObservations" = "stratObs",
+      "communityObservations" = "commObs",
+      "surfaceCoverObservations" = "covObs"
+    )
+    
+    observe({  # Dynamically shows/hides UIs based on checkboxInput
       panel_names =  c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", "stratumObservations", "communityObservations", "surfaceCoverObservations")
       for(panel_name in panel_names){
         if(panel_name %in% input$observations_input_control){
@@ -571,24 +673,43 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
     })
     
-    ##### IndividualOrganismObservations ####
-    output$individualOrganismObservations_ui = renderUI({
-      tags$p("not implemented")
-    })
-    
-    ##### AggregateOrganismObservations ####
-    strata_methods = templates_lookup %>% filter(subject == "strata definition") %>% pull(template_id, name)
-    cover_methods = templates_lookup %>% filter(subject == "plant cover") %>% pull(template_id, name)
-    
-    observe({  # This observer prevents re-rendering of the entire UI when user_data changes
-      if(!is.null(input$aggOrgObs_data) & length(names(user_data)) != 0){
-        file_selected = input$aggOrgObs_data
-        updateSelectizeInput(session, inputId = "aggOrgObs_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+    observe({  # Prevents re-rendering of entire UIs when user_data changes
+      if(length(names(user_data)) != 0){
+        input_names = paste0(abbreviations, "_data")
+        for(input_name in input_names){
+          if(!is.null(input[[input_name]])){
+            updateSelectizeInput(session, inputId = input_name, selected = input[[input_name]], choices = c(dropdown_empty(), names(user_data))) 
+          }
+        }
       }
     })
     
+    ## individualOrganismObservations ####
+    output$individualOrganismObservations_ui = renderUI({
+      tagList(
+        tags$p("Assign a dataset", class = "text-info annotation"),
+        selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
+        uiOutput(ns("indOrgObs_mapping_ui"))
+      )
+    })
+    
+    output$indOrgObs_mapping_ui = renderUI({
+      req(input$indOrgObs_data)
+      tagList(
+        fluidRow(
+          column(4, selectInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
+          column(4, selectInput(ns("indOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
+        )
+      )
+    })
+    
+    ## aggregateOrganismObservations ####
     output$aggregateOrganismObservations_ui = renderUI({
       tagList(
+        div(class = "frame", 
+            tags$p(icon("info", class = "icon-padded"), "An observation applying to all occurrences of an organism based on an aggregation factor, e.g. a measurement of the 
+                      overall cover/biomass/etc. of a specific taxon in a plot.", class = "text-info annotation no-margin"),
+        ),
         tags$label("Strata definitions"),
         br(),
         tags$p("Are observations structured into strata?", class = "text-info annotation"),
@@ -596,17 +717,19 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         uiOutput(ns("aggOrgObs_strata_ui")),
         
         hr(),
-        tags$label("Cover scale"),
+        tags$label("Cover scale *"),
         br(),
         tags$p("Which scale was used to measure plant cover?", class = "text-info annotation"),
-        selectizeInput(ns("aggOrgObs_coverScale"), label = NULL, choices = append(list("Select a template" = ""), setNames(as.list(cover_methods), names(cover_methods)))),
+        selectizeInput(ns("aggOrgObs_coverScale"), label = NULL, 
+                       choices = append(list("Select a template" = "", "Undefined (ordinal scale)" = "ordinal", "Undefined (continuous scale)" = "continuous"), 
+                                        setNames(as.list(cover_methods), names(cover_methods)))),
         
         hr(),
-        tags$label("Observations"),
+        tags$label("Observations *"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
-        uiOutput(ns("aggOrgObs_observations_ui"))
+        uiOutput(ns("aggOrgObs_mapping_ui"))
       )
     })
     
@@ -614,12 +737,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if(input$aggOrgObs_hasStrata == "yes"){
         tagList(
           tags$p("Which definition was used?", class = "text-info annotation"),
-          selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, choices = append(list("Select a template" = ""), setNames(as.list(strata_methods), names(strata_methods))))  
+          selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, choices = append(list("Select a template" = "", "Undefined" =  "undefined"), setNames(as.list(strata_methods), names(strata_methods))))  
         )
       }
     })
     
-    output$aggOrgObs_observations_ui = renderUI({
+    output$aggOrgObs_mapping_ui = renderUI({
       req(input$aggOrgObs_data)
       tagList(
         fluidRow(
@@ -640,43 +763,30 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       }
     })
     
-    ##### SpeciesObservations ####
-    output$speciesObservations_ui = renderUI({
-      tags$p("not implemented")
-    })
-    
-    ##### stratumObservations ####
+    ## stratumObservations ####
     output$stratumObservations_ui = renderUI({
       tags$p("not implemented")
     })
     
-    ##### communityObservations ####
+    ## communityObservations ####
     output$communityObservations_ui = renderUI({
       tags$p("not implemented")
     })
     
-    ##### surfaceCoverObservations ####
+    ## surfaceCoverObservations ####
     output$surfaceCoverObservations_ui = renderUI({
       tags$p("not implemented")
     })
     
     #-------------------------------------------------------------------------#
-    #### Species ####
-    output$species_ui = renderUI({
-      tagList(
-        h3("Species UI")
-      )
-    })
-    
-    #-------------------------------------------------------------------------#
-    #### Summary ####
-    ##### Project ####
+    # Summary ####
+    ## Project ####
     output$summary_project = renderUI({
       render_summary_table(c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
                            c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type))
     })
     
-    ##### Plots ####
+    ## Plots ####
     output$summary_plot_id = renderUI({
       render_summary_table("Unique identifier *", input$plot_unique_id)
     })
@@ -705,7 +815,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       render_summary_table("Parent material", input$plot_parent_material)
     })
     
-    #### Build Nodes ####
+    #-------------------------------------------------------------------------#
+    # Build Nodes ####
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
@@ -737,9 +848,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       handlerExpr = {
         mappings = list()
         nodes = list()
-        
         #-------------------------------------------------------------------------#
-        ##### Project ####
+        ## Project ####
         if(isTruthy(input$project_title)){
           mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
         }
@@ -769,20 +879,21 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         }
         
         #-------------------------------------------------------------------------#
-        ##### Plots ####
+        # Plots ####
         if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
           # TODO error and warning handling
+          # TODO support subplots
+          # TODO make entries unique
           plots_method_links = c()
           
           # Input mappings
-          mappings$plots[["plot > plotName"]] = list(value = paste0(input$header_data, "$",input$plot_unique_id), source = "File")
-          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$header_data, "$", input$plot_unique_id), source = "File")  
-          
+          mappings$plots[["plot > plotName"]] = list(value = paste0(input$plot_data, "$",input$plot_unique_id), source = "File")
+          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$plot_data, "$", input$plot_unique_id), source = "File")  
           
           if("Coordinates" %in% input$plot_input_control){
             if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueX"]] = list(value = paste0(input$header_data, "$", input$plot_coordinates_x), source = "File")
-              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueY"]] = list(value = paste0(input$header_data, "$", input$plot_coordinates_y), source = "File")
+              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueX"]] = list(value = paste0(input$plot_data, "$", input$plot_coordinates_x), source = "File")
+              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueY"]] = list(value = paste0(input$plot_data, "$", input$plot_coordinates_y), source = "File")
               mappings$plots[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = list(value = input$plot_crs, source = "Text")
               plots_method_links["plot > location > horizontalCoordinates > coordinates > attributeID"] = input$plot_location_method
             }
@@ -790,7 +901,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           
           if("Elevation" %in% input$plot_input_control){
             if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-              mappings$plots[["plot > location > verticalCoordinates > elevation > value"]] = list(value = paste0(input$header_data, "$", input$plot_elevation), source = "File")
+              mappings$plots[["plot > location > verticalCoordinates > elevation > value"]] = list(value = paste0(input$plot_data, "$", input$plot_elevation), source = "File")
               plots_method_links["plot > location > verticalCoordinates > elevation > attributeID"] = input$plot_elevation_method}
           }
           
@@ -798,22 +909,22 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             if(isTruthy(input$plot_shape)){
               mappings$plots[["plot > geometry > shape"]] = list(value = input$plot_shape, source = "Text")}
             if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-              mappings$plots[["plot > geometry > area > value"]] = list(value = paste0(input$header_data, "$", input$plot_area), source = "File")
+              mappings$plots[["plot > geometry > area > value"]] = list(value = paste0(input$plot_data, "$", input$plot_area), source = "File")
               plots_method_links["plot > geometry > area > attributeID"] = input$plot_area_method}
           }
           
           if("Topography" %in% input$plot_input_control){
             if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-              mappings$plots[["plot > topography > aspect > value"]] = list(value = paste0(input$header_data, "$", input$plot_aspect), source = "File")
+              mappings$plots[["plot > topography > aspect > value"]] = list(value = paste0(input$plot_data, "$", input$plot_aspect), source = "File")
               plots_method_links["plot > topography > aspect > attributeID"] = input$plot_aspect_method}
             if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-              mappings$plots[["plot > topography > slope > value"]] = list(value = paste0(input$header_data, "$", input$plot_slope), source = "File")
+              mappings$plots[["plot > topography > slope > value"]] = list(value = paste0(input$plot_data, "$", input$plot_slope), source = "File")
               plots_method_links["plot > topography > slope > attributeID"] = input$plot_slope_method}
           }
           
           if("Parent material" %in% input$plot_input_control){
             if(isTruthy(input$plot_parent_material)){
-              mappings$plots[["plot > parentMaterial > value"]] = list(value = paste0(input$header_data, "$", input$plot_parent_material), source = "File")}
+              mappings$plots[["plot > parentMaterial > value"]] = list(value = paste0(input$plot_data, "$", input$plot_parent_material), source = "File")}
           }
           
           # Build plot nodes 
@@ -821,6 +932,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           plots_mapping_nodes = lapply(1:nrow(plots_df), function(i){
             new_vegx_node(vegx_schema, colnames(plots_df), plots_df[i,], id = NULL, log_path)
           })
+          plots_mapping_nodes = plots_mapping_nodes[which(sapply(plots_mapping_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
           
           nodes$plots = append(nodes$plots, plots_mapping_nodes)
           
@@ -836,70 +948,229 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 link_vegx_nodes(plot_node$node, names(plots_method_links)[j], plots_method_nodes$attributes[[j]]$node, vegx_schema, log_path)   
               }
             })
-            nodes$methods = append(nodes$methods,  plots_method_nodes$methods)
+            nodes$methods = append(nodes$methods, plots_method_nodes$methods)
             nodes$attributes = append(nodes$attributes,  plots_method_nodes$attributes)  
           }
         }
         
         #-------------------------------------------------------------------------#
-        ##### Observations #####
-        browser()
-        if("aggregateOrganismObservations" %in% input$observations_input_control){
-          aggOrgObs_mappings = data.frame(
-            observation_type = "aggregateOrganismObservation",
-            plot_id = input$aggOrgObs_plot_id,
-            date = input$aggOrgObs_date,
-            taxon_name = input$aggOrgObs_taxonName,
-            taxon_cover = input$aggOrgObs_taxonCover
+        # Observations #####
+        # The central element in VegX is the plotObervation, which is referenced by all other observationTypes. 
+        # Additionally, a number of other elements such as methods, organismNames, or attributes may be shared by different observationTypes.
+        # This provides a logical order for building up the VegX document when importing observations: First, build plotObservations from
+        # all unique combinations of plot and date across all observations. Second, systematically process potentially shared elements and 
+        # create new nodes from the mappings for different observationTypes. Finally, resolve the mapped values to their corresponding 
+        # node IDs and create the actual observation elements. 
+        #
+        # The workflow below follows this rationale.
+        
+        if(input$observations_input_control != ""){
+          # Fetch user data assigned in observation mappings
+          data_upload = sapply(input$observations_input_control, function(obs_category){
+            input_value = input[[paste0(abbreviations[obs_category], "_data")]]
+            file_name = str_split(input_value, "\\$", simplify = T)[1]
+            column_name = str_split(input_value, "\\$", simplify = T)[2]
+            upload = user_data[[file_name]]
+            df_upload = jsonlite::fromJSON(upload$x$data)
+            colnames(df_upload) = upload$x$rColHeaders
+            return(data.frame(df_upload))
+          }, simplify = FALSE, USE.NAMES = TRUE)
+          
+          #------------------------------------#
+          # Build plotObservations
+          # 1. Get unique plot-date combinations across observations, to avoid creation of duplicate plotObservations
+          plotObs_df = lapply(input$observations_input_control, function(obs_category){
+            df_upload = data_upload[[obs_category]]
+            plot = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
+            date = df_upload[,input[[paste0(abbreviations[obs_category], "_date")]]]
+            return(data.frame("plotUniqueIdentifier" = plot, "plotObservation > obsStartDate" = date, check.names = F))
+          }) %>% 
+            bind_rows() %>% 
+            distinct() %>% 
+            mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
+          
+          # 2. Check if plots have ids already
+          plots_unmatched = setdiff(plotObs_df$plotUniqueIdentifier, 
+                                    sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
+          
+          if(length(plots_unmatched) > 0){
+            plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
+            plots_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
+              new_vegx_node(vegx_schema, colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path)
+            })
+            nodes$plots = append(nodes$plots, plots_nodes_addendum)
+            warning(paste0("Added new nodes for the following plots references in observation data", plots_unmatched))
+          }
+          
+          # 3. Replace mapped plot identifiers with internal ids
+          plots_lookup = data.frame(
+            plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+            plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
           )
           
-          if(input$aggOrgObs_hasStrata == "yes"){
-            aggOrgObs_mappings$taxonStratum = input$aggOrgObs_taxonStratum
-            aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
-            aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
+          plotObs_df = plotObs_df %>% 
+            inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
+            mutate("plotObservation > plotID" = plotID) %>% 
+            dplyr::select(-plotUniqueIdentifier, -plotID)
+          
+          # 4. Create nodes
+          plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
+            new_vegx_node(vegx_schema, colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path)
+          })
+          nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
+          
+          # 5. Build lookup table
+          plotObs_lookup = lapply(plotObs_nodes, function(x){
+            data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
+                       plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
+                       obs_date = xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate")))}) %>% 
+            bind_rows() %>% 
+            left_join(plots_lookup, by = "plotID")
+          
+          #------------------------------------#
+          # Build organismNames and OrganismIdentities
+          # 1. Fetch data
+          orgNames = c() # Organismnames may come from indOrgObs or aggOrgObs
+          if("individualOrganismObservations" %in% input$observations_input_control){
+            orgNames = c(orgNames, data_upload[["individualOrganismObservations"]][,input$indOrgObs_taxonName])
+          }
+          if("aggregateOrganismObservations" %in% input$observations_input_control){
+            orgNames = c(orgNames, data_upload[["aggregateOrganismObservations"]][, input$aggOrgObs_taxonName])
+          }  
+          
+          # 2. Build Nodes
+          orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
+          orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
+            new_vegx_node(vegx_schema, colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path)
+          })
+          
+          orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
+          orgIdentities_nodes = lapply(1:nrow(orgIdentities_df), function(i){
+            new_vegx_node(vegx_schema, colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path)
+          })
+          
+          nodes$organismNames = orgNames_nodes
+          nodes$organismIdentities = orgIdentities_nodes
+          
+          # 3. Build lookup table
+          orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
+            data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),
+                       originalOrganismNameID = xml2::xml_text(xml2::xml_child(x$node, search = "originalOrganismNameID")))}) %>% 
+            bind_rows()
+          
+          orgNames_lookup = bind_cols(orgNames_df, orgIdentities_df) %>% 
+            setNames(c("organismName", "originalOrganismNameID")) 
+          
+          organisms_lookup = left_join(orgIdentities_lookup, orgNames_lookup, by = "originalOrganismNameID")
+          
+          #------------------------------------#
+          # Build Strata, if available
+          
+          
+          #------------------------------------#
+          # Build Observations
+          ## AggregatOrganismObservations
+          if("aggregateOrganismObservations" %in% input$observations_input_control){
+            
+            if(input$aggOrgObs_hasStrata == "yes"){
+              if(input$aggOrgObs_strataDef == "undefined"){
+                stratum_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
+                
+                
+                method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
+                                       node_path = c("method > subject", "method > name", "method > description"),
+                                       node_value = c("plant cover", "Undefined ordinal cover scale", "An ordinal plant cover scale with missing definitions for individual categories"))
+                attributes_df = data.frame(template_id = 1, main_element = "attributes", 
+                                           node_path = "attribute > choice > ordinal > code", 
+                                           node_value = cover_values,
+                                           group_value = cover_values) %>% 
+                  group_by(group_value) %>% 
+                  group_modify(~add_row(.x, template_id = 1, main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
+                  mutate(node_id = cur_group_id()+1) %>% 
+                  ungroup() %>% 
+                  select(template_id, node_id, main_element, node_path, node_value)
+              } else {
+                aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
+                aggOrgObs_taxonStratum = input$aggOrgObs_taxonStratum
+                
+                aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
+              }
+              
+            }
+            
+            #------------------#
+            if(input$aggOrgObs_coverScale == "ordinal"){
+              # 1. Get unique cover values from observation data
+              cover_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonCover])
+              method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
+                                     node_path = c("method > subject", "method > name", "method > description"),
+                                     node_value = c("plant cover", "Undefined ordinal cover scale", "An ordinal plant cover scale with missing definitions for individual categories"))
+              attributes_df = data.frame(template_id = 1, main_element = "attributes", 
+                                         node_path = "attribute > choice > ordinal > code", 
+                                         node_value = cover_values,
+                                         group_value = cover_values) %>% 
+                group_by(group_value) %>% 
+                group_modify(~add_row(.x, template_id = 1, main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
+                mutate(node_id = cur_group_id()+1) %>% 
+                ungroup() %>% 
+                select(template_id, node_id, main_element, node_path, node_value)
+              
+              aggOrgObs_coverScale_template = bind_rows(method_df, attributes_df)
+            } else if(input$aggOrgObs_coverScale == "continuous"){
+              method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
+                                     node_path = c("method > subject", "method > name", "method > description"),
+                                     node_value = c("plant cover", "Undefined quantitative cover scale", "A quantitative plant cover scale with missing definitions for individual categories"))
+              attributes_df = data.frame(template_id = 1, node_id = 2, main_element = "attributes",
+                                         node_path = c("attribute > choice > quantitative > methodID", "attribute > choice > quantitative > unit"),
+                                         node_value = c("1", "undefined"))
+              aggOrgObs_coverScale_template = bind_rows(method_df, attributes_df)
+            } else {
+              aggOrgObs_coverScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_coverScale)
+            }
+            
+            # 2. Build Nodes
+            aggOrgObs_coverScale_nodes = templates_to_nodes(aggOrgObs_coverScale_template, vegx_schema = vegx_schema, log_path = log_path)
+            nodes$methods = append(nodes$methods, aggOrgObs_coverScale_nodes$methods)
+            nodes$attributes = append(nodes$attributes, aggOrgObs_coverScale_nodes$attributes)
+            
+            # 3. Build lookup (if qualitative cover scale was used)
+            if(xml2::xml_name(xml2::xml_child(aggOrgObs_coverScale_nodes$attributes[[1]]$node)) != "quantitative"){
+              coverScale_lookup = lapply(aggOrgObs_coverScale_nodes$attributes, function(x){
+                data.frame(attributeID = xml2::xml_attr(x$node, "id"),
+                           taxon_cover = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                bind_rows()
+            }
+            #------------------#
+            aggOrgObs_mappings = data.frame(
+              plotUniqueIdentifier = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_plot_id],
+              obs_date = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date],
+              organismName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonName],
+              taxon_cover = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonCover]
+            )
+            
+            aggOrgObs_df = aggOrgObs_mappings %>% 
+              left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
+              left_join(organisms_lookup, by = "organismName") %>% 
+              left_join(coverScale_lookup, by = "taxon_cover") %>% 
+              dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
+                            "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
+                            "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_cover, 
+                            "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID)
+            
+            aggOrgObs_nodes = lapply(1:nrow(aggOrgObs_df), function(i){
+              new_vegx_node(vegx_schema, colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path)
+            })
+            nodes$aggregateOrganismObservations = aggOrgObs_nodes  
           }
           
-          if(isTruthy(input$aggOrgObs_coverScale)){
-            aggOrgObs_coverScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_coverScale)
-            aggOrgObs_coverScale_nodes = templates_to_nodes(aggOrgObs_coverScale_template, vegx_schema = vegx_schema, log_path = log_path)
-          }
+          if("stratumObservations" %in% input$observations_input_control){}
+          if("communityObservations" %in% input$observations_input_control){}
+          if("surfaceCoverObservations" %in% input$observations_input_control){}
+          
         }
         
-        if("individualOrganismObservations" %in% input$observations_input_control){}
-        if("speciesObservations" %in% input$observations_input_control){}
-        if("stratumObservations" %in% input$observations_input_control){}
-        if("communityObservations" %in% input$observations_input_control){}
-        if("surfaceCoverObservations" %in% input$observations_input_control){}
-        
-        # Build plotObservations
-        # "plotObservation > plotID" = paste0(input$aggOrgObs_data, "$", input$aggOrgObs$), source = "File")
-        # "plotObservation > obsStartDate" = paste0(input$aggOrgObs_data, "$",input$), source = "File")
-        # "plotObservation > obsEndDate" = paste0(input$aggOrgObs_data, "$",input$), source = "File")
-        # "plotObservation > projectID" = xml_attr(nodes$project, "id"), source = "Text")
-        
-        build_node_values_df()
-        
-        # Build organismNames
-        
-        # Build organismIdentities, link to organismNames
-        
-        # Build Strata, if available
-        
-        # Build Observations
-        ## AggregatOrganismObservations
-        
-        # <aggregateOrganismObservation id="570">
-        #   <plotObservationID>6</plotObservationID>
-        #   <organismIdentityID>51</organismIdentityID>
-        #   <stratumObservationID>33</stratumObservationID>
-        #   <aggregateOrganismMeasurement>
-        #     <value>P</value>
-        #     <attributeID>6</attributeID>
-        #   </aggregateOrganismMeasurement>
-        # </aggregateOrganismObservation>
-        
         #-------------------------------------------------------------------------#
-        ##### Update app state ####
+        # Update app state ####
         # Update VegX document 
         for(element_name in names(nodes)){
           element_nodes = nodes[[element_name]]

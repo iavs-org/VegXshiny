@@ -74,8 +74,11 @@ app_server <- function(input, output, session) {
   user_data = mod_fileManager_server("fileManager", action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
-  # Main UI: Create mappings and build VegX document
+  # Guided import for tabular data
   mod_importWizard_server("importWizard", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
+  
+  # --------------------------------------------------------------------------------------- #
+  # Create mappings and add nodes freely
   mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #

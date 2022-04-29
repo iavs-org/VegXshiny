@@ -39,10 +39,12 @@ mod_fileManager_server <- function(id, action_log, log_path){
     file_focus = reactiveVal()
     data_unedited = reactiveVal()
     
+    
+    # TODO Import TV2/TV3
     #### Upload ####
     # Process and render uploaded files
     observeEvent(input$upload, {
-      lapply(input$upload$name, function(file_name){      # TODO Import TV2/TV3
+      lapply(input$upload$name, function(file_name){     
         tryCatch(
           expr = {
             file_info = input$upload[which(input$upload$name == file_name),]

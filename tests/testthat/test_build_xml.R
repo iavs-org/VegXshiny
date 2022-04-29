@@ -95,6 +95,8 @@ test_that("Element types are checked properly", {
   expect_equal(length(xml_children(root)), 0)
 })
 
+#------------------------------------------------------------#
+
 test_that("Siblings are from the correct level", {
   node_paths = list(c("plot", "plotName"), c("plot", "location", "horizontalCoordinates", "coordinates", "attributeID"))
   names_ref = c("plotName", "attributeID") 
@@ -103,5 +105,14 @@ test_that("Siblings are from the correct level", {
   build_xml(root, node_paths, c("foo", "bar"), vegx_schema)
   names_test = root %>% xml_find_all(".//*[not(*)]") %>% xml_name()
   expect_equal(names_ref, names_test)
+})
+
+#------------------------------------------------------------#
+
+test_that("Nodes without children are handled properly", {
+  node_paths = list(c("organismName"))
+  root = xml_new_root("organismName")
+  build_xml(root, node_paths, "foo", vegx_schema)
+  expect_equal(xml_text(root), "foo")
 })
 

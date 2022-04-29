@@ -98,7 +98,7 @@ mod_nodeEditor_ui <- function(id){
             )
           )
         )
-        # Templates Tab is build and inserted server-side
+        # Templates Tab is built and inserted server-side
       )
     )
   )
@@ -234,8 +234,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                                      column(4, selectInput(ns("id_source"), label = "ID source", choices = list("Auto" = "auto", "File" = "file"), width = "100%")),
                                      column(8, uiOutput(ns("id_column")))
                                    ),
-                                   
-                                   tags$p("All mappings will be reset."),
                                    size = "l",
                                    footer = tagList(
                                      tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
@@ -469,8 +467,8 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
     # --------------------------------------------------------------------------------------- #
     ##### UI #####
     if(tab_selected %in% templates_lookup$target_element){
-      templates_elem_overview = templates_lookup %>% filter(.data$target_element == tab_selected)
-      templates_elem = templates %>% filter(.data$template_id %in% templates_elem_overview$template_id)
+      templates_elem_overview = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+        dplyr::select(-template_id, -target_element)
       
       output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
                                              rownames = FALSE,
@@ -486,9 +484,13 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
           fluidRow(
             column(
               width = 12,
-              tags$h4(tags$b("Templates selected:")),
-              textOutput(ns("templates_selected")),
-              
+              fluidRow(
+                style="min-height: 65px",
+                column(12,
+                       tags$h4(tags$b("Templates selected:")),
+                       textOutput(ns("templates_selected"))
+                )
+              ),
               hr(),
               DT::dataTableOutput(ns("templates")),
               hr(.noWS = c("before","after"))
@@ -529,8 +531,6 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                                      hr(),
                                      tags$label("This action will:"),
                                      tags$li(paste0("Add ", n_nodes," new element(s) to the following main elements: ", paste0(node_elements, collapse = ", "))),
-                                     tags$br(),
-                                     tags$p("All existing mappings will be reset."),
                                      size = "l",
                                      footer = tagList(
                                        tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
