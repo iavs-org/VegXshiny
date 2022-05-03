@@ -17,12 +17,21 @@ mod_fileManager_ui <- function(id){
     
     mainPanel(
       width = 10, 
-      tagList(
-        tags$label("File browser"),
-        uiOutput(ns("file_browser")),
-        tags$hr(),
-        tags$label("File Editor"),
-        uiOutput(ns("file_editor"))
+      fluidRow(
+        column(
+          10, 
+          offset = 1,
+          tagList(
+            tags$label("File browser"),
+            uiOutput(ns("file_browser")),
+            tags$hr(),
+            div(
+              tags$label("File Editor"),
+              uiOutput(ns("file_editor")),
+              style = "margin-bottom: 20px"
+            )
+          )  
+        )
       )
     )
   )
@@ -98,7 +107,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
               
               # Create Button and Event listener
               file_button = actionButton(ns(paste0("button_", file_name)),
-                                         width = "200px", height = "200px", class = "btn-success",
+                                         width = "180px", height = "180px", class = "btn-success no-margin",
                                          label = div(icon, tags$br(), file_name))
               
               observeEvent(eventExpr = input[[paste0("button_", file_name)]],
@@ -124,7 +133,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs")
           )
         ),
-        rhandsontable::rHandsontableOutput(ns("hot_table"))
+        rhandsontable::rHandsontableOutput(ns("hot_table"), height = 500)
       )
     })
     

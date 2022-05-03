@@ -17,27 +17,6 @@ mod_importWizard_ui <- function(id){
       widths = c(2, 10),
       selected = "Project",
       
-      # Data ####
-      # nav(title =  "1. Data", value = "Data",
-      #     column(
-      #       width = 10, offset = 1,
-      #       h2("Data"),
-      #       tags$p("Describe your data", class = "text-info annotation no-margin"),
-      #       hr(),
-      #       tags$p("This import wizard helps you to convert plant community data from a spreadsheet format into VegX."),
-      #       tags$p("Plant community data are usually organized in a table where rows correspond to species, columns correspond to plots and values reflect the cover
-      #            of a given species in a given plot. Meta data about species or plots may be appended as additional columns or rows, respectively."),
-      #       div(class = "text-center", style = "max-width: 700px; margin-left: auto; margin-right: auto",
-      #           tags$img(src = "www/images/veg_table.png", contentType = "image/png", alt = "Vegetation table", width = "100%"),
-      #           tags$p("Structure of a typical vegetation dataset.", class = "annotation")
-      #       ),
-      #       tags$p("Please use the File Manager to upload separate header, cover, and species datasets and assign their roles below.",
-      #              tags$b("Note that, contrary to the depiction above, header data should be organized in columns.", class = "text-info"),
-      #              "You can use the File Manager to edit your data accordingly."),
-      #       uiOutput(ns("data_ui"))
-      #     )
-      # ),
-      # 
       # Project ####
       nav(title = "1. Project", value = "Project",
           column(
@@ -56,7 +35,7 @@ mod_importWizard_ui <- function(id){
             h2("Plots"),
             tags$p("Describe static plot properties", class = "text-info annotation no-margin"),
             hr(),
-            uiOutput(ns("plots_ui"))
+            uiOutput(ns("plot_ui"))
           )
       ),
       
@@ -70,8 +49,8 @@ mod_importWizard_ui <- function(id){
             hr(),
             tags$h4("Observation categories"),
             checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = T, 
-                               choiceNames = c("Individual organisms", "Aggregate organisms", "Species", "Stratum", "Community", "Surface cover"),
-                               choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", 
+                               choiceNames = c("Individual organisms", "Aggregate organisms", "Stratum", "Community", "Surface cover"),
+                               choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", 
                                                 "stratumObservations", "communityObservations", "surfaceCoverObservations")),
             
             tags$div(
@@ -114,27 +93,6 @@ mod_importWizard_ui <- function(id){
                   tags$div(
                     class = "panel-body",
                     uiOutput(ns("aggregateOrganismObservations_ui"))
-                  )
-                )
-              ),
-              
-              tags$div(
-                id = ns("speciesObservations"),
-                class = "panel panel-default",
-                tags$div(
-                  id = ns("speciesObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("SpeciesObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("speciesObservationsBody"))
-                    )
-                  )
-                ),
-                tags$div(
-                  id = ns("speciesObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
-                  tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("speciesObservations_ui"))
                   )
                 )
               ),
@@ -356,48 +314,53 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     # Plots ####
     observe({  # This observer prevents re-rendering of the entire UI when user_data changes
       if(!is.null(input$plot_data) & length(names(user_data)) != 0){
-        file_selected = input$plot_data
+        file_selected = input$plot_data # save current selection
         updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+      }
+      
+      if(!is.null(input$subplot_data) & length(names(user_data)) != 0){
+        file_selected = input$subplot_data # save current selection
+        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
       }
     })
     
-    output$plots_ui = renderUI({
+    output$plot_ui = renderUI({
       tagList(
         tags$h4("Main plots"),
         tags$p("Assign a dataset", class = "text-info annotation"),
         selectizeInput(ns("plot_data"), label = NULL, choices = c("No files found" = "")),
-        uiOutput(ns("plots_mappings_ui"))
+        uiOutput(ns("plot_mappings_ui"))
       )
     })
     
-    output$plots_mappings_ui = renderUI({
+    output$plot_mappings_ui = renderUI({
       req(input$plot_data)
       
       tagList(
         selectizeInput(inputId = ns("plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders)),
         
         checkboxGroupInput(ns("plot_input_control"), label = "Additional plot information", inline = T,
-                           choiceNames = c("Coordinates", "Elevation", "Geometry/Area", "Topography", "Parent Material"),
+                           choiceNames = c("Coordinates", "Elevation", "Geometry", "Topography", "Parent Material"),
                            choiceValues = c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial")),
         
         tags$div(
-          id = ns("plotsAccordion"), class = "panel-group", "role" = "tablist",
+          id = ns("plotAccordion"), class = "panel-group", "role" = "tablist",
           
           ## Coordinates ####
-          tags$div(
-            id = ns("plotsCoordinates"),
+          shinyjs::hidden(tags$div(
+            id = ns("plotCoordinates"),
             class = "panel panel-default",
             tags$div(
-              id = ns("plotsCoordinatesHeading") , class = "panel-heading" , "role" = "tab",
+              id = ns("plotCoordinatesHeading") , class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Coordinates",
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsCoordinatesBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotAccordion")), "href"=paste0("#", ns("plotCoordinatesBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("plotsCoordinatesBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("plotCoordinatesBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
                 fluidRow(
@@ -406,28 +369,29 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
                                         choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
                 ), 
+                hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(12, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
                 )
               )
             )
-          ),
+          )),
           
           # Elevation ####
-          tags$div(
-            id = ns("plotsElevation"),
+          shinyjs::hidden(tags$div(
+            id = ns("plotElevation"),
             class = "panel panel-default",
             tags$div(
-              id = ns("plotsElevationHeading"), class = "panel-heading" , "role" = "tab",
+              id = ns("plotElevationHeading"), class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Elevation",
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsElevationBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotAccordion")), "href"=paste0("#", ns("plotElevationBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("plotsElevationBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("plotElevationBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
                 fluidRow(
@@ -437,99 +401,91 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 )
               )
             )
-          ),
+          )),
           
           # Geometry ####
-          tags$div(
-            id = ns("plotsGeometry"),
+          shinyjs::hidden(tags$div(
+            id = ns("plotGeometry"),
             class = "panel panel-default",
             tags$div(
-              id = ns("plotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
+              id = ns("plotGeometryHeading"), class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Geometry", class = "collapsed", 
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsGeometryBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotAccordion")), "href"=paste0("#", ns("plotGeometryBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("plotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("plotGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
                 fluidRow(
                   column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
+                ),
+                hr(style = "margin-top:0px; margin-bottom:15px"),
+                fluidRow(
+                  column(4, selectInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_dimensions_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                ),
+                hr(style = "margin-top:0px; margin-bottom:15px"),
+                fluidRow(
                   column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
                                         choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
                 )
               )
             )
-          ),
+          )),
+          
           # Topography ####
-          tags$div(
-            id = ns("plotsTopography"),
+          shinyjs::hidden(tags$div(
+            id = ns("plotTopography"),
             class = "panel panel-default",
             tags$div(
-              id = ns("plotsTopographyHeading"), class = "panel-heading" , "role" = "tab",
+              id = ns("plotTopographyHeading"), class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Topography", class = "collapsed", 
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsTopographyBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotAccordion")), "href"=paste0("#", ns("plotTopographyBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("plotsTopographyBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("plotTopographyBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
-                tags$label("Aspect"),
-                tags$div(
-                  class="form-inline frame",
-                  tags$div(
-                    class = "form-group",
-                    tags$label("Value", "for" = ns("plot_aspect")),
-                    selectInput(ns("plot_aspect"), label = NULL, choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))
-                  ),
-                  tags$div(
-                    class = "form-group",
-                    tags$label("Measurement method", "for" = ns("plot_aspect_method")),
-                    selectInput(ns("plot_aspect_method"), label = NULL, 
-                                choices = append(list("Select a template" = ""), setNames(as.list(aspect_methods), names(aspect_methods)))) 
-                  )
-                ), 
-                tags$label("Slope"),
-                tags$div(
-                  class="form-inline frame",
-                  tags$div(
-                    class = "form-group",
-                    tags$label("Value", "for" = ns("plot_slope")),
-                    selectInput(ns("plot_slope"), label = NULL, choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))
-                  ),
-                  tags$div(
-                    class = "form-group",
-                    tags$label("Measurement method", "for" = ns("plot_slope_method")),
-                    selectInput(ns("plot_slope_method"), label = NULL, 
-                                choices = append(list("Select a template" = ""), setNames(as.list(slope_methods), names(slope_methods))))
-                  )
+                fluidRow(
+                  column(4, selectInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_aspect_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(aspect_methods), names(aspect_methods)))))
+                ),
+                hr(style = "margin-top:0px; margin-bottom:15px"),
+                fluidRow(
+                  column(4, selectInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("plot_slope_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(slope_methods), names(slope_methods))))) 
                 )
               )
             )
-          ),
+          )),
           # Parent material ####
-          tags$div(
-            id = ns("plotsParentMaterial"),
+          shinyjs::hidden(tags$div(
+            id = ns("plotParentMaterial"),
             class = "panel panel-default",
             tags$div(
-              id = ns("plotsParentMaterialHeading"), class = "panel-heading" , "role" = "tab",
+              id = ns("plotParentMaterialHeading"), class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Parent Material", class = "collapsed", 
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotsAccordion")), "href"=paste0("#", ns("plotsParentMaterialBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("plotAccordion")), "href"=paste0("#", ns("plotParentMaterialBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("plotsParentMaterialBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("plotParentMaterialBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
                 fluidRow(
@@ -538,12 +494,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               )
             )
           )
-        ),
+          )),
         hr(),
         tags$h4("Subplots"),
-        tags$p("Are plots structured into subplots?", class = "text-info annotation"),
-        radioButtons(ns("plots_hasSubplots"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
-        uiOutput(ns("subPlots_ui")),
+        tags$p("Are plot structured into subplot?", class = "text-info annotation"),
+        radioButtons(ns("plot_hasSubplot"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
+        uiOutput(ns("subplot_ui")),
       )
     })
     
@@ -551,119 +507,96 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       panel_names =  c("Coordinates", "Elevation", "Geometry", "Topography", "ParentMaterial")
       for(panel_name in panel_names){
         if(panel_name %in% input$plot_input_control){
-          shinyjs::show(paste0("plots", panel_name))
+          shinyjs::show(paste0("plot", panel_name))
         } else {
-          shinyjs::hide(paste0("plots", panel_name))
+          shinyjs::hide(paste0("plot", panel_name))
         }
       }
     })
     
-    ## Subplots ####
-    output$subPlots_ui = renderUI({
-      if(input$plots_hasSubplots == "yes"){
+    # Subplots ####
+    output$subplot_ui = renderUI({
+      if(input$plot_hasSubplot == "yes"){
         tagList(
           tags$p("Assign a dataset", class = "text-info annotation"),
-          selectizeInput(ns("subPlot_data"), label = NULL, choices = c(dropdown_empty(), names(user_data))),
-          uiOutput(ns("subPlots_mappings_ui"))
+          selectizeInput(ns("subplot_data"), label = NULL, choices = list("Choose a file" = "")),
+          uiOutput(ns("subplot_mappings_ui"))
         )
       }
     })
     
-    output$subPlots_mappings_ui = renderUI({
-      req(input$subPlot_data)
+    output$subplot_mappings_ui = renderUI({
+      req(input$subplot_data)
       
       tagList(
         fluidRow(
-          column(4, selectizeInput(inputId = ns("subPlot_plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
-          column(4, selectizeInput(inputId = ns("subPlot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders)))
+          column(4, selectizeInput(inputId = ns("subplot_plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+          column(4, selectizeInput(inputId = ns("subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders)))
         ),
-        checkboxGroupInput(ns("subPlots_input_control"), label = "Additional sub-plot information", inline = T,
-                           choiceNames = c("Dimensions", "Geometry/Area"),
-                           choiceValues = c("Dimensions", "Geometry")),
+        checkboxGroupInput(ns("subplot_input_control"), label = "Additional sub-plot information", inline = T, choices = "Geometry"),
         
         tags$div(
-          id = ns("subPlotsAccordion"), class = "panel-group", "role" = "tablist",
-          
-          ## Coordinates ####
-          tags$div(
-            id = ns("subPlotsDimensions"),
+          id = ns("subplotAccordion"), class = "panel-group", "role" = "tablist",
+          # Geometry ####
+          shinyjs::hidden(tags$div(
+            id = ns("subplotGeometry"),
             class = "panel panel-default",
             tags$div(
-              id = ns("subPlotsDimensionsHeading") , class = "panel-heading" , "role" = "tab",
-              tags$h4(
-                class = "panel-title",
-                tags$a("Dimensions",
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("subPlotsAccordion")), "href"=paste0("#", ns("subPlotsDimensionsBody"))
-                )
-              )
-            ),
-            tags$div(
-              id = ns("subPlotsDimensionsBody"), class="panel-collapse collapse", "role"="tabpanel",
-              tags$div(
-                class = "panel-body",
-                fluidRow(
-                  column(4, selectInput(ns("subPlot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))), 
-                  column(4, selectInput(ns("subPlot_width"), label = "Width", choices =  c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
-                  column(4, selectInput(ns("subPlot_dimension_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(dimension_methods), names(dimension_methods))))) 
-                )
-              )
-            )
-          ),
-          tags$div(
-            id = ns("subPlotsGeometry"),
-            class = "panel panel-default",
-            tags$div(
-              id = ns("subPlotsGeometryHeading"), class = "panel-heading" , "role" = "tab",
+              id = ns("subplotGeometryHeading"), class = "panel-heading" , "role" = "tab",
               tags$h4(
                 class = "panel-title",
                 tags$a("Geometry", class = "collapsed", 
-                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("subPlotsAccordion")), "href"=paste0("#", ns("subPlotsGeometryBody"))
+                       "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("subplotAccordion")), "href"=paste0("#", ns("subplotGeometryBody"))
                 )
               )
             ),
             tags$div(
-              id = ns("subPlotsGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
+              id = ns("subplotGeometryBody"), class="panel-collapse collapse", "role"="tabpanel",
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("subPlot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
-                  column(4, selectInput(ns("subPlot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subPlot_data]]$x$rColHeaders))),
-                  column(4, selectInput(ns("subPlot_area_method"), label = "Measurement method", 
+                  column(4, selectInput(ns("subplot_shape"), label = "Shape", choices =  list("rectangle", "linear", "polygon", "circle"))),
+                ),
+                hr(style = "margin-top:0px; margin-bottom:15px"),
+                fluidRow(
+                  column(4, selectInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("subplot_dimensions_method"), label = "Measurement method", 
+                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                ),
+                hr(style = "margin-top:0px; margin-bottom:15px"),
+                fluidRow(
+                  column(4, selectInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+                  column(4, selectInput(ns("subplot_area_method"), label = "Measurement method", 
                                         choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
                 )
               )
             )
-          )
+          ))
         )
       )
     })
     
     observe({
-      panel_names =  c("Dimensions", "Geometry")
-      for(panel_name in panel_names){
-        if(panel_name %in% input$subPlots_input_control){
-          shinyjs::show(paste0("subPlots", panel_name))
-        } else {
-          shinyjs::hide(paste0("subPlots", panel_name))
-        }
+      if(!is.null(input$subplot_input_control) && input$subplot_input_control != ""){
+        shinyjs::show("subplotGeometry")
+      } else {
+        shinyjs::hide("subplotGeometry")
       }
     })
-    
     
     #-------------------------------------------------------------------------#
     # Observations ####
     abbreviations = c(
       "individualOrganismObservations" = "indOrgObs",
       "aggregateOrganismObservations" = "aggOrgObs",
-      "speciesObservations" = "specObs",
       "stratumObservations" = "stratObs",
       "communityObservations" = "commObs",
       "surfaceCoverObservations" = "covObs"
     )
     
     observe({  # Dynamically shows/hides UIs based on checkboxInput
-      panel_names =  c("individualOrganismObservations", "aggregateOrganismObservations", "speciesObservations", "stratumObservations", "communityObservations", "surfaceCoverObservations")
+      panel_names =  c("individualOrganismObservations", "aggregateOrganismObservations", "stratumObservations", "communityObservations", "surfaceCoverObservations")
       for(panel_name in panel_names){
         if(panel_name %in% input$observations_input_control){
           shinyjs::show(panel_name)
@@ -747,6 +680,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       tagList(
         fluidRow(
           column(4, selectInput(ns("aggOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
+          uiOutput(ns("aggOrgObs_subplot_ui")),
           column(4, selectInput(ns("aggOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
         ),
         fluidRow(
@@ -760,6 +694,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$aggOrgObs_taxonStratum_ui = renderUI({
       if(input$aggOrgObs_hasStrata == "yes"){
         column(4, selectInput(ns("aggOrgObs_taxonStratum"), label = "Taxon stratum *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
+      }
+    })
+    
+    output$aggOrgObs_subplot_ui = renderUI({
+      browser()
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes"){
+        column(4, selectInput(ns("aggOrgObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -879,82 +820,202 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         }
         
         #-------------------------------------------------------------------------#
-        # Plots ####
+        ## Plots ####
         if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
-          # TODO error and warning handling
-          # TODO support subplots
-          # TODO make entries unique
-          plots_method_links = c()
+          browser()
+          # Fetch user data assigned plots
+          plots_upload = user_data[[input$plot_data]]
+          plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
+          colnames(plots_df_upload) = plots_upload$x$rColHeaders
+          plots_df_upload = data.frame(plots_df_upload)
+          plots_df_upload[plots_df_upload==""] = NA  
           
-          # Input mappings
-          mappings$plots[["plot > plotName"]] = list(value = paste0(input$plot_data, "$",input$plot_unique_id), source = "File")
-          mappings$plots[["plot > plotUniqueIdentifier"]] = list(value = paste0(input$plot_data, "$", input$plot_unique_id), source = "File")  
+          # Check identifiers
+          plot_ids = plots_df_upload[[input$plot_unique_id]]
+          if("" %in% plot_ids){
+            stop("Plot IDs may not contain empty values")
+          }
+          if(length(plot_ids) != length(unique(plot_ids))){
+            stop("Plot IDs must be unique")
+          }
+          
+          # Build mappings table
+          plots_df = data.frame(
+            "plot > plotName" = plot_ids,
+            "plot > plotUniqueIdentifier" = plot_ids,
+            check.names = F
+          )
           
           if("Coordinates" %in% input$plot_input_control){
             if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueX"]] = list(value = paste0(input$plot_data, "$", input$plot_coordinates_x), source = "File")
-              mappings$plots[["plot > location > horizontalCoordinates > coordinates > valueY"]] = list(value = paste0(input$plot_data, "$", input$plot_coordinates_y), source = "File")
-              mappings$plots[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = list(value = input$plot_crs, source = "Text")
-              plots_method_links["plot > location > horizontalCoordinates > coordinates > attributeID"] = input$plot_location_method
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
+              plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
+              plots_df[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = input$plot_crs
+              plots_df[["plot > location > horizontalCoordinates > coordinates > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
             }
           }
           
           if("Elevation" %in% input$plot_input_control){
             if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-              mappings$plots[["plot > location > verticalCoordinates > elevation > value"]] = list(value = paste0(input$plot_data, "$", input$plot_elevation), source = "File")
-              plots_method_links["plot > location > verticalCoordinates > elevation > attributeID"] = input$plot_elevation_method}
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[plot_elevation]]
+              plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+            }
           }
           
           if("Geometry" %in% input$plot_input_control){
             if(isTruthy(input$plot_shape)){
-              mappings$plots[["plot > geometry > shape"]] = list(value = input$plot_shape, source = "Text")}
+              plots_df[["plot > geometry > shape"]] = input$plot_shape
+            }
+            if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
+              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              plots_df[["plot > geometry > width > value"]] = plots_df_upload[[input$plot_width]]
+              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+            }
             if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-              mappings$plots[["plot > geometry > area > value"]] = list(value = paste0(input$plot_data, "$", input$plot_area), source = "File")
-              plots_method_links["plot > geometry > area > attributeID"] = input$plot_area_method}
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
+              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+            }
           }
           
           if("Topography" %in% input$plot_input_control){
             if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-              mappings$plots[["plot > topography > aspect > value"]] = list(value = paste0(input$plot_data, "$", input$plot_aspect), source = "File")
-              plots_method_links["plot > topography > aspect > attributeID"] = input$plot_aspect_method}
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
+              plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+            }
             if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-              mappings$plots[["plot > topography > slope > value"]] = list(value = paste0(input$plot_data, "$", input$plot_slope), source = "File")
-              plots_method_links["plot > topography > slope > attributeID"] = input$plot_slope_method}
+              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
+              
+              plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
+              plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+              
+              nodes$methods = append(nodes$methods, method_nodes$methods)
+              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+            }
           }
           
           if("Parent material" %in% input$plot_input_control){
             if(isTruthy(input$plot_parent_material)){
-              mappings$plots[["plot > parentMaterial > value"]] = list(value = paste0(input$plot_data, "$", input$plot_parent_material), source = "File")}
+              plots_df[["plot > parentMaterial > value"]] =plots_df_upload[[input$plot_parent_material]]
+            }
           }
           
           # Build plot nodes 
-          plots_df = build_node_values_df(mappings$plots, user_data) 
-          plots_mapping_nodes = lapply(1:nrow(plots_df), function(i){
+          plot_nodes = lapply(1:nrow(plots_df), function(i){
             new_vegx_node(vegx_schema, colnames(plots_df), plots_df[i,], id = NULL, log_path)
           })
-          plots_mapping_nodes = plots_mapping_nodes[which(sapply(plots_mapping_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
+          plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
+          nodes$plots = append(nodes$plots, plot_nodes)
           
-          nodes$plots = append(nodes$plots, plots_mapping_nodes)
-          
-          # Build method/attribute nodes and link to plots
-          if(length(plots_method_links) != 0){
-            plots_method_links = sort(plots_method_links) # important for correct order of links
-            plots_templates = templates %>% dplyr::filter(template_id %in% plots_method_links)
-            plots_method_nodes = templates_to_nodes(plots_templates, vegx_schema, log_path)
+          #------------------------------------#
+          ## Subplots ####
+          if(!is.null(input$plot_hasSubplot) && isTruthy(input$subplot_data)){
+            # Fetch user data assigned plots
+            subplots_upload = user_data[[input$subplot_data]]
+            subplots_df_upload = jsonlite::fromJSON(subplots_upload$x$data)
+            colnames(subplots_df_upload) = subplots_upload$x$rColHeaders
+            subplots_df_upload = data.frame(subplots_df_upload)
+            subplots_df_upload[subplots_df_upload==""] = NA  
             
-            # Loop over plot nodes
-            lapply(plots_mapping_nodes, function(plot_node){
-              for(j in 1:length(plots_method_links)){ # Set links
-                link_vegx_nodes(plot_node$node, names(plots_method_links)[j], plots_method_nodes$attributes[[j]]$node, vegx_schema, log_path)   
+            plot_lookup = data.frame(
+              plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+              plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+            )
+            
+            # Build mappings table
+            plot_ids = subplots_df_upload[[input$subplot_plot_unique_id]]
+            subplot_ids = subplots_df_upload[[input$subplot_id]]
+            if(length(setdiff(plot_ids, plot_lookup$plotID)) != 0){stop("Unknown main plots")} # TODO: Create nodes for those
+            if("" %in% subplot_ids){stop("Subplot IDs may not contain empty values")}
+            if(length(plot_ids) != length(unique(plot_ids))){stop("Subplot IDs must be unique")}
+            
+            subplots_df = data.frame(
+              "plot > plotName" = subplots_df_upload[[input$subplot_id]],
+              "plot > plotUniqueIdentifier" = paste(subplots_df_upload[[input$subplot_plot_unique_id]], subplots_df_upload[[input$subplot_id]], sep = "-"),
+              "plot > relatedPlot > relatedPlotID" = subplots_df_upload %>% 
+                dplyr::select(plotUniqueIdentifier = input$subplot_plot_unique_id) %>% 
+                left_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
+                pull(plotID),          
+              "plot > relatedPlot > plotRelationship" = "subplot",
+              check.names = F
+            ) %>% filter(complete.cases(.))
+            
+            if("Geometry" %in% input$subplot_input_control){
+              if(isTruthy(input$subplot_shape)){
+                subplots_df[["plot > geometry > shape"]] = input$subplot_shape
               }
+              if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                
+                subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
+                subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                subplots_df[["plot > geometry > width > value"]] = subplots_df_upload[[input$subplot_width]]
+                subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              if(isTruthy(input$subplot_area) && isTruthy(input$subplot_area_method)){
+                method_template = templates %>% dplyr::filter(template_id ==  input$subplot_area_method)
+                
+                # Check if method exists already 
+                method_name = method_template[method_template$node_path == "method > name", "node_value"] 
+                methods_lookup = data.frame(
+                  methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                  methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                )
+                
+                if(method_name %in% methods_lookup$methodName){  # If yes, use existing ID
+                  attributes_method_links = sapply(nodes$attributes, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//methodID"))})
+                  attribute_node = nodes$attributes[[which(attributes_method_links == methods_lookup$methodID[methods_lookup$methodName == method_name])]]
+                  attribute_id = xml2::xml_attr(attribute_node$node, "id")
+                } else {                                         # If no, create new nodes
+                  method_nodes = templates_to_nodes(method_template, vegx_schema, log_path)
+                  nodes$methods = append(nodes$methods, method_nodes$methods)
+                  nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+                  attribute_id = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                }
+                
+                subplots_df[["plot > geometry > area > value"]] = subplots_df_upload[[input$subplot_area]]
+                subplots_df[["plot > geometry > area > attributeID"]] = attribute_id
+              }
+            }
+            
+            # Build subplot nodes 
+            subplot_nodes = lapply(1:nrow(subplots_df), function(i){
+              new_vegx_node(vegx_schema, colnames(subplots_df), subplots_df[i,], id = NULL, log_path)
             })
-            nodes$methods = append(nodes$methods, plots_method_nodes$methods)
-            nodes$attributes = append(nodes$attributes,  plots_method_nodes$attributes)  
+            nodes$plots = append(nodes$plots, subplot_nodes)
           }
         }
         
         #-------------------------------------------------------------------------#
-        # Observations #####
+        ## Observations #####
         # The central element in VegX is the plotObervation, which is referenced by all other observationTypes. 
         # Additionally, a number of other elements such as methods, organismNames, or attributes may be shared by different observationTypes.
         # This provides a logical order for building up the VegX document when importing observations: First, build plotObservations from
@@ -964,12 +1025,11 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         #
         # The workflow below follows this rationale.
         
-        if(input$observations_input_control != ""){
+        if(!is.null(input$observations_input_control) && input$observations_input_control != ""){
           # Fetch user data assigned in observation mappings
           data_upload = sapply(input$observations_input_control, function(obs_category){
             input_value = input[[paste0(abbreviations[obs_category], "_data")]]
             file_name = str_split(input_value, "\\$", simplify = T)[1]
-            column_name = str_split(input_value, "\\$", simplify = T)[2]
             upload = user_data[[file_name]]
             df_upload = jsonlite::fromJSON(upload$x$data)
             colnames(df_upload) = upload$x$rColHeaders
@@ -989,27 +1049,22 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             distinct() %>% 
             mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
           
-          # 2. Check if plots have ids already
+          # 2. Check if plot have ids already
           plots_unmatched = setdiff(plotObs_df$plotUniqueIdentifier, 
                                     sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
           
           if(length(plots_unmatched) > 0){
             plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
-            plots_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
+            plot_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
               new_vegx_node(vegx_schema, colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path)
             })
-            nodes$plots = append(nodes$plots, plots_nodes_addendum)
-            warning(paste0("Added new nodes for the following plots references in observation data", plots_unmatched))
+            nodes$plots = append(nodes$plots, plot_nodes_addendum)
+            warning(paste0("Added new nodes for the following plot references in observation data", plots_unmatched))
           }
           
           # 3. Replace mapped plot identifiers with internal ids
-          plots_lookup = data.frame(
-            plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-            plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
-          )
-          
           plotObs_df = plotObs_df %>% 
-            inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
+            inner_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
             mutate("plotObservation > plotID" = plotID) %>% 
             dplyr::select(-plotUniqueIdentifier, -plotID)
           
@@ -1025,7 +1080,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                        plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
                        obs_date = xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate")))}) %>% 
             bind_rows() %>% 
-            left_join(plots_lookup, by = "plotID")
+            left_join(plot_lookup, by = "plotID")
           
           #------------------------------------#
           # Build organismNames and OrganismIdentities
