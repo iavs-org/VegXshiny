@@ -312,7 +312,7 @@
             <xsd:element name="simpleUserDefined" type="misc:simpleUserDefinedType" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="complexUserDefined" type="misc:complexUserDefinedType" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="id" type="misc:IDType" use="optional" />
+        <xsd:attribute name="id" type="misc:IDType" use="required" />
         <xsd:attribute name="system" type="misc:SystemType" use="optional" />
         <xsd:attribute name="scope" default="document" type="misc:ScopeType" use="optional" />
     </xsd:complexType>
