@@ -67,19 +67,28 @@ body {
   filter: brightness(1.5);
 }
 
-.icon-padded {
+.icon-padded-right {
   padding-right:3px;
+}
+
+.icon-info {
+  padding-left:3px;
+  vertical-align: super;
 }
 
 .annotation {
   display:inline-block;
-  vertical-align:middle!important;
   font-style:italic;
   margin-bottom: 10px;
 }
 
 .no-margin {
   margin-bottom: 0px;
+}
+
+.btn-focus {
+  border-width: 2px;
+  border-color: white!important;
 }
 
 .btn-file {
