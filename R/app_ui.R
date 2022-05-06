@@ -20,23 +20,23 @@ app_ui <- function(request) {
                         mod_about_ui("about")
                ),
                
-               tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded"),
+               tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
-               tabPanel("Import wizard ", icon = icon("magic", class = "icon-padded"), 
+               tabPanel("Import wizard ", icon = icon("magic", class = "icon-padded-right"), 
                         mod_importWizard_ui("importWizard")
                ),
                
-               tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded"),
+               tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),
                         mod_vegxBuilder_ui("vegxBuilder")
                ),
                
-               tabPanel("XML Viewer", icon = icon("code", class = "icon-padded"),
+               tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel("Action Log", icon = icon("history", class = "icon-padded"),
+               tabPanel("Action Log", icon = icon("history", class = "icon-padded-right"),
                         mod_actionLog_ui("actionLog")
                )
     )

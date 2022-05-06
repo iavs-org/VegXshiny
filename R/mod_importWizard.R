@@ -85,8 +85,9 @@ mod_importWizard_ui <- function(id){
                     class = "panel-title",
                     tags$a("AggregateOrganismObservations", class = "collapsed",
                            "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
-                    )
-                  )
+                    ),
+                    tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to all occurrences of an organism based on an aggregation factor, e.g. a measurement of the overall cover/biomass/etc. of a specific taxon in a plot.")
+                  ),
                 ),
                 tags$div(
                   id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
@@ -214,7 +215,10 @@ mod_importWizard_ui <- function(id){
     ),
     
     # Navigation bar ####
-    uiOutput(ns("navigation_ui"))
+    div(
+      uiOutput(ns("navigation_ui")),
+      style = "margin-bottom: 100px"
+    )
   )
 }
 
@@ -247,7 +251,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     #-------------------------------------------------------------------------#
     # Navigation ####
-    sidebar_tabs = c("Data", "Project", "Plots", "Observations", "Species", "Summary")
+    sidebar_tabs = c("Project", "Plots", "Observations", "Summary")
     
     output$navigation_ui = renderUI({
       if(input$sidebar == "Data"){
@@ -328,6 +332,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       tagList(
         tags$h4("Main plots"),
         tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per main plot and additional plot properties in columns"),
         selectizeInput(ns("plot_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plot_mappings_ui"))
       )
@@ -519,6 +524,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if(input$plot_hasSubplot == "yes"){
         tagList(
           tags$p("Assign a dataset", class = "text-info annotation"),
+          tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per subplot (identified by unique combinations of plot and subplot ids) and additional subplot properties in columns"),
           selectizeInput(ns("subplot_data"), label = NULL, choices = list("Choose a file" = "")), 
           uiOutput(ns("subplot_mappings_ui"))
         )
@@ -590,7 +596,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     abbreviations = c(
       "individualOrganismObservations" = "indOrgObs",
       "aggregateOrganismObservations" = "aggOrgObs",
-      "stratumObservations" = "stratObs",
+      "stratumObservations" = "stratumObs",
       "communityObservations" = "commObs",
       "surfaceCoverObservations" = "covObs"
     )
@@ -620,35 +626,33 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     ## individualOrganismObservations ####
     output$individualOrganismObservations_ui = renderUI({
       tagList(
-        tags$p("Assign a dataset", class = "text-info annotation"),
-        selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
-        uiOutput(ns("indOrgObs_mapping_ui"))
+        tags$p("not implemented")
+        # tags$p("Assign a dataset", class = "text-info annotation"),
+        # tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A table with one row per subplot (identified by unique combinations of plot and subplot ids) and subplot properties in columns"),
+        # selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
+        # uiOutput(ns("indOrgObs_mapping_ui"))
       )
     })
     
-    output$indOrgObs_mapping_ui = renderUI({
-      req(input$indOrgObs_data)
-      tagList(
-        fluidRow(
-          column(4, selectInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
-          column(4, selectInput(ns("indOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
-        )
-      )
-    })
+    # output$indOrgObs_mapping_ui = renderUI({
+    #   req(input$indOrgObs_data)
+    #   tagList(
+    #     fluidRow(
+    #       column(4, selectInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
+    #       column(4, selectInput(ns("indOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
+    #     )
+    #   )
+    # })
     
     ## aggregateOrganismObservations ####
     output$aggregateOrganismObservations_ui = renderUI({
       tagList(
-        div(class = "frame", 
-            tags$p(icon("info", class = "icon-padded"), "An observation applying to all occurrences of an organism based on an aggregation factor, e.g. a measurement of the 
-                      overall cover/biomass/etc. of a specific taxon in a plot.", class = "text-info annotation no-margin"),
-        ),
         tags$label("Strata definitions"),
         br(),
         tags$p("Are observations structured into strata?", class = "text-info annotation"),
         radioButtons(ns("aggOrgObs_hasStrata"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
         uiOutput(ns("aggOrgObs_strata_ui")),
-      
+        
         uiOutput(ns("aggOrgObs_subplot_ui")),
         
         hr(),
@@ -658,11 +662,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         selectizeInput(ns("aggOrgObs_measurementScale"), label = NULL, 
                        choices = append(list("Select a template" = "", "Undefined (ordinal scale)" = "ordinal", "Undefined (continuous scale)" = "continuous"), 
                                         setNames(as.list(cover_methods), names(cover_methods)))),
-
+        
         hr(),
         tags$label("Observations *"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date, taxon and stratum (optional)"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("aggOrgObs_mapping_ui"))
       )
@@ -715,7 +720,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         )
       )
     })
-
+    
     ## stratumObservations ####
     output$stratumObservations_ui = renderUI({
       tags$p("not implemented")
@@ -769,7 +774,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     })
     
     #-------------------------------------------------------------------------#
-    # Build Nodes ####
+    ## Build Nodes ####
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
@@ -799,392 +804,360 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(
       eventExpr = input$confirm_import,
       handlerExpr = {
-        mappings = list()
-        nodes = list()
-        #-------------------------------------------------------------------------#
-        ## Project ####
-        if(isTruthy(input$project_title)){
-          mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
-        }
-        if(isTruthy(input$project_abstract)){
-          mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
-        }
-        if(isTruthy(input$party_name) & isTruthy(input$party_role)){
-          mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
-        }
-        if(length(mappings$project) != 0){
-          project_df = build_node_values_df(mappings$project, user_data) 
-          nodes$projects = list(new_vegx_node(vegx_schema, colnames(project_df), project_df[1,], id = NULL, log_path))  
-        }
-        
-        if(isTruthy(input$project_citation)){
-          mappings$literatureCitations[["literatureCitation > citationString"]]  = list(value = input$project_citation, source = "Text")
-          literatureCitations_df = build_node_values_df(mappings$literatureCitations, user_data)
-          nodes$literatureCitations = list(new_vegx_node(vegx_schema, colnames(literatureCitations_df), literatureCitations_df[1,], id = NULL, log_path))
-          link_vegx_nodes(nodes$projects[[1]]$node, "project > documentCitationID", nodes$literatureCitations[[1]]$node, vegx_schema, log_path)
-        }
-        
-        if(isTruthy(input$party_name)){
-          mappings$parties[[paste0("party > choice > ", tolower(input$party_type), "Name")]] = list(value = input$party_name, source = "Text")
-          parties_df = build_node_values_df(mappings$parties, user_data)
-          nodes$parties = list(new_vegx_node(vegx_schema, colnames(parties_df), parties_df[1,], id = NULL, log_path))
-          link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, vegx_schema, log_path)
-        }
-        
-        #-------------------------------------------------------------------------#
-        ## Plots ####
-        if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
-          # Fetch user data assigned plots
-          plots_upload = user_data[[input$plot_data]]
-          plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
-          colnames(plots_df_upload) = plots_upload$x$rColHeaders
-          plots_df_upload = data.frame(plots_df_upload)
-          plots_df_upload[plots_df_upload==""] = NA  
-          
-          # Check identifiers
-          plot_ids = plots_df_upload[[input$plot_unique_id]]
-          if("" %in% plot_ids){
-            warning("Plot IDs may not contain empty values")
+        tryCatch({
+          mappings = list()
+          nodes = list()
+          #-------------------------------------------------------------------------#
+          ### Project ####
+          if(isTruthy(input$project_title)){
+            mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
           }
-          if(length(plot_ids) != length(unique(plot_ids))){
-            warning("Plot IDs must be unique")
+          if(isTruthy(input$project_abstract)){
+            mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
+          }
+          if(isTruthy(input$party_name) & isTruthy(input$party_role)){
+            mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
+          }
+          if(length(mappings$project) != 0){
+            project_df = build_node_values_df(mappings$project, user_data) 
+            nodes$projects = list(new_vegx_node(colnames(project_df), project_df[1,], id = NULL, log_path, vegx_schema, write_log = F))  
           }
           
-          # Build mappings table
-          plots_df = data.frame(
-            "plot > plotName" = plot_ids,
-            "plot > plotUniqueIdentifier" = plot_ids,
-            check.names = F
-          )
-          
-          if("Coordinates" %in% input$plot_input_control){
-            if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
-              plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
-              plots_df[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = input$plot_crs
-              plots_df[["plot > location > horizontalCoordinates > coordinates > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
+          if(isTruthy(input$project_citation)){
+            mappings$literatureCitations[["literatureCitation > citationString"]]  = list(value = input$project_citation, source = "Text")
+            literatureCitations_df = build_node_values_df(mappings$literatureCitations, user_data)
+            nodes$literatureCitations = list(new_vegx_node(colnames(literatureCitations_df), literatureCitations_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
+            link_vegx_nodes(nodes$projects[[1]]$node, "project > documentCitationID", nodes$literatureCitations[[1]]$node, log_path, vegx_schema)
           }
           
-          if("Elevation" %in% input$plot_input_control){
-            if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[plot_elevation]]
-              plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
+          if(isTruthy(input$party_name)){
+            mappings$parties[[paste0("party > choice > ", tolower(input$party_type), "Name")]] = list(value = input$party_name, source = "Text")
+            parties_df = build_node_values_df(mappings$parties, user_data)
+            nodes$parties = list(new_vegx_node(colnames(parties_df), parties_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
+            link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, log_path, vegx_schema)
           }
           
-          if("Geometry" %in% input$plot_input_control){
-            if(isTruthy(input$plot_shape)){
-              plots_df[["plot > geometry > shape"]] = input$plot_shape
-            }
-            if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
-              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              plots_df[["plot > geometry > width > value"]] = plots_df_upload[[input$plot_width]]
-              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
-            if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
-              plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
-          }
-          
-          if("Topography" %in% input$plot_input_control){
-            if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
-              plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
-            if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-              method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
-              
-              plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
-              plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-              
-              nodes$methods = append(nodes$methods, method_nodes$methods)
-              nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-            }
-          }
-          
-          if("Parent material" %in% input$plot_input_control){
-            if(isTruthy(input$plot_parent_material)){
-              plots_df[["plot > parentMaterial > value"]] =plots_df_upload[[input$plot_parent_material]]
-            }
-          }
-          
-          # Build plot nodes 
-          plot_nodes = lapply(1:nrow(plots_df), function(i){
-            new_vegx_node(vegx_schema, colnames(plots_df), plots_df[i,], id = NULL, log_path)
-          })
-          plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
-          nodes$plots = append(nodes$plots, plot_nodes)
-          
-          plot_lookup = data.frame(
-            plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-            plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
-          )
-          
-          #------------------------------------#
-          ## Subplots ####
-          if(!is.null(input$plot_hasSubplot) && isTruthy(input$subplot_data)){
+          #-------------------------------------------------------------------------#
+          ## Plots ####
+          if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
+            browser()
             # Fetch user data assigned plots
-            subplots_upload = user_data[[input$subplot_data]]
-            subplots_df_upload = jsonlite::fromJSON(subplots_upload$x$data)
-            colnames(subplots_df_upload) = subplots_upload$x$rColHeaders
-            subplots_df_upload = data.frame(subplots_df_upload)
-            subplots_df_upload[subplots_df_upload==""] = NA  
+            plots_upload = user_data[[input$plot_data]]
+            plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
+            colnames(plots_df_upload) = plots_upload$x$rColHeaders
+            plots_df_upload = data.frame(plots_df_upload)
+            plots_df_upload[plots_df_upload==""] = NA  
+            
+            # Check identifiers
+            plot_ids = plots_df_upload[[input$plot_unique_id]]
+            if("" %in% plot_ids){
+              stop("Plot IDs may not contain empty values")
+            }
+            if(length(plot_ids) != length(unique(plot_ids))){
+              stop("Plot IDs must be unique")
+            }
             
             # Build mappings table
-            plot_ids = subplots_df_upload[[input$subplot_plot_unique_id]]
-            subplot_ids = subplots_df_upload[[input$subplot_id]]
-            plotUniqueIdentifiers = paste(subplots_df_upload[[input$subplot_plot_unique_id]], subplots_df_upload[[input$subplot_id]], sep = "-")
-            
-            if(length(setdiff(plot_ids, plot_lookup$plotUniqueIdentifier)) != 0){   # TODO: Create nodes for those
-              warning("Unknown main plots")
-            } else if("" %in% subplot_ids){
-              warning("Subplot IDs may not contain empty values")
-            } else if(length(plotUniqueIdentifiers) != length(unique(plotUniqueIdentifiers))){
-              warning("Combination of PlotID and SubPlotID must be unique")
-            }
-            
-            subplots_df = data.frame(
-              "plot > plotName" = subplots_df_upload[[input$subplot_id]],
-              "plot > plotUniqueIdentifier" = plotUniqueIdentifiers,
-              "plot > relatedPlot > relatedPlotID" = subplots_df_upload %>% 
-                dplyr::select(plotUniqueIdentifier = input$subplot_plot_unique_id) %>% 
-                left_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
-                pull(plotID),          
-              "plot > relatedPlot > plotRelationship" = "subplot",
+            plots_df = data.frame(
+              "plot > plotName" = plot_ids,
+              "plot > plotUniqueIdentifier" = plot_ids,
               check.names = F
-            ) %>% filter(complete.cases(.))
+            )
             
-            if("Geometry" %in% input$subplot_input_control){
-              if(isTruthy(input$subplot_shape)){
-                subplots_df[["plot > geometry > shape"]] = input$subplot_shape
-              }
-              if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
-                method_nodes = templates %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+            if("Coordinates" %in% input$plot_input_control){
+              if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
                 
-                subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
-                subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-                subplots_df[["plot > geometry > width > value"]] = subplots_df_upload[[input$subplot_width]]
-                subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
+                plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
+                plots_df[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = input$plot_crs
+                plots_df[["plot > location > horizontalCoordinates > coordinates > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
                 
                 nodes$methods = append(nodes$methods, method_nodes$methods)
                 nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
               }
-              if(isTruthy(input$subplot_area) && isTruthy(input$subplot_area_method)){
-                method_template = templates %>% dplyr::filter(template_id ==  input$subplot_area_method)
+            }
+            
+            if("Elevation" %in% input$plot_input_control){
+              if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
                 
-                # Check if method exists already 
-                method_name = method_template[method_template$node_path == "method > name", "node_value"] 
-                methods_lookup = data.frame(
-                  methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                  methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
-                )
+                plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[plot_elevation]]
+                plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
                 
-                if(method_name %in% methods_lookup$methodName){  # If yes, use existing ID
-                  attributes_method_links = sapply(nodes$attributes, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//methodID"))})
-                  attribute_node = nodes$attributes[[which(attributes_method_links == methods_lookup$methodID[methods_lookup$methodName == method_name])]]
-                  attribute_id = xml2::xml_attr(attribute_node$node, "id")
-                } else {                                         # If no, create new nodes
-                  method_nodes = templates_to_nodes(method_template, vegx_schema, log_path)
-                  nodes$methods = append(nodes$methods, method_nodes$methods)
-                  nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-                  attribute_id = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-                }
-                
-                subplots_df[["plot > geometry > area > value"]] = subplots_df_upload[[input$subplot_area]]
-                subplots_df[["plot > geometry > area > attributeID"]] = attribute_id
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
               }
             }
             
-            # Build subplot nodes 
-            subplot_nodes = lapply(1:nrow(subplots_df), function(i){
-              new_vegx_node(vegx_schema, colnames(subplots_df), subplots_df[i,], id = NULL, log_path)
-            })
-            nodes$plots = append(nodes$plots, subplot_nodes)
+            if("Geometry" %in% input$plot_input_control){
+              if(isTruthy(input$plot_shape)){
+                plots_df[["plot > geometry > shape"]] = input$plot_shape
+              }
+              if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                
+                plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
+                plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                plots_df[["plot > geometry > width > value"]] = plots_df_upload[[input$plot_width]]
+                plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
+                
+                plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
+                plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+            }
             
-            # Update plot lookup
+            if("Topography" %in% input$plot_input_control){
+              if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
+                
+                plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
+                plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
+                method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
+                
+                plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
+                plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+            }
+            
+            if("Parent material" %in% input$plot_input_control){
+              if(isTruthy(input$plot_parent_material)){
+                plots_df[["plot > parentMaterial > value"]] =plots_df_upload[[input$plot_parent_material]]
+              }
+            }
+            
+            # Build plot nodes 
+            plot_nodes = lapply(1:nrow(plots_df), function(i){
+              new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+            })
+            plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
+            nodes$plots = append(nodes$plots, plot_nodes)
+            
             plot_lookup = data.frame(
               plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
               plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
             )
-          }
-        }
-        
-        #-------------------------------------------------------------------------#
-        ## Observations ####
-        # The central element in VegX is the plotObervation, which is referenced by all other observationTypes. 
-        # Additionally, a number of other elements such as methods, organismNames, strata etc. may be shared by different observationTypes.
-        # This provides a logical order for building up the VegX document when importing observations: First, build plotObservations from
-        # all unique combinations of plot, subplot (if provided) and date across all observations. Second, systematically process potentially shared elements and 
-        # create new nodes from the mappings for different observationTypes. Finally, resolve the mapped values to their corresponding 
-        # node IDs and create the actual observation elements. 
-        #
-        # The workflow below follows this rationale.
-        if(!is.null(input$observations_input_control) && input$observations_input_control != ""){
-          # Fetch user data assigned in observation mappings
-          data_upload = sapply(input$observations_input_control, function(obs_category){
-            input_value = input[[paste0(abbreviations[obs_category], "_data")]]
-            file_name = str_split(input_value, "\\$", simplify = T)[1]
-            upload = user_data[[file_name]]
-            df_upload = jsonlite::fromJSON(upload$x$data)
-            colnames(df_upload) = upload$x$rColHeaders
-            return(data.frame(df_upload))
-          }, simplify = FALSE, USE.NAMES = TRUE)
-          
-          #------------------------------------#
-          # Build plotObservations
-          # 1. Get unique plot-date combinations across observations, to avoid creation of duplicate plotObservations
-          plotObs_df_list = lapply(input$observations_input_control, function(obs_category){
-            df_upload = data_upload[[obs_category]] 
             
-            # Get Identifiers
-            plotUniqueIdentifier = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
-            if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
-              plotUniqueIdentifier = paste(plotUniqueIdentifier, df_upload[,input[[paste0(abbreviations[obs_category], "_subplot_id")]]], sep = "-")
-            }
-            date = df_upload[,input[[paste0(abbreviations[obs_category], "_date")]]]
-            
-            return(data.frame("plotUniqueIdentifier" = plotUniqueIdentifier, "plotObservation > obsStartDate" = date, check.names = F))
-          }) 
-          
-          plotObs_df = plotObs_df_list %>% 
-            bind_rows() %>% 
-            distinct() %>% 
-            filter(complete.cases(.)) %>% 
-            mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
-          
-          # 2. Check if plots have ids already
-          plots_unmatched = setdiff(plotObs_df$plotUniqueIdentifier, 
-                                    sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
-          
-          if(length(plots_unmatched) > 0){
-            plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
-            plot_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
-              new_vegx_node(vegx_schema, colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path)
-            })
-            nodes$plots = append(nodes$plots, plot_nodes_addendum)
-            warning(paste0("Added new nodes for the following plot references in observation data", plots_unmatched)) # TODO: incorporate into messaging system
-          }
-          
-          # 3. Replace mapped plot identifiers with internal ids
-          plotObs_df = plotObs_df %>% 
-            inner_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
-            mutate("plotObservation > plotID" = plotID) %>% 
-            dplyr::select(-plotUniqueIdentifier, -plotID)
-          
-          # 4. Create nodes
-          plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
-            new_vegx_node(vegx_schema, colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path)
-          })
-          nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
-          
-          # 5. Build lookup table
-          plotObs_lookup = lapply(plotObs_nodes, function(x){
-            data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
-                       plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
-                       obs_date = xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate")))}) %>% 
-            bind_rows() %>% 
-            left_join(plot_lookup, by = "plotID")
-          
-          #------------------------------------#
-          # Build organismNames and OrganismIdentities
-          # 1. Fetch data
-          orgNames = c() # Organismnames may come from indOrgObs or aggOrgObs
-          if("individualOrganismObservations" %in% input$observations_input_control){
-            orgNames = c(orgNames, data_upload[["individualOrganismObservations"]][,input$indOrgObs_taxonName])
-          }
-          if("aggregateOrganismObservations" %in% input$observations_input_control){
-            orgNames = c(orgNames, data_upload[["aggregateOrganismObservations"]][, input$aggOrgObs_taxonName])
-          }  
-          
-          # 2. Build Nodes
-          orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
-          orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
-            new_vegx_node(vegx_schema, colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path)
-          })
-          
-          orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
-          orgIdentities_nodes = lapply(1:nrow(orgIdentities_df), function(i){
-            new_vegx_node(vegx_schema, colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path)
-          })
-          
-          nodes$organismNames = orgNames_nodes
-          nodes$organismIdentities = orgIdentities_nodes
-          
-          # 3. Build lookup table
-          orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
-            data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),
-                       originalOrganismNameID = xml2::xml_text(xml2::xml_child(x$node, search = "originalOrganismNameID")))}) %>% 
-            bind_rows()
-          
-          orgNames_lookup = bind_cols(orgNames_df, orgIdentities_df) %>% 
-            setNames(c("organismName", "originalOrganismNameID")) 
-          
-          organisms_lookup = left_join(orgIdentities_lookup, orgNames_lookup, by = "originalOrganismNameID")
-          
-          #------------------------------------#
-          # Build Strata, if available
-          
-          if(input$aggOrgObs_hasStrata == "yes"){
-            if(input$aggOrgObs_strataDef == "undefined"){
-              stratum_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
-              method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
-                                     node_path = c("method > subject", "method > name", "method > description"),
-                                     node_value = c("stratum definition", "stratum definition/undefined", "An undefined stratum definition"))
-              strata_df = data.frame(template_id = 1, main_element = "strata", 
-                                     node_path = "stratum > stratumName", 
-                                     node_value = stratum_values,
-                                     group_value = stratum_values) %>% 
-                group_by(group_value) %>% 
-                group_modify(~add_row(.x, template_id = 1, main_element = "strata", node_path = "stratum > methodID", node_value = "1")) %>%
-                mutate(node_id = cur_group_id()+1) %>% 
-                ungroup() %>% 
-                dplyr::select(template_id, node_id, main_element, node_path, node_value)
+            #------------------------------------#
+            ## Subplots ####
+            if(!is.null(input$plot_hasSubplot) && isTruthy(input$subplot_data)){
+              # Fetch user data assigned plots
+              subplots_upload = user_data[[input$subplot_data]]
+              subplots_df_upload = jsonlite::fromJSON(subplots_upload$x$data)
+              colnames(subplots_df_upload) = subplots_upload$x$rColHeaders
+              subplots_df_upload = data.frame(subplots_df_upload)
+              subplots_df_upload[subplots_df_upload==""] = NA  
               
-              aggOrgObs_strataDef_template = bind_rows(method_df, strata_df)
-            } else {
-              aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
+              # Build mappings table
+              plot_ids = subplots_df_upload[[input$subplot_plot_unique_id]]
+              subplot_ids = subplots_df_upload[[input$subplot_id]]
+              plotUniqueIdentifiers = paste(subplots_df_upload[[input$subplot_plot_unique_id]], subplots_df_upload[[input$subplot_id]], sep = "-")
+              
+              if(length(setdiff(plot_ids, plot_lookup$plotUniqueIdentifier)) != 0){   # TODO: Create nodes for those
+                stop("Unknown main plots")
+              } else if("" %in% subplot_ids){
+                stop("Subplot IDs may not contain empty values")
+              } else if(length(plotUniqueIdentifiers) != length(unique(plotUniqueIdentifiers))){
+                stop("Combination of PlotID and SubPlotID must be unique")
+              }
+              
+              subplots_df = data.frame(
+                "plot > plotName" = subplots_df_upload[[input$subplot_id]],
+                "plot > plotUniqueIdentifier" = plotUniqueIdentifiers,
+                "plot > relatedPlot > relatedPlotID" = subplots_df_upload %>% 
+                  dplyr::select(plotUniqueIdentifier = input$subplot_plot_unique_id) %>% 
+                  left_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
+                  pull(plotID),          
+                "plot > relatedPlot > plotRelationship" = "subplot",
+                check.names = F
+              ) %>% filter(complete.cases(.))
+              
+              if("Geometry" %in% input$subplot_input_control){
+                if(isTruthy(input$subplot_shape)){
+                  subplots_df[["plot > geometry > shape"]] = input$subplot_shape
+                }
+                if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
+                  method_nodes = templates %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                  
+                  subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
+                  subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                  subplots_df[["plot > geometry > width > value"]] = subplots_df_upload[[input$subplot_width]]
+                  subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                  
+                  nodes$methods = append(nodes$methods, method_nodes$methods)
+                  nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+                }
+                if(isTruthy(input$subplot_area) && isTruthy(input$subplot_area_method)){
+                  method_template = templates %>% dplyr::filter(template_id ==  input$subplot_area_method)
+                  
+                  # Check if method exists already 
+                  method_name = method_template[method_template$node_path == "method > name", "node_value"] 
+                  methods_lookup = data.frame(
+                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                  )
+                  
+                  if(method_name %in% methods_lookup$methodName){  # If yes, use existing ID
+                    attributes_method_links = sapply(nodes$attributes, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//methodID"))})
+                    attribute_node = nodes$attributes[[which(attributes_method_links == methods_lookup$methodID[methods_lookup$methodName == method_name])]]
+                    attribute_id = xml2::xml_attr(attribute_node$node, "id")
+                  } else {                                         # If no, create new nodes
+                    method_nodes = templates_to_nodes(method_template, vegx_schema, log_path)
+                    nodes$methods = append(nodes$methods, method_nodes$methods)
+                    nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+                    attribute_id = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                  }
+                  
+                  subplots_df[["plot > geometry > area > value"]] = subplots_df_upload[[input$subplot_area]]
+                  subplots_df[["plot > geometry > area > attributeID"]] = attribute_id
+                }
+              }
+              
+              # Build subplot nodes 
+              subplot_nodes = lapply(1:nrow(subplots_df), function(i){
+                new_vegx_node(colnames(subplots_df), subplots_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              })
+              nodes$plots = append(nodes$plots, subplot_nodes)
+              
+              # Update plot lookup
+              plot_lookup = data.frame(
+                plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+              )
             }
-            
-            aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
-            nodes$strata = append(nodes$strata, aggOrgObs_strataDef_nodes$strata)
-            nodes$methods = append(nodes$methods, aggOrgObs_strataDef_nodes$methods)
-            nodes$attributes = append(nodes$attributes, aggOrgObs_strataDef_nodes$attributes)
           }
           
-          
-          
-          #------------------------------------#
-          # Build Observations
-          ## AggregatOrganismObservations
-          if("aggregateOrganismObservations" %in% input$observations_input_control){
+          #-------------------------------------------------------------------------#
+          ## Observations ####
+          # The central element in VegX is the plotObervation, which is referenced by all other observationTypes. 
+          # Additionally, a number of other elements such as methods, organismNames, strata etc. may be shared by different observationTypes.
+          # This provides a logical order for building up the VegX document when importing observations: First, build plotObservations from
+          # all unique combinations of plot, subplot (if provided) and date across all observations. Second, systematically process potentially shared elements and 
+          # create new nodes from the mappings for different observationTypes. Finally, resolve the mapped values to their corresponding 
+          # node IDs and create the actual observation elements. 
+          #
+          # The workflow below follows this rationale.
+          if(!is.null(input$observations_input_control) && input$observations_input_control != ""){
+            # Fetch user data assigned in observation mappings
+            data_upload = sapply(input$observations_input_control, function(obs_category){
+              input_value = input[[paste0(abbreviations[obs_category], "_data")]]
+              file_name = str_split(input_value, "\\$", simplify = T)[1]
+              upload = user_data[[file_name]]
+              df_upload = jsonlite::fromJSON(upload$x$data)
+              colnames(df_upload) = upload$x$rColHeaders
+              return(data.frame(df_upload))
+            }, simplify = FALSE, USE.NAMES = TRUE)
+            
+            #------------------------------------#
+            # Build plotObservations
+            # 1. Get unique plot-date combinations across observations, to avoid creation of duplicate plotObservations
+            plotObs_df_list = lapply(input$observations_input_control, function(obs_category){
+              df_upload = data_upload[[obs_category]] 
+              
+              # Get Identifiers
+              plotUniqueIdentifier = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
+              if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
+                plotUniqueIdentifier = paste(plotUniqueIdentifier, df_upload[,input[[paste0(abbreviations[obs_category], "_subplot_id")]]], sep = "-")
+              }
+              date = df_upload[,input[[paste0(abbreviations[obs_category], "_date")]]]
+              
+              return(data.frame("plotUniqueIdentifier" = plotUniqueIdentifier, "plotObservation > obsStartDate" = date, check.names = F))
+            }) 
+            
+            plotObs_df = plotObs_df_list %>% 
+              bind_rows() %>% 
+              distinct() %>% 
+              filter(complete.cases(.)) %>% 
+              mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
+            
+            # 2. Check if plots have ids already
+            plots_unmatched = setdiff(plotObs_df$plotUniqueIdentifier, 
+                                      sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
+            
+            if(length(plots_unmatched) > 0){
+              plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
+              plot_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
+                new_vegx_node(colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              })
+              nodes$plots = append(nodes$plots, plot_nodes_addendum)
+              warning(paste0("Observation data referenced unknown plots. Added ", length(plots_unmatched)," new plot nodes for the following plots: ", plots_unmatched)) # TODO: incorporate into messaging system
+            }
+            
+            # 3. Replace mapped plot identifiers with internal ids
+            plotObs_df = plotObs_df %>% 
+              inner_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
+              mutate("plotObservation > plotID" = plotID) %>% 
+              dplyr::select(-plotUniqueIdentifier, -plotID)
+            
+            # 4. Create nodes
+            plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
+              new_vegx_node(colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+            })
+            nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
+            
+            # 5. Build lookup table
+            plotObs_lookup = lapply(plotObs_nodes, function(x){
+              data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
+                         plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
+                         obs_date = xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate")))}) %>% 
+              bind_rows() %>% 
+              left_join(plot_lookup, by = "plotID")
+            
+            #------------------------------------#
+            # Build organismNames and OrganismIdentities
+            # 1. Fetch data
+            orgNames = c() # Organismnames may come from indOrgObs or aggOrgObs
+            if("individualOrganismObservations" %in% input$observations_input_control){
+              orgNames = c(orgNames, data_upload[["individualOrganismObservations"]][,input$indOrgObs_taxonName])
+            }
+            if("aggregateOrganismObservations" %in% input$observations_input_control){
+              orgNames = c(orgNames, data_upload[["aggregateOrganismObservations"]][, input$aggOrgObs_taxonName])
+            }  
+            
+            # 2. Build Nodes
+            orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
+            orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
+              new_vegx_node(colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+            })
+            
+            orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
+            orgIdentities_nodes = lapply(1:nrow(orgIdentities_df), function(i){
+              new_vegx_node(colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+            })
+            
+            nodes$organismNames = orgNames_nodes
+            nodes$organismIdentities = orgIdentities_nodes
+            
+            # 3. Build lookup table
+            orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
+              data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),
+                         originalOrganismNameID = xml2::xml_text(xml2::xml_child(x$node, search = "originalOrganismNameID")))}) %>% 
+              bind_rows()
+            
+            orgNames_lookup = bind_cols(orgNames_df, orgIdentities_df) %>% 
+              setNames(c("organismName", "originalOrganismNameID")) 
+            
+            organisms_lookup = left_join(orgIdentities_lookup, orgNames_lookup, by = "originalOrganismNameID")
+            
+            #------------------------------------#
+            # Build Strata, if available
             if(input$aggOrgObs_hasStrata == "yes"){
               if(input$aggOrgObs_strataDef == "undefined"){
                 stratum_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
@@ -1204,6 +1177,29 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 aggOrgObs_strataDef_template = bind_rows(method_df, strata_df)
               } else {
                 aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
+                
+                # Check if observations contain undefined strata
+                strata_template = aggOrgObs_strataDef_template %>% 
+                  dplyr::filter(node_path == "stratum > stratumName") %>% 
+                  pull(node_value)
+                strata_observations = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
+                strata_unmatched = setdiff(strata_observations, strata_template)
+                
+                if(length(strata_unmatched) != 0){
+                  
+                  strata_df = data.frame(template_id = aggOrgObs_strataDef_template$template_id[1], 
+                                         main_element = "strata", 
+                                         node_path = "stratum > stratumName", 
+                                         node_value = strata_unmatched,
+                                         group_value = strata_unmatched) %>% 
+                    group_by(group_value) %>% 
+                    group_modify(~add_row(.x, template_id = aggOrgObs_strataDef_template$template_id[1], main_element = "strata", node_path = "stratum > methodID", node_value = "1")) %>%
+                    mutate(node_id = cur_group_id()+max(aggOrgObs_strataDef_template$node_id)) %>% 
+                    ungroup() %>% 
+                    dplyr::select(template_id, node_id, main_element, node_path, node_value)
+                  
+                  aggOrgObs_strataDef_template = bind_rows(aggOrgObs_strataDef_template, strata_df)
+                }
               }
               
               aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
@@ -1212,116 +1208,200 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               nodes$attributes = append(nodes$attributes, aggOrgObs_strataDef_nodes$attributes)
             }
             
+            strata_lookup = lapply(nodes$strata, function(x){
+              data.frame(stratumID = xml2::xml_attr(x$node, "id"),
+                         stratumName = xml2::xml_text(xml2::xml_child(x$node, search = "stratumName")))}) %>% 
+              bind_rows()
             
-            #------------------#
-            if(input$aggOrgObs_measurementScale == "ordinal"){
-              # 1. Get unique measurements from observation data
-              measurement_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])
-              method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
-                                     node_path = c("method > subject", "method > name", "method > description"),
-                                     node_value = c("aggregate measurement", "Undefined ordinal measurement scale", "An undefined ordinal measurement scale for aggregateOrganismObservations"))
-              attributes_df = data.frame(template_id = 1, main_element = "attributes", 
-                                         node_path = "attribute > choice > ordinal > code", 
-                                         node_value = measurement_values,
-                                         group_value = measurement_values) %>% 
-                group_by(group_value) %>% 
-                group_modify(~add_row(.x, template_id = 1, main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
-                mutate(node_id = cur_group_id()+1) %>% 
-                ungroup() %>% 
-                select(template_id, node_id, main_element, node_path, node_value)
+            #------------------------------------#
+            # Build Observations
+            ## AggregatOrganismObservations
+            if("aggregateOrganismObservations" %in% input$observations_input_control){
+              if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
+                # Build mapping table
+                plotUniqueIdentifier = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_plot_id]
+                if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot == "yes"){
+                  plotUniqueIdentifier = paste(plotUniqueIdentifier, data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_subplot_id], sep = "-")
+                }
+                
+                aggOrgObs_stratumObs_df = data.frame(
+                  plotUniqueIdentifier = plotUniqueIdentifier,
+                  obs_date = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date],
+                  stratumName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum]
+                ) %>%  
+                  left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
+                  left_join(strata_lookup, by = "stratumName") %>% 
+                  dplyr::select("stratumObservation > plotObservationID" = plotObservationID, 
+                                "stratumObservation > stratumID" = stratumID) %>% 
+                  distinct() %>% 
+                  arrange("stratumObservation > plotObservationID", "stratumObservation > stratumID")
+                
+                # Create nodes
+                aggOrgObs_stratumObs_nodes = lapply(1:nrow(aggOrgObs_stratumObs_df), function(i){
+                  new_vegx_node(colnames(aggOrgObs_stratumObs_df), aggOrgObs_stratumObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+                })
+                nodes$stratumObservations = append(nodes$stratumObservations, aggOrgObs_stratumObs_nodes)  
+                
+                # Build lookup table
+                stratumObs_lookup = lapply(nodes$stratumObservations, function(x){
+                  data.frame(stratumObservationID = xml2::xml_attr(x$node, "id"),
+                             plotObservationID = xml2::xml_text(xml2::xml_child(x$node, search = "plotObservationID")),
+                             stratumID = xml2::xml_text(xml2::xml_child(x$node, search = "stratumID")))}) %>% 
+                  bind_rows()
+              }
               
-              aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
-            } else if(input$aggOrgObs_measurementScale == "continuous"){
-              method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
-                                     node_path = c("method > subject", "method > name", "method > description"),
-                                     node_value = c("aggregate measurement", "Undefined quantitative measurement scale", "An undefined quantitative measurement scale for aggregateOrganismObservations"))
-              attributes_df = data.frame(template_id = 1, node_id = 2, main_element = "attributes",
-                                         node_path = c("attribute > choice > quantitative > methodID", "attribute > choice > quantitative > unit"),
-                                         node_value = c("1", "undefined"))
-              aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
-            } else {
-              aggOrgObs_measurementScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
-            }
-            
-            # 2. Build Nodes
-            aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path)
-            nodes$methods = append(nodes$methods, aggOrgObs_measurementScale_nodes$methods)
-            nodes$attributes = append(nodes$attributes, aggOrgObs_measurementScale_nodes$attributes)
-            
-            # 3. Build lookup (if qualitative scale was used)
-            if(xml2::xml_name(xml2::xml_child(aggOrgObs_measurementScale_nodes$attributes[[1]]$node)) != "quantitative"){ # Any better way to decide whether method is quantitative or not?
-              measurementScale_lookup = lapply(aggOrgObs_measurementScale_nodes$attributes, function(x){
-                data.frame(attributeID = xml2::xml_attr(x$node, "id"),
-                           taxon_measurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
-                bind_rows()
-            }
-            #------------------#
-            browser()
-            plotUniqueIdentifier = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_plot_id]
-            if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot == "yes"){
-              plotUniqueIdentifier = paste(plotUniqueIdentifier, data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_subplot_id], sep = "-")
-            }
+              #------------------#
+              if(input$aggOrgObs_measurementScale == "continuous"){
+                method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
+                                       node_path = c("method > subject", "method > name", "method > description"),
+                                       node_value = c("aggregate measurement", "Undefined quantitative measurement scale", "An undefined quantitative measurement scale for aggregateOrganismObservations"))
+                attributes_df = data.frame(template_id = 1, node_id = 2, main_element = "attributes",
+                                           node_path = c("attribute > choice > quantitative > methodID", "attribute > choice > quantitative > unit"),
+                                           node_value = c("1", "undefined"))
+                aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
+              } else if(input$aggOrgObs_measurementScale == "ordinal"){
+                # 1. Get unique measurements from observation data
+                measurement_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])
+                method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
+                                       node_path = c("method > subject", "method > name", "method > description"),
+                                       node_value = c("aggregate measurement", "aggregate measurement/undefined", "An undefined ordinal measurement scale for aggregateOrganismObservations"))
+                attributes_df = data.frame(template_id = 1, main_element = "attributes", 
+                                           node_path = "attribute > choice > ordinal > code", 
+                                           node_value = measurement_values,
+                                           group_value = measurement_values) %>% 
+                  group_by(group_value) %>% 
+                  group_modify(~add_row(.x, template_id = 1, main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
+                  mutate(node_id = cur_group_id()+1) %>% 
+                  ungroup() %>% 
+                  select(template_id, node_id, main_element, node_path, node_value)
+                
+                aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
+              } else  {
+                aggOrgObs_measurementScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
+                
+                # Check if observations contain undefined measurement categories
+                codes_template = aggOrgObs_measurementScale_template %>% 
+                  dplyr::filter(node_path == "attribute > choice > ordinal > code") %>% 
+                  pull(node_value)
+                codes_observations = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])
+                codes_unmatched = setdiff(codes_observations, codes_template)
+                
+                if(length(codes_unmatched) != 0){
+                  codes_df = data.frame(template_id = aggOrgObs_measurementScale_template$template_id[1], 
+                                        main_element = "attributes", 
+                                        node_path = "attribute > choice > ordinal > code", 
+                                        node_value = codes_unmatched,
+                                        group_value = codes_unmatched) %>% 
+                    group_by(group_value) %>% 
+                    group_modify(~add_row(.x, template_id = aggOrgObs_measurementScale_template$template_id[1], main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
+                    mutate(node_id = cur_group_id()+max( aggOrgObs_measurementScale_template$node_id)) %>% 
+                    ungroup() %>% 
+                    dplyr::select(template_id, node_id, main_element, node_path, node_value)
+                  
+                  aggOrgObs_measurementScale_template = bind_rows(aggOrgObs_measurementScale_template, codes_df)
+                }
+              }
               
-            aggOrgObs_mappings = data.frame(
-              plotUniqueIdentifier = plotUniqueIdentifier,
-              obs_date = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date],
-              organismName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonName],
-              taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]
-            )
+              # 2. Build Nodes
+              aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path)
+              nodes$methods = append(nodes$methods, aggOrgObs_measurementScale_nodes$methods)
+              nodes$attributes = append(nodes$attributes, aggOrgObs_measurementScale_nodes$attributes)
+              
+              # 3. Build lookup (if qualitative scale was used)
+              if(xml2::xml_name(xml2::xml_child(aggOrgObs_measurementScale_nodes$attributes[[1]]$node)) != "quantitative"){ # Any better way to decide whether method is quantitative or not?
+                measurementScale_lookup = lapply(aggOrgObs_measurementScale_nodes$attributes, function(x){
+                  data.frame(attributeID = xml2::xml_attr(x$node, "id"),
+                             taxon_measurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                  bind_rows()
+              }
+              #------------------#
+              plotUniqueIdentifier = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_plot_id]
+              if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot == "yes"){
+                plotUniqueIdentifier = paste(plotUniqueIdentifier, data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_subplot_id], sep = "-")
+              }
+              
+              aggOrgObs_mappings = data.frame(
+                plotUniqueIdentifier = plotUniqueIdentifier,
+                obs_date = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date],
+                organismName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonName],
+                taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]
+              )
+              
+              if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
+                aggOrgObs_mappings$stratumName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum]
+                
+                aggOrgObs_df = aggOrgObs_mappings %>% 
+                  left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
+                  left_join(organisms_lookup, by = "organismName") %>% 
+                  left_join(measurementScale_lookup, by = "taxon_measurement") %>%
+                  left_join(strata_lookup, by = "stratumName") %>% 
+                  left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% # TODO: FIX JOIN!
+                  dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
+                                "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
+                                "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_measurement, 
+                                "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID,
+                                "aggregateOrganismObservation > stratumObservationID" = stratumObservationID)
+              } else {
+                aggOrgObs_df = aggOrgObs_mappings %>% 
+                  left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
+                  left_join(organisms_lookup, by = "organismName") %>% 
+                  left_join(measurementScale_lookup, by = "taxon_measurement") %>% 
+                  dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
+                                "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
+                                "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_measurement, 
+                                "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID)
+              }
+              
+              aggOrgObs_nodes = lapply(1:nrow(aggOrgObs_df), function(i){
+                new_vegx_node(colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              })
+              nodes$aggregateOrganismObservations = aggOrgObs_nodes  
+            }
             
-            aggOrgObs_df = aggOrgObs_mappings %>% 
-              left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
-              left_join(organisms_lookup, by = "organismName") %>% 
-              left_join(measurementScale_lookup, by = "taxon_measurement") %>% 
-              dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
-                            "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
-                            "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_measurement, 
-                            "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID)
+            if("stratumObservations" %in% input$observations_input_control){}
+            if("communityObservations" %in% input$observations_input_control){}
+            if("surfaceCoverObservations" %in% input$observations_input_control){}
             
-            aggOrgObs_nodes = lapply(1:nrow(aggOrgObs_df), function(i){
-              new_vegx_node(vegx_schema, colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path)
-            })
-            nodes$aggregateOrganismObservations = aggOrgObs_nodes  
           }
           
-          if("stratumObservations" %in% input$observations_input_control){}
-          if("communityObservations" %in% input$observations_input_control){}
-          if("surfaceCoverObservations" %in% input$observations_input_control){}
-          
-        }
-        
-        #-------------------------------------------------------------------------#
-        # Update app state ####
-        # Update VegX document 
-        for(element_name in names(nodes)){
-          element_nodes = nodes[[element_name]]
-          parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
-          if(parent_missing){
-            elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
-            if(length(elements_present) > 0){
-              elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, element_name)]
-              insert_position = which(elements_ordered == element_name) - 1
-              xml_add_child(vegx_doc, element_name, .where = insert_position)  
-            } else {
-              xml_add_child(vegx_doc, element_name)  
+          #-------------------------------------------------------------------------#
+          # Update app state ####
+          # Update VegX document 
+          for(element_name in names(nodes)){
+            element_nodes = nodes[[element_name]]
+            parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
+            if(parent_missing){
+              elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
+              if(length(elements_present) > 0){
+                elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, element_name)]
+                insert_position = which(elements_ordered == element_name) - 1
+                xml_add_child(vegx_doc, element_name, .where = insert_position)  
+              } else {
+                xml_add_child(vegx_doc, element_name)  
+              }
+            }
+            parent = xml_find_all(vegx_doc, paste0("./",  element_name))
+            
+            for(node in element_nodes){
+              if(!is.null(node$node)){
+                xml_add_child(parent, node$node)
+              }
             }
           }
-          parent = xml_find_all(vegx_doc, paste0("./",  element_name))
           
-          for(node in element_nodes){
-            if(!is.null(node$node)){
-              xml_add_child(parent, node$node)
-            }
-          }
-        }
-        
-        # Update VegX text 
-        vegx_txt(as.character(vegx_doc))
-        
-        # Update action log 
-        action_log(read_action_log(log_path))
-        
-        removeModal()
+          # Update VegX text 
+          vegx_txt(as.character(vegx_doc))
+          
+          # Update action log 
+          action_log(read_action_log(log_path))
+          
+        }, error = function(e){
+          showNotification("Import failed. Please consult the log for more information.")
+          new_action_log_record(log_path, "Import error", e$message)
+          action_log(read_action_log(log_path))
+        }, finally = {
+          removeModal()
+        })
       }
     )
   })

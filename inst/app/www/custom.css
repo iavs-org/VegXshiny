@@ -52,6 +52,10 @@ body {
  min-height:160px!important;
 }
 
+.wtHolder{
+  background-color: #fff;
+}
+
 .nav-stacked li a {
   text-align:left !important; 
   vertical-align:middle!important;

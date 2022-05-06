@@ -42,13 +42,8 @@ mod_nodeEditor_ui <- function(id){
               column(
                 width = 12,
                 tags$h4(tags$b("Elements")),
-                div(class = "annotation text-info",
-                    tags$span("Select the VegX elements you want to use."), 
-                    shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                                 tags$p("The tree lists all available VegX elements for the currently selected main element. You can use the search
-                                                    box to quickly identify the location of an element by its name. If available, additional documentation information
-                                                    from the VegX schema is presented on mouse-over."))
-                ),
+                tags$p("Select the VegX elements you want to use", class = "text-info annotation"),
+                tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "The tree lists all available VegX elements for the currently selected main element. You can use the search box to quickly identify the location of an element by its name. If available, additional documentation information from the VegX schema is presented on mouse-over."),
                 br(),
                 shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T),
                 hr(.noWS = c("before","after")),
@@ -61,18 +56,9 @@ mod_nodeEditor_ui <- function(id){
               column(
                 width = 12,
                 tags$h4(tags$b("Values")),
-                div(class = "annotation text-info",
-                    tags$span("Associate the selected VegX elements with values."), 
-                    shinyWidgets::dropdownButton(circle = T, icon = icon('info'), status = "info", size = "xs", inline = T, width = "600px",
-                                                 tags$p("There are two ways to map elements to values:"),
-                                                 tags$ol(tags$li("Map the selected elements to a column of your uploaded data. Choosing this option will create a new 
-                                                                 VegX node for each row in the data."),
-                                                         tags$li("Provide a free text value. If all mappings in the main element are free text values, this will create a 
-                                                             single new VegX node. This option may be useful, e.g., when entering new methods or attributes. If there 
-                                                             are mappings present that link to uploaded data, free text values will be copied to all newly created nodes.")
-                                                 )
-                    )
-                ),
+                tags$p("Associate the selected VegX elements with values", class = "text-info annotation"),
+                tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "There are two ways to map elements to values:\n\n1. Map the selected elements to a column of your uploaded data. Choosing this option will create a new VegX node for each row in the data.\n\n2. Provide a free text value. If all mappings in the main element are free text values, this will create a single new VegX node. This option may be useful, e.g., when entering new methods or attributes. If there are mappings present that link to uploaded data, free text values will be copied to all newly created nodes."),
+                
                 fluidRow(
                   align = "center", 
                   column(5, tags$label("VegX Element")),
@@ -82,7 +68,7 @@ mod_nodeEditor_ui <- function(id){
                   )
                 ),
                 div(id = ns("placeholder")),
-                actionButton(ns("add_mapping"), label = "Add mapping", icon = icon("plus", class = "icon-padded")), 
+                actionButton(ns("add_mapping"), label = "Add mapping", icon = icon("plus", class = "icon-padded-right")), 
                 hr(.noWS = c("before","after")),
               )
             ),
@@ -315,7 +301,7 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                    # loop over mappings
                    for(i in 1:nrow(node_values_df)){
                      # Create new node
-                     fct_result = new_vegx_node(vegx_schema, node_names, as.character(node_values_df[i,]), id = ids[i], log_path)
+                     fct_result = new_vegx_node(node_names, as.character(node_values_df[i,]), id = ids[i], log_path, vegx_schema)
                      new_node = fct_result$node
                      n_errors = n_errors + fct_result$errors
                      n_warnings = n_warnings + fct_result$warnings 
@@ -439,7 +425,7 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                      # Create new node
                      target_root = xml_find_all(vegx_doc, paste0("//", root_name, "[@id='", target_ids[i], "']")) ####
                      node_values = as.character(node_values_df[i,])
-                     fct_result = merge_into_vegx_node(vegx_schema, target_root, node_paths, node_values, log_path)
+                     fct_result = merge_into_vegx_node(target_root, node_paths, node_values, log_path, vegx_schema)
                      if(fct_result$errors == 0){
                        n_merges = n_merges + 1
                      } else {
@@ -567,7 +553,7 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
                        new_nodes = list()
                        # loop over node_ids, create new nodes
                        for(j in 1:length(node_mappings)){ 
-                         fct_result = new_vegx_node(vegx_schema, node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, log_path)
+                         fct_result = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, log_path, vegx_schema)
                          new_node = fct_result$node
                          n_errors = n_errors + fct_result$errors
                          n_warnings = n_warnings + fct_result$warnings 
