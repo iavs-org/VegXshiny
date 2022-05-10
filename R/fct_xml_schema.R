@@ -9,12 +9,12 @@
 #' @noRd
 load_schema = function(){
   list(
-    veg  = xml2::read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny")),
-    misc = xml2::read_xml(system.file("extdata", "vegxschema", "veg-misc.xsd", package = "VegXshiny")),
-    obs  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plotobservation.xsd", package = "VegXshiny")),
-    plot = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plot.xsd", package = "VegXshiny")),
-    org  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-organism.xsd", package = "VegXshiny")),
-    comm = xml2::read_xml(system.file("extdata", "vegxschema", "veg-community.xsd", package = "VegXshiny"))
+    veg  = xml2::read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny", mustWork = F)),
+    misc = xml2::read_xml(system.file("extdata", "vegxschema", "veg-misc.xsd", package = "VegXshiny", mustWork = F)),
+    obs  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plotobservation.xsd", package = "VegXshiny", mustWork = F)),
+    plot = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plot.xsd", package = "VegXshiny", mustWork = F)),
+    org  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-organism.xsd", package = "VegXshiny", mustWork = F)),
+    comm = xml2::read_xml(system.file("extdata", "vegxschema", "veg-community.xsd", package = "VegXshiny", mustWork = F))
   )
 }
 

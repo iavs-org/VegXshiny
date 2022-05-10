@@ -66,7 +66,7 @@ new_vegx_document = function(){
 #' @noRd
 #' 
 #' @return xml_document
-new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_schema, write_log = T){ # TODO change param order for consistency, move vegx_schema to end 
+new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_schema, write_log = T){ 
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -92,7 +92,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_sche
   
   # set ID for root node
   root_node = xml_root(target_root)
-  root_definition = xml_find_all(vegx_schema, paste0("//*[@name='", root_name, "']"))
+  root_definition = xml_find_all(vegx_schema, paste0(".//*[@name='", root_name, "']"))
   if(!(length(xml_children(root_node)) == 0  & xml_text(root_node) == "") & xml_has_attr(root_definition, "id")){ # ID is required by schema
     generator_name = id_lookup[paste0(root_name,"ID")]
     if(is.null(id)){                      
@@ -208,64 +208,63 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
     parent = root
     is_choice = FALSE
     if(length(node_paths[[i]]) == 1){ # no traversal needed, just set text value of root
-      node_xpath = paste0("..//*[@name='", node_paths[[i]], "']")
+      node_xpath = paste0(".//*[@name='", node_paths[[i]], "']")
       if(length(xml_find_all(vegx_schema, node_xpath)) == 0){ # Check if node name is valid
         warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: invalid node name.")) 
         break  
       }
       xml_text(root) = node_values[i]
     } else { # traverse node path and create new nodes
-      for(j in 2:length(node_paths[[i]])){ 
+      for(j in 2:length(node_paths[[i]])){
         node_name = node_paths[[i]][j]
+        
         # Skip choices
         if(node_name == "choice"){
           is_choice = TRUE # Next element is a choice element, leave parent as is
           next
         }
         
-        node_xpath = paste0("..//*[@name='", paste(node_paths[[i]][1:j], collapse = "']/*[@name='"), "']") %>% 
+        node_xpath = paste0(".//xsd:element[@name='", paste(node_paths[[i]][1:j], collapse = "']/*[@name='"), "']") %>%
           str_replace_all("\\*\\[@name='choice']", "xsd:choice")
+        schema_node = xml_find_all(vegx_schema, node_xpath)
         
         # Check if node name is valid
-        if(length(xml_find_all(vegx_schema, node_xpath)) == 0){
-          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: invalid node name.")) 
-          break  
+        if(length(schema_node) == 0){
+          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: invalid node path."))
+          break
         }
         
         # Determine insertion position
         siblings = xml_children(parent) %>% xml_name()
         if(is_choice){ # If node is child of a choice element
-          choices = vegx_schema %>% 
-            xml_find_all(node_xpath) %>% 
-            xml_parent() %>% 
-            xml_children %>% 
+          choices = schema_node %>%
+            xml_parent() %>%
+            xml_children %>%
             xml_attr("name")
           
           # Check other choice is present
-          if(length(intersect(siblings, choices[choices != node_name])) != 0){ 
-            warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: only one node allowed in this position.")) 
-            break  
+          if(length(intersect(siblings, choices[choices != node_name])) != 0){
+            warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "' and descendents: only one node allowed in this position."))
+            break
           }
           # If not, find siblings of choice element instead of siblings of the node
-          siblings_schema = vegx_schema %>% 
-            xml_find_all(node_xpath) %>% 
-            xml_parent() %>% 
+          siblings_schema = schema_node %>%
+            xml_parent() %>%
             xml_parent() %>%  # Go up two levels to skip choice element
-            xml_children() %>% 
+            xml_children() %>%
             xml_attr("name")
           
           siblings_schema[which(is.na(siblings_schema))] = node_name # This is a bit hacky and will probably insert incorrectly when there are multiple unnamed elements at the same level, but there's no such case atm
-          is_choice = FALSE    
+          is_choice = FALSE
         } else {
-          siblings_schema_nodes = vegx_schema %>% 
-            xml_find_all(node_xpath) %>% 
-            xml_parent() %>% 
-            xml_children() 
+          siblings_schema_nodes = schema_node %>%
+            xml_parent() %>%
+            xml_children()
           
           if("choice" %in% xml_name(siblings_schema_nodes)){
             siblings_schema = siblings_schema_nodes %>% xml_attr("name")
             choices = siblings_schema_nodes[which(xml_name(siblings_schema_nodes) == "choice")] %>% xml_children() %>% xml_attr("name")
-            siblings_schema = append(siblings_schema, choices, after = which(is.na(siblings_schema))) 
+            siblings_schema = append(siblings_schema, choices, after = which(is.na(siblings_schema)))
             siblings_schema = siblings_schema[!is.na(siblings_schema)]
           } else {
             siblings_schema = siblings_schema_nodes %>% xml_attr("name")
@@ -278,30 +277,32 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
           insert_position = 0
         }
         if(length(insert_position) > 1){
-          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': Multiple matches in VegX schema.")) 
+          warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': Multiple matches in VegX schema."))
         }
         
         # Insert node
         if(j < length(node_paths[[i]])){
           if(!(node_name %in% siblings)){
-            xml_add_child(parent, node_name, .where = insert_position)                   
+            xml_add_child(parent, node_name, .where = insert_position)
           }
           parent = xml_child(parent, node_name)
         } else {
           # Get node schema definition
-          node_def = vegx_schema %>% 
-            xml_find_all(node_xpath) %>% 
-            xml_attrs() %>% 
+          node_def = schema_node %>%
+            xml_attrs() %>%
             unlist()
           
-          maxOccurs = ifelse("maxOccurs" %in% names(node_def), names(node_def)["maxOccurs"], "1")
-          type = ifelse("type" %in% names(node_def), node_def["type"], "xsd:string")
+          node_def_names = names(node_def)
+          maxOccurs = 1
+          if("maxOccurs" %in% node_def_names){maxOccurs = node_def_names["maxOccurs"]}
+          type = "xsd:string"
+          if("type" %in% node_def_names){type = node_def["type"]}
           val = node_values[i]
           
-          # Check if adding new node is allowed      
+          # Check if adding new node is allowed
           if(!is.na(as.numeric(maxOccurs))){ # max_occ not unbounded
             if(length(siblings[siblings == node_name]) >= as.numeric(maxOccurs)){
-              warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': maxOccurs reached.")) 
+              warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': maxOccurs reached."))
               break
             }
           }
@@ -322,11 +323,11 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
           } else if (type == "xsd:integer"){
             val = suppressWarnings(as.integer(val))
             if(is.na(val)){
-              warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': invalid integer format.")) 
+              warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': invalid integer format."))
               break
             }
           }
-          xml_add_child(parent, node_name, as.character(val), .where = insert_position)    
+          xml_add_child(parent, node_name, as.character(val), .where = insert_position)
         }
       }
     }

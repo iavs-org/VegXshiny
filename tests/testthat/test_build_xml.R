@@ -8,13 +8,13 @@ link_vegx_schema(vegx_schema, "veg", schema_files, simplify = T)
 
 test_that("Invalid node names are handled properly", {
   root = xml_new_root("method")
-  expect_warning(build_xml(root, list(c("method","invalidNodeName")), "foo", vegx_schema), "invalid node name")
+  expect_warning(build_xml(root, list(c("method","invalidNodeName")), "foo", vegx_schema), "invalid node path")
   expect_equal(length(xml_children(root)), 0)
   
-  expect_warning(build_xml(root, list(c("method","name"), c("method","invalidNodeName")), c("foo", "bar"), vegx_schema ), "invalid node name")
+  expect_warning(build_xml(root, list(c("method","name"), c("method","invalidNodeName")), c("foo", "bar"), vegx_schema ), "invalid node path")
   expect_equal(length(xml_children(root)), 1)
   
-  expect_warning(build_xml(root, list(c("method","invalidNodeName"), c("method","description")), c("foo", "bar"), vegx_schema), "invalid node name")
+  expect_warning(build_xml(root, list(c("method","invalidNodeName"), c("method","description")), c("foo", "bar"), vegx_schema), "invalid node path")
   expect_equal(length(xml_children(root)), 2)
 })
 
@@ -115,4 +115,3 @@ test_that("Nodes without children are handled properly", {
   build_xml(root, node_paths, "foo", vegx_schema)
   expect_equal(xml_text(root), "foo")
 })
-

@@ -209,7 +209,17 @@ mod_importWizard_ui <- function(id){
                     tableOutput(ns("summary_plot_parent_material"))
                 )
               )
+            ),
+            h3("Observations"),
+            fluidRow(
+              column(
+                6,
+                div(class = "frame",
+                    h4("AggregateOrganismObservations"),
+                    tableOutput(ns("summary_aggOrgObs")))
+              )
             )
+            
           )
       )
     ),
@@ -322,9 +332,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
       }
       
-      if(!is.null(input$subplot_data) & length(names(user_data)) != 0){   # TODO this doesnt update properly when subplots are switched off
+      if(!is.null(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && length(names(user_data)) != 0){
         file_selected = input$subplot_data # save current selection
-        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data)))
       }
     })
     
@@ -683,24 +693,27 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     })
     
     output$aggOrgObs_taxonStratum_mapping_ui = renderUI({
-      if(input$aggOrgObs_hasStrata == "yes"){
+      if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
         column(4, selectInput(ns("aggOrgObs_taxonStratum"), label = "Taxon stratum *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
     
     output$aggOrgObs_subplot_ui = renderUI({
-      req(input$subplot_plot_unique_id, input$subplot_id)
-      tagList(
-        hr(),
-        tags$label("Subplots"),
-        br(),
-        tags$p("Were observations made at the level of subplots?", class = "text-info annotation"),
-        radioButtons(ns("aggOrgObs_hasSubplot"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T)
-      )
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes"){
+        req(input$subplot_plot_unique_id, input$subplot_id)
+        tagList(
+          hr(),
+          tags$label("Subplots"),
+          br(),
+          tags$p("Were observations made at the level of subplots?", class = "text-info annotation"),
+          radioButtons(ns("aggOrgObs_hasSubplot"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T)
+        )
+      }
     })
     
     output$aggOrgObs_subplot_mapping_ui = renderUI({
-      if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot  == "yes"){
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot  == "yes"){
+        req(input$subplot_plot_unique_id, input$subplot_id)
         column(4, selectInput(ns("aggOrgObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
@@ -769,12 +782,33 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                            c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]))
     })
     
-    output$summary_plot_parent_material= renderUI({
+    output$summary_plot_parent_material = renderUI({
       render_summary_table("Parent material", input$plot_parent_material)
     })
     
+    ## Observations ####
+    output$summary_aggOrgObs = renderUI({
+      if("aggregateOrganismObservations" %in% input$observations_input_control){
+        stratum_val = NULL
+        if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
+          if(isTruthy(input$aggOrgObs_taxonStratum) && isTruthy(input$aggOrgObs_taxonStratum)){
+            stratum_val = paste0(input$aggOrgObs_taxonStratum, " (strata definition: '", templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_strataDef], "')")
+          }
+        }
+        
+        measurement_val = NULL
+        if(isTruthy(input$aggOrgObs_taxonMeasurement) && isTruthy(input$aggOrgObs_measurementScale)){
+          measurement_val = paste0(input$aggOrgObs_taxonMeasurement, " (measurement scale: '", templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_measurementScale], "')")
+        } 
+        
+        render_summary_table(c("Plot", "Subplot", "Observation date", "Taxon name", "Taxon stratum", "Measurement value"),
+                             list(input$aggOrgObs_plot_id, input$aggOrgObs_subplot_id, input$aggOrgObs_date, input$aggOrgObs_taxonName, 
+                                  stratum_val, measurement_val))
+      }
+    })
+    
     #-------------------------------------------------------------------------#
-    ## Build Nodes ####
+    # Build Nodes ####
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
@@ -807,6 +841,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tryCatch({
           mappings = list()
           nodes = list()
+          
           #-------------------------------------------------------------------------#
           ### Project ####
           if(isTruthy(input$project_title)){
@@ -840,7 +875,6 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           #-------------------------------------------------------------------------#
           ## Plots ####
           if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
-            browser()
             # Fetch user data assigned plots
             plots_upload = user_data[[input$plot_data]]
             plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
@@ -944,8 +978,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             }
             
             # Build plot nodes 
+            
+            vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
+            # for(i in 1:nrow(plots_df)){
+            #   new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
+            # }
+            # 
             plot_nodes = lapply(1:nrow(plots_df), function(i){
-              new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
             })
             plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
             nodes$plots = append(nodes$plots, plot_nodes)
@@ -1032,7 +1072,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               
               # Build subplot nodes 
               subplot_nodes = lapply(1:nrow(subplots_df), function(i){
-                new_vegx_node(colnames(subplots_df), subplots_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+                new_vegx_node(colnames(subplots_df), subplots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
               })
               nodes$plots = append(nodes$plots, subplot_nodes)
               
@@ -1094,7 +1134,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             if(length(plots_unmatched) > 0){
               plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
               plot_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
-                new_vegx_node(colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path, vegx_schema, write_log = F)
+                new_vegx_node(colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
               })
               nodes$plots = append(nodes$plots, plot_nodes_addendum)
               warning(paste0("Observation data referenced unknown plots. Added ", length(plots_unmatched)," new plot nodes for the following plots: ", plots_unmatched)) # TODO: incorporate into messaging system
@@ -1107,8 +1147,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               dplyr::select(-plotUniqueIdentifier, -plotID)
             
             # 4. Create nodes
+            vegx_schema_plotObs = xml_find_all(vegx_schema, "./xsd:element[@name='plotObservations']")
             plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
-              new_vegx_node(colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              new_vegx_node(colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path, vegx_schema_plotObs, write_log = F)
             })
             nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
             
@@ -1132,14 +1173,16 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             }  
             
             # 2. Build Nodes
+            vegx_schema_orgNames = xml_find_all(vegx_schema, "./xsd:element[@name='organismNames']")
             orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
             orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
-              new_vegx_node(colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              new_vegx_node(colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path, vegx_schema_orgNames, write_log = F)
             })
             
+            vegx_schema_orgIdentities = xml_find_all(vegx_schema, "./xsd:element[@name='organismIdentities']")
             orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
             orgIdentities_nodes = lapply(1:nrow(orgIdentities_df), function(i){
-              new_vegx_node(colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+              new_vegx_node(colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path, vegx_schema_orgIdentities, write_log = F)
             })
             
             nodes$organismNames = orgNames_nodes
@@ -1237,8 +1280,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   arrange("stratumObservation > plotObservationID", "stratumObservation > stratumID")
                 
                 # Create nodes
+                vegx_schema_stratumObs = xml_find_all(vegx_schema, "./xsd:element[@name='stratumObservations']")
                 aggOrgObs_stratumObs_nodes = lapply(1:nrow(aggOrgObs_stratumObs_df), function(i){
-                  new_vegx_node(colnames(aggOrgObs_stratumObs_df), aggOrgObs_stratumObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+                  new_vegx_node(colnames(aggOrgObs_stratumObs_df), aggOrgObs_stratumObs_df[i,], id = NULL, log_path, vegx_schema_stratumObs, write_log = F)
                 })
                 nodes$stratumObservations = append(nodes$stratumObservations, aggOrgObs_stratumObs_nodes)  
                 
@@ -1314,6 +1358,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                              taxon_measurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
                   bind_rows()
               }
+              
               #------------------#
               plotUniqueIdentifier = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_plot_id]
               if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot == "yes"){
@@ -1335,7 +1380,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   left_join(organisms_lookup, by = "organismName") %>% 
                   left_join(measurementScale_lookup, by = "taxon_measurement") %>%
                   left_join(strata_lookup, by = "stratumName") %>% 
-                  left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% # TODO: FIX JOIN!
+                  left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% 
                   dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
                                 "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
                                 "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_measurement, 
@@ -1352,8 +1397,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                                 "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID)
               }
               
+              vegx_schema_aggOrgObs = xml_find_all(vegx_schema, "./xsd:element[@name='aggregateOrganismObservations']")
               aggOrgObs_nodes = lapply(1:nrow(aggOrgObs_df), function(i){
-                new_vegx_node(colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path, vegx_schema, write_log = F)
+                new_vegx_node(colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path, vegx_schema_aggOrgObs, write_log = F)
               })
               nodes$aggregateOrganismObservations = aggOrgObs_nodes  
             }
@@ -1361,12 +1407,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
             if("stratumObservations" %in% input$observations_input_control){}
             if("communityObservations" %in% input$observations_input_control){}
             if("surfaceCoverObservations" %in% input$observations_input_control){}
-            
           }
           
           #-------------------------------------------------------------------------#
           # Update app state ####
-          # Update VegX document 
+          # VegX document 
+
           for(element_name in names(nodes)){
             element_nodes = nodes[[element_name]]
             parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
@@ -1381,18 +1427,22 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               }
             }
             parent = xml_find_all(vegx_doc, paste0("./",  element_name))
+            xml_add_child(parent, element_nodes[[1]]$node)
             
-            for(node in element_nodes){
-              if(!is.null(node$node)){
-                xml_add_child(parent, node$node)
+            if(length(element_nodes) > 1){
+              target = xml_children(parent)
+              for(i in 2:length(element_nodes)){
+                if(!is.null(element_nodes[[i]]$node)){
+                  xml_add_sibling(target, element_nodes[[i]]$node) 
+                }
               }
             }
           }
           
-          # Update VegX text 
+          # VegX text 
           vegx_txt(as.character(vegx_doc))
           
-          # Update action log 
+          # Action log 
           action_log(read_action_log(log_path))
           
         }, error = function(e){
