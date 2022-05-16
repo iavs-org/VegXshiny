@@ -309,7 +309,7 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
           
           # Do some format checks on node value
           if(type == "xsd:date"){
-            val = suppressWarnings(ymd(val))
+            val = suppressWarnings(lubridate::ymd(val))
             if(is.na(val)){
               warning(paste0("Skipped node at '", paste(node_paths[[i]][1:j], collapse = " > "), "': invalid date format."))
               break

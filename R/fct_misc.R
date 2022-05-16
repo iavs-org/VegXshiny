@@ -52,16 +52,38 @@ new_action_log_record = function(log_path, type, message, append = T, col.names 
 
 #' Build a html table to summarize a set of inputs
 #'
-#' @param input_names A character vector of names
-#' @param input_values The names of 
+#' @param header The header of the output UI
+#' @param labels The labels of the output table 
+#' @param values The values of the output table
+#' @param values_mandatory Indices of values that are mandatory for input group to be valid.
+#' @param values_grouping A list with index vectors that indicate the grouping of labels/values (used for validity checking)
 #'
 #' @return a rendered UI element
 #' @noRd
-render_summary_table = function(labels, values){
-  if(length(values) == 0){ # All input values are NULL
-    renderText("-")
+render_summary_table = function(header = NA, labels, values, values_mandatory = NA, values_grouping = list(1:length(values))){
+  
+  values_truthy = sapply(values, isTruthy)
+  div_class = "frame frame-danger"
+  if(!any(values_truthy)){ # No input values available
+    div_content = renderText("-")
+    if(all(is.na(values_mandatory))){div_class = "frame"}
   } else {
-    values[!sapply(values, isTruthy)] = "-"
-    renderTable(tibble(labels, values), spacing = "xs", rownames = F, colnames = F, bordered = F)
+    div_content = renderTable(tibble(labels, values), spacing = "xs", rownames = F, colnames = F, bordered = F)
+    groups_valid = sapply(values_grouping, function(group_indices){ # Check if values within groups are either all truthy or non-truthy
+      return(all(values_truthy[group_indices]) | all(!values_truthy[group_indices]))
+    })
+    values[!values_truthy] = "-"
+    
+    if(all(groups_valid) & (all(is.na(values_mandatory)) || all(values_truthy[values_mandatory]))){
+      div_class = "frame frame-success"
+    } else {
+      div_class = "frame frame-danger"
+    }
   }
+  
+  # return div
+  div(class = div_class, 
+      if(!is.na(header)){h4(header)}, 
+      div_content
+  )
 }

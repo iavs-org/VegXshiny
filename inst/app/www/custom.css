@@ -7,7 +7,6 @@ TODO:
 ...
 */
 
-/* set text color in handsontable to black*/
 body {
    font-size: 16px;
 }
@@ -23,6 +22,14 @@ body {
   border-color: #666666;
   padding: 10px;
   margin-bottom: 6px;
+}
+
+.frame-danger {
+  border-color: #da3b3b;
+}
+
+.frame-success {
+  border-color: #00a97e;
 }
 
 .form-inline {
