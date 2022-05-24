@@ -729,89 +729,127 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     #-------------------------------------------------------------------------#
     # Summary ####
+    inputs_complete = reactiveValues()
+    
     ## Project ####
     output$summary_project = renderUI({
+      inputs_complete$project = check_input_completeness(values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
+                                                         values_mandatory = 1, values_grouping = list(1,2,3,4:6))
       render_summary_table(header = NA, 
-                           c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
-                           c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
-                           values_mandatory = 1,
-                           values_grouping = list(1,2,3,4:6))
+                           labels = c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
+                           values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
+                           inputs_complete$project)
     })
     
     ## Plots ####
     output$summary_plot_id = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
         if(is.null(input$subplot_plot_unique_id) | is.null(input$subplot_id)){
-          render_summary_table("Identifier",
-                               c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
-                               c(input$plot_unique_id, "", ""),
-                               values_mandatory = 1:3)  
+          inputs_complete$plot_id = F
+          render_summary_table(header = "Identifier",
+                               labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
+                               values = c(input$plot_unique_id, "", ""),
+                               inputs_complete = inputs_complete$plot_id)  
         } else {
-          render_summary_table("Identifier",
-                               c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
-                               c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
-                               values_mandatory = 1:3)         
+          inputs_complete$plot_id = check_input_completeness(values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
+                                                             values_mandatory = 1:3)
+          render_summary_table(header = "Identifier",
+                               labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
+                               values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
+                               inputs_complete = inputs_complete$plot_id)         
         }
         
       } else {
-        render_summary_table("Identifier", "Unique identifier *", input$plot_unique_id, values_mandatory = 1)
+        inputs_complete$plot_id = check_input_completeness(input$plot_unique_id, values_mandatory = 1)
+        render_summary_table("Identifier", "Unique identifier *", input$plot_unique_id, inputs_complete$plot_id)
       }
     })
     
     output$summary_plot_coordinates = renderUI({
       if("Coordinates" %in% input$plot_input_control){
-        render_summary_table("Coordinates",
-                             c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
-                             c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs))
+        inputs_complete$plot_coordinates = check_input_completeness(values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs))
+        render_summary_table(header = "Coordinates",
+                             labels = c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
+                             values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs),
+                             inputs_complete = inputs_complete$plot_coordinates )
+      } else {
+        inputs_complete$plot_coordinates = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     output$summary_plot_elevation = renderUI({
       if("Elevation" %in% input$plot_input_control){
-        render_summary_table("Elevation",
-                             c("Plot elevation", "Measurement method"),
-                             c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]))
+        inputs_complete$plot_elevation = check_input_completeness(values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]))
+        render_summary_table(header = "Elevation",
+                             labels = c("Plot elevation", "Measurement method"),
+                             values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]),
+                             inputs_complete = inputs_complete$plot_elevation)
+      } else {
+        inputs_complete$plot_elevation = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     output$summary_plot_geometry = renderUI({
       if("Geometry" %in% input$plot_input_control){
-        render_summary_table("Geometry (plot)",
-                             c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
-                             c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
-                             values_grouping = list(1, 2:4, 5:6))
+        inputs_complete$plot_geometry = check_input_completeness(values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
+                                                                 values_grouping = list(1, 2:4, 5:6))
+        render_summary_table(header = "Geometry (plot)",
+                             labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                             values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
+                             inputs_complete = inputs_complete$plot_geometry)
+      } else {
+        inputs_complete$plot_geometry = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     output$summary_subplot_geometry = renderUI({
-      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
-        render_summary_table("Geometry (subplot)",
-                             c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
-                             c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
-                             values_grouping = list(1, 2:4, 5:6))
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && isTruthy(input$subplot_input_control) && "Geometry" %in% input$subplot_input_control){
+        inputs_complete$subplot_geometry = check_input_completeness(values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
+                                                                    values_grouping = list(1, 2:4, 5:6))
+        render_summary_table(header = "Geometry (subplot)",
+                             labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                             values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
+                             inputs_complete = inputs_complete$subplot_geometry)
+      } else {
+        inputs_complete$subplot_geometry = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     output$summary_plot_topography = renderUI({
       if("Topography" %in% input$plot_input_control){
-        render_summary_table("Topography",
-                             c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
-                             c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
-                             values_grouping = list(1:2, 3:4))
+        inputs_complete$plot_topography = check_input_completeness(values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
+                                                                   values_grouping = list(1:2, 3:4))
+        render_summary_table(header = "Topography",
+                             labels = c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
+                             values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
+                             inputs_complete = inputs_complete$plot_topography)
+      } else {
+        inputs_complete$plot_topography = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     output$summary_plot_parent_material = renderUI({
       if("Parent_material" %in% input$plot_input_control){
-        render_summary_table("Parent material", "Parent material", input$plot_parent_material)
+        inputs_complete$parent_material = check_input_completeness(input$plot_parent_material)
+        render_summary_table(header = "Parent material", labels = "Parent material", values = input$plot_parent_material, input_complete = inputs_complete$parent_material)
+      } else {
+        inputs_complete$parent_material = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
     ## Observations ####
     output$summary_observations = renderUI({
       if(!isTruthy(input$observations_input_control)){
+        inputs_complete$observations = F
         return(div(class = "frame frame-danger", h4("No observations selected")))
       } else {
+        inputs_complete$observations = T
         uiOutput(ns("summary_aggOrgObs"))
       }
     })
@@ -820,18 +858,25 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if("aggregateOrganismObservations" %in% input$observations_input_control){
         input_values = list("Plot" = input$aggOrgObs_plot_id, "Subplot" = input$aggOrgObs_subplot_id, "Observation date" = input$aggOrgObs_date, "Taxon name" = input$aggOrgObs_taxonName, 
                             "Stratum definition" = ifelse(isTruthy(input$aggOrgObs_strataDef), templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_strataDef], ""), "Stratum" = input$aggOrgObs_taxonStratum, 
-                            "Measurement scale" = ifelse(isTruthy(input$aggOrgObs_measurementScale), templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_measurementScale], ""), "Measurement value" = input$aggOrgObs_taxonMeasurement)
+                            "Measurement scale" = ifelse(is.na(as.numeric(input$aggOrgObs_measurementScale)), input$aggOrgObs_measurementScale, templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_measurementScale]), 
+                            "Measurement value" = input$aggOrgObs_taxonMeasurement)
         
         if(is.null(input$aggOrgObs_plot_id)){input_values[["Plot"]] = ""}
         if(is.null(input$aggOrgObs_date)){input_values[["Observation date"]]= ""}
         if(is.null(input$aggOrgObs_taxonName)){input_values[["Taxon name"]] = ""}
+        if(is.null(input$aggOrgObs_measurementScale)){input_values[["Measurement scale"]] = ""}
         if(is.null(input$aggOrgObs_taxonMeasurement)){input_values[["Measurement value"]] = ""}
         if(isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
         if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "no"){input_values[["Stratum"]] = NULL; input_values[["Stratum definition"]] = NULL}
         
-        values = Filter(Negate(is.null), input_values) %>% unlist # removes NULL values
+        values = Filter(Negate(is.null), input_values) %>% unlist() # removes NULL values
         labels = names(values)
-        render_summary_table("AggregateOrganismObservations", labels, values, values_mandatory = 1:length(values))
+        
+        inputs_complete$aggOrgObs = check_input_completeness(values = values, values_mandatory = 1:length(values))
+        render_summary_table(header = "AggregateOrganismObservations", labels = labels, values = values, inputs_complete = inputs_complete$aggOrgObs)
+      } else {
+        inputs_complete$aggOrgObs = T  # Set to completeness to TRUE if UI is not rendered
+        return(NULL)
       }
     })
     
@@ -840,17 +885,29 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
+        #-------------------------------------------------------------------------#
+        ### Check inputs
+        # Build UI elements
+        if(all(sapply(reactiveValuesToList(inputs_complete), isTRUE))){
+          modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will add all mappings to your VegX document."))
+          modal_footer = tagList(
+            tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
+          )
+        } else {
+          modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please review your entries."))
+          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))))
+          )
+        }
+        
+        # Show modal dialog
         showModal(
           modalDialog(tags$h3("Import data"),
                       hr(),
-                      div(class = "text-center",
-                          tags$p("This will add all mappings to your VegX document."),
-                      ),
+                      modal_content,
                       size = "l",
-                      footer = tagList(
-                        tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                  actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
-                      )
+                      footer = modal_footer
           )
         )
       }
@@ -868,18 +925,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       handlerExpr = {
         tryCatch({
           #-------------------------------------------------------------------------#
-          ### Check inputs
-          # Check if all inputs are complete --> use reactiveValues + summaries to automate checks
-          
-          # Check input types 
-          
-          # 
-          
-          #-------------------------------------------------------------------------#
           withProgress(
             message = "Importing data",
-            detail = 'This may take a while...',
             expr = {
+              # Preparations 
+              shinyjs::disable("confirm_import")
+              shinyjs::disable("dismiss_modal")
               mappings = list()
               nodes = list()  
               
@@ -917,7 +968,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               ## Plots ####
               if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
                 # Fetch user data assigned to plots
-                setProgress(value = 0.2, "Plots")
+                setProgress(value = 0.1, "Plots")
                 plots_upload = user_data[[input$plot_data]]
                 plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
                 colnames(plots_df_upload) = plots_upload$x$rColHeaders
@@ -1132,7 +1183,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               #
               # The workflow below follows this rationale.
               if(!is.null(input$observations_input_control) && input$observations_input_control != ""){
-                setProgress(value = 0.4, "Observations")
+                setProgress(value = 0.2, "Plot observations")
                 # Fetch user data assigned in observation mappings
                 data_upload = sapply(input$observations_input_control, function(obs_category){
                   input_value = input[[paste0(abbreviations[obs_category], "_data")]]
@@ -1202,6 +1253,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 #------------------------------------#
                 # Build organismNames and OrganismIdentities
                 # 1. Fetch data
+                setProgress(value = 0.3, "Organisms")
                 orgNames = c() # Organismnames may come from indOrgObs or aggOrgObs
                 if("individualOrganismObservations" %in% input$observations_input_control){
                   orgNames = c(orgNames, data_upload[["individualOrganismObservations"]][,input$indOrgObs_taxonName])
@@ -1239,6 +1291,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 #------------------------------------#
                 # Build Strata, if available
+                setProgress(value = 0.4, "Strata")
                 if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
                   if(input$aggOrgObs_strataDef == "undefined"){
                     stratum_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
@@ -1296,7 +1349,10 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 #------------------------------------#
                 # Build Observations
+                browser()
+                progress_increment = 0.4 / (length(input$observations_input_control) + 1)
                 ## AggregatOrganismObservations
+                incProgress(progress_increment, "Aggregate Organism Observations")
                 if("aggregateOrganismObservations" %in% input$observations_input_control){
                   if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
                     # Build mapping table
@@ -1307,7 +1363,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     
                     aggOrgObs_stratumObs_df = data.frame(
                       plotUniqueIdentifier = plotUniqueIdentifier,
-                      obs_date = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date],
+                      obs_date = lubridate::ymd(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_date]),
                       stratumName = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum]
                     ) %>%  
                       left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 

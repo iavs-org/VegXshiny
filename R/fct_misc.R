@@ -50,40 +50,58 @@ new_action_log_record = function(log_path, type, message, append = T, col.names 
   write.table(record, log_path, append = append, col.names = col.names, row.names = F)
 }
 
+#' Check if user inputs are complete
+#'
+#' @param values The values of the output table
+#' @param values_mandatory Indices of values that are mandatory for input group to be valid.
+#' @param values_grouping A list with index vectors that indicate the grouping of labels/values (used for validity checking)
+#'
+#' @return 1-element logical
+#' @noRd
+check_input_completeness = function(values, values_mandatory = NA, values_grouping = list(1:length(values))){
+  values_truthy = sapply(values, isTruthy)
+  if(!any(values_truthy)){ # No input values available
+    if(all(is.na(values_mandatory))){
+      return(T)
+    } 
+    return(F)
+  } 
+  groups_valid = sapply(values_grouping, function(group_indices){ # Check if values within groups are either all truthy or non-truthy
+    all(values_truthy[group_indices]) | all(!values_truthy[group_indices])
+  })
+  
+  return(all(groups_valid) & (all(is.na(values_mandatory)) || all(values_truthy[values_mandatory])))
+}
+
 #' Build a html table to summarize a set of inputs
 #'
 #' @param header The header of the output UI
 #' @param labels The labels of the output table 
 #' @param values The values of the output table
-#' @param values_mandatory Indices of values that are mandatory for input group to be valid.
-#' @param values_grouping A list with index vectors that indicate the grouping of labels/values (used for validity checking)
+#' @param inputs_complete A logical flag (usually obtained with check_input_completeness)
 #'
 #' @return a rendered UI element
 #' @noRd
-render_summary_table = function(header = NA, labels, values, values_mandatory = NA, values_grouping = list(1:length(values))){
-  
+render_summary_table = function(header = NA, labels, values, inputs_complete){
   values_truthy = sapply(values, isTruthy)
+  
   div_class = "frame frame-danger"
-  if(!any(values_truthy)){ # No input values available
-    div_content = renderText("-")
-    if(all(is.na(values_mandatory))){div_class = "frame"}
-  } else {
-    div_content = renderTable(tibble(labels, values), spacing = "xs", rownames = F, colnames = F, bordered = F)
-    groups_valid = sapply(values_grouping, function(group_indices){ # Check if values within groups are either all truthy or non-truthy
-      return(all(values_truthy[group_indices]) | all(!values_truthy[group_indices]))
-    })
-    values[!values_truthy] = "-"
-    
-    if(all(groups_valid) & (all(is.na(values_mandatory)) || all(values_truthy[values_mandatory]))){
-      div_class = "frame frame-success"
-    } else {
-      div_class = "frame frame-danger"
-    }
+  if(!any(values_truthy) && inputs_complete){
+    div_class = "frame"
+  } else if(inputs_complete){
+    div_class = "frame frame-success"
   }
   
-  # return div
-  div(class = div_class, 
-      if(!is.na(header)){h4(header)}, 
-      div_content
+  div_content = renderText("-")
+  if(any(values_truthy)){
+    values[!values_truthy] = "-"
+    div_content = renderTable(tibble(labels, values), spacing = "xs", rownames = F, colnames = F, bordered = F)
+  }
+  
+  return(
+    div(class = div_class, 
+        if(!is.na(header)){h4(header)}, 
+        div_content
+    )
   )
 }
