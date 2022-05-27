@@ -82,7 +82,7 @@ check_input_completeness = function(values, values_mandatory = NA, values_groupi
 #'
 #' @return a rendered UI element
 #' @noRd
-render_summary_table = function(header = NA, labels, values, inputs_complete){
+render_mapping_summary = function(header = NA, labels, values, inputs_complete){
   values_truthy = sapply(values, isTruthy)
   
   div_class = "frame frame-danger"
@@ -104,4 +104,77 @@ render_summary_table = function(header = NA, labels, values, inputs_complete){
         div_content
     )
   )
+}
+
+render_export_summary = function(vegx_doc){
+  node_summary = lapply(xml_children(vegx_doc), function(node){
+    data.frame(
+      "VegX Element" = xml_name(node),
+      "Node count" = length(xml_children(node)),
+      check.names = F
+    )
+  }) 
+  
+  if(length(node_summary) == 0){
+    return(renderText("VegX document is empty"))
+  }
+  return(renderTable(bind_rows(node_summary)))
+}
+
+#' Convert a VegX xml document to a list of rectangular tables
+#'
+#' @param vegx_doc the vegx xml-document
+#' @param resolve_ids A character vector of VegX main elements, for which ids should be resolved
+#'
+#' @importFrom tidyr pivot_longer pivot_wider drop_na
+#' 
+#' @return a list of dataframes
+#' @noRd
+vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentities", "aggregateOrganismObservations")){
+  # Convert xml to list of data.frame (1 row per node)
+  vegx_list = xml2::as_list(vegx_doc)
+  vegx_df = lapply(vegx_list$vegX, function(main_element){
+    result = mapply(function(node, node_name){
+      values = unlist(node)
+      if(is.null(names(values))){ # Set name manually for leaf nodes (e.g. organismName)
+        names(values) = node_name
+      }
+      return(c("id" = attr(node, "id"), values))
+    }, node = main_element, names(main_element), SIMPLIFY = F)  
+    return(bind_rows(result))
+  })
+  
+  # Process attributes
+  if("attributes" %in% resolve_ids && "attributes" %in% names(vegx_df)){
+    vegx_df$attributes = vegx_df$attributes %>% 
+      pivot_longer(cols = -id, names_sep = "\\.", names_to = c("attributeType", "name")) %>% 
+      drop_na() %>% 
+      pivot_wider(id_cols = c("id", "attributeType"), names_from = "name", values_from = "value")  
+  }
+  # Process organisms
+  if("organisms" %in% resolve_ids && "organismNames" %in% names(vegx_df) && "organismNames" %in% names(vegx_df)){
+    vegx_df$organismIdentities = vegx_df$organismIdentities %>% 
+      left_join(vegx_df$organismNames, by = c("originalOrganismNameID" = "id")) %>% 
+      select(id, organismName)  
+  }
+  
+  if("aggregateOrganismObservations" %in% resolve_ids && "aggregateOrganismObservations" %in% names(vegx_df)){
+    if("stratumObservationID" %in% colnames(vegx_df$aggregateOrganismObservations)){
+      vegx_df$aggregateOrganismObservations = vegx_df$aggregateOrganismObservations %>% 
+        left_join(vegx_df$plotObservations, by = c("plotObservationID" = "id")) %>% 
+        left_join(vegx_df$plots, by = c("plotID" = "id")) %>% 
+        left_join(vegx_df$organismIdentities, by = c("organismIdentityID" = "id")) %>% 
+        left_join(vegx_df$stratumObservations, by = c("stratumObservationID" = "id")) %>% 
+        left_join(vegx_df$strata, by = c("stratumID" = "id")) %>% 
+        dplyr::select(id, plotUniqueIdentifier, obsStartDate, organismName, stratumName, measurementValue = aggregateOrganismMeasurement.value)
+    } else {
+      vegx_df$aggregateOrganismObservations = vegx_df$aggregateOrganismObservations %>% 
+        left_join(vegx_df$plotObservations, by = c("plotObservationID" = "id")) %>% 
+        left_join(vegx_df$plots, by = c("plotID" = "id")) %>% 
+        left_join(vegx_df$strata, by = c("stratumID" = "id")) %>% 
+        dplyr::select(id, plotUniqueIdentifier, obsStartDate, organismName, measurementValue = aggregateOrganismMeasurement.value)
+    }
+  }
+  
+  return(vegx_df)
 }

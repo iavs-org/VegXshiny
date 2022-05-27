@@ -58,9 +58,9 @@ mod_fileManager_server <- function(id, action_log, log_path){
             file_info = input$upload[which(input$upload$name == file_name),]
             file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
             if(file_ext == "csv"){
-              tbl = read.csv(file_info$datapath)
+              tbl = utils::read.csv(file_info$datapath)
             } else if(file_ext %in% c("tab", "tsv", "txt")){
-              tbl = read.delim(file_info$datapath)
+              tbl = utils::read.delim(file_info$datapath)
             } else if(file_ext %in% c("xls", "xlsx")){
               tbl = readxl::read_excel(file_info$datapath)
             } else (

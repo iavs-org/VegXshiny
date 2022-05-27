@@ -735,7 +735,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$summary_project = renderUI({
       inputs_complete$project = check_input_completeness(values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
                                                          values_mandatory = 1, values_grouping = list(1,2,3,4:6))
-      render_summary_table(header = NA, 
+      render_mapping_summary(header = NA, 
                            labels = c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
                            values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
                            inputs_complete$project)
@@ -746,14 +746,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
         if(is.null(input$subplot_plot_unique_id) | is.null(input$subplot_id)){
           inputs_complete$plot_id = F
-          render_summary_table(header = "Identifier",
+          render_mapping_summary(header = "Identifier",
                                labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
                                values = c(input$plot_unique_id, "", ""),
                                inputs_complete = inputs_complete$plot_id)  
         } else {
           inputs_complete$plot_id = check_input_completeness(values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
                                                              values_mandatory = 1:3)
-          render_summary_table(header = "Identifier",
+          render_mapping_summary(header = "Identifier",
                                labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
                                values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
                                inputs_complete = inputs_complete$plot_id)         
@@ -761,14 +761,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         
       } else {
         inputs_complete$plot_id = check_input_completeness(input$plot_unique_id, values_mandatory = 1)
-        render_summary_table("Identifier", "Unique identifier *", input$plot_unique_id, inputs_complete$plot_id)
+        render_mapping_summary("Identifier", "Unique identifier *", input$plot_unique_id, inputs_complete$plot_id)
       }
     })
     
     output$summary_plot_coordinates = renderUI({
       if("Coordinates" %in% input$plot_input_control){
         inputs_complete$plot_coordinates = check_input_completeness(values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs))
-        render_summary_table(header = "Coordinates",
+        render_mapping_summary(header = "Coordinates",
                              labels = c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
                              values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs),
                              inputs_complete = inputs_complete$plot_coordinates )
@@ -781,7 +781,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$summary_plot_elevation = renderUI({
       if("Elevation" %in% input$plot_input_control){
         inputs_complete$plot_elevation = check_input_completeness(values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]))
-        render_summary_table(header = "Elevation",
+        render_mapping_summary(header = "Elevation",
                              labels = c("Plot elevation", "Measurement method"),
                              values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]),
                              inputs_complete = inputs_complete$plot_elevation)
@@ -795,7 +795,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if("Geometry" %in% input$plot_input_control){
         inputs_complete$plot_geometry = check_input_completeness(values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
                                                                  values_grouping = list(1, 2:4, 5:6))
-        render_summary_table(header = "Geometry (plot)",
+        render_mapping_summary(header = "Geometry (plot)",
                              labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
                              values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
                              inputs_complete = inputs_complete$plot_geometry)
@@ -809,7 +809,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && isTruthy(input$subplot_input_control) && "Geometry" %in% input$subplot_input_control){
         inputs_complete$subplot_geometry = check_input_completeness(values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
                                                                     values_grouping = list(1, 2:4, 5:6))
-        render_summary_table(header = "Geometry (subplot)",
+        render_mapping_summary(header = "Geometry (subplot)",
                              labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
                              values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
                              inputs_complete = inputs_complete$subplot_geometry)
@@ -823,7 +823,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if("Topography" %in% input$plot_input_control){
         inputs_complete$plot_topography = check_input_completeness(values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
                                                                    values_grouping = list(1:2, 3:4))
-        render_summary_table(header = "Topography",
+        render_mapping_summary(header = "Topography",
                              labels = c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
                              values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
                              inputs_complete = inputs_complete$plot_topography)
@@ -836,7 +836,10 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$summary_plot_parent_material = renderUI({
       if("Parent_material" %in% input$plot_input_control){
         inputs_complete$parent_material = check_input_completeness(input$plot_parent_material)
-        render_summary_table(header = "Parent material", labels = "Parent material", values = input$plot_parent_material, input_complete = inputs_complete$parent_material)
+        render_mapping_summary(header = "Parent material", 
+                             labels = "Parent material", 
+                             values = input$plot_parent_material, 
+                             inputs_complete = inputs_complete$parent_material)
       } else {
         inputs_complete$parent_material = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -873,7 +876,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         labels = names(values)
         
         inputs_complete$aggOrgObs = check_input_completeness(values = values, values_mandatory = 1:length(values))
-        render_summary_table(header = "AggregateOrganismObservations", labels = labels, values = values, inputs_complete = inputs_complete$aggOrgObs)
+        render_mapping_summary(header = "AggregateOrganismObservations", labels = labels, values = values, inputs_complete = inputs_complete$aggOrgObs)
       } else {
         inputs_complete$aggOrgObs = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -1098,8 +1101,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   subplot_ids = subplots_df_upload[[input$subplot_id]]
                   plotUniqueIdentifiers = paste(subplots_df_upload[[input$subplot_plot_unique_id]], subplots_df_upload[[input$subplot_id]], sep = "-")
                   
-                  if(length(setdiff(plot_ids, plot_lookup$plotUniqueIdentifier)) != 0){   # TODO: Create nodes for those
-                    stop("Unknown main plots")
+                  if(length(setdiff(plot_ids, plot_lookup$plotUniqueIdentifier)) != 0){
+                    stop("Subplot data contain unknown plot IDs")
                   } else if("" %in% subplot_ids){
                     stop("Subplot IDs may not contain empty values")
                   } else if(length(plotUniqueIdentifiers) != length(unique(plotUniqueIdentifiers))){
@@ -1115,7 +1118,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                       pull(plotID),          
                     "plot > relatedPlot > plotRelationship" = "subplot",
                     check.names = F
-                  ) %>% filter(complete.cases(.))
+                  ) %>% filter(stats::complete.cases(.))
                   
                   if("Geometry" %in% input$subplot_input_control){
                     if(isTruthy(input$subplot_shape)){
@@ -1200,6 +1203,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 plotObs_df_list = lapply(input$observations_input_control, function(obs_category){
                   df_upload = data_upload[[obs_category]] 
                   
+                  # Check date formats
+                  date_input = input[[paste0(abbreviations[obs_category], "_date")]]
+                  date_vec = df_upload %>% pull(date_input) 
+                  tryCatch(lubridate::ymd(date_vec), warning = function(w){
+                    stop(paste0("Could not parse date field for ", obs_category))
+                  })
+                 
                   # Get Identifiers
                   plotUniqueIdentifier = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
                   if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
@@ -1213,7 +1223,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 plotObs_df = plotObs_df_list %>% 
                   bind_rows() %>% 
                   distinct() %>% 
-                  filter(complete.cases(.)) %>% 
+                  filter(stats::complete.cases(.)) %>% 
                   mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
                 
                 # 2. Check if plots have ids already
@@ -1349,7 +1359,6 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 #------------------------------------#
                 # Build Observations
-                browser()
                 progress_increment = 0.4 / (length(input$observations_input_control) + 1)
                 ## AggregatOrganismObservations
                 incProgress(progress_increment, "Aggregate Organism Observations")

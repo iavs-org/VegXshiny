@@ -24,7 +24,7 @@ app_server <- function(input, output, session) {
   
   # VegX document
   vegx_doc = new_vegx_document()
-  # vegx_doc_history = list(vegx_doc)
+  # vegx_doc_history = list(vegx_doc) 
 
   # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
@@ -79,11 +79,15 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Create mappings and add nodes freely
-  mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
+  # mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer
   mod_xmlViewer_server("xmlViewer", vegx_doc, vegx_txt, action_log, log_path)
+  
+  # --------------------------------------------------------------------------------------- #
+  # Export
+  mod_exportVegx_server("exportVegx", vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Action Log
