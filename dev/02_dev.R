@@ -26,7 +26,7 @@ usethis::use_package("shinyjs")
 usethis::use_dev_package("shinyTree")
 usethis::use_package("shinyWidgets")
 usethis::use_package("stringr")
-usethis::use_package("tidyr")         # transform data using base r and remove
+usethis::use_package("tidyr")
 usethis::use_package("xml2")
 
 usethis::use_package("config", type = "Suggests")
@@ -35,17 +35,18 @@ usethis::use_package("knitr", type = "Suggests")
 usethis::use_package("readxl", type = "Suggests")
 usethis::use_package("spelling", type = "Suggests")
 usethis::use_package("testthat", type = "Suggests")
+usethis::use_package("tidyr", type = "Suggests")
 
 ## Add modules ----
 golem::add_module("about")
 golem::add_module("fileManager")
 golem::add_module("vegxBuilder")
 golem::add_module("importWizard")
-#golem::add_module("quickformGenerator")
 golem::add_module("nodeEditor")
 golem::add_module("rowGenerator")
 golem::add_module("xmlViewer")
 golem::add_module("actionLog")
+golem::add_module("exportVegx")
 
 ## Add helper functions ----
 golem::add_fct("xml_schema")
