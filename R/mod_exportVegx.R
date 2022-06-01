@@ -1,4 +1,4 @@
-#' exportVegx UI Function
+#' vegxExport UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_exportVegx_ui <- function(id){
+mod_vegxExport_ui <- function(id){
   ns <- NS(id)
   fluidPage(
     column(
@@ -23,10 +23,10 @@ mod_exportVegx_ui <- function(id){
   )
 }
 
-#' exportVegx Server Functions
+#' vegxExport Server Functions
 #'
 #' @noRd 
-mod_exportVegx_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
+mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer(id, function(input, output, session){
     observe({
       vegx_txt() # Can't put observer on vegx_doc (not reactive), so use vegx_txt (readctive) instead 

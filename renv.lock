@@ -41,6 +41,31 @@
       "Hash": "22b546dd7e337f6c0c58a39983a496bc",
       "Requirements": []
     },
+    "VegXshiny": {
+      "Package": "VegXshiny",
+      "Version": "0.0.0.9000",
+      "Source": "Repository",
+      "Repository": null,
+      "Remotes": "shinyTree/shinyTree",
+      "Hash": "eaf71be04faab329b20548080dfb3a6f",
+      "Requirements": [
+        "DT",
+        "bslib",
+        "dplyr",
+        "golem",
+        "jsonlite",
+        "lubridate",
+        "rhandsontable",
+        "shiny",
+        "shinyAce",
+        "shinyTree",
+        "shinyWidgets",
+        "shinyjs",
+        "stringr",
+        "tidyr",
+        "xml2"
+      ]
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.1",

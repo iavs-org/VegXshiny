@@ -36,6 +36,13 @@ app_server <- function(input, output, session) {
     read_action_log(log_path)
   })
   
+  templates = reactiveVal({
+    templates_predefined
+  })
+  
+  templates_lookup = reactiveVal({
+    templates_predefined_lookup
+  })
   # --------------------------------------------------------------------------------------- #
   # Create global observers
   observe({
@@ -75,7 +82,7 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Guided import for tabular data
-  mod_importWizard_server("importWizard", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
+  mod_importWizard_server("importWizard", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Create mappings and add nodes freely
@@ -87,7 +94,7 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Export
-  mod_exportVegx_server("exportVegx", vegx_doc, vegx_txt, action_log, log_path)
+  mod_vegxExport_server("vegxExport", vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Action Log

@@ -213,19 +213,58 @@ mod_importWizard_ui <- function(id){
 #' importWizard Server Functions
 #'
 #' @noRd 
-mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path){
+mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    # Server-wide observers & reactives ####
+    
+    # Observers & reactives ####
     # Pull method templates
-    location_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name)
-    elevation_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name)
-    dimension_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot dimension") %>% pull(template_id, name)
-    area_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name)
-    aspect_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name)
-    slope_methods = templates_lookup %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name)
-    strata_methods = templates_lookup %>% filter(target_element == "strata", subject == "strata definition") %>% pull(template_id, name)
-    cover_methods = templates_lookup %>% filter(target_element == "methods", subject == "plant cover") %>% pull(template_id, name)
+    methods = reactive({
+      list(location = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name),
+           elevation = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name),
+           plot_dimension = templates_lookup()  %>% dplyr::filter(target_element == "methods", subject == "plot dimension") %>% pull(template_id, name),
+           plot_area = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name),
+           aspect = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name),
+           slope = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name),
+           aggOrgObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "plant count", "plant frequency", "basal area", "user-defined aggregate measurement")) %>% pull(template_id, name),
+           strataDef = templates_lookup() %>% filter(target_element == "strata", subject == "strata definition") %>% pull(template_id, name))
+    })
+    
+    # Observe method inputs and trigger mod_newMethodTemplate when custom template option is selected
+    observe_method_input = function(input_name, method_subject){
+      if(input[[input_name]] == "custom_template"){
+        module_id = paste0("new_method-", sample.int(100000, 1))
+        mod_newMethodTemplate_server(module_id, method_subject, templates, templates_lookup)
+        mod_newMethodTemplate_ui(ns(module_id))
+        updateSelectizeInput(session, input_name, selected = "")
+      }
+    }
+    
+    observeEvent(input$plot_location_method, handlerExpr = observe_method_input("plot_location_method", "location"))
+    observeEvent(input$plot_elevation_method, handlerExpr = observe_method_input("plot_elevation_method", "elevation"))
+    observeEvent(input$plot_dimension_method, handlerExpr = observe_method_input("plot_dimension_method", "plot dimension"))
+    observeEvent(input$plot_area_method, handlerExpr = observe_method_input("plot_area_method", "plot area"))
+    observeEvent(input$plot_aspect_method, handlerExpr = observe_method_input("plot_aspect_method", "aspect"))
+    observeEvent(input$plot_slope_method, handlerExpr = observe_method_input("plot_slope_method", "slope"))
+    observeEvent(input$subplot_dimension_method, handlerExpr = observe_method_input("subplot_dimension_method", "plot dimension"))
+    observeEvent(input$subplot_area_method, handlerExpr = observe_method_input("subplot_area_method", "plot area"))
+    observeEvent(input$aggOrgObs_measurementScale, handlerExpr = observe_method_input("aggOrgObs_measurementScale", "user-defined aggregate measurement"))
+    
+    # Update method inputs to prevent re-rendering of the entire UI when `methods()` changes
+    observeEvent(  
+      eventExpr = methods(),
+      handlerExpr = {
+        updateSelectizeInput(session, inputId = "plot_location_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$location), after = 1))
+        updateSelectizeInput(session, inputId = "plot_elevation_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$elevation), after = 1))
+        updateSelectizeInput(session, inputId = "plot_dimension_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "plot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
+        updateSelectizeInput(session, inputId = "plot_aspect_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aspect), after = 1))
+        updateSelectizeInput(session, inputId = "plot_slope_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$slope), after = 1))
+        updateSelectizeInput(session, inputId = "subplot_dimension_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "subplot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
+        updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
+      }
+    ) 
     
     # Dynamic display text for data dropdown menus
     dropdown_empty = reactive({
@@ -248,21 +287,10 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
           )
         )
       } else if(input$sidebar =="Summary") {
-        if(TRUE
-           # isTruthy(input$plot_data) &
-           # isTruthy(input$cover_data) &
-           # isTruthy(input$project_title)
-        ){
-          buttons = fluidRow(
-            column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-            column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block"))
-          )  
-        } else {
-          buttons = fluidRow(
-            column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-            column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block", disabled = "", title = "Please fill all mandatory fields"))
-          )
-        }
+        buttons = fluidRow(
+          column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
+          column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block"))
+        )  
       } else {
         buttons = fluidRow(
           column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
@@ -304,7 +332,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     #-------------------------------------------------------------------------#
     # Plots ####
-    observe({  # This observer prevents re-rendering of the entire UI when user_data changes
+    # Observe and update data inputs instead of using a reactive expression in their definition, thus preventing re-rendering of the entire UI when `user_data()` changes 
+    observe({  
       if(!is.null(input$plot_data) & length(names(user_data)) != 0){
         file_selected = input$plot_data # save current selection
         updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
@@ -328,7 +357,6 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$plot_mappings_ui = renderUI({
       req(input$plot_data)
-      
       tagList(
         selectizeInput(inputId = ns("plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders)),
         
@@ -360,7 +388,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
                   column(4, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(location_methods), names(location_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$location), after = 1)))
                 ), 
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -390,7 +418,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 fluidRow(
                   column(4, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
                   column(4, selectInput(ns("plot_elevation_method"), label = "Measurement method",
-                                        choices = append(list("Select a template" = ""), setNames(as.list(elevation_methods), names(elevation_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$elevation), after = 1)))
                 )
               )
             )
@@ -421,13 +449,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_dimensions_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(dimension_methods), names(dimension_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
             )
@@ -453,13 +481,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 fluidRow(
                   column(4, selectInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_aspect_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(aspect_methods), names(aspect_methods)))))
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$aspect), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_slope_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(slope_methods), names(slope_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$slope), after = 1)))
                 )
               )
             )
@@ -556,13 +584,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_dimensions_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(dimension_methods), names(dimension_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_area_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = ""), setNames(as.list(area_methods), names(area_methods))))) 
+                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
             )
@@ -640,16 +668,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$p("Are observations structured into strata?", class = "text-info annotation"),
         radioButtons(ns("aggOrgObs_hasStrata"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T),
         uiOutput(ns("aggOrgObs_strata_ui")),
-        
         uiOutput(ns("aggOrgObs_subplot_ui")),
         
         hr(),
         tags$label("Measurement scale *"),
         br(),
         tags$p("Which scale was used to measure the observation?", class = "text-info annotation"),
-        selectizeInput(ns("aggOrgObs_measurementScale"), label = NULL, 
-                       choices = append(list("Select a template" = "", "Undefined (ordinal scale)" = "ordinal", "Undefined (quantitative scale)" = "quantitative"), 
-                                        setNames(as.list(cover_methods), names(cover_methods)))),
+        selectizeInput(ns("aggOrgObs_measurementScale"), label = NULL, choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$aggOrgObs), after = 1)),
         
         hr(),
         tags$label("Observations *"),
@@ -657,6 +682,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$p("Assign a dataset", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date, taxon and stratum (optional)"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
+        
         uiOutput(ns("aggOrgObs_mapping_ui"))
       )
     })
@@ -665,7 +691,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if(input$aggOrgObs_hasStrata == "yes"){
         tagList(
           tags$p("Which definition was used?", class = "text-info annotation"),
-          selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, choices = append(list("Select a template" = "", "Undefined" =  "undefined"), setNames(as.list(strata_methods), names(strata_methods))))  
+          selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, 
+                         choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$strataDef), after = 1))
         )
       }
     })
@@ -736,9 +763,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       inputs_complete$project = check_input_completeness(values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
                                                          values_mandatory = 1, values_grouping = list(1,2,3,4:6))
       render_mapping_summary(header = NA, 
-                           labels = c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
-                           values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
-                           inputs_complete$project)
+                             labels = c("Title *", "Abstract", "Citation", "Party name", "Party role", "Party type"),
+                             values = c(input$project_title, input$project_abstract, input$project_citation, input$party_name, input$party_role, input$party_type),
+                             inputs_complete$project)
     })
     
     ## Plots ####
@@ -747,16 +774,16 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         if(is.null(input$subplot_plot_unique_id) | is.null(input$subplot_id)){
           inputs_complete$plot_id = F
           render_mapping_summary(header = "Identifier",
-                               labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
-                               values = c(input$plot_unique_id, "", ""),
-                               inputs_complete = inputs_complete$plot_id)  
+                                 labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
+                                 values = c(input$plot_unique_id, "", ""),
+                                 inputs_complete = inputs_complete$plot_id)  
         } else {
           inputs_complete$plot_id = check_input_completeness(values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
                                                              values_mandatory = 1:3)
           render_mapping_summary(header = "Identifier",
-                               labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
-                               values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
-                               inputs_complete = inputs_complete$plot_id)         
+                                 labels = c("Plot unique identifier (plot) *", "Plot unique identifier (subplot) *", "Subplot identifier *"),  
+                                 values = c(input$plot_unique_id, input$subplot_plot_unique_id, input$subplot_id),
+                                 inputs_complete = inputs_complete$plot_id)         
         }
         
       } else {
@@ -767,11 +794,11 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_plot_coordinates = renderUI({
       if("Coordinates" %in% input$plot_input_control){
-        inputs_complete$plot_coordinates = check_input_completeness(values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs))
+        inputs_complete$plot_coordinates = check_input_completeness(values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup()$name[as.numeric(input$plot_location_method)], input$plot_crs))
         render_mapping_summary(header = "Coordinates",
-                             labels = c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
-                             values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup$name[as.numeric(input$plot_location_method)], input$plot_crs),
-                             inputs_complete = inputs_complete$plot_coordinates )
+                               labels = c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
+                               values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup()$name[as.numeric(input$plot_location_method)], input$plot_crs),
+                               inputs_complete = inputs_complete$plot_coordinates )
       } else {
         inputs_complete$plot_coordinates = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -780,11 +807,11 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_plot_elevation = renderUI({
       if("Elevation" %in% input$plot_input_control){
-        inputs_complete$plot_elevation = check_input_completeness(values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]))
+        inputs_complete$plot_elevation = check_input_completeness(values = c(input$plot_elevation, templates_lookup()$name[as.numeric(input$plot_elevation_method)]))
         render_mapping_summary(header = "Elevation",
-                             labels = c("Plot elevation", "Measurement method"),
-                             values = c(input$plot_elevation, templates_lookup$name[as.numeric(input$plot_elevation_method)]),
-                             inputs_complete = inputs_complete$plot_elevation)
+                               labels = c("Plot elevation", "Measurement method"),
+                               values = c(input$plot_elevation, templates_lookup()$name[as.numeric(input$plot_elevation_method)]),
+                               inputs_complete = inputs_complete$plot_elevation)
       } else {
         inputs_complete$plot_elevation = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -793,12 +820,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_plot_geometry = renderUI({
       if("Geometry" %in% input$plot_input_control){
-        inputs_complete$plot_geometry = check_input_completeness(values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
+        inputs_complete$plot_geometry = check_input_completeness(values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup()$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup()$name[as.numeric(input$plot_area_method)]),
                                                                  values_grouping = list(1, 2:4, 5:6))
         render_mapping_summary(header = "Geometry (plot)",
-                             labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
-                             values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup$name[as.numeric(input$plot_area_method)]),
-                             inputs_complete = inputs_complete$plot_geometry)
+                               labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                               values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup()$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup()$name[as.numeric(input$plot_area_method)]),
+                               inputs_complete = inputs_complete$plot_geometry)
       } else {
         inputs_complete$plot_geometry = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -807,12 +834,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_subplot_geometry = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && isTruthy(input$subplot_input_control) && "Geometry" %in% input$subplot_input_control){
-        inputs_complete$subplot_geometry = check_input_completeness(values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
+        inputs_complete$subplot_geometry = check_input_completeness(values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup()$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup()$name[as.numeric(input$subplot_area_method)]),
                                                                     values_grouping = list(1, 2:4, 5:6))
         render_mapping_summary(header = "Geometry (subplot)",
-                             labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
-                             values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup$name[as.numeric(input$subplot_area_method)]),
-                             inputs_complete = inputs_complete$subplot_geometry)
+                               labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                               values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup()$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup()$name[as.numeric(input$subplot_area_method)]),
+                               inputs_complete = inputs_complete$subplot_geometry)
       } else {
         inputs_complete$subplot_geometry = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -821,12 +848,12 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     
     output$summary_plot_topography = renderUI({
       if("Topography" %in% input$plot_input_control){
-        inputs_complete$plot_topography = check_input_completeness(values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
+        inputs_complete$plot_topography = check_input_completeness(values = c(input$plot_aspect, templates_lookup()$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup()$name[as.numeric(input$plot_slope_method)]),
                                                                    values_grouping = list(1:2, 3:4))
         render_mapping_summary(header = "Topography",
-                             labels = c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
-                             values = c(input$plot_aspect, templates_lookup$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup$name[as.numeric(input$plot_slope_method)]),
-                             inputs_complete = inputs_complete$plot_topography)
+                               labels = c("Plot aspect", "Aspect measurement method", "Plot slope", "Slope measurement method"), 
+                               values = c(input$plot_aspect, templates_lookup()$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup()$name[as.numeric(input$plot_slope_method)]),
+                               inputs_complete = inputs_complete$plot_topography)
       } else {
         inputs_complete$plot_topography = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -837,9 +864,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       if("Parent_material" %in% input$plot_input_control){
         inputs_complete$parent_material = check_input_completeness(input$plot_parent_material)
         render_mapping_summary(header = "Parent material", 
-                             labels = "Parent material", 
-                             values = input$plot_parent_material, 
-                             inputs_complete = inputs_complete$parent_material)
+                               labels = "Parent material", 
+                               values = input$plot_parent_material, 
+                               inputs_complete = inputs_complete$parent_material)
       } else {
         inputs_complete$parent_material = T  # Set to completeness to TRUE if UI is not rendered
         return(NULL)
@@ -860,8 +887,8 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     output$summary_aggOrgObs = renderUI({
       if("aggregateOrganismObservations" %in% input$observations_input_control){
         input_values = list("Plot" = input$aggOrgObs_plot_id, "Subplot" = input$aggOrgObs_subplot_id, "Observation date" = input$aggOrgObs_date, "Taxon name" = input$aggOrgObs_taxonName, 
-                            "Stratum definition" = ifelse(isTruthy(input$aggOrgObs_strataDef), templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_strataDef], ""), "Stratum" = input$aggOrgObs_taxonStratum, 
-                            "Measurement scale" = ifelse(is.na(as.numeric(input$aggOrgObs_measurementScale)), input$aggOrgObs_measurementScale, templates_lookup$name[templates_lookup$template_id == input$aggOrgObs_measurementScale]), 
+                            "Stratum definition" = ifelse(isTruthy(input$aggOrgObs_strataDef), templates_lookup()$name[templates_lookup()$template_id == input$aggOrgObs_strataDef], ""), "Stratum" = input$aggOrgObs_taxonStratum, 
+                            "Measurement scale" = ifelse(is.na(as.numeric(input$aggOrgObs_measurementScale)), input$aggOrgObs_measurementScale, templates_lookup()$name[templates_lookup()$template_id == input$aggOrgObs_measurementScale]), 
                             "Measurement value" = input$aggOrgObs_taxonMeasurement)
         
         if(is.null(input$aggOrgObs_plot_id)){input_values[["Plot"]] = ""}
@@ -996,7 +1023,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Coordinates" %in% input$plot_input_control){
                   if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
@@ -1010,7 +1037,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Elevation" %in% input$plot_input_control){
                   if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[input$plot_elevation]]
                     plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1025,7 +1052,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     plots_df[["plot > geometry > shape"]] = input$plot_shape
                   }
                   if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
                     plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1036,7 +1063,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
                     plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1048,7 +1075,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Topography" %in% input$plot_input_control){
                   if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
                     plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1057,7 +1084,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-                    method_nodes = templates %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
                     
                     plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
                     plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1125,7 +1152,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                       subplots_df[["plot > geometry > shape"]] = input$subplot_shape
                     }
                     if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
-                      method_nodes = templates %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                      method_nodes = templates() %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
                       
                       subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
                       subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1136,7 +1163,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                       nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                     }
                     if(isTruthy(input$subplot_area) && isTruthy(input$subplot_area_method)){
-                      method_template = templates %>% dplyr::filter(template_id ==  input$subplot_area_method)
+                      method_template = templates() %>% dplyr::filter(template_id ==  input$subplot_area_method)
                       
                       # Check if method exists already 
                       method_name = method_template[method_template$node_path == "method > name", "node_value"] 
@@ -1209,7 +1236,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   tryCatch(lubridate::ymd(date_vec), warning = function(w){
                     stop(paste0("Could not parse date field for ", obs_category))
                   })
-                 
+                  
                   # Get Identifiers
                   plotUniqueIdentifier = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
                   if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
@@ -1320,7 +1347,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     
                     aggOrgObs_strataDef_template = bind_rows(method_df, strata_df)
                   } else {
-                    aggOrgObs_strataDef_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
+                    aggOrgObs_strataDef_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_strataDef)
                     
                     # Check if observations contain undefined strata
                     strata_template = aggOrgObs_strataDef_template %>% 
@@ -1425,7 +1452,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     
                     aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
                   } else  {
-                    aggOrgObs_measurementScale_template = templates %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
+                    aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
                     method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                     
                     # Check if observations contain undefined measurement categories

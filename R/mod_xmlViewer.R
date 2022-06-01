@@ -15,8 +15,7 @@ mod_xmlViewer_ui <- function(id){
       width = 10, offset = 1,
       fluidRow(
         actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
-        actionButton(ns("validate"), "Validate", width = "80px", class = "btn-xs"),
-        downloadButton(ns("export"), "Export", style = "width: 80px", class = "btn-xs", icon = NULL)
+        actionButton(ns("validate"), "Validate", width = "80px", class = "btn-xs")
       ),
       fluidRow(
         aceEditor(
@@ -140,13 +139,5 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    # Update action log
                    action_log(read_action_log(log_path))
                  })
-    
-    output$export = downloadHandler(
-      filename = "vegx.xml",
-      content = function(file) {
-        write_xml(vegx_doc, file)
-      },
-      contentType = "xml"
-    )
   })
 }

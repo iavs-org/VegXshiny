@@ -51,27 +51,32 @@ body {
   margin: 0px;
 }
 
-.htCore {
-  color:black!important;
-}
-
 .file-grid {
  min-height:160px!important;
 }
 
-.wtHolder{
-  background-color: #fff;
+.htCore {
+  color: #333!important;
+}
+
+.handsontable th {
+  color: #fff!important; 
+  background: #888!important; 
+}
+
+#fileManager-hot_table {
+  background: white;
 }
 
 .nav-stacked li a {
-  text-align:left !important; 
-  vertical-align:middle!important;
-  border-width:0px !important; 
-  padding-top:6px!important; 
-  padding-bottom:6px!important;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
+  text-align: left !important; 
+  vertical-align: middle!important;
+  border-width: 0px !important; 
+  padding-top: 6px!important; 
+  padding-bottom: 6px!important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .nav-stacked > li > a:hover, .nav-stacked > li > a:focus {
@@ -79,17 +84,17 @@ body {
 }
 
 .icon-padded-right {
-  padding-right:3px;
+  padding-right: 3px;
 }
 
 .icon-info {
-  padding-left:3px;
+  padding-left: 3px;
   vertical-align: super;
 }
 
 .annotation {
-  display:inline-block;
-  font-style:italic;
+  display: inline-block;
+  font-style: italic;
   margin-bottom: 10px;
 }
 

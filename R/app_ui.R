@@ -31,13 +31,13 @@ app_ui <- function(request) {
                # tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),
                #          mod_vegxBuilder_ui("vegxBuilder")
                # ),
-               
+                
                tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
                tabPanel("VegX Export", icon = icon("file-export", class = "icon-padded-right"),
-                        mod_exportVegx_ui("exportVegx")
+                        mod_vegxExport_ui("vegxExport")
                ),
                
                tabPanel("Action Log", icon = icon("history", class = "icon-padded-right"),
