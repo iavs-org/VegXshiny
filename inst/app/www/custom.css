@@ -68,6 +68,10 @@ body {
   background: white;
 }
 
+.dataTables_wrapper .dataTables_info, .dataTables_wrapper th, .dataTables_wrapper label {
+  color: #fff!important; 
+}
+
 .nav-stacked li a {
   text-align: left !important; 
   vertical-align: middle!important;

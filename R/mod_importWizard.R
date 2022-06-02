@@ -260,16 +260,16 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observeEvent(  
       eventExpr = methods(),
       handlerExpr = {
-        updateSelectizeInput(session, inputId = "plot_location_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$location), after = 1))
-        updateSelectizeInput(session, inputId = "plot_elevation_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$elevation), after = 1))
-        updateSelectizeInput(session, inputId = "plot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
-        updateSelectizeInput(session, inputId = "plot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
-        updateSelectizeInput(session, inputId = "plot_aspect_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aspect), after = 1))
-        updateSelectizeInput(session, inputId = "plot_slope_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$slope), after = 1))
-        updateSelectizeInput(session, inputId = "subplot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
-        updateSelectizeInput(session, inputId = "subplot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
-        updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
-        updateSelectizeInput(session, inputId = "aggOrgObs_strataDef", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
+        updateSelectizeInput(session, inputId = "plot_location_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$location), after = 1))
+        updateSelectizeInput(session, inputId = "plot_elevation_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$elevation), after = 1))
+        updateSelectizeInput(session, inputId = "plot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "plot_area_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
+        updateSelectizeInput(session, inputId = "plot_aspect_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$aspect), after = 1))
+        updateSelectizeInput(session, inputId = "plot_slope_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$slope), after = 1))
+        updateSelectizeInput(session, inputId = "subplot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "subplot_area_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
+        updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
+        updateSelectizeInput(session, inputId = "aggOrgObs_strataDef", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
       }
     ) 
     
@@ -395,7 +395,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
                   column(4, selectInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_location_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$location), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$location), after = 1)))
                 ), 
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -425,7 +425,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 fluidRow(
                   column(4, selectInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
                   column(4, selectInput(ns("plot_elevation_method"), label = "Measurement method",
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$elevation), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$elevation), after = 1)))
                 )
               )
             )
@@ -456,13 +456,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_dimensions_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_area_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
             )
@@ -488,13 +488,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 fluidRow(
                   column(4, selectInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_aspect_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$aspect), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$aspect), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("plot_slope_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$slope), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$slope), after = 1)))
                 )
               )
             )
@@ -591,13 +591,13 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   column(4, selectInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_dimensions_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectInput(ns("subplot_area_method"), label = "Measurement method", 
-                                        choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
+                                        choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
             )
@@ -681,7 +681,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tags$label("Measurement scale *"),
         br(),
         tags$p("Which scale was used to measure the observation?", class = "text-info annotation"),
-        selectizeInput(ns("aggOrgObs_measurementScale"), label = NULL, choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$aggOrgObs), after = 1)),
+        selectizeInput(ns("aggOrgObs_measurementScale"), label = NULL, choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$aggOrgObs), after = 1)),
         
         hr(),
         tags$label("Observations *"),
@@ -699,7 +699,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
         tagList(
           tags$p("Which definition was used?", class = "text-info annotation"),
           selectizeInput(ns("aggOrgObs_strataDef"), label = NULL, 
-                         choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(isolate(methods())$strataDef), after = 1))
+                         choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$strataDef), after = 1))
         )
       }
     })
