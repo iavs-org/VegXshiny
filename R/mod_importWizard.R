@@ -231,24 +231,30 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     })
     
     # Observe method inputs and trigger mod_newMethodTemplate when custom template option is selected
-    observe_method_input = function(input_name, method_subject){
+    observe_method_input = function(input_name, method_subject, template_type = c("method", "strataDef")){
       if(input[[input_name]] == "custom_template"){
         module_id = paste0("new_method-", sample.int(100000, 1))
-        mod_newMethodTemplate_server(module_id, method_subject, templates, templates_lookup)
-        mod_newMethodTemplate_ui(ns(module_id))
+        if(template_type == "method"){
+          mod_newMethodTemplate_server(module_id, method_subject, templates, templates_lookup)
+          mod_newMethodTemplate_ui(ns(module_id))
+        } else if(template_type == "strataDef"){
+          mod_newStrataDefTemplate_server(module_id, method_subject, templates, templates_lookup)
+          mod_newStrataDefTemplate_ui(ns(module_id))
+        }
         updateSelectizeInput(session, input_name, selected = "")
       }
     }
     
-    observeEvent(input$plot_location_method, handlerExpr = observe_method_input("plot_location_method", "location"))
-    observeEvent(input$plot_elevation_method, handlerExpr = observe_method_input("plot_elevation_method", "elevation"))
-    observeEvent(input$plot_dimension_method, handlerExpr = observe_method_input("plot_dimension_method", "plot dimension"))
-    observeEvent(input$plot_area_method, handlerExpr = observe_method_input("plot_area_method", "plot area"))
-    observeEvent(input$plot_aspect_method, handlerExpr = observe_method_input("plot_aspect_method", "aspect"))
-    observeEvent(input$plot_slope_method, handlerExpr = observe_method_input("plot_slope_method", "slope"))
-    observeEvent(input$subplot_dimension_method, handlerExpr = observe_method_input("subplot_dimension_method", "plot dimension"))
-    observeEvent(input$subplot_area_method, handlerExpr = observe_method_input("subplot_area_method", "plot area"))
-    observeEvent(input$aggOrgObs_measurementScale, handlerExpr = observe_method_input("aggOrgObs_measurementScale", "user-defined aggregate measurement"))
+    observeEvent(input$plot_location_method, handlerExpr = observe_method_input("plot_location_method", "location", "method"))
+    observeEvent(input$plot_elevation_method, handlerExpr = observe_method_input("plot_elevation_method", "elevation", "method"))
+    observeEvent(input$plot_dimensions_method, handlerExpr = observe_method_input("plot_dimensions_method", "plot dimension", "method"))
+    observeEvent(input$plot_area_method, handlerExpr = observe_method_input("plot_area_method", "plot area", "method"))
+    observeEvent(input$plot_aspect_method, handlerExpr = observe_method_input("plot_aspect_method", "aspect", "method"))
+    observeEvent(input$plot_slope_method, handlerExpr = observe_method_input("plot_slope_method", "slope", "method"))
+    observeEvent(input$subplot_dimensions_method, handlerExpr = observe_method_input("subplot_dimensions_method", "plot dimension", "method"))
+    observeEvent(input$subplot_area_method, handlerExpr = observe_method_input("subplot_area_method", "plot area", "method"))
+    observeEvent(input$aggOrgObs_measurementScale, handlerExpr = observe_method_input("aggOrgObs_measurementScale", "user-defined aggregate measurement", "method"))
+    observeEvent(input$aggOrgObs_strataDef, handlerExpr = observe_method_input("aggOrgObs_strataDef", "strata definition", "strataDef"))
     
     # Update method inputs to prevent re-rendering of the entire UI when `methods()` changes
     observeEvent(  
@@ -256,13 +262,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
       handlerExpr = {
         updateSelectizeInput(session, inputId = "plot_location_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$location), after = 1))
         updateSelectizeInput(session, inputId = "plot_elevation_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$elevation), after = 1))
-        updateSelectizeInput(session, inputId = "plot_dimension_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "plot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
         updateSelectizeInput(session, inputId = "plot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
         updateSelectizeInput(session, inputId = "plot_aspect_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aspect), after = 1))
         updateSelectizeInput(session, inputId = "plot_slope_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$slope), after = 1))
-        updateSelectizeInput(session, inputId = "subplot_dimension_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
+        updateSelectizeInput(session, inputId = "subplot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
         updateSelectizeInput(session, inputId = "subplot_area_method", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
         updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
+        updateSelectizeInput(session, inputId = "aggOrgObs_strataDef", selected = "", choices = append(list("Select a template" = "", "\u2795 define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
       }
     ) 
     
@@ -442,7 +449,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("", "rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("Select a shape" = "", "rectangle", "linear", "polygon", "circle"))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -577,7 +584,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("subplot_shape"), label = "Shape", choices =  list("", "rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("subplot_shape"), label = "Shape", choices =  list("Select a shape" = "", "rectangle", "linear", "polygon", "circle"))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -1023,7 +1030,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Coordinates" %in% input$plot_input_control){
                   if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
@@ -1037,7 +1044,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Elevation" %in% input$plot_input_control){
                   if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[input$plot_elevation]]
                     plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1052,7 +1059,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     plots_df[["plot > geometry > shape"]] = input$plot_shape
                   }
                   if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
                     plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1063,7 +1070,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
                     plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1075,7 +1082,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 if("Topography" %in% input$plot_input_control){
                   if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
                     plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1084,7 +1091,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
                     plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1108,7 +1115,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] # TODO: add error handling here
                 nodes$plots = append(nodes$plots, plot_nodes)
                 
-                plot_lookup = data.frame(
+                plots_lookup = data.frame(
                   plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
                   plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
                 )
@@ -1128,7 +1135,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   subplot_ids = subplots_df_upload[[input$subplot_id]]
                   plotUniqueIdentifiers = paste(subplots_df_upload[[input$subplot_plot_unique_id]], subplots_df_upload[[input$subplot_id]], sep = "-")
                   
-                  if(length(setdiff(plot_ids, plot_lookup$plotUniqueIdentifier)) != 0){
+                  if(length(setdiff(plot_ids, plots_lookup$plotUniqueIdentifier)) != 0){
                     stop("Subplot data contain unknown plot IDs")
                   } else if("" %in% subplot_ids){
                     stop("Subplot IDs may not contain empty values")
@@ -1141,7 +1148,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     "plot > plotUniqueIdentifier" = plotUniqueIdentifiers,
                     "plot > relatedPlot > relatedPlotID" = subplots_df_upload %>% 
                       dplyr::select(plotUniqueIdentifier = input$subplot_plot_unique_id) %>% 
-                      left_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
+                      left_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
                       pull(plotID),          
                     "plot > relatedPlot > plotRelationship" = "subplot",
                     check.names = F
@@ -1152,7 +1159,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                       subplots_df[["plot > geometry > shape"]] = input$subplot_shape
                     }
                     if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
-                      method_nodes = templates() %>% dplyr::filter(template_id ==  input$subplot_dimension_method) %>% templates_to_nodes(vegx_schema, log_path)
+                      method_nodes = templates() %>% dplyr::filter(template_id ==  input$subplot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                       
                       subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
                       subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1177,7 +1184,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                         attribute_node = nodes$attributes[[which(attributes_method_links == methods_lookup$methodID[methods_lookup$methodName == method_name])]]
                         attribute_id = xml2::xml_attr(attribute_node$node, "id")
                       } else {                                         # If no, create new nodes
-                        method_nodes = templates_to_nodes(method_template, vegx_schema, log_path)
+                        method_nodes = templates_to_nodes(method_template, vegx_schema, log_path, write_log = F)
                         nodes$methods = append(nodes$methods, method_nodes$methods)
                         nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                         attribute_id = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
@@ -1195,7 +1202,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   nodes$plots = append(nodes$plots, subplot_nodes)
                   
                   # Update plot lookup
-                  plot_lookup = data.frame(
+                  plots_lookup = data.frame(
                     plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
                     plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
                   )
@@ -1258,6 +1265,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                                           sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
                 
                 if(length(plots_unmatched) > 0){
+                  stop("Plot identifiers do not match between plot data and observation data")
                   plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
                   plot_nodes_addendum = lapply(1:nrow(plots_df_addendum), function(i){
                     new_vegx_node(colnames(plots_df_addendum), plots_df_addendum[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
@@ -1268,7 +1276,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 
                 # 3. Replace mapped plot identifiers with internal ids
                 plotObs_df = plotObs_df %>% 
-                  inner_join(plot_lookup, by = "plotUniqueIdentifier") %>% 
+                  inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
                   mutate("plotObservation > plotID" = plotID) %>% 
                   dplyr::select(-plotUniqueIdentifier, -plotID)
                 
@@ -1285,7 +1293,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                              plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
                              obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate"))))}) %>% 
                   bind_rows() %>% 
-                  left_join(plot_lookup, by = "plotID")
+                  left_join(plots_lookup, by = "plotID")
                 
                 #------------------------------------#
                 # Build organismNames and OrganismIdentities
@@ -1330,7 +1338,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                 # Build Strata, if available
                 setProgress(value = 0.4, "Strata")
                 if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
-                  if(input$aggOrgObs_strataDef == "undefined"){
+                  if(input$aggOrgObs_strataDef == "undefined"){   # TODO remove
                     stratum_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonStratum])
                     method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
                                            node_path = c("method > subject", "method > name", "method > description"),
@@ -1373,7 +1381,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     }
                   }
                   
-                  aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path)
+                  aggOrgObs_strataDef_nodes = templates_to_nodes(aggOrgObs_strataDef_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
                   nodes$strata = append(nodes$strata, aggOrgObs_strataDef_nodes$strata)
                   nodes$methods = append(nodes$methods, aggOrgObs_strataDef_nodes$methods)
                   nodes$attributes = append(nodes$attributes, aggOrgObs_strataDef_nodes$attributes)
@@ -1425,63 +1433,35 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   }
                   
                   #------------------#
-                  if(input$aggOrgObs_measurementScale == "quantitative"){
-                    method_is_quantitative = T
-                    method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
-                                           node_path = c("method > subject", "method > name", "method > description"),
-                                           node_value = c("aggregate measurement", "Undefined quantitative measurement scale", "An undefined quantitative measurement scale for aggregateOrganismObservations"))
-                    attributes_df = data.frame(template_id = 1, node_id = 2, main_element = "attributes",
-                                               node_path = c("attribute > choice > quantitative > methodID", "attribute > choice > quantitative > unit"),
-                                               node_value = c("1", "undefined"))
-                    aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
-                  } else if(input$aggOrgObs_measurementScale == "ordinal"){
-                    method_is_quantitative = F
-                    measurement_values = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])  # 1. Get unique measurements from observation data
-                    method_df = data.frame(template_id = 1, node_id = 1, main_element = "methods", 
-                                           node_path = c("method > subject", "method > name", "method > description"),
-                                           node_value = c("aggregate measurement", "aggregate measurement/undefined", "An undefined ordinal measurement scale for aggregateOrganismObservations"))
-                    attributes_df = data.frame(template_id = 1, main_element = "attributes", 
-                                               node_path = "attribute > choice > ordinal > code", 
-                                               node_value = measurement_values,
-                                               group_value = measurement_values) %>% 
-                      group_by(group_value) %>% 
-                      group_modify(~add_row(.x, template_id = 1, main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
-                      mutate(node_id = cur_group_id()+1) %>% 
-                      ungroup() %>% 
-                      select(template_id, node_id, main_element, node_path, node_value)
+                  aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
+                  method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
+                  
+                  # Check if observations contain undefined measurement categories
+                  if(!method_is_quantitative){
+                    codes_template = aggOrgObs_measurementScale_template %>% 
+                      dplyr::filter(node_path == "attribute > choice > ordinal > code") %>% 
+                      pull(node_value)
+                    codes_observations = sort(unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]))
+                    codes_unmatched = setdiff(codes_observations, codes_template)
                     
-                    aggOrgObs_measurementScale_template = bind_rows(method_df, attributes_df)
-                  } else  {
-                    aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
-                    method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
-                    
-                    # Check if observations contain undefined measurement categories
-                    if(!method_is_quantitative){
-                      codes_template = aggOrgObs_measurementScale_template %>% 
-                        dplyr::filter(node_path == "attribute > choice > ordinal > code") %>% 
-                        pull(node_value)
-                      codes_observations = unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])
-                      codes_unmatched = setdiff(codes_observations, codes_template)
+                    if(length(codes_unmatched) != 0){
+                      attributes_addendum = data.frame(template_id = aggOrgObs_measurementScale_template$template_id[1], 
+                                                       main_element = "attributes", 
+                                                       node_path = "attribute > choice > ordinal > code", 
+                                                       node_value = codes_unmatched,
+                                                       group_value = codes_unmatched) %>% 
+                        group_by(group_value) %>% 
+                        group_modify(~add_row(.x, template_id = aggOrgObs_measurementScale_template$template_id[1], main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
+                        mutate(node_id = cur_group_id()+max( aggOrgObs_measurementScale_template$node_id)) %>% 
+                        ungroup() %>% 
+                        dplyr::select(template_id, node_id, main_element, node_path, node_value)
                       
-                      if(length(codes_unmatched) != 0){
-                        attributes_addendum = data.frame(template_id = aggOrgObs_measurementScale_template$template_id[1], 
-                                                         main_element = "attributes", 
-                                                         node_path = "attribute > choice > ordinal > code", 
-                                                         node_value = codes_unmatched,
-                                                         group_value = codes_unmatched) %>% 
-                          group_by(group_value) %>% 
-                          group_modify(~add_row(.x, template_id = aggOrgObs_measurementScale_template$template_id[1], main_element = "attributes", node_path = "attribute > choice > ordinal > methodID", node_value = "1")) %>%
-                          mutate(node_id = cur_group_id()+max( aggOrgObs_measurementScale_template$node_id)) %>% 
-                          ungroup() %>% 
-                          dplyr::select(template_id, node_id, main_element, node_path, node_value)
-                        
-                        aggOrgObs_measurementScale_template = bind_rows(aggOrgObs_measurementScale_template, attributes_addendum)
-                      }
+                      aggOrgObs_measurementScale_template = bind_rows(aggOrgObs_measurementScale_template, attributes_addendum)
                     }
                   }
                   
                   # 2. Build Nodes
-                  aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path)
+                  aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
                   nodes$methods = append(nodes$methods, aggOrgObs_measurementScale_nodes$methods)
                   nodes$attributes = append(nodes$attributes, aggOrgObs_measurementScale_nodes$attributes)
                   
@@ -1570,7 +1550,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   target = xml_child(parent, 1)
                   for(i in 2:length(element_nodes)){
                     if(!is.null(element_nodes[[i]]$node)){
-                      xml_add_sibling(target, element_nodes[[i]]$node)  # This is much faster than xml_add_child(), especially as the document grows
+                      xml_add_sibling(target, element_nodes[[i]]$node)  # TODO: This is much faster than xml_add_child() but still not ideal
                       target = xml_child(parent, i)
                     }
                   }
@@ -1582,7 +1562,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               
               # Action log 
               setProgress(value = 1)
-              showNotification("Import finished")
+              showNotification("Import finished.")
               new_action_log_record(log_path, "Import info", "Data imported")
               action_log(read_action_log(log_path))
             })  

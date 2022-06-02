@@ -36,9 +36,6 @@ load_schema = function(){
 #'
 #' @noRd
 link_vegx_schema = function(node, ns, schema_files, simplify = T){
-  # if(xml_name(node) == "extension"){
-  #   browser()
-  # }
   # Pre-processing
   if(simplify){
     children = xml_children(node)

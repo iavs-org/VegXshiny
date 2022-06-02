@@ -145,7 +145,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_sche
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, vegx_schema){ # TODO change param order for consistency, move vegx_schema to end 
+merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, vegx_schema, write_log = T){ # TODO change param order for consistency, move vegx_schema to end 
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
   root_name = unique(sapply(node_names, function(names){names[1]}))
@@ -153,13 +153,17 @@ merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, 
   conditions = list(warnings = c(), errors = c())
   
   if(length(root_name) != 1){
-    new_action_log_record(log_path, "Merge error", paste0("Could not merge with ", root_name, " element (id = ", root_id, "). Node paths do not share the same root."))
+    if(write_log){
+      new_action_log_record(log_path, "Merge error", paste0("Could not merge with ", root_name, " element (id = ", root_id, "). Node paths do not share the same root."))
+    }
     return(list(warnings = 0, errors = 1))
   }
   
   # Build XML
   if(length(target_root) == 0){
-    new_action_log_record(log_path, "Merge error", paste0("Could not merge mappings into ", root_name, " element (id = ", root_id, "). No such element id."))
+    if(write_log){
+      new_action_log_record(log_path, "Merge error", paste0("Could not merge mappings into ", root_name, " element (id = ", root_id, "). No such element id."))
+    }
     return(list(warnings = 0, errors = 1))
   }
   
@@ -171,13 +175,15 @@ merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, 
     conditions$errors <<- c(conditions$errors, e$message)
   })
   
-  if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
-    warnings = ifelse(length(conditions$warnings) == 0, "", paste0("<li>Warning: ", conditions$warnings, "</li>", collapse = ""))
-    errors = ifelse(length(conditions$errors) == 0, "", paste0("<li>Error: ", conditions$errors, "</li>", collapse = ""))
-    message = paste0("Merged mappings into ", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
-    new_action_log_record(log_path, "Merge warning", message)
-  } else {
-    new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")"))
+  if(write_log){
+    if(length(conditions$warnings) != 0 | length(conditions$errors) != 0){
+      warnings = ifelse(length(conditions$warnings) == 0, "", paste0("<li>Warning: ", conditions$warnings, "</li>", collapse = ""))
+      errors = ifelse(length(conditions$errors) == 0, "", paste0("<li>Error: ", conditions$errors, "</li>", collapse = ""))
+      message = paste0("Merged mappings into ", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
+      new_action_log_record(log_path, "Merge warning", message)
+    } else {
+      new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")"))
+    }
   }
   
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))
@@ -362,14 +368,14 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
 #' @noRd
 #' 
 #' @return This function is used for its side effects.
-link_vegx_nodes = function(target_root, target_node_path, linked_node, log_path, vegx_schema){
+link_vegx_nodes = function(target_root, target_node_path, linked_node, log_path, vegx_schema, write_log = T){
   node_names = target_node_path %>% str_split(" > ", simplify = T)
   node_names = node_names[node_names != "choice"]
   link_id = xml2::xml_attr(linked_node, "id")
   
   target_position = xml2::xml_find_all(target_root, paste0("//", paste(node_names, collapse = "//")))
   if(length(target_position) == 0){
-    merge_into_vegx_node(target_root, target_node_path, link_id, log_path, vegx_schema)
+    merge_into_vegx_node(target_root, target_node_path, link_id, log_path, vegx_schema, write_log)
   } else {
     xml2::xml_set_text(target_position, link_id)
   }
@@ -385,7 +391,7 @@ link_vegx_nodes = function(target_root, target_node_path, linked_node, log_path,
 #' @noRd
 #' 
 #' @return A nested list of `xml_node` objects grouped by VegX main elements
-templates_to_nodes = function(templates_selected, vegx_schema, log_path){                     
+templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_log = T){                     
   templates_split = templates_selected %>% 
     group_by(template_id) %>% 
     group_split()
@@ -403,10 +409,10 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path){
       link_template = nodes_split[[j]] %>% dplyr::filter(str_detect(node_path, "ID$"))
       node_template = anti_join(nodes_split[[j]], link_template, by = "node_path")
       
-      new_node = new_vegx_node(node_template$node_path, node_template$node_value, id = NULL, log_path, vegx_schema)
+      new_node = new_vegx_node(node_template$node_path, node_template$node_value, id = NULL, log_path, vegx_schema, write_log = write_log)
       if(nrow(link_template) != 0){ # ID links present --> link corresponding nodes
         for(k in 1:nrow(link_template)){
-          link_vegx_nodes(new_node$node, link_template$node_path, new_nodes[[as.numeric(link_template$node_value)]], log_path, vegx_schema)
+          link_vegx_nodes(new_node$node, link_template$node_path, new_nodes[[as.numeric(link_template$node_value)]], log_path, vegx_schema, write_log = write_log)
         }
       }
       
@@ -416,3 +422,4 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path){
   }
   return(node_list)
 }
+  
