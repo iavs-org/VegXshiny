@@ -128,7 +128,7 @@ render_export_summary = function(vegx_doc){
 #'
 #' @importFrom tidyr pivot_longer pivot_wider drop_na
 #' 
-#' @return a list of dataframes
+#' @return a list of data.frames
 #' @noRd
 vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentities", "aggregateOrganismObservations")){
   # Convert xml to list of data.frame (1 row per node)
@@ -177,4 +177,8 @@ vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentitie
   }
   
   return(vegx_df)
+  
+  
+  # TODO Two output options: First - long-table format with potentially resolved ids. 
+  #                          Second - vegetation-table with header and cover data (aggOrgObs) or equivalent measurement tables (for indOrgObs, stratumObs, etc.)
 }

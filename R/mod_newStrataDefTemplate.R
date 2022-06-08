@@ -66,7 +66,6 @@ mod_newStrataDefTemplate_server <- function(id, subject, templates, templates_lo
       eventExpr = input$add_custom_method,
       handlerExpr = {
         tryCatch({
-          browser()
           if(!isTruthy(input$method_name) | !isTruthy(input$method_description)){stop("Please fill all mandatory method fields")}
           template_id = max(templates_lookup()$template_id) + 1
           
