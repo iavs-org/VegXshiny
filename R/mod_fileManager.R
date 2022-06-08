@@ -12,7 +12,7 @@ mod_fileManager_ui <- function(id){
   
   sidebarLayout(
     tags$div(class = "col-sm-2 well", role = "complementary", 
-             fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = c(".csv", ".tv2", ".tv3", ".txt", ".tsv", ".tab", ".rds", ".RData"))
+             fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", "xls", "xlsx", ".xml"))
     ),
     mainPanel(
       width = 10, 
@@ -47,8 +47,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
     file_focus = reactiveVal()
     data_unedited = reactiveVal()
     
-    
-    # TODO Import TV2/TV3
     #### Upload ####
     # Process and render uploaded files
     observeEvent(input$upload, {
@@ -58,18 +56,23 @@ mod_fileManager_server <- function(id, action_log, log_path){
             file_info = input$upload[which(input$upload$name == file_name),]
             file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
             if(file_ext == "csv"){
-              tbl = utils::read.csv(file_info$datapath)
+              user_data[[file_name]] = utils::read.csv(file_info$datapath) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("tab", "tsv", "txt")){
-              tbl = utils::read.delim(file_info$datapath)
+              user_data[[file_name]]  = utils::read.delim(file_info$datapath) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("xls", "xlsx")){
-              tbl = readxl::read_excel(file_info$datapath)
+              user_data[[file_name]] = readxl::read_excel(file_info$datapath) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+            } else if(file_ext == "xml"){
+              user_data[[file_name]] = xml2::read_xml(file_info$datapath)
             } else (
               stop("Unsupported file format.")
             )
-            
-            user_data[[file_name]] = rhandsontable::rhandsontable(tbl, useTypes = FALSE, readOnly = T) %>% 
-              rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-            
+  
             new_action_log_record(log_path, "File info", paste0("File '", file_name,"' uploaded"))
           }, error = function(e){
             shiny::showNotification("Upload failed. Please consult the log for more information.", type = "error")
@@ -89,21 +92,20 @@ mod_fileManager_server <- function(id, action_log, log_path){
         class = "file-grid",
         column(
           12,
-          # Loop over file names in user_data()
-          lapply(names(user_data), function(file_name){
+          lapply(names(user_data), function(file_name){           # Loop over file names in user_data()
             if(is.null(user_data[[file_name]])){
               return()
             }
-            # Assign appropriate file icon
             file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
-            icon = switch(file_ext,
+            icon = switch(file_ext,                                       # Assign appropriate file icon
                           "csv" = icon("file-csv", "fa-9x black"),
+                          "txt" = icon("file-csv", "fa-9x black"),
                           "xls" = icon("file-excel", "fa-9x black"),
                           "xlsx" = icon("file-excel", "fa-9x black"),
-                          icon("file-spreadsheet", "fa-9x black"))
+                          "xml" = icon("file-code", "fa-9x black"),
+                          icon("file", "fa-9x black"))
             
-            # Create Button and Event listener
-            file_button = actionButton(ns(paste0("button_", file_name)),
+            file_button = actionButton(ns(paste0("button_", file_name)),              # Create Button and Event listener
                                        width = "180px", height = "180px", class = "btn-success no-margin",
                                        label = div(icon, tags$br(), file_name))
             
@@ -126,6 +128,13 @@ mod_fileManager_server <- function(id, action_log, log_path){
     #### File editor ####
     output$file_editor = renderUI({
       req(file_focus())
+      file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+      
+      if(file_ext %in% c("csv", "tab", "tsv", "txt", "xls", "xlsx")){
+        output_function = rhandsontable::rHandsontableOutput
+      } else {
+        output_function = uiOutput
+      }
       ui = div(
         id = ns(paste0("editor_", file_focus())),
         fluidRow(
@@ -134,13 +143,21 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs")
           )
         ),
-        rhandsontable::rHandsontableOutput(ns("hot_table"), height = 500)
+        if(file_ext == "xml"){
+          aceEditor(outputId = ns("editor"), value = as.character(user_data[[file_focus()]]), height = "500px", mode = "xml", theme = "tomorrow", readOnly = T, autoComplete = "disabled")
+        } else {
+          rhandsontable::rHandsontableOutput(ns("editor"), height = 500)
+        }
       )
     })
     
     observe({
       req(file_focus(), user_data[[file_focus()]])
-      output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])    
+      file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+      
+      if(file_ext %in% c("csv", "tab", "tsv", "txt", "xls", "xlsx")){
+        output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+      } 
     })
     
     ##### Edit #####
@@ -152,8 +169,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  where = "beforeBegin",
                  ui = tagList(
                    actionButton(ns("save_edits"), "Save edits",  width = "120px", class = "btn-success btn-xs",  icon("check")),
-                   actionButton(ns("transpose"), "Transpose", width = "120px", class = "btn-info btn-xs"),
-                   actionButton(ns("add_names"), "Add col-names", width = "120px", class = "btn-info btn-xs"),
                    actionButton(ns("discard_edits"), "Discard edits", width = "120px", class = "btn-danger btn-xs", icon = icon("times")),
                  )
         )
@@ -229,81 +244,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    action_log(read_action_log(log_path))
                  })
     
-    ##### Transpose table #####
-    observeEvent(eventExpr = input$transpose,
-                 handlerExpr = {
-                   # Transpose data
-                   data_df = rhandsontable::hot_to_r(input$hot_table)
-                   data_df_tr = data.frame(t(data_df))
-                   
-                   # Overwrite user data
-                   user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df_tr)
-                   output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
-                   
-                   # Update action log 
-                   shiny::showNotification("File transposed")
-                   new_action_log_record(log_path, "File info", paste0("File '", file_focus(),"' transposed"))
-                   action_log(read_action_log(log_path))
-                 })
-    
-    ##### Add colnames #####
-    ###### Modal dialogue #####
-    observeEvent(eventExpr = input$add_names,
-                 handlerExpr = {
-                   showModal(
-                     modalDialog(
-                       selectInput(ns("name_source"), label = "Create column names from row", user_data[[file_focus()]]$x$rowHeaders),
-                       tags$label("Names:"),
-                       renderText(paste(rhandsontable::hot_to_r(input$hot_table)[input$name_source,], collapse = ", ")),
-                       footer = tagList(
-                         tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                   actionButton(ns("confirm_add_names"), class = "pull-right btn-success", "Confirm", icon("check")))
-                       ),
-                     )
-                   )
-                 })
-    
-    ###### Confirm  #####
-    observeEvent(eventExpr = input$confirm_add_names, 
-                 handlerExpr = {
-                   tryCatch({
-                     # Modify data
-                     data_df = rhandsontable::hot_to_r(input$hot_table)
-                     if(nrow(data_df) <= 1){
-                       shiny::showNotification("Can't remove last row.", type = "warning")
-                       return()
-                     }
-                     if(length(as.character(data_df[input$name_source,])) != length(unique(as.character(data_df[input$name_source,])))){
-                       shiny::showNotification("Column names must be unique", type = "warning")
-                       return()
-                     }
-                     
-                     colnames(data_df) = data_df[input$name_source,]
-                     data_df = data_df[rownames(data_df) != input$name_source,]
-                     
-                     # Overwrite user data
-                     user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df)
-                     output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
-                     
-                     # Update action log 
-                     shiny::showNotification("Names added")
-                     new_action_log_record(log_path, "File info", paste0("Column names added to file '", file_focus(),"'"))
-                     action_log(read_action_log(log_path))
-                   }, error = function(e){
-                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
-                     new_action_log_record(log_path, "File edit error", paste0("Adding colnames to file '", file_focus(),"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
-                     action_log(read_action_log(log_path))
-                   }, finally = {
-                     removeModal()  
-                   })
-                 })
-    
-    ###### Dismiss modal  #####
-    observeEvent(eventExpr = input$dismiss_modal, 
-                 handlerExpr = {
-                   removeModal()
-                 })
-    
     ##### Delete file #####
     observeEvent(eventExpr = input$delete,
                  handlerExpr = {
@@ -324,11 +264,13 @@ mod_fileManager_server <- function(id, action_log, log_path){
                          lapply(names(user_data), function(file_name){
                            # Assign appropriate file icon
                            file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
-                           icon = switch(file_ext,
+                           icon = switch(file_ext,                                       # Assign appropriate file icon
                                          "csv" = icon("file-csv", "fa-9x black"),
+                                         "txt" = icon("file-csv", "fa-9x black"),
                                          "xls" = icon("file-excel", "fa-9x black"),
                                          "xlsx" = icon("file-excel", "fa-9x black"),
-                                         icon("file-spreadsheet", "fa-9x black"))
+                                         "xml" = icon("file-code", "fa-9x black"),
+                                         icon("file", "fa-9x black"))
                            
                            # Create Button and Event listener
                            file_button = actionButton(ns(paste0("button_", file_name)),
