@@ -24,13 +24,14 @@ app_ui <- function(request) {
                         mod_fileManager_ui("fileManager")
                ),
                
-               tabPanel("Import wizard ", icon = icon("magic", class = "icon-padded-right"), 
-                        mod_importWizard_ui("importWizard")
+               navbarMenu(title = "Import wizard ", icon = icon("magic", class = "icon-padded-right"), 
+                 tabPanel("Import from tables", mod_tableImport_ui("tableImport")),
+                 tabPanel("Import TurboVeg", mod_turbovegImport_ui("turbovegImport"))
                ),
                
-               # tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),
-               #          mod_vegxBuilder_ui("vegxBuilder")
-               # ),
+               tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),
+                        mod_vegxBuilder_ui("vegxBuilder")
+               ),
                 
                tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")

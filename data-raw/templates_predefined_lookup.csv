@@ -28,5 +28,7 @@ template_id,target_element,subject,name,description,user_defined
 27,methods,climate,Climate PDM/mm,Precipitation of the driest month,0
 28,methods,climate,Climate PWM/mm,Precipitation of the wettest month,0
 29,strata,strata definition,Strata definition/Recce,Standard Recce stratum definition,0
-30,methods,plant cover,Plant cover/Braun-Blanquet,"Standard Braun-Blanquet scala (levels: r,+,1,2,3,4,5)",0
-31,methods,plant cover,Plant cover/Recce,"Standard Recce scala (levels: 1,2,3,4,5,6)",0
+30,methods,plant cover,"Plant cover/standard Braun-Blanquet (levels: r,+,1,2,3,4,5)","Standard Braun-Blanquet scala (levels: r,+,1,2,3,4,5)",0
+31,methods,plant cover,"Plant cover/extended Braun-Blanquet (levels: r,+,1,2m,2a,2b,3,4,5)","Extended Braun-Blanquet scala (levels: r,+,1,2m,2a,2b,3,4,5)",0
+32,methods,plant cover,"Plant cover/Recce (levels: 1,2,3,4,5,6)","Standard Recce scala (levels: 1,2,3,4,5,6)",0
+33,methods,plant cover,Plant cover/presence-absence (levels: 1),Presence absence scale,0

@@ -1,4 +1,4 @@
-#' importWizard UI Function
+#' tableImport UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -8,10 +8,11 @@
 #'
 #' @importFrom shiny NS tagList 
 #' @import bslib
-mod_importWizard_ui <- function(id){
+mod_tableImport_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
+    
     navs_pill_list(
       id=ns("sidebar"),
       widths = c(2, 10),
@@ -210,10 +211,10 @@ mod_importWizard_ui <- function(id){
   )
 }
 
-#' importWizard Server Functions
+#' tableImport Server Functions
 #'
 #' @noRd 
-mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path){
+mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
@@ -343,12 +344,14 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observe({  
       if(!is.null(input$plot_data) & length(names(user_data)) != 0){
         file_selected = input$plot_data # save current selection
-        updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data))) 
+        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+        updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), choices)) 
       }
       
       if(!is.null(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && length(names(user_data)) != 0){
         file_selected = input$subplot_data # save current selection
-        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), names(user_data)))
+        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), choices))
       }
     })
     
@@ -638,9 +641,10 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
     observe({  # Prevents re-rendering of entire UIs when user_data changes
       if(length(names(user_data)) != 0){
         input_names = paste0(abbreviations, "_data")
+        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
         for(input_name in input_names){
           if(!is.null(input[[input_name]])){
-            updateSelectizeInput(session, inputId = input_name, selected = input[[input_name]], choices = c(dropdown_empty(), names(user_data))) 
+            updateSelectizeInput(session, inputId = input_name, selected = input[[input_name]], choices = c(dropdown_empty(), choices)) 
           }
         }
       }
@@ -971,7 +975,7 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
               mappings = list()
               nodes = list()  
               
-              ### Project ####
+              ## Project ####
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$project_title)){
                 mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
@@ -1062,9 +1066,9 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                     method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
                     
                     plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
-                    plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > geometry > length > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
                     plots_df[["plot > geometry > width > value"]] = plots_df_upload[[input$plot_width]]
-                    plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > geometry > width > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1296,10 +1300,10 @@ mod_importWizard_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_t
                   left_join(plots_lookup, by = "plotID")
                 
                 #------------------------------------#
-                # Build organismNames and OrganismIdentities
+                # Build organismNames and organismIdentities
                 # 1. Fetch data
                 setProgress(value = 0.3, "Organisms")
-                orgNames = c() # Organismnames may come from indOrgObs or aggOrgObs
+                orgNames = c() # organism names may come from indOrgObs or aggOrgObs
                 if("individualOrganismObservations" %in% input$observations_input_control){
                   orgNames = c(orgNames, data_upload[["individualOrganismObservations"]][,input$indOrgObs_taxonName])
                 }

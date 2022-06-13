@@ -81,12 +81,16 @@ app_server <- function(input, output, session) {
   user_data = mod_fileManager_server("fileManager", action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
-  # Guided import for tabular data
-  mod_importWizard_server("importWizard", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
+  # Import Wizard
+  
+  # Tabular Data
+  mod_tableImport_server("tableImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
+  # XML Data
+  mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Create mappings and add nodes freely
-  # mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
+  mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer

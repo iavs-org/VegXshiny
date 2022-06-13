@@ -83,7 +83,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_sche
   target_root = xml_new_root(root_name)
   
   withCallingHandlers({
-    build_xml(target_root, node_names, node_values, vegx_schema)
+    build_xml(target_root, node_names, unlist(node_values), vegx_schema)
   }, warning = function(w){
     conditions$warnings <<- c(conditions$warnings, w$message)
   }, error = function(e){

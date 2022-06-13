@@ -40,7 +40,8 @@ usethis::use_package("tidyr", type = "Suggests")
 ## Add modules ----
 golem::add_module("about")
 golem::add_module("fileManager")
-golem::add_module("importWizard")
+golem::add_module("tableImport")
+golem::add_module("turbovegImport")
 #golem::add_module("vegxBuilder")
 #golem::add_module("nodeEditor")
 #golem::add_module("rowGenerator")
@@ -53,6 +54,7 @@ golem::add_module("newStrataDefTemplate")
 ## Add helper functions ----
 golem::add_fct("xml_schema")
 golem::add_fct("xml_export")
+golem::add_fct("import_tools")
 golem::add_fct("misc")
 
 ## External resources

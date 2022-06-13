@@ -452,162 +452,162 @@ mod_nodeEditor_server <- function(id, user_data, tab_selected, elem_selected, el
     #### Templates ####
     # --------------------------------------------------------------------------------------- #
     ##### UI #####
-    if(tab_selected %in% templates_lookup$target_element){
-      templates_elem_overview = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
-        dplyr::select(-template_id, -target_element)
-      
-      output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
-                                             rownames = FALSE,
-                                             options = list(columnDefs = list(list(width = '80px', targets = 0)))) 
-      
-      output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
-      
-      insertTab(
-        inputId = "tabset",
-        tab = tabPanel(
-          value= templates,
-          title = "Templates",
-          fluidRow(
-            column(
-              width = 12,
-              fluidRow(
-                style="min-height: 65px",
-                column(12,
-                       tags$h4(tags$b("Templates selected:")),
-                       textOutput(ns("templates_selected"))
-                )
-              ),
-              hr(),
-              DT::dataTableOutput(ns("templates")),
-              hr(.noWS = c("before","after"))
-            )
-          ),
-          fluidRow(
-            column(
-              width = 12,
-              actionButton(ns("add_template"), label = "Add template(s)", width = "250px", class = "btn-primary", style = "font-weight:bold")
-            )
-          )
-        )
-      )
-      
-      ##### Dialogue #####
-      observeEvent(eventExpr = input$add_template,
-                   handlerExpr = {
-                     if(length(input$templates_rows_selected) == 0){
-                       shiny::showNotification("Nothing to submit", type = "warning")
-                     } else {
-                       # Summarize selection
-                       templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
-                         slice(input$templates_rows_selected) %>% 
-                         pull(template_id)
-                       
-                       nodes_summary = templates %>% 
-                         dplyr::filter(.data$template_id %in% templates_selected) %>% 
-                         group_by(.data$template_id, .data$node_id, .data$main_element) %>% 
-                         tally()
-                       
-                       # Extract basic information for modal dialog
-                       n_nodes = nrow(nodes_summary)
-                       node_elements = unique(nodes_summary$main_element) 
-                       
-                       # Show modal dialog
-                       showModal(
-                         modalDialog(tags$h3("Add template node"),
-                                     hr(),
-                                     tags$label("This action will:"),
-                                     tags$li(paste0("Add ", n_nodes," new element(s) to the following main elements: ", paste0(node_elements, collapse = ", "))),
-                                     size = "l",
-                                     footer = tagList(
-                                       tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                                 actionButton(ns("confirm_add_template"), class = "pull-right btn-success", "Confirm", icon("check")))
-                                     ),
-                         )
-                       )
-                     }
-                   })
-      
-      ##### Update #####
-      observeEvent(eventExpr = input$confirm_add_template, 
-                   handlerExpr = {
-                     n_insertions = 0
-                     n_failures = 0
-                     n_errors = 0
-                     n_warnings = 0
-                     
-                     templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
-                       slice(input$templates_rows_selected) %>% 
-                       pull(template_id)
-                     
-                     template_mappings = templates %>% 
-                       dplyr::filter(template_id %in% templates_selected) %>% 
-                       group_by(.data$template_id) %>% 
-                       group_split()
-                     
-                     # loop over template_ids
-                     for(i in 1:length(template_mappings)){
-                       node_mappings = template_mappings[[i]] %>% 
-                         group_by(node_id) %>% 
-                         group_split()
-                       
-                       new_nodes = list()
-                       # loop over node_ids, create new nodes
-                       for(j in 1:length(node_mappings)){ 
-                         fct_result = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, log_path, vegx_schema)
-                         new_node = fct_result$node
-                         n_errors = n_errors + fct_result$errors
-                         n_warnings = n_warnings + fct_result$warnings 
-                         
-                         leaf_nodes = xml_find_all(new_node, "//*[not(*)]")
-                         leaf_names = leaf_nodes %>% xml_name()
-                         if(any(str_detect(leaf_names, "ID$"))){  # ID links present, replace template-internal node_id with actual id generated for VegX output
-                           id_nodes = leaf_nodes[str_detect(leaf_names, "ID$")]
-                           for(id_node in id_nodes){
-                             node_id = as.numeric(xml_text(id_node))
-                             if(node_id > j){ # links allowed only to earlier nodes
-                               new_node = NULL 
-                               break
-                             } 
-                             vegx_id = xml_attr(new_nodes[[node_id]], "id")
-                             xml_text(id_node) = vegx_id
-                           }
-                         }
-                         
-                         # Save new node for lookup in subsequent iterations
-                         new_nodes[[j]] = new_node
-                         
-                         # Append new node to VegX document
-                         if(is.null(new_node)){
-                           new_action_log_record(log_path, "Template error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
-                                                                                    "'. Make sure to reference only earlier node_ids in a template"))
-                           n_failures = n_failures + 1
-                           next
-                         } else {
-                           parent_name = unique(node_mappings[[j]]$main_element)
-                           parent_missing = (length(xml_find_all(vegx_doc, paste0("./", parent_name))) == 0)
-                           if(parent_missing){
-                             xml_add_child(vegx_doc, parent_name)
-                           }
-                           parent = xml_find_all(vegx_doc, paste0("./", parent_name))
-                           xml_add_child(parent, new_node)  
-                           n_insertions = n_insertions + 1
-                         }
-                       }
-                     }
-                     
-                     # Update VegX text 
-                     vegx_txt(as.character(vegx_doc))
-                     
-                     # Update Action log 
-                     action_log(read_action_log(log_path))
-                     
-                     # Show notification
-                     if(n_insertions > 0){shiny::showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
-                     if(n_warnings > 0 | n_errors > 0){shiny::showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
-                     if(n_failures > 0){shiny::showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
-                     
-                     removeModal()
-                   })
-    }
+    # if(tab_selected %in% templates_lookup$target_element){
+    #   templates_elem_overview = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+    #     dplyr::select(-template_id, -target_element)
+    #   
+    #   output$templates = DT::renderDataTable(templates_elem_overview, # DT also creates input objects that can be accessed (see below input$templates_rows_selected)
+    #                                          rownames = FALSE,
+    #                                          options = list(columnDefs = list(list(width = '80px', targets = 0)))) 
+    #   
+    #   output$templates_selected = renderText(paste(templates_elem_overview$name[input$templates_rows_selected], collapse = ", "))
+    #   
+    #   insertTab(
+    #     inputId = "tabset",
+    #     tab = tabPanel(
+    #       value= templates,
+    #       title = "Templates",
+    #       fluidRow(
+    #         column(
+    #           width = 12,
+    #           fluidRow(
+    #             style="min-height: 65px",
+    #             column(12,
+    #                    tags$h4(tags$b("Templates selected:")),
+    #                    textOutput(ns("templates_selected"))
+    #             )
+    #           ),
+    #           hr(),
+    #           DT::dataTableOutput(ns("templates")),
+    #           hr(.noWS = c("before","after"))
+    #         )
+    #       ),
+    #       fluidRow(
+    #         column(
+    #           width = 12,
+    #           actionButton(ns("add_template"), label = "Add template(s)", width = "250px", class = "btn-primary", style = "font-weight:bold")
+    #         )
+    #       )
+    #     )
+    #   )
+    
+    ##### Dialogue #####
+    # observeEvent(eventExpr = input$add_template,
+    #              handlerExpr = {
+    #                if(length(input$templates_rows_selected) == 0){
+    #                  shiny::showNotification("Nothing to submit", type = "warning")
+    #                } else {
+    #                  # Summarize selection
+    #                  templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+    #                    slice(input$templates_rows_selected) %>% 
+    #                    pull(template_id)
+    #                  
+    #                  nodes_summary = templates %>% 
+    #                    dplyr::filter(.data$template_id %in% templates_selected) %>% 
+    #                    group_by(.data$template_id, .data$node_id, .data$main_element) %>% 
+    #                    tally()
+    #                  
+    #                  # Extract basic information for modal dialog
+    #                  n_nodes = nrow(nodes_summary)
+    #                  node_elements = unique(nodes_summary$main_element) 
+    #                  
+    #                  # Show modal dialog
+    #                  showModal(
+    #                    modalDialog(tags$h3("Add template node"),
+    #                                hr(),
+    #                                tags$label("This action will:"),
+    #                                tags$li(paste0("Add ", n_nodes," new element(s) to the following main elements: ", paste0(node_elements, collapse = ", "))),
+    #                                size = "l",
+    #                                footer = tagList(
+    #                                  tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+    #                                            actionButton(ns("confirm_add_template"), class = "pull-right btn-success", "Confirm", icon("check")))
+    #                                ),
+    #                    )
+    #                  )
+    #                }
+    #              })
+    
+    ##### Update #####
+    # observeEvent(eventExpr = input$confirm_add_template, 
+    #              handlerExpr = {
+    #                n_insertions = 0
+    #                n_failures = 0
+    #                n_errors = 0
+    #                n_warnings = 0
+    #                
+    #                templates_selected = templates_lookup %>% filter(.data$target_element == tab_selected) %>% 
+    #                  slice(input$templates_rows_selected) %>% 
+    #                  pull(template_id)
+    #                
+    #                template_mappings = templates %>% 
+    #                  dplyr::filter(template_id %in% templates_selected) %>% 
+    #                  group_by(.data$template_id) %>% 
+    #                  group_split()
+    #                
+    #                # loop over template_ids
+    #                for(i in 1:length(template_mappings)){
+    #                  node_mappings = template_mappings[[i]] %>% 
+    #                    group_by(node_id) %>% 
+    #                    group_split()
+    #                  
+    #                  new_nodes = list()
+    #                  # loop over node_ids, create new nodes
+    #                  for(j in 1:length(node_mappings)){ 
+    #                    fct_result = new_vegx_node(node_mappings[[j]]$node_path, node_mappings[[j]]$node_value, id = NULL, log_path, vegx_schema)
+    #                    new_node = fct_result$node
+    #                    n_errors = n_errors + fct_result$errors
+    #                    n_warnings = n_warnings + fct_result$warnings 
+    #                    
+    #                    leaf_nodes = xml_find_all(new_node, "//*[not(*)]")
+    #                    leaf_names = leaf_nodes %>% xml_name()
+    #                    if(any(str_detect(leaf_names, "ID$"))){  # ID links present, replace template-internal node_id with actual id generated for VegX output
+    #                      id_nodes = leaf_nodes[str_detect(leaf_names, "ID$")]
+    #                      for(id_node in id_nodes){
+    #                        node_id = as.numeric(xml_text(id_node))
+    #                        if(node_id > j){ # links allowed only to earlier nodes
+    #                          new_node = NULL 
+    #                          break
+    #                        } 
+    #                        vegx_id = xml_attr(new_nodes[[node_id]], "id")
+    #                        xml_text(id_node) = vegx_id
+    #                      }
+    #                    }
+    #                    
+    #                    # Save new node for lookup in subsequent iterations
+    #                    new_nodes[[j]] = new_node
+    #                    
+    #                    # Append new node to VegX document
+    #                    if(is.null(new_node)){
+    #                      new_action_log_record(log_path, "Template error", paste0("Ivalid ID reference for 'template_id=", node_mappings[[j]]$template_id[1], 
+    #                                                                               "'. Make sure to reference only earlier node_ids in a template"))
+    #                      n_failures = n_failures + 1
+    #                      next
+    #                    } else {
+    #                      parent_name = unique(node_mappings[[j]]$main_element)
+    #                      parent_missing = (length(xml_find_all(vegx_doc, paste0("./", parent_name))) == 0)
+    #                      if(parent_missing){
+    #                        xml_add_child(vegx_doc, parent_name)
+    #                      }
+    #                      parent = xml_find_all(vegx_doc, paste0("./", parent_name))
+    #                      xml_add_child(parent, new_node)  
+    #                      n_insertions = n_insertions + 1
+    #                    }
+    #                  }
+    #                }
+    #                
+    #                # Update VegX text 
+    #                vegx_txt(as.character(vegx_doc))
+    #                
+    #                # Update Action log 
+    #                action_log(read_action_log(log_path))
+    #                
+    #                # Show notification
+    #                if(n_insertions > 0){shiny::showNotification(paste0(n_insertions, " node(s) successfully added."), type = "default") }
+    #                if(n_warnings > 0 | n_errors > 0){shiny::showNotification(paste0(n_warnings, " warning(s) and ", n_errors, " error(s) encountered. Please consult the log for more information."), type = "warning")} 
+    #                if(n_failures > 0){shiny::showNotification(paste0(n_failures, " node(s) not added. Please consult the log for more information."), type = "error") }
+    #                
+    #                removeModal()
+    #             })
+    
   })
 }
