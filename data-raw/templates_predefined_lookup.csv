@@ -32,3 +32,4 @@ template_id,target_element,subject,name,description,user_defined
 31,methods,plant cover,"Plant cover/extended Braun-Blanquet (levels: r,+,1,2m,2a,2b,3,4,5)","Extended Braun-Blanquet scala (levels: r,+,1,2m,2a,2b,3,4,5)",0
 32,methods,plant cover,"Plant cover/Recce (levels: 1,2,3,4,5,6)","Standard Recce scala (levels: 1,2,3,4,5,6)",0
 33,methods,plant cover,Plant cover/presence-absence (levels: 1),Presence absence scale,0
+34,strata,strata definition,Strata definition/Turboveg,Standard TurboVeg stratum definition (levels: 0-9),

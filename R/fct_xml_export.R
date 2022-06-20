@@ -105,7 +105,7 @@ new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_sche
   
   # set other attributes of root node
   if(root_name == "organismName"){
-    xml_attr(root_node, "taxonName") = "true"     # special case in entire schema --> always set to true
+    # xml_attr(root_node, "taxonName") = "true"     # special case in entire schema --> always set to true
   }
   
   # Create Log entry and return node

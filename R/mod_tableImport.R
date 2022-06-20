@@ -1399,7 +1399,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 #------------------------------------#
                 # Build Observations
                 progress_increment = 0.4 / (length(input$observations_input_control) + 1)
-                ## AggregatOrganismObservations
+                
+                # AggregatOrganismObservations
                 incProgress(progress_increment, "Aggregate Organism Observations")
                 if("aggregateOrganismObservations" %in% input$observations_input_control){
                   if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){

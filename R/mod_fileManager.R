@@ -130,10 +130,10 @@ mod_fileManager_server <- function(id, action_log, log_path){
       req(file_focus())
       file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
       
-      if(file_ext %in% c("csv", "tab", "tsv", "txt", "xls", "xlsx")){
-        output_function = rhandsontable::rHandsontableOutput
-      } else {
+      if(file_ext == "xml"){
         output_function = uiOutput
+      } else {
+        output_function = rhandsontable::rHandsontableOutput
       }
       ui = div(
         id = ns(paste0("editor_", file_focus())),
@@ -179,9 +179,14 @@ mod_fileManager_server <- function(id, action_log, log_path){
         data_unedited(user_data[[file_focus()]])
         
         # Make user_data editable
-        user_data[[file_focus()]] = user_data[[file_focus()]] %>% 
-          rhandsontable::hot_cols(readOnly = F) %>% 
-          rhandsontable::hot_context_menu(allowRowEdit = TRUE, allowColEdit = TRUE)
+        file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+        if(file_ext == "xml"){
+          updateAceEditor(session, "editor", readOnly = F)
+        } else {
+          user_data[[file_focus()]] = user_data[[file_focus()]] %>% 
+            rhandsontable::hot_cols(readOnly = F) %>% 
+            rhandsontable::hot_context_menu(allowRowEdit = TRUE, allowColEdit = TRUE)  
+        }
         
         # Update action log
         new_action_log_record(log_path, "File info", paste0("Entered edit mode for file '", file_focus(),"'"))
@@ -192,16 +197,21 @@ mod_fileManager_server <- function(id, action_log, log_path){
     observeEvent(eventExpr = input$save_edits,
                  handlerExpr = {
                    tryCatch({
-                     # Read edits
-                     data_edited = input$hot_table
-                     data_edited_df = rhandsontable::hot_to_r(data_edited)
-                     
-                     # Overwrite user data
-                     user_data[[file_focus()]] = rhandsontable::rhandsontable(data_edited_df, useTypes = FALSE, readOnly = T) %>% 
-                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-                     
-                     output$hot_table = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
-                     
+                     file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+                     if(file_ext == "xml"){
+                       user_data[[file_focus()]] = read_xml(isolate(input$editor))
+                     } else {
+                       # Read edits
+                       data_edited = input$editor
+                       data_edited_df = rhandsontable::hot_to_r(data_edited)
+                       
+                       # Overwrite user data
+                       user_data[[file_focus()]] = rhandsontable::rhandsontable(data_edited_df, useTypes = FALSE, readOnly = T) %>% 
+                         rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                       
+                       output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     }
+
                      # Restore UI state
                      insertUI(selector = paste0("#", ns("save_edits")),
                               where = "beforeBegin",
@@ -218,6 +228,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      shiny::showNotification("Edits saved")
                      new_action_log_record(log_path, "File info", paste0("Left edit mode for file for file '", file_focus(),"'. All edits were saved."))
                      action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     shiny::showNotification("Something went wrong", type = "error")
                    })
                  })
     
@@ -239,6 +251,11 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    # Restore data
                    user_data[[file_focus()]] = data_unedited()
                    
+                   file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+                   if(file_ext == "xml"){
+                     updateAceEditor(session, "editor", value = as.character(user_data[[file_focus()]]), readOnly = T)
+                   }
+                   
                    # Update action log
                    new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded"))
                    action_log(read_action_log(log_path))
@@ -250,7 +267,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    # Remove user data and file focus
                    file_name = isolate(file_focus())
                    .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
-                   output$hot_table = NULL
+                   output$editor = NULL
                    file_focus(NULL)
                    
                    # Redraw file browser

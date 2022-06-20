@@ -15,23 +15,20 @@ mod_turbovegImport_ui <- function(id){
       width = 10, offset = 1,
       
       fluidRow(
-        h2("Project"),
-        textInput(inputId = ns("project_title"), label = "Project title *",  width = "100%"),
-        textAreaInput(inputId = ns("project_abstract"), label = "Abstract", width = "100%", resize = "vertical"),
-        textInput(inputId = ns("project_citation"), label = "Citation", width = "100%"),
-        tags$label("Responsible Party"),
-        fluidRow(
-          column(width = 4, textInput(ns("party_name"), "Name", width = "100%")),
-          column(width = 4, textInput(ns("party_role"), "Role", width = "100%")),
-          column(width = 4, selectizeInput(ns("party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), width = "100%"))
-        )
-      ),
-      
-      fluidRow(
         tags$h2 ("File"),
         tags$p("Select the Turboveg XML file you want to import", class = "text-info annotation"),
         selectizeInput(ns("tv_file"), label = NULL, choices = c("No files found" = ""))
       ), 
+      
+      fluidRow(
+        tags$h2("Project information"),
+        textInput(inputId = ns("project_title"), label = "Project title *",  width = "100%")
+      ),
+      
+      fluidRow(
+        tags$h2("Undefined records"),
+        uiOutput("recor")
+      ),
       
       hr(),
       
@@ -72,6 +69,11 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
         if(input$tv_file != ""){
           tv_tables = tv_to_df(user_data[[input$tv_file]])
           tv_dfs(tv_tables)
+          
+          udf_cols = colnames(tv_dfs()$udf_header)
+          
+          # div(class = "text-center text-warning", tags$p(paste0("The plot header data of your file contain ", length(udf_cols), " undefined features.\nYou can map them to the corresponding VegX elements below."))),
+          # shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T),
         } else {
           tv_dfs(NULL)
         }
@@ -81,28 +83,16 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
-        udf_cols = colnames(tv_dfs()$udf_header)
-        
-        if(length(udf_cols) == 0){
-          modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will overwrite the existing VegX document."))
-        } else {
-          modal_content = tagList(
-            div(class = "text-center text-warning", tags$p(paste0("The plot header data of your file contain ", length(udf_cols), " undefined features.\nYou can map them to the corresponding VegX elements below."))),
-            shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T),
-            div(class = "text-center text-info", tags$p("This will overwrite existing the VegX document."))
-          )
-        }
-        
         # Show modal dialog
         showModal(
-          modalDialog(tags$h3("Import data"),
-                      hr(),
-                      modal_content,
-                      size = "l",
-                      footer =  tagList(
-                        tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
-                                  actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
-                      )
+          modalDialog(
+            tags$h3("Import data"),
+            hr(),
+            div(class = "text-center text-info", icon("check"), tags$p("This will overwrite the existing VegX document.")),
+            size = "l",
+            footer =  tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
+                                actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))
+            )
           )
         )
       }
@@ -119,161 +109,321 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
       eventExpr = input$confirm_import,
       handlerExpr = {
         tryCatch({
-          nodes = list()
-          mappings = list()
-          
-          # Project ####
-          
-          # 
-          # if(isTruthy(input$project_title)){
-          #   mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
-          # }
-          # if(isTruthy(input$project_abstract)){
-          #   mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
-          # }
-          # if(isTruthy(input$party_name) & isTruthy(input$party_role)){
-          #   mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
-          # }
-          # if(length(mappings$project) != 0){
-          #   project_df = build_node_values_df(mappings$project, user_data) 
-          #   nodes$projects = list(new_vegx_node(colnames(project_df), project_df[1,], id = NULL, log_path, vegx_schema, write_log = F))  
-          # }
-          # 
-          # if(isTruthy(input$project_citation)){
-          #   mappings$literatureCitations[["literatureCitation > citationString"]]  = list(value = input$project_citation, source = "Text")
-          #   literatureCitations_df = build_node_values_df(mappings$literatureCitations, user_data)
-          #   nodes$literatureCitations = list(new_vegx_node(colnames(literatureCitations_df), literatureCitations_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
-          #   link_vegx_nodes(nodes$projects[[1]]$node, "project > documentCitationID", nodes$literatureCitations[[1]]$node, log_path, vegx_schema)
-          # }
-          # 
-          # if(isTruthy(input$party_name)){
-          #   mappings$parties[[paste0("party > choice > ", tolower(input$party_type), "Name")]] = list(value = input$party_name, source = "Text")
-          #   parties_df = build_node_values_df(mappings$parties, user_data)
-          #   nodes$parties = list(new_vegx_node(colnames(parties_df), parties_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
-          #   link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, log_path, vegx_schema)
-          # }
-          
-          #-------------------------------------------------------------------------# 
-          # Plots ####
-          plots_df = data.frame("plot > plotName" = tv_dfs()$std_header[["releve_nr"]], 
-                                "plot > plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
-                                check.names = F)
-          std_cols = colnames(tv_dfs()$std_header) 
-          if("surf_area" %in% std_cols){
-            method_nodes = templates() %>% dplyr::filter(template_id == 1) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)   # Plot area/m2
-            
-            plots_df[["plot > geometry > area > value"]] = tv_dfs()$std_header[["surf_area"]]
-            plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-            
-            nodes$methods = append(nodes$methods, method_nodes$methods)
-            nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-          }
-          
-          if("altitude" %in% std_cols){
-            method_nodes = templates() %>% dplyr::filter(template_id == 20) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Elevation/m
-            
-            plots_df[["plot > location > verticalCoordinates > elevation > value"]] = tv_dfs()$std_header[["altitude"]]
-            plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-            
-            nodes$methods = append(nodes$methods, method_nodes$methods)
-            nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-          }
-          
-          if("exposition" %in% std_cols){
-            method_nodes = templates() %>% dplyr::filter(template_id == 18) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Aspect/degrees
-            
-            plots_df[["plot > topography > aspect > value"]] = tv_dfs()$std_header[["exposition"]]
-            plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-            
-            nodes$methods = append(nodes$methods, method_nodes$methods)
-            nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-          }
-          
-          if("inclinatio" %in% std_cols){
-            method_nodes = templates() %>% dplyr::filter(template_id == 16) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Slope/degrees
-            
-            plots_df[["plot > topography > slope > value"]] = tv_dfs()$std_header[["inclinatio"]]
-            plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
-            
-            nodes$methods = append(nodes$methods, method_nodes$methods)
-            nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-          }
-          
-          
-          # Build plot nodes 
-          vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
-          plot_nodes = lapply(1:nrow(plots_df), function(i){
-            new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
-          })
-          plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] 
-          nodes$plots = append(nodes$plots, plot_nodes)
-          
-          plots_lookup = data.frame(
-            plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-            plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
-          )
-          
-          #-------------------------------------------------------------------------#
-          # plotObservations ####
-          plotObs_df = data.frame("plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
-                                  "plotObservation > obsStartDate" = lubridate::ymd(tv_dfs()$std_header[["date"]]),
-                                  "plotObservation > projectID" = 1, 
-                                  check.names = F) %>% 
-            inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
-            mutate("plotObservation > plotID" = plotID) %>% 
-            dplyr::select(-plotUniqueIdentifier, -plotID)
-          
-          vegx_schema_plotObs = xml_find_all(vegx_schema, "./xsd:element[@name='plotObservations']")
-          plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
-            new_vegx_node(colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path, vegx_schema_plotObs, write_log = F)
-          })
-          nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
-          
-          plotObs_lookup = lapply(plotObs_nodes, function(x){
-            data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
-                       plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
-                       obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate"))))}) %>% 
-            bind_rows() %>% 
-            left_join(plots_lookup, by = "plotID")
-          
-          
-          #-------------------------------------------------------------------------#
-          # Update app state ####
-          # VegX document 
-          for(element_name in names(nodes)){
-            element_nodes = nodes[[element_name]]
-            parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
-            if(parent_missing){
-              elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
-              if(length(elements_present) > 0){
-                elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, element_name)]
-                insert_position = which(elements_ordered == element_name) - 1
-                xml_add_child(vegx_doc, element_name, .where = insert_position)
-              } else {
-                xml_add_child(vegx_doc, element_name)
+          withProgress(
+            message = "Importing data",
+            expr = {
+              # Preparations 
+              shinyjs::disable("confirm_import")
+              shinyjs::disable("dismiss_modal")
+              nodes = list()
+              mappings = list()
+              
+              #-------------------------------------------------------------------------# 
+              # Project ####
+              setProgress(value = 0.05, "Projects")
+              if(isTruthy(input$project_title)){
+                mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
+                project_df = build_node_values_df(mappings$project, user_data)
+                nodes$projects = list(new_vegx_node(colnames(project_df), project_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
               }
-            }
-            parent = xml_find_all(vegx_doc, paste0("./",  element_name))
-            xml_add_child(parent, element_nodes[[1]]$node)
-            
-            if(length(element_nodes) > 1){
-              target = xml_child(parent, 1)
-              for(i in 2:length(element_nodes)){
-                if(!is.null(element_nodes[[i]]$node)){
-                  xml_add_sibling(target, element_nodes[[i]]$node)  # TODO: This is much faster than xml_add_child() but still not ideal
-                  target = xml_child(parent, i)
+              
+              #-------------------------------------------------------------------------# 
+              # Plots ####
+              setProgress(value = 0.2, "Plots")
+              plots_df = data.frame("plot > plotName" = tv_dfs()$std_header[["releve_nr"]], 
+                                    "plot > plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
+                                    check.names = F)
+              std_cols = colnames(tv_dfs()$std_header) 
+              if("surf_area" %in% std_cols){
+                method_nodes = templates() %>% dplyr::filter(template_id == 1) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)   # Plot area/m2
+                
+                plots_df[["plot > geometry > area > value"]] = tv_dfs()$std_header[["surf_area"]]
+                plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              
+              if("altitude" %in% std_cols){
+                method_nodes = templates() %>% dplyr::filter(template_id == 20) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Elevation/m
+                
+                plots_df[["plot > location > verticalCoordinates > elevation > value"]] = tv_dfs()$std_header[["altitude"]]
+                plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              
+              if("exposition" %in% std_cols){
+                method_nodes = templates() %>% dplyr::filter(template_id == 18) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Aspect/degrees
+                
+                plots_df[["plot > topography > aspect > value"]] = tv_dfs()$std_header[["exposition"]]
+                plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              
+              if("inclinatio" %in% std_cols){
+                method_nodes = templates() %>% dplyr::filter(template_id == 16) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)  # Slope/degrees
+                
+                plots_df[["plot > topography > slope > value"]] = tv_dfs()$std_header[["inclinatio"]]
+                plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                
+                nodes$methods = append(nodes$methods, method_nodes$methods)
+                nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
+              }
+              
+              
+              # Build plot nodes 
+              vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
+              plot_nodes = lapply(1:nrow(plots_df), function(i){
+                new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
+              })
+              plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] 
+              nodes$plots = append(nodes$plots, plot_nodes)
+              
+              plots_lookup = data.frame(
+                plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+              )
+              
+              #-------------------------------------------------------------------------#
+              # Organism names ####
+              setProgress(value = 0.4, "Organisms")
+              vegx_schema_orgNames = xml_find_all(vegx_schema, "./xsd:element[@name='organismNames']")
+              orgNames_df = tv_dfs()$lookup$Species_list[[1]]$records %>% 
+                mutate(taxonName = ifelse(valid_name == "", "true", "false"),
+                       valid_name = ifelse(valid_name == "", name, valid_name))
+              
+              orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
+                node = new_vegx_node("organismName", orgNames_df[i,"name"], id = NULL, log_path, vegx_schema_orgNames, write_log = F)
+                xml_set_attr(node$node, "taxonName", orgNames_df[i,"taxonName"])
+                return(node)
+              })
+              
+              orgNames_df$orgNameID = sapply(orgNames_nodes, function(x){xml_attr(x$node, "id")})
+              orgNames_df$preferredNameID = orgNames_df[match(orgNames_df$valid_name, orgNames_df$name), "orgNameID"]
+              orgNames_df = orgNames_df %>% 
+                mutate(preferredNameID = ifelse(preferredNameID == orgNameID, "", preferredNameID))
+              
+              vegx_schema_orgIdentities = xml_find_all(vegx_schema, "./xsd:element[@name='organismIdentities']")
+              orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = orgNames_df$orgNameID,
+                                            "organismIdentity > preferredTaxonNomenclature > preferredTaxonNameID" = orgNames_df$preferredNameID,
+                                            check.names = F)
+              
+              orgIdentities_nodes = lapply(1:nrow(orgIdentities_df), function(i){
+                new_vegx_node(colnames(orgIdentities_df), orgIdentities_df[i,], id = NULL, log_path, vegx_schema_orgIdentities, write_log = F)
+              })
+              
+              nodes$organismNames = orgNames_nodes
+              nodes$organismIdentities = orgIdentities_nodes
+              
+              # Lookup
+              orgNames_lookup = data.frame(organismName = orgNames_df$nr,
+                                           originalOrganismNameID = ifelse(orgNames_df$preferredNameID == "", orgNames_df$orgNameID, orgNames_df$preferredNameID))
+              
+              orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
+                data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),
+                           originalOrganismNameID = xml2::xml_text(xml2::xml_child(x$node, search = "originalOrganismNameID")))}) %>% 
+                bind_rows()
+              
+              organisms_lookup = left_join(orgIdentities_lookup, orgNames_lookup, by = "originalOrganismNameID")
+              
+              #-------------------------------------------------------------------------# 
+              # Cover Scale #####
+              setProgress(value = 0.5, "Cover scale definitions")
+              coverscales = tv_dfs()$lookup$Coverscale_list
+              new_template_id = id_generator()
+              coverscale_templates = lapply(coverscales, function(coverscale){
+                template_id = new_template_id()
+                new_node_id = id_generator()
+                method_df = data.frame("template_id" = template_id,
+                                       "node_id" = new_node_id(),
+                                       "main_element" = "methods",
+                                       "node_path" = c("method > subject", "method > name", "method > description"),
+                                       "node_value" = c("plant cover", coverscale$description, paste0("Imported TurboVeg cover scale (Code: ", coverscale$code, ")")))
+                
+                if(coverscale$code == "00"){            # The only quantitative cover scale in turboveg
+                  attributes_df = data.frame("template_id" = template_id,
+                                             "node_id" = new_node_id(),
+                                             "main_element" = "attributes",
+                                             "node_path" = c("attribute > choice > quantitative > unit", "attribute > choice > quantitative > lowerLimit", "attribute > choice > quantitative > upperLimit", "attribute > choice > quantitative > methodID"),
+                                             "node_value" = c("%", 0, 100, 1))
+                } else {
+                  attributes_df = lapply(1:nrow(coverscale$records), function(i){
+                    data.frame("template_id" = template_id,
+                               "node_id" = new_node_id(),
+                               "main_element" = "attributes",
+                               "node_path" = c("attribute > choice > ordinal > code", "attribute > choice > ordinal > definition",  "attribute > choice > ordinal > methodID"),
+                               "node_value" = c(coverscale$records$code[i] , paste0("Approximately ", coverscale$records$percentage[i], " % cover"), 1))
+                  }) %>% bind_rows()
+                }
+                
+                template = bind_rows(method_df, attributes_df)
+                return(template)
+              })
+              template_nodes = templates_to_nodes(bind_rows(coverscale_templates), vegx_schema, log_path, write_log = F) 
+              
+              nodes$methods = append(nodes$methods, template_nodes$methods)
+              nodes$attributes = append(nodes$attributes, template_nodes$attributes) 
+              
+              measurementScale_lookup = lapply(template_nodes$attributes, function(x){
+                data.frame(attributeID = xml2::xml_attr(x$node, "id"),
+                           taxon_measurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                bind_rows()
+              
+              #-------------------------------------------------------------------------# 
+              # Strata definition #####
+              setProgress(value = 0.55, "Layer definitions")
+              stratadef_template_id = templates_lookup() %>% 
+                dplyr::filter(name == "Strata definition/Turboveg") %>% 
+                pull(template_id) %>% 
+                unique()
+              
+              stratadef_template = templates() %>% 
+                dplyr::filter(template_id == stratadef_template_id)
+              
+              template_nodes = templates_to_nodes(stratadef_template, vegx_schema, log_path, write_log = F)
+              nodes$strata = append(nodes$strata, template_nodes$strata)
+              nodes$methods = append(nodes$methods, template_nodes$methods)
+              nodes$attributes = append(nodes$attributes, template_nodes$attributes) 
+              
+              strata_lookup = lapply(nodes$strata, function(x){
+                data.frame(stratumID = xml2::xml_attr(x$node, "id"),
+                           stratumName = xml2::xml_text(xml2::xml_child(x$node, search = "stratumName")))}) %>% 
+                bind_rows()
+              
+              #-------------------------------------------------------------------------#
+              # PlotObservations ####
+              setProgress(value = 0.6, "Plot observations")
+              plotObs_df = data.frame("plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
+                                      "plotObservation > obsStartDate" = tv_dfs()$std_header[["date"]],
+                                      "plotObservation > projectID" = 1, 
+                                      check.names = F) %>% 
+                inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
+                mutate("plotObservation > plotID" = plotID) %>% 
+                dplyr::select(-plotUniqueIdentifier, -plotID)
+              
+              vegx_schema_plotObs = xml_find_all(vegx_schema, "./xsd:element[@name='plotObservations']")
+              plotObs_nodes = lapply(1:nrow(plotObs_df), function(i){
+                new_vegx_node(colnames(plotObs_df), plotObs_df[i,], id = NULL, log_path, vegx_schema_plotObs, write_log = F)
+              })
+              
+              nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
+              
+              plotObs_lookup = lapply(plotObs_nodes, function(x){
+                data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
+                           plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
+                           obs_date = xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate")))}) %>% 
+                bind_rows() %>% 
+                left_join(plots_lookup, by = "plotID")
+              
+              #-------------------------------------------------------------------------#
+              # StratumObservations ####
+              # Build mapping table
+              stratumObs_df = data.frame(
+                plotUniqueIdentifier = tv_dfs()$species$releve_nr,
+                stratumName = tv_dfs()$species$layer
+              ) %>%  
+                filter(stratumName != 0) %>%    # Stratum 0 is defined as no strata in Turboveg
+                left_join(plotObs_lookup, by = c("plotUniqueIdentifier")) %>% 
+                left_join(strata_lookup, by = "stratumName") %>% 
+                dplyr::select("stratumObservation > plotObservationID" = plotObservationID, 
+                              "stratumObservation > stratumID" = stratumID) %>% 
+                distinct() %>% 
+                arrange("stratumObservation > plotObservationID", "stratumObservation > stratumID")
+              
+              if(nrow(stratumObs_df) > 0){
+                # Create nodes
+                vegx_schema_stratumObs = xml_find_all(vegx_schema, "./xsd:element[@name='stratumObservations']")
+                stratumObs_nodes = lapply(1:nrow(stratumObs_df), function(i){
+                  new_vegx_node(colnames(stratumObs_df), stratumObs_df[i,], id = NULL, log_path, vegx_schema_stratumObs, write_log = F)
+                })
+                nodes$stratumObservations = append(nodes$stratumObservations, stratumObs_nodes)  
+                
+                # Build lookup table
+                stratumObs_lookup = lapply(nodes$stratumObservations, function(x){
+                  data.frame(stratumObservationID = xml2::xml_attr(x$node, "id"),
+                             plotObservationID = xml2::xml_text(xml2::xml_child(x$node, search = "plotObservationID")),
+                             stratumID = xml2::xml_text(xml2::xml_child(x$node, search = "stratumID")))}) %>% 
+                  bind_rows()
+              } else {
+                stratumObs_lookup = data.frame(stratumObservationID = character(0),
+                                               plotObservationID = character(0),
+                                               stratumID = character(0))
+              }
+              
+              #-------------------------------------------------------------------------#
+              # AggregateOrganismObservations ####
+              browser()
+              aggOrgObs_mappings = tv_dfs()$species %>% 
+                rename(plotUniqueIdentifier = releve_nr,
+                       organismName = nr,
+                       stratumName = layer,
+                       taxon_measurement = cover)
+              
+              
+              aggOrgObs_df = aggOrgObs_mappings %>% 
+                left_join(plotObs_lookup, by = c("plotUniqueIdentifier")) %>% 
+                left_join(organisms_lookup, by = "organismName") %>% 
+                left_join(measurementScale_lookup, by = "taxon_measurement") %>%
+                left_join(strata_lookup, by = "stratumName") %>% 
+                left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% 
+                dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
+                              "aggregateOrganismObservation > organismIdentityID" = organismIdentityID, 
+                              "aggregateOrganismObservation > aggregateOrganismMeasurement > value" = taxon_measurement, 
+                              "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID,
+                              "aggregateOrganismObservation > stratumObservationID" = stratumObservationID)
+              
+              
+              vegx_schema_aggOrgObs = xml_find_all(vegx_schema, "./xsd:element[@name='aggregateOrganismObservations']")
+              aggOrgObs_nodes = lapply(1:nrow(aggOrgObs_df), function(i){
+                new_vegx_node(colnames(aggOrgObs_df), aggOrgObs_df[i,], id = NULL, log_path, vegx_schema_aggOrgObs, write_log = F)
+              })
+              nodes$aggregateOrganismObservations = aggOrgObs_nodes  
+              
+              
+              #-------------------------------------------------------------------------#
+              # Update app state ####
+              # VegX document 
+              setProgress(value = 0.8, "Updating VegX document")
+              for(element_name in names(nodes)){
+                element_nodes = nodes[[element_name]]
+                parent_missing = (length(xml_find_all(vegx_doc, paste0("./", element_name))) == 0)
+                if(parent_missing){
+                  elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
+                  if(length(elements_present) > 0){
+                    elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, element_name)]
+                    insert_position = which(elements_ordered == element_name) - 1
+                    xml_add_child(vegx_doc, element_name, .where = insert_position)
+                  } else {
+                    xml_add_child(vegx_doc, element_name)
+                  }
+                }
+                parent = xml_find_all(vegx_doc, paste0("./",  element_name))
+                xml_add_child(parent, element_nodes[[1]]$node)
+                
+                if(length(element_nodes) > 1){
+                  target = xml_child(parent, 1)
+                  for(i in 2:length(element_nodes)){
+                    if(!is.null(element_nodes[[i]]$node)){
+                      xml_add_sibling(target, element_nodes[[i]]$node)  # TODO: This is much faster than xml_add_child() but still not ideal
+                      target = xml_child(parent, i)
+                    }
+                  }
                 }
               }
-            }
-          }
-          
-          # VegX text 
-          vegx_txt(as.character(vegx_doc))
-          
-          # Action log 
-          showNotification("Import finished.")
-          new_action_log_record(log_path, "Import info", "Data imported from TurboVeg file")
-          action_log(read_action_log(log_path))
+              
+              # VegX text 
+              vegx_txt(as.character(vegx_doc))
+              
+              # Action log 
+              setProgress(value = 1)
+              showNotification("Import finished.")
+              new_action_log_record(log_path, "Import info", "Data imported from TurboVeg file")
+              action_log(read_action_log(log_path))
+            })  
         }, error = function(e){
           showNotification("Import failed. Please consult the log for more information.")
           new_action_log_record(log_path, "Import error", e$message)
