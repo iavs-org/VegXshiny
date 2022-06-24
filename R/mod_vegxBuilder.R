@@ -35,6 +35,7 @@ mod_vegxBuilder_ui <- function(id){
       nav("Projects",                       mod_nodeEditor_ui(ns("projects"))),
       nav("Protocols",                      mod_nodeEditor_ui(ns("protocols"))),
       nav("SiteObservations",               mod_nodeEditor_ui(ns("siteObservations"))),
+      nav("SimpleUserDefined",              mod_nodeEditor_ui(ns("simpleUserDefined"))),
       nav("Strata",                         mod_nodeEditor_ui(ns("strata"))),
       nav("StratumObservations",            mod_nodeEditor_ui(ns("stratumObservations"))),
       nav("SurfaceCoverObservations",       mod_nodeEditor_ui(ns("surfaceCoverObservations"))),

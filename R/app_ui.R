@@ -10,23 +10,26 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     
-    # Your application UI logic 
+    # Application UI logic 
     navbarPage("VegXshiny",  
                position = "fixed-top",
                theme=bslib::bs_theme(version = 3, bootswatch = "darkly"),
                header = tags$style(type="text/css", "body {padding-top: 80px;}"),
                
-               tabPanel("About",
-                        mod_about_ui("about")
+               
+               navbarMenu(title = "About ", icon = icon("home", class = "icon-padded-right"),
+                          tabPanel("The VegX standard", mod_aboutVegX_ui("aboutVegX")),
+                          tabPanel("How to use this app", mod_aboutVegXshiny_ui("aboutVegXshiny"))
                ),
+               
                
                tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
                navbarMenu(title = "Import wizard ", icon = icon("magic", class = "icon-padded-right"), 
-                 tabPanel("Import from tables", mod_tableImport_ui("tableImport")),
-                 tabPanel("Import TurboVeg", mod_turbovegImport_ui("turbovegImport"))
+                 tabPanel("Import from Tables", mod_tableImport_ui("tableImport")),
+                 tabPanel("Import from TurboVeg XML", mod_turbovegImport_ui("turbovegImport"))
                ),
                
                tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),

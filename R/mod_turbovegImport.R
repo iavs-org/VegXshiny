@@ -11,28 +11,23 @@ mod_turbovegImport_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
-    column(
-      width = 10, offset = 1,
-      
-      fluidRow(
-        tags$h2 ("File"),
-        tags$p("Select the Turboveg XML file you want to import", class = "text-info annotation"),
-        selectizeInput(ns("tv_file"), label = NULL, choices = c("No files found" = ""))
-      ), 
-      
-      fluidRow(
-        tags$h2("Project information"),
-        textInput(inputId = ns("project_title"), label = "Project title *",  width = "100%")
-      ),
-      
-      fluidRow(
-        tags$h2("Undefined records"),
-        uiOutput("recor")
-      ),
-      
-      hr(),
-      
-      fluidRow(
+    fluidRow(
+      column(
+        width = 10, offset = 1,
+        tags$h2 ("TurboVeg Import"),
+        tags$p("Select a TurboVeg XML file and read the data into R", class = "text-info annotation"),
+        fluidRow(
+          column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
+          column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg XML", style = "height: 35px; line-height: 0px")))
+        ),
+        
+        fluidRow(
+          column(12, 
+                 tags$label("Document summary"),
+                 uiOutput(ns("tv_summary")),
+                 hr()
+          )
+        ),
         actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block")
       )
     )
@@ -47,6 +42,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     ns <- session$ns
     
     tv_dfs = reactiveVal()
+    output$tv_summary = renderText("No summary available.")
     
     dropdown_empty = reactive({
       if(length(names(user_data)) == 0){
@@ -56,43 +52,85 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
       }
     })
     
-    schema_list_plots = vegx_schema %>% xml_find_all("//*[@name='plots']") %>% schema_to_list(name_attr = "name") 
-    schema_list_plotObs = vegx_schema %>% xml_find_all("//*[@name='plotObservations']") %>% schema_to_list(name_attr = "name") 
-    output$tree = shinyTree::renderTree(list("plots" = schema_list_plots, "plotObservations" = schema_list_plotObs))
+    # Observe and update input instead of using a reactive expression in the definition, thus preventing re-rendering of the entire UI when `user_data()` changes 
+    observe({   
+      file_selected = input$tv_file # save current selection
+      choices = names(user_data)[stringr::str_ends(names(user_data), ".xml")]
+      updateSelectizeInput(session, inputId = "tv_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
+    })
     
-    observe({  
-      if(!is.null(input$tv_file) & length(names(user_data)) != 0){
-        file_selected = input$tv_file # save current selection
-        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml")]
-        updateSelectizeInput(session, inputId = "tv_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
-        
-        if(input$tv_file != ""){
-          tv_tables = tv_to_df(user_data[[input$tv_file]])
-          tv_dfs(tv_tables)
+    # Read TurboVeg XML into tabular format
+    observeEvent(
+      eventExpr = input$read_tv,
+      handlerExpr = {  
+        tryCatch({     
+          shinyjs::disable("read_tv")
+          shinyjs::disable("tv_file")
           
-          udf_cols = colnames(tv_dfs()$udf_header)
-          
-          # div(class = "text-center text-warning", tags$p(paste0("The plot header data of your file contain ", length(udf_cols), " undefined features.\nYou can map them to the corresponding VegX elements below."))),
-          # shinyTree::shinyTree(ns("tree"), theme = "proton", multiple = T, checkbox = T, themeIcons = F, search = T),
+          if(!isTruthy(input$tv_file)){
+            showNotification("Please select a file", type = "error")
+            return()
+          } 
+          tv_import = tv_to_df(user_data[[input$tv_file]])
+          tv_dfs(tv_import)
+          showNotification("Turboveg file read.")
+        }, finally = {
+          shinyjs::enable("read_tv")
+          shinyjs::enable("tv_file")
+        })
+      }
+    )
+    
+    observeEvent(
+      eventExpr = tv_dfs(),
+      handlerExpr = {
+        if(!isTruthy(tv_dfs())){
+          output$tv_summary = renderText("No summary available.")
         } else {
-          tv_dfs(NULL)
+          tv_import = isolate(tv_dfs())
+          summary_df = list(
+            c("Property" = "Plots", "Summary" = nrow(tv_import$std_header)),
+            c("Property" = "Standard header columns", "Summary" = ncol(tv_import$std_header)),
+            c("Property" = "Undefined header columns","Summary" = ncol(tv_import$udf_header)),
+            c("Property" = "Observations", "Summary" = nrow(tv_import$species)),
+            c("Property" = "Unique species names","Summary" = length(unique(tv_import$species$nr))),
+            c("Property" = "Lookup tables", "Summary" = paste(names(tv_import$lookup), collapse = ", "))
+          ) %>% bind_rows()
+          output$tv_summary = renderTable(summary_df, colnames = F)
         }
       }
-    })
+    )
     
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
+        # Build Modal UI elements
+        if(isTruthy(tv_dfs())){
+          modal_content = tagList(
+            div(class = "text-center text-info", icon("check"), 
+                tags$p("This will convert the uploaded document into VegX document. Depending on the document size, this process may take a while."),
+            ),
+            tags$p(paste0("The header data contain ", ncol(tv_dfs()$udf_header), " undefined columns. Which fields should be imported as user defined plot attributes?")),
+            checkboxGroupInput(ns("udf_header_import"), label = NULL, choices = colnames(tv_dfs()$udf_header)[-1], inline = T)
+          )
+          modal_footer = tagList(
+            tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
+          )
+        } else {
+          modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please read in a TurboVeg XML file."))
+          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))))
+          )
+        }
+        
         # Show modal dialog
         showModal(
-          modalDialog(
-            tags$h3("Import data"),
-            hr(),
-            div(class = "text-center text-info", icon("check"), tags$p("This will overwrite the existing VegX document.")),
-            size = "l",
-            footer =  tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
-                                actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))
-            )
+          modalDialog(tags$h3("Import data"),
+                      hr(),
+                      modal_content,
+                      size = "l",
+                      footer = modal_footer
           )
         )
       }
@@ -174,11 +212,37 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
               }
               
+              # Undefined header 
+              udf_method_nodes = lapply(input$udf_header_import, function(name){
+                new_vegx_node(node_paths = c("method > subject", "method > name", "method > description"),
+                              node_values = c("Turboveg udf_header", name, "TurboVeg undefined method"),
+                              id = NULL, log_path, vegx_schema, write_log = T)
+              })
+              
+              nodes$methods = append(nodes$methods, udf_method_nodes)
+              
+              udf_methods_lookup = data.frame(
+                methodID = sapply(udf_method_nodes, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                methodName = sapply(udf_method_nodes, function(x){xml_text(xml_find_first(x$node, "//name"))}) # the mapped unique identifier in the data
+              )
               
               # Build plot nodes 
               vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
               plot_nodes = lapply(1:nrow(plots_df), function(i){
-                new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
+                plot_node = new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
+                lapply(1:nrow(udf_methods_lookup), function(j){
+                  method_name = udf_methods_lookup$methodName[j]
+                  method_id = udf_methods_lookup$methodID[j]
+                  simpleUserDef_node = xml_new_root("simpleUserDefined")
+                  xml_add_child(simpleUserDef_node, "name", method_name)
+                  xml_add_child(simpleUserDef_node, "value", tv_dfs()$udf_header[[method_name]][i])
+                  xml_add_child(simpleUserDef_node, "choice")
+                  xml_child(simpleUserDef_node, "choice") %>% 
+                    xml_add_child("methodID", method_id)
+                  
+                  xml_add_child(plot_node$node, simpleUserDef_node)
+                })
+                return(plot_node)
               })
               plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] 
               nodes$plots = append(nodes$plots, plot_nodes)
@@ -190,7 +254,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------#
               # Organism names ####
-              setProgress(value = 0.4, "Organisms")
+              setProgress(value = 0.3, "Organisms")
               vegx_schema_orgNames = xml_find_all(vegx_schema, "./xsd:element[@name='organismNames']")
               orgNames_df = tv_dfs()$lookup$Species_list[[1]]$records %>% 
                 mutate(taxonName = ifelse(valid_name == "", "true", "false"),
@@ -232,7 +296,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Cover Scale #####
-              setProgress(value = 0.5, "Cover scale definitions")
+              setProgress(value = 0.35, "Cover scale definitions")
               coverscales = tv_dfs()$lookup$Coverscale_list
               new_template_id = id_generator()
               coverscale_templates = lapply(coverscales, function(coverscale){
@@ -242,7 +306,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                                        "node_id" = new_node_id(),
                                        "main_element" = "methods",
                                        "node_path" = c("method > subject", "method > name", "method > description"),
-                                       "node_value" = c("plant cover", coverscale$description, paste0("Imported TurboVeg cover scale (Code: ", coverscale$code, ")")))
+                                       "node_value" = c("plant cover", coverscale$description, paste0("TurboVeg cover scale (Code: ", coverscale$code, ")")))
                 
                 if(coverscale$code == "00"){            # The only quantitative cover scale in turboveg
                   attributes_df = data.frame("template_id" = template_id,
@@ -275,7 +339,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Strata definition #####
-              setProgress(value = 0.55, "Layer definitions")
+              setProgress(value = 0.4, "Layer definitions")
               stratadef_template_id = templates_lookup() %>% 
                 dplyr::filter(name == "Strata definition/Turboveg") %>% 
                 pull(template_id) %>% 
@@ -296,7 +360,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------#
               # PlotObservations ####
-              setProgress(value = 0.6, "Plot observations")
+              setProgress(value = 0.45, "Plot observations")
               plotObs_df = data.frame("plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
                                       "plotObservation > obsStartDate" = tv_dfs()$std_header[["date"]],
                                       "plotObservation > projectID" = 1, 
@@ -322,6 +386,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               #-------------------------------------------------------------------------#
               # StratumObservations ####
               # Build mapping table
+              setProgress(value = 0.5, "Stratum observations")
               stratumObs_df = data.frame(
                 plotUniqueIdentifier = tv_dfs()$species$releve_nr,
                 stratumName = tv_dfs()$species$layer
@@ -356,7 +421,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------#
               # AggregateOrganismObservations ####
-              browser()
+              setProgress(value = 0.6, "Organism observations")
               aggOrgObs_mappings = tv_dfs()$species %>% 
                 rename(plotUniqueIdentifier = releve_nr,
                        organismName = nr,
@@ -401,18 +466,17 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                     xml_add_child(vegx_doc, element_name)
                   }
                 }
-                parent = xml_find_all(vegx_doc, paste0("./",  element_name))
-                xml_add_child(parent, element_nodes[[1]]$node)
                 
-                if(length(element_nodes) > 1){
-                  target = xml_child(parent, 1)
-                  for(i in 2:length(element_nodes)){
-                    if(!is.null(element_nodes[[i]]$node)){
-                      xml_add_sibling(target, element_nodes[[i]]$node)  # TODO: This is much faster than xml_add_child() but still not ideal
-                      target = xml_child(parent, i)
-                    }
+                parent = xml_find_all(vegx_doc, paste0("./",  element_name))
+                xml_add_child(parent, "placeholder")
+                placeholder = xml_child(parent, "placeholder")
+                
+                for(i in 1:length(element_nodes)){
+                  if(!is.null(element_nodes[[i]]$node)){
+                    xml_add_sibling(placeholder, element_nodes[[i]]$node, .where = "before", .copy = F)  # This is much faster than xml_add_child()
                   }
                 }
+                xml_remove(placeholder)  # Remove placeholder
               }
               
               # VegX text 

@@ -926,9 +926,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     observeEvent(
       eventExpr = input$submit, 
       handlerExpr = {
-        #-------------------------------------------------------------------------#
-        ### Check inputs
-        # Build UI elements
+        # Build Modal UI elements
         if(all(sapply(reactiveValuesToList(inputs_complete), isTRUE))){
           modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will add all mappings to your VegX document."))
           modal_footer = tagList(
@@ -1315,7 +1313,9 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 vegx_schema_orgNames = xml_find_all(vegx_schema, "./xsd:element[@name='organismNames']")
                 orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
                 orgNames_nodes = lapply(1:nrow(orgNames_df), function(i){
-                  new_vegx_node(colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path, vegx_schema_orgNames, write_log = F)
+                  node = new_vegx_node(colnames(orgNames_df), orgNames_df[i,], id = NULL, log_path, vegx_schema_orgNames, write_log = F)
+                  xml_set_attr(node$node, "taxonName", "true")
+                  return(node)
                 })
                 
                 vegx_schema_orgIdentities = xml_find_all(vegx_schema, "./xsd:element[@name='organismIdentities']")
@@ -1326,7 +1326,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 nodes$organismNames = orgNames_nodes
                 nodes$organismIdentities = orgIdentities_nodes
-                
+ 
                 # 3. Build lookup table
                 orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
                   data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),

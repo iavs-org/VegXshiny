@@ -9,113 +9,91 @@
 #' @noRd
 
 tv_to_df = function(tv_xml){
-  # TODO 
-  # The runtime complexity of xml2::xml_find_* (including xml_child, xml_parent, etc.) functions is horrible as xml documents get larger. 
-  # A (still rather slow) workaround could be to add a releve_nr attribute to every relevant node and then extract attributes for the entire nodeset via xml_attrs, i.e.:
-  # lapply(seq_along(plot_nodes), function(i){
-  #   releve_nr = plot_nodes[[i]] %>% xml_attr("releve_nr")
-  #   xml_find_all(plot_nodes[[i]], "./species_data/species/standard_record") %>% xml_set_attr("releve_nr", releve_nr) 
-  #   plot_nodes[[i]] %>% xml_child("species_data") 
-  # }) 
-  # species_df = xml_find_all(tv_xml, ".///species_data/species/standard_record") %>% xml_attrs()
   # ----------------------------------------------------------- #
   # Plot data ####
-  plot_nodes = tv_xml %>% xml_child("Plots") %>% xml_children() 
-
-  plot_dfs = lapply(seq_along(plot_nodes), function(i){
-    releve_nr = plot_nodes[[i]] %>% xml_attr("releve_nr")
-
+  plot_nodes = tv_xml %>% xml_child("Plots") %>% xml_children()
+  withProgress(message = "Reading TurboVeg XML", expr = {
+    progress_mod  = ceiling(length(plot_nodes)/min(length(plot_nodes), 10))
+    progress_incr = 1 / min(length(plot_nodes), 10)
+    
     # Header data - Standard records
-    standard_header_df = plot_nodes[[i]] %>% 
-      xml_child("header_data") %>% 
-      xml_child("standard_record") %>% 
-      xml_attrs() %>% 
-      as.data.frame.list() %>% 
-      mutate(releve_nr = releve_nr) %>% 
-      relocate(releve_nr)
-    
+    header_std_records = lapply(seq_along(plot_nodes), function(i){
+      if(i %% progress_mod == 0){incProgress(progress_incr * 0.25, message = "Header data (standard)")}
+      plot_children = plot_nodes[i] %>% xml_children()
+      header_children = plot_children[which(xml_name(plot_children) == "header_data")] %>% xml_children()   
+      header_children[which(xml_name(header_children) == "standard_record")] %>% xml_attrs() 
+    }) %>% 
+      bind_rows() %>%
+      na_if("null") %>% 
+      na_if("") %>% 
+      select_if(~!all(is.na(.)))
+
     # Header data - Undefined records
-    udf_header_df = plot_nodes[[i]] %>% 
-      xml_find_all("./header_data/udf_record") %>% 
-      xml_attrs() %>% 
-      bind_rows() %>% 
-      dplyr::select(name, value) %>% 
-      tidyr::pivot_wider(names_from = "name", values_from = value) %>% 
-      mutate(releve_nr = releve_nr) %>% 
-      relocate(releve_nr)
-    
+    header_udf_records = lapply(seq_along(plot_nodes), function(i){
+      if(i %% progress_mod == 0){incProgress(progress_incr * 0.25, message = "Header data (undefined)")}
+      plot_children = plot_nodes[i] %>% xml_children()
+      header_children = plot_children[which(xml_name(plot_children) == "header_data")] %>% xml_children() 
+      udf_names = header_children[which(xml_name(header_children) == "udf_record")] %>% xml_attr("name") 
+      udf_vals = header_children[which(xml_name(header_children) == "udf_record")] %>% xml_attr("value") 
+      bind_rows(setNames(c(xml_attr(plot_nodes[i], "releve_nr"), udf_vals), c("releve_nr", udf_names)))
+    }) %>% 
+      bind_rows() %>%
+      na_if("null") %>% 
+      na_if("") %>% 
+      select_if(~!all(is.na(.)))
+
+    # ----------------------------------------------------------- #
     # Species data 
-    species_nodes = plot_nodes[[i]] %>% 
-      xml_find_all("./species_data/species")
-    
-    species_df = lapply(seq_along(species_nodes), function(j){
-      # Standard data
-      species_record = species_nodes[[j]] %>% 
-        xml_child("standard_record") %>% 
+    species_std_records = lapply(seq_along(plot_nodes), function(i){
+      if(i %% progress_mod == 0){incProgress(progress_incr * 0.4, message = "Species data")}
+      plot_children = plot_nodes[i] %>% xml_children()
+      species_data_children = plot_children[which(xml_name(plot_children) == "species_data")] %>% xml_children()
+      species_children = species_data_children[which(xml_name(species_data_children) == "species")] %>% xml_children()
+      standard_records = species_children[which(xml_name(species_children) == "standard_record")] %>% 
         xml_attrs() %>% 
-        as.data.frame.list() %>% 
-        mutate(releve_nr = releve_nr)
+        bind_rows() %>% 
+        mutate(releve_nr = xml_attr(plot_nodes[i], "releve_nr"))
+    }) %>% 
+      bind_rows()
 
-      if(length(xml_child(species_nodes[[j]], "udf_record")) != 0){
-        udf_species_record = species_nodes[[j]] %>%
-          xml_child("udf_record") %>%
-          xml_attrs() %>%
-          as.data.frame.list() %>%
-          dplyr::select(name, value) %>%
-          tidyr::pivot_wider(names_from = name, values_from = value)
-        species_record = cbind(species_record, udf_species_record)
-      }
+    # ----------------------------------------------------------- #
+    # Lookup tables ####
+    lookup_names = tv_xml %>% xml_child("Lookup_tables") %>% xml_children() %>% xml_name()
+    
+    incProgress(0.05, message = "Lookup tables")
+    lookup_dfs = sapply(lookup_names, simplify = FALSE, USE.NAMES = TRUE, FUN = function(name){
+      # Select all leaf nodes in current lookup category
+      lookup_parent_nodes = tv_xml %>% 
+        xml_child("Lookup_tables") %>% 
+        xml_child(name) %>% 
+        xml_find_all(".//*[not(*)]") %>% 
+        xml_parent()
       
-      return(species_record)
-    }) %>% bind_rows() %>% 
-      relocate(releve_nr)
-
-    return(list(standard_header = standard_header_df, udf_header = udf_header_df, species = species_df))
-  })
-  
-  # ----------------------------------------------------------- #
-  # Lookup tables ####
-  lookup_names = tv_xml %>% xml_child("Lookup_tables") %>% xml_children() %>% xml_name()
-  lookup_dfs = sapply(lookup_names, simplify = FALSE, USE.NAMES = TRUE, FUN = function(name){
-    # Select all leaf nodes in current lookup category
-    lookup_parent_nodes = tv_xml %>% 
-      xml_child("Lookup_tables") %>% 
-      xml_child(name) %>% 
-      xml_find_all(".//*[not(*)]") %>% 
-      xml_parent()
-    
-    # Extract data
-    lookup_df = lapply(seq_along(lookup_parent_nodes), function(i){
-      lookup = list()
-      nodes = lookup_parent_nodes[[i]] %>% xml_children()
-      for(j in seq_along(nodes)){
-        node_name = xml_name(nodes[[j]])
-        node_text = xml_text(nodes[[j]])
-        if(node_text != ""){                 # Special element with text node
-          lookup[[node_name]] = node_text  
-        } else {                             # Standard turboveg record
-          record = nodes[[j]] %>% xml_attrs() %>% as.data.frame.list()
-          lookup[["records"]] = append(lookup[["records"]], list(record))
-        }  
-      }
-      lookup$records = bind_rows(lookup$records)
-      return(lookup)
+      # Extract data
+      lookup_df = lapply(seq_along(lookup_parent_nodes), function(i){
+        lookup = list()
+        nodes = lookup_parent_nodes[[i]] %>% xml_children()
+        for(j in seq_along(nodes)){
+          node_name = xml_name(nodes[[j]])
+          node_text = xml_text(nodes[[j]])
+          if(node_text != ""){                 # Special element with text node
+            lookup[[node_name]] = node_text  
+          } else {                             # Standard turboveg record
+            record = nodes[[j]] %>% xml_attrs() %>% as.data.frame.list()
+            lookup[["records"]] = append(lookup[["records"]], list(record))
+          }  
+        }
+        lookup$records = bind_rows(lookup$records)
+        return(lookup)
+      })
+      
+      return(lookup_df)
     })
-    
-    return(lookup_df)
   })
   
-  # ----------------------------------------------------------- #
-  # Templates? ####
-  
-  # Prepare result
-  standard_header_df = lapply(plot_dfs, "[[", "standard_header") %>% bind_rows()
-  udf_header_df = lapply(plot_dfs, "[[", "udf_header") %>% bind_rows()
-  species_df = lapply(plot_dfs, "[[", "species") %>% bind_rows()
-  
-  tv_import = list(std_header = standard_header_df,
-                   udf_header = udf_header_df,
-                   species = species_df,
+  tv_import = list(std_header = header_std_records,
+                   udf_header = header_udf_records,
+                   species = species_std_records,
                    lookup = lookup_dfs)
   return(tv_import)
 }

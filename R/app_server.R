@@ -12,6 +12,8 @@
 #' @noRd 
 
 app_server <- function(input, output, session) {
+  options(shiny.maxRequestSize=100*1024^2) # Set max upload size to 100MB
+  
   log_path = tempfile("log_", fileext = ".csv")
   new_action_log_record(log_path, "System info", "Session started", append = F, col.names = T)
   
@@ -24,7 +26,6 @@ app_server <- function(input, output, session) {
   
   # VegX document
   vegx_doc = new_vegx_document()
-  # vegx_doc_history = list(vegx_doc) 
 
   # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
@@ -73,19 +74,14 @@ app_server <- function(input, output, session) {
   })
   
   # --------------------------------------------------------------------------------------- #
-  # About page
-  mod_about_server("about")
-  
-  # --------------------------------------------------------------------------------------- #
   # File Upload
   user_data = mod_fileManager_server("fileManager", action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Import Wizard
-  
-  # Tabular Data
+  # 1. Tabular Data
   mod_tableImport_server("tableImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
-  # XML Data
+  # 2. TurboVeg XML Data
   mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #

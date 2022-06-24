@@ -1,12 +1,13 @@
-#' about UI Function
+#' aboutVegX UI Function
 #'
 #' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd 
-#' 
-mod_about_ui <- function(id){
+#'
+#' @importFrom shiny NS tagList 
+mod_aboutVegX_ui <- function(id){
   ns <- NS(id)
   fluidPage(
     fluidRow(
@@ -63,12 +64,13 @@ mod_about_ui <- function(id){
     )
   )
 }
-
-#' about Server Functions
+    
+#' aboutVegX Server Functions
 #'
 #' @noRd 
-mod_about_server <- function(id){
+mod_aboutVegX_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+ 
   })
 }

@@ -38,7 +38,8 @@ usethis::use_package("testthat", type = "Suggests")
 usethis::use_package("tidyr", type = "Suggests")
 
 ## Add modules ----
-golem::add_module("about")
+golem::add_module("aboutVegX")
+golem::add_module("aboutVegXshiny")
 golem::add_module("fileManager")
 golem::add_module("tableImport")
 golem::add_module("turbovegImport")
