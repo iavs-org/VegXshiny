@@ -35,7 +35,6 @@ usethis::use_package("knitr", type = "Suggests")
 usethis::use_package("readxl", type = "Suggests")
 usethis::use_package("spelling", type = "Suggests")
 usethis::use_package("testthat", type = "Suggests")
-usethis::use_package("tidyr", type = "Suggests")
 
 ## Add modules ----
 golem::add_module("aboutVegX")

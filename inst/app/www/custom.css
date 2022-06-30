@@ -1,12 +1,3 @@
-/*
-TODO:
-- remove padding from text in radioGroupButton of mapping UI
-- prevent textoverflow in nav-pills
-- sidebar wider when display size is small
-- vegxBuilder sidebar is wider
-...
-*/
-
 body {
    font-size: 16px;
 }
@@ -116,16 +107,15 @@ body {
   line-height: 0.7;
 }
 
-.btn .btn-dropdown-input {
-  margin-left: 6px!important;
-}
-
-.btn .btn-default .btn-sidebar {
-  width: 100%!important;
-  margin: 10px!important;
-  padding: 25px!important;
-}
-
 tbody > ul {
-   margin-bottom: 0px!important;
+  margin-bottom: 0px!important;
+}
+
+.multicol { 
+  height: 150px;
+  webkit-column-count: 3; /* Chrome, Safari, Opera */ 
+  moz-column-count: 3;    /* Firefox */ 
+  column-count: 3; 
+  moz-column-fill: auto;
+  column-fill: auto;
 }

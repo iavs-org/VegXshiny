@@ -11,7 +11,6 @@ new_action_log_record(log_path, "System info", "Test started.", append = F, col.
 #------------------------------------------------------------#
 
 test_that("Returns no warnings and errors with correct input", {
-  # Test set 1
   node_paths = c("method > name", "method > description")
   node_values = c("foo", "bar")
 
@@ -32,6 +31,3 @@ test_that("Returns NULL node and an error with incorrect input", {
   expect_equal(fct_result$warnings, 0)
   expect_equal(fct_result$errors, 1)
 })
-
-#------------------------------------------------------------#
-# TODO: No ID conflicts when mixing auto and user-supplied ids

@@ -392,6 +392,7 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_l
     group_split()
   
   node_list = list()
+  
   # loop over template_ids
   for(i in 1:length(templates_split)){
     nodes_split = templates_split[[i]] %>% 
@@ -417,4 +418,97 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_l
   }
   return(node_list)
 }
+
+
+
+new_vegx_nodes = function(nodes_df, vegx_schema){
+  tryCatch({
+    #### Check node paths
+    node_names = colnames(nodes_df) %>% stringr::str_split(" > ") 
+    root_name = unique(sapply(node_names, "[[", 1))
+    
+    # Are all paths within the same main element?
+    if(length(root_name) != 1){stop(paste("Node paths points to multiple root elements:", root_name))}
+    
+    # Do all paths conform with the schema definition?
+    node_xpaths = sapply(node_names, function(x){
+      paste0(".//", paste0("*[@name='", x, "']", collapse = "/")) %>% 
+        str_replace_all("\\*\\[@name='choice']", "xsd:choice")
+    })
+    schema_nodes = sapply(node_xpaths, xml_find_all, x = vegx_schema)
+    
+    if(any(lengths(schema_nodes) == 0)){            # There are invalid node paths
+      if(all(lengths(schema_nodes) == 0)){
+        stop("No valid node paths found.")
+      }
+      nodes_valid = which(lengths(schema_nodes) != 0)
+      schema_nodes = schema_nodes[nodes_valid]
+      node_names = node_names[nodes_valid]
+      nodes_df = nodes_df[,nodes_valid, drop = F]
+    }
+    
+    leaf_nodes = xml_find_all(vegx_schema, paste0(".//*[@name='", root_name, "']")) %>% 
+      xml_parent() %>% 
+      xml_find_all(".//*[not(*)]")
+    
+    nodes_matched = match(unlist(sapply(schema_nodes, xml_path)), sapply(leaf_nodes, xml_path))
+
+    if(anyNA(nodes_matched)){warning(paste0("Invalid node path: ", node_xpaths[which(is.na(nodes_matched))]))}
+    
+    #### Prepare data
+    # Reorder nodes_df according to schema
+    node_names = node_names[order(nodes_matched)]
+    nodes_df = nodes_df[, order(nodes_matched), drop = F]
+    node_types = sapply(schema_nodes, function(node) xml_attr(node, "type"))[order(nodes_matched)]
+
+    for(i in seq_along(node_types)){
+      if(node_types[i] == "xsd:date"){
+        nodes_df[,i] = as.character(lubridate::ymd(nodes_df[,i]))
+      } else if(node_types[i] == "xsd:decimal"){
+        nodes_df[,i] = as.numeric(nodes_df[,i])
+      } else if(node_types[i] == "xsd:date"){
+        nodes_df[,i] = as.integer(nodes_df[,i])
+      }
+    }
+
+    # Build nodes
+    nodes = lapply(1:nrow(nodes_df), function(i){
+      root = xml_new_root(root_name)
+      node_values = unlist(nodes_df[i,])
+      
+      for(j in 1:length(node_values)){
+        if(is.na(node_values[j]) | node_values[j] == ""){next} # Skip node if empty
+        if(length(node_names[[j]]) == 1){
+          xml_text(root) = node_values[j] # no traversal needed, just set text value of root
+        } else {
+          parent = root
+          for(k in 2:length(node_names[[j]])){
+            node_name = node_names[[j]][k]
+            if(node_name == "choice"){next}
+            if(k < length(node_names[[j]])){
+              if(! node_name %in% xml_name(xml_children(parent))){ # Only add new node if there is none with the same name
+                xml_add_child(parent, node_name)
+              } 
+              parent = xml_child(parent, node_name)
+            } else {
+              xml_add_child(parent, node_name, as.character(node_values[j]))
+            }
+          }
+        }
+      } 
+      # Check if root is empty
+      if(xml_length(root) == 0 && xml_text(root) == ""){
+        return(NULL)
+      } else {
+        id_key = paste0(root_name, "ID")
+        if(id_key %in% names(id_factory)){
+          id = id_factory[[id_key]]()
+          xml_set_attr(root, "id", id)
+        }
+        return(list(node = root))
+      }
+    })
+    return(nodes)
+  })
   
+}

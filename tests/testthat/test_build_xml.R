@@ -61,7 +61,6 @@ test_that("MaxOccurs complies with schema definition", {
   expect_equal(xml_text(xml_children(root)), c("foo", "baz"))
 })
 
-
 #------------------------------------------------------------#
 
 test_that("Choice elements can have only one child", {
