@@ -110,8 +110,7 @@ test_that("Nodes without children are handled properly", {
   expect_equal(xml_text(fct_result[[2]]$node), "B")
 })
 
-test_that("Element types are checked properly (one node)", {
-  browser()
+test_that("Element types are checked properly", {
   nodes_df = data.frame("plotObservation > obsStartDate" = "this is not a date", check.names = F)
   fct_result = new_vegx_nodes(nodes_df, vegx_schema)
   expect_null(fct_result[[1]])
@@ -128,5 +127,7 @@ test_that("Element types are checked properly (one node)", {
                         "plotObservation > plotID" = c("1", "2"), 
                         check.names = F)
   fct_result = new_vegx_nodes(nodes_df, vegx_schema)
-  expect_null(fct_result[[1]])
+  expect_equal(length(fct_result), 2)
+  expect_equal(xml_length(fct_result[[1]]$node), 2)
+  expect_equal(xml_length(fct_result[[2]]$node), 1)
 })

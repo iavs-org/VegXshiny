@@ -178,7 +178,6 @@ vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentitie
   
   return(vegx_df)
   
-  
   # TODO Two output options: First - long-table format with potentially resolved ids. 
   #                          Second - vegetation-table with header and cover data (aggOrgObs) or equivalent measurement tables (for indOrgObs, stratumObs, etc.)
 }

@@ -452,7 +452,7 @@ new_vegx_nodes = function(nodes_df, vegx_schema){
       xml_find_all(".//*[not(*)]")
     
     nodes_matched = match(unlist(sapply(schema_nodes, xml_path)), sapply(leaf_nodes, xml_path))
-
+    
     if(anyNA(nodes_matched)){warning(paste0("Invalid node path: ", node_xpaths[which(is.na(nodes_matched))]))}
     
     #### Prepare data
@@ -460,17 +460,19 @@ new_vegx_nodes = function(nodes_df, vegx_schema){
     node_names = node_names[order(nodes_matched)]
     nodes_df = nodes_df[, order(nodes_matched), drop = F]
     node_types = sapply(schema_nodes, function(node) xml_attr(node, "type"))[order(nodes_matched)]
-
-    for(i in seq_along(node_types)){
-      if(node_types[i] == "xsd:date"){
-        nodes_df[,i] = as.character(lubridate::ymd(nodes_df[,i]))
-      } else if(node_types[i] == "xsd:decimal"){
-        nodes_df[,i] = as.numeric(nodes_df[,i])
-      } else if(node_types[i] == "xsd:date"){
-        nodes_df[,i] = as.integer(nodes_df[,i])
+    
+    suppressWarnings({
+      for(i in seq_along(node_types)){
+        if(node_types[i] == "xsd:date"){
+          nodes_df[,i] = as.character(lubridate::ymd(nodes_df[,i]))
+        } else if(node_types[i] == "xsd:decimal"){
+          nodes_df[,i] = as.numeric(nodes_df[,i])
+        } else if(node_types[i] == "xsd:integer"){
+          nodes_df[,i] = as.integer(nodes_df[,i])
+        }
       }
-    }
-
+    })
+    
     # Build nodes
     nodes = lapply(1:nrow(nodes_df), function(i){
       root = xml_new_root(root_name)
@@ -510,5 +512,4 @@ new_vegx_nodes = function(nodes_df, vegx_schema){
     })
     return(nodes)
   })
-  
 }

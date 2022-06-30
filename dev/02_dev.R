@@ -23,7 +23,6 @@ usethis::use_package("rhandsontable")
 usethis::use_package("shiny")
 usethis::use_package("shinyAce")
 usethis::use_package("shinyjs")
-usethis::use_dev_package("shinyTree")
 usethis::use_package("shinyWidgets")
 usethis::use_package("stringr")
 usethis::use_package("tidyr")
@@ -42,9 +41,6 @@ golem::add_module("aboutVegXshiny")
 golem::add_module("fileManager")
 golem::add_module("tableImport")
 golem::add_module("turbovegImport")
-#golem::add_module("vegxBuilder")
-#golem::add_module("nodeEditor")
-#golem::add_module("rowGenerator")
 golem::add_module("xmlViewer")
 golem::add_module("actionLog")
 golem::add_module("vegxExport")
@@ -59,9 +55,7 @@ golem::add_fct("misc")
 
 ## External resources
 golem::add_js_file("custom")
-golem::add_js_handler("node_tooltip")
 golem::add_css_file("custom")
-
 
 ## Add internal datasets ----
 usethis::use_data_raw("data_preparation")

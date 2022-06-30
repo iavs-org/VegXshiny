@@ -32,10 +32,6 @@ app_ui <- function(request) {
                  tabPanel("Import from TurboVeg XML", mod_turbovegImport_ui("turbovegImport"))
                ),
                
-               tabPanel("Node editor",  icon = icon("project-diagram", class = "icon-padded-right"),
-                        mod_vegxBuilder_ui("vegxBuilder")
-               ),
-                
                tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),

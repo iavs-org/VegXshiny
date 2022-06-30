@@ -79,14 +79,12 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Import Wizard
+  
   # 1. Tabular Data
   mod_tableImport_server("tableImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
+  
   # 2. TurboVeg XML Data
   mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
-  
-  # --------------------------------------------------------------------------------------- #
-  # Create mappings and add nodes freely
-  mod_vegxBuilder_server("vegxBuilder", user_data, vegx_schema, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer

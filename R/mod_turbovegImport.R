@@ -161,6 +161,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Project ####
+              browser()
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$project_title)){
                 mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
@@ -222,27 +223,31 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                               id = NULL, log_path, vegx_schema, write_log = F)
               })
               
-              nodes$methods = append(nodes$methods, udf_method_nodes)
-              
-              udf_methods_lookup = data.frame(
-                methodID = sapply(udf_method_nodes, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                methodName = sapply(udf_method_nodes, function(x){xml_text(xml_find_first(x$node, "//name"))}) # the mapped unique identifier in the data
-              )
+              if(length(udf_method_nodes) > 0){
+                nodes$methods = append(nodes$methods, udf_method_nodes)
+                
+                udf_methods_lookup = data.frame(
+                  methodID = sapply(udf_method_nodes, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                  methodName = sapply(udf_method_nodes, function(x){xml_text(xml_find_first(x$node, "//name"))}) # the mapped unique identifier in the data
+                )  
+              }
               
               # Build plot nodes 
               vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
               plot_nodes = lapply(1:nrow(plots_df), function(i){
                 plot_node = new_vegx_node(colnames(plots_df), plots_df[i,], id = NULL, log_path, vegx_schema_plots, write_log = F)
-                lapply(1:nrow(udf_methods_lookup), function(j){
-                  method_name = udf_methods_lookup$methodName[j]
-                  method_id = udf_methods_lookup$methodID[j]
-                  simpleUserDef_node = xml_new_root("simpleUserDefined")
-                  xml_add_child(simpleUserDef_node, "name", method_name)
-                  xml_add_child(simpleUserDef_node, "value", tv_dfs()$udf_header[[method_name]][i])
-                  xml_add_child(simpleUserDef_node, "methodID", method_id)
-
-                  xml_add_child(plot_node$node, simpleUserDef_node)
-                })
+                if(length(udf_method_nodes) > 0){
+                  lapply(1:nrow(udf_methods_lookup), function(j){
+                    method_name = udf_methods_lookup$methodName[j]
+                    method_id = udf_methods_lookup$methodID[j]
+                    simpleUserDef_node = xml_new_root("simpleUserDefined")
+                    xml_add_child(simpleUserDef_node, "name", method_name)
+                    xml_add_child(simpleUserDef_node, "value", tv_dfs()$udf_header[[method_name]][i])
+                    xml_add_child(simpleUserDef_node, "methodID", method_id)
+                    
+                    xml_add_child(plot_node$node, simpleUserDef_node)
+                  })
+                }
                 return(plot_node)
               })
               plot_nodes = plot_nodes[which(sapply(plot_nodes, function(x) !is.null(x$node)))] 
@@ -259,7 +264,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               orgNames_df = tv_dfs()$lookup$Species_list[[1]]$records %>% 
                 mutate(taxonName = ifelse(valid_name == "", "true", "false"),
                        valid_name = ifelse(valid_name == "", name, valid_name))
-
+              
               orgNames_nodes = new_vegx_nodes(dplyr::select(orgNames_df, organismName = name), vegx_schema)
               lapply(1:length(orgNames_nodes), function(i){xml_set_attr(orgNames_nodes[[i]]$node, "taxonName", orgNames_df[i,"taxonName"])})
               
@@ -267,12 +272,12 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               orgNames_df$preferredNameID = orgNames_df[match(orgNames_df$valid_name, orgNames_df$name), "orgNameID"]
               orgNames_df = orgNames_df %>% 
                 mutate(preferredNameID = ifelse(preferredNameID == orgNameID, "", preferredNameID))
-
+              
               orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = orgNames_df$orgNameID,
                                             "organismIdentity > preferredTaxonNomenclature > preferredTaxonNameID" = orgNames_df$preferredNameID,
                                             check.names = F)
               orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema)
-
+              
               nodes$organismNames = orgNames_nodes
               nodes$organismIdentities = orgIdentities_nodes
               
@@ -364,7 +369,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               vegx_schema_plotObs = xml_find_all(vegx_schema, "./xsd:element[@name='plotObservations']")
               plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema_plotObs)
-
+              
               nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)
               
               plotObs_lookup = lapply(plotObs_nodes, function(x){
