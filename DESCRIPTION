@@ -7,7 +7,6 @@ License: MIT + file LICENSE
 Imports: 
     bslib,
     dplyr,
-    digest,
     DT,
     golem,
     jsonlite,
