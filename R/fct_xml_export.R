@@ -177,7 +177,7 @@ merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, 
       message = paste0("Merged mappings into ", root_name, " node (id = ", root_id, ") with the following exceptions:<ul>", warnings, errors, "</ul>")
       new_action_log_record(log_path, "Merge warning", message)
     } else {
-      new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")"))
+      new_action_log_record(log_path, "Merge info", paste0("Successfully merged mappings into ", root_name, " (id = ", root_id, ")."))
     }
   }
   

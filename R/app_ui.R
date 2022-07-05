@@ -10,6 +10,9 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     
+    # Detect device & Browser info
+    shinybrowser::detect(),
+    
     # Application UI logic 
     navbarPage("VegXshiny",  
                position = "fixed-top",
@@ -27,9 +30,10 @@ app_ui <- function(request) {
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu(title = "Import wizard ", icon = icon("magic", class = "icon-padded-right"), 
+               navbarMenu(title = "Import to VegX", icon = icon("magic", class = "icon-padded-right"), 
                  tabPanel("Import from Tables", mod_tableImport_ui("tableImport")),
-                 tabPanel("Import from TurboVeg XML", mod_turbovegImport_ui("turbovegImport"))
+                 tabPanel("Import from TurboVeg", mod_turbovegImport_ui("turbovegImport")),
+                 tabPanel("Import from VegX", mod_vegxImport_ui("vegxImport"))
                ),
                
                tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),

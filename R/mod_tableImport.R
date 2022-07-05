@@ -23,7 +23,7 @@ mod_tableImport_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Project"),
-            tags$p("Describe your project and its contributors", class = "text-info annotation no-margin"),
+            tags$p("Describe your project and its contributors. Imported files can be assigned in the next steps.", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("project_ui"))
           )
@@ -34,7 +34,7 @@ mod_tableImport_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Plots"),
-            tags$p("Describe static plot properties", class = "text-info annotation no-margin"),
+            tags$p("Describe static plot properties. Properties of observations (e.g. date, observer) can be assigned in the next step.", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("plot_ui"))
           )
@@ -221,14 +221,14 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     # Observers & reactives ####
     # Pull method templates
     methods = reactive({
-      list(location = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "location") %>% pull(template_id, name),
-           elevation = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% pull(template_id, name),
-           plot_dimension = templates_lookup()  %>% dplyr::filter(target_element == "methods", subject == "plot dimension") %>% pull(template_id, name),
-           plot_area = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% pull(template_id, name),
-           aspect = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% pull(template_id, name),
-           slope = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "slope") %>% pull(template_id, name),
-           aggOrgObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "plant count", "plant frequency", "basal area", "user-defined aggregate measurement")) %>% pull(template_id, name),
-           strataDef = templates_lookup() %>% filter(target_element == "strata", subject == "strata definition") %>% pull(template_id, name))
+      list(location = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "location") %>% arrange(name) %>% pull(template_id, name),
+           elevation = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "elevation") %>% arrange(name) %>% pull(template_id, name),
+           plot_dimension = templates_lookup()  %>% dplyr::filter(target_element == "methods", subject == "plot dimension") %>% arrange(name) %>% pull(template_id, name),
+           plot_area = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "plot area") %>% arrange(name) %>% pull(template_id, name),
+           aspect = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "aspect") %>% arrange(name) %>% pull(template_id, name),
+           slope = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "slope") %>% arrange(name) %>% pull(template_id, name),
+           aggOrgObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "plant count", "plant frequency", "basal area", "user-defined aggregate measurement")) %>% arrange(name) %>% pull(template_id, name),
+           strataDef = templates_lookup() %>% filter(target_element == "strata", subject == "strata definition") %>% arrange(name) %>% pull(template_id, name))
     })
     
     # Observe method inputs and trigger mod_newMethodTemplate when custom template option is selected
@@ -452,7 +452,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  list("Select a shape" = "", "rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("plot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -587,7 +587,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectInput(ns("subplot_shape"), label = "Shape", choices =  list("Select a shape" = "", "rectangle", "linear", "polygon", "circle"))),
+                  column(4, selectInput(ns("subplot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
@@ -930,13 +930,13 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         if(all(sapply(reactiveValuesToList(inputs_complete), isTRUE))){
           modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will add all mappings to your VegX document."))
           modal_footer = tagList(
-            tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
+            tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check")))
           )
         } else {
           modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please review your entries."))
-          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))))
+          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check"))))
           )
         }
         
@@ -1058,7 +1058,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 if("Geometry" %in% input$plot_input_control){
                   if(isTruthy(input$plot_shape)){
-                    plots_df[["plot > geometry > shape"]] = input$plot_shape
+                    plots_df[["plot > geometry > shape"]] = plots_df_upload[[input$plot_shape]]
                   }
                   if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
                     method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
@@ -1158,7 +1158,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   
                   if("Geometry" %in% input$subplot_input_control){
                     if(isTruthy(input$subplot_shape)){
-                      subplots_df[["plot > geometry > shape"]] = input$subplot_shape
+                      subplots_df[["plot > geometry > shape"]] = subplots_df_upload[[input$subplot_shape]]
                     }
                     if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
                       method_nodes = templates() %>% dplyr::filter(template_id ==  input$subplot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
@@ -1568,7 +1568,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               # Action log 
               setProgress(value = 1)
               showNotification("Import finished.")
-              new_action_log_record(log_path, "Import info", "Data imported")
+              new_action_log_record(log_path, "Import info", "Data imported from tables.")
               action_log(read_action_log(log_path))
             })  
         }, error = function(e){

@@ -1,355 +1,891 @@
-template_id,node_id,main_element,node_path,node_value
-1,1,methods,method > subject,plot area
-1,1,methods,method > name,Plot area/m2
-1,1,methods,method > description,Plot area measured in squared meters.
-1,2,attributes,attribute > choice > quantitative > unit,m2
-1,2,attributes,attribute > choice > quantitative > lowerLimit,0
-1,2,attributes,attribute > choice > quantitative > methodID,1
-2,1,methods,method > subject,plot area
-2,1,methods,method > name,Plot area/cm2
-2,1,methods,method > description,Plot area measured in squared centimeters.
-2,2,attributes,attribute > choice > quantitative > unit,cm2
-2,2,attributes,attribute > choice > quantitative > lowerLimit,0
-2,2,attributes,attribute > choice > quantitative > methodID,1
-3,1,methods,method > subject,plot dimension
-3,1,methods,method > name,Plot dimension/m
-3,1,methods,method > description,"Plot dimension (radius, length, width) measured in meters."
-3,2,attributes,attribute > choice > quantitative > unit,m
-3,2,attributes,attribute > choice > quantitative > lowerLimit,0
-3,2,attributes,attribute > choice > quantitative > methodID,1
-4,1,methods,method > subject,plot dimension
-4,1,methods,method > name,Plot dimension/cm
-4,1,methods,method > description,"Plot dimension (radius, length, width) measured in centimeters."
-4,2,attributes,attribute > choice > quantitative > unit,cm
-4,2,attributes,attribute > choice > quantitative > lowerLimit,0
-4,2,attributes,attribute > choice > quantitative > methodID,1
-5,1,methods,method > subject,plant cover
-5,1,methods,method > name,Plant cover/%
-5,1,methods,method > description,Plant cover as percentage of ground covered by the projection.
-5,2,attributes,attribute > choice > quantitative > unit,%
-5,2,attributes,attribute > choice > quantitative > lowerLimit,0
-5,2,attributes,attribute > choice > quantitative > upperLimit,100
-5,2,attributes,attribute > choice > quantitative > methodID,1
-6,1,methods,method > subject,plant count
-6,1,methods,method > name,Individual plant counts
-6,1,methods,method > description,Number of plant individuals
-6,2,attributes,attribute > choice > quantitative > unit,individuals
-6,2,attributes,attribute > choice > quantitative > lowerLimit,0
-6,2,attributes,attribute > choice > quantitative > methodID,1
-7,1,methods,method > subject,plant frequency
-7,1,methods,method > name,Plant frequency/%
-7,1,methods,method > description,Frequency of occurrence in fixed subunits of the plot
-7,2,attributes,attribute > choice > quantitative > unit,%
-7,2,attributes,attribute > choice > quantitative > lowerLimit,0
-7,2,attributes,attribute > choice > quantitative > upperLimit,100
-7,2,attributes,attribute > choice > quantitative > methodID,1
-8,1,methods,method > subject,basal area
-8,1,methods,method > name,Basal area/m2*ha-1
-8,1,methods,method > description,Basal area in square meters per hectare
-8,2,attributes,attribute > choice > quantitative > unit,m2*ha-1
-8,2,attributes,attribute > choice > quantitative > lowerLimit,0
-8,2,attributes,attribute > choice > quantitative > methodID,1
-9,1,methods,method > subject,stratum height
-9,1,methods,method > name,Stratum height/m
-9,1,methods,method > description,Stratum height in meters above the ground
-9,2,attributes,attribute > choice > quantitative > unit,m
-9,2,attributes,attribute > choice > quantitative > lowerLimit,0
-9,2,attributes,attribute > choice > quantitative > methodID,1
-10,1,methods,method > subject,stratum height
-10,1,methods,method > name,Stratum height/cm
-10,1,methods,method > description,Stratum height in cm above the ground
-10,2,attributes,attribute > choice > quantitative > unit,cm
-10,2,attributes,attribute > choice > quantitative > lowerLimit,0
-10,2,attributes,attribute > choice > quantitative > methodID,1
-11,1,methods,method > subject,plant height
-11,1,methods,method > name,Plant height/m
-11,1,methods,method > description,Plant height in meters above the ground
-11,2,attributes,attribute > choice > quantitative > unit,m
-11,2,attributes,attribute > choice > quantitative > lowerLimit,0
-11,2,attributes,attribute > choice > quantitative > methodID,1
-12,1,methods,method > subject,plant height
-12,1,methods,method > name,Plant height/cm
-12,1,methods,method > description,Plant height in cm above the ground
-12,2,attributes,attribute > choice > quantitative > unit,cm
-12,2,attributes,attribute > choice > quantitative > lowerLimit,0
-12,2,attributes,attribute > choice > quantitative > methodID,1
-13,1,methods,method > subject,stem diameter
-13,1,methods,method > name,DBH/cm
-13,1,methods,method > description,"Diameter at breast height, in cm"
-13,2,attributes,attribute > choice > quantitative > unit,cm
-13,2,attributes,attribute > choice > quantitative > lowerLimit,0
-13,2,attributes,attribute > choice > quantitative > methodID,1
-14,1,methods,method > subject,surface cover
-14,1,methods,method > name,Surface cover/%
-14,1,methods,method > description,Surface covered by a surface type as percentage of ground covered by the projection.
-14,2,attributes,attribute > choice > quantitative > unit,%
-14,2,attributes,attribute > choice > quantitative > lowerLimit,0
-14,2,attributes,attribute > choice > quantitative > upperLimit,100
-14,2,attributes,attribute > choice > quantitative > methodID,1
-15,1,methods,method > subject,pH
-15,1,methods,method > name,pH/0-14
-15,1,methods,method > description,pH scale from 0 to 14
-15,2,attributes,attribute > choice > quantitative > unit,dimensionless
-15,2,attributes,attribute > choice > quantitative > lowerLimit,0
-15,2,attributes,attribute > choice > quantitative > upperLimit,14
-15,2,attributes,attribute > choice > quantitative > methodID,1
-16,1,methods,method > subject,slope
-16,1,methods,method > name,Slope/degrees
-16,1,methods,method > description,Slope measured using degrees
-16,2,attributes,attribute > choice > quantitative > unit,degrees
-16,2,attributes,attribute > choice > quantitative > lowerLimit,0
-16,2,attributes,attribute > choice > quantitative > upperLimit,90
-16,2,attributes,attribute > choice > quantitative > methodID,1
-17,1,methods,method > subject,slope
-17,1,methods,method > name,Slope/percent
-17,1,methods,method > description,Slope measured using percent
-17,2,attributes,attribute > choice > quantitative > unit,%
-17,2,attributes,attribute > choice > quantitative > lowerLimit,0
-17,2,attributes,attribute > choice > quantitative > upperLimit,100
-17,2,attributes,attribute > choice > quantitative > methodID,1
-18,1,methods,method > subject,aspect
-18,1,methods,method > name,Aspect/degrees
-18,1,methods,method > description,Aspect measured using degrees from North
-18,2,attributes,attribute > choice > quantitative > unit,degrees
-18,2,attributes,attribute > choice > quantitative > lowerLimit,-360
-18,2,attributes,attribute > choice > quantitative > upperLimit,360
-18,2,attributes,attribute > choice > quantitative > methodID,1
-19,1,methods,method > subject,aspect
-19,1,methods,method > name,Aspect/radians
-19,1,methods,method > description,Aspect measured using radians from North
-19,2,attributes,attribute > choice > quantitative > unit,radians
-19,2,attributes,attribute > choice > quantitative > lowerLimit,-6.2832
-19,2,attributes,attribute > choice > quantitative > upperLimit,6.2832
-19,2,attributes,attribute > choice > quantitative > methodID,1
-20,1,methods,method > subject,elevation
-20,1,methods,method > name,Elevation/m
-20,1,methods,method > description,Elevation measured using meters above sea level
-20,2,attributes,attribute > choice > quantitative > unit,m
-20,2,attributes,attribute > choice > quantitative > methodID,1
-21,1,methods,method > subject,location
-21,1,methods,method > name,LonLat/degrees
-21,1,methods,method > description,"Longitude and latitude of a specific location, measured in degrees"
-21,2,attributes,attribute > choice > quantitative > unit,degrees
-21,2,attributes,attribute > choice > quantitative > lowerLimit,-180
-21,2,attributes,attribute > choice > quantitative > upperLimit,180
-21,2,attributes,attribute > choice > quantitative > methodID,1
-22,1,methods,method > subject,climate
-22,1,methods,method > name,Climate MAT/Celsius
-22,1,methods,method > description,Mean annual temperature
-22,2,attributes,attribute > choice > quantitative > unit,Celsius
-22,2,attributes,attribute > choice > quantitative > methodID,1
-23,1,methods,method > subject,climate
-23,1,methods,method > name,Climate TWM/Celsius
-23,1,methods,method > description,Temperature of the warmest month
-23,2,attributes,attribute > choice > quantitative > unit,Celsius
-23,2,attributes,attribute > choice > quantitative > methodID,1
-24,1,methods,method > subject,climate
-24,1,methods,method > name,Climate TCM/Celsius
-24,1,methods,method > description,Temperature of the coldest month
-24,2,attributes,attribute > choice > quantitative > unit,Celsius
-24,2,attributes,attribute > choice > quantitative > methodID,1
-25,1,methods,method > subject,climate
-25,1,methods,method > name,Climate MDR/Celsius
-25,1,methods,method > description,Mean diurnal range
-25,2,attributes,attribute > choice > quantitative > unit,Celsius
-25,2,attributes,attribute > choice > quantitative > lowerLimit,0
-25,2,attributes,attribute > choice > quantitative > methodID,1
-26,1,methods,method > subject,climate
-26,1,methods,method > name,Climate MAP/mm
-26,1,methods,method > description,Mean annual precipitation
-26,2,attributes,attribute > choice > quantitative > unit,mm
-26,2,attributes,attribute > choice > quantitative > lowerLimit,0
-26,2,attributes,attribute > choice > quantitative > methodID,1
-27,1,methods,method > subject,climate
-27,1,methods,method > name,Climate PDM/mm
-27,1,methods,method > description,Precipitation of the driest month
-27,2,attributes,attribute > choice > quantitative > unit,mm
-27,2,attributes,attribute > choice > quantitative > lowerLimit,0
-27,2,attributes,attribute > choice > quantitative > methodID,1
-28,1,methods,method > subject,climate
-28,1,methods,method > name,Climate PWM/mm
-28,1,methods,method > description,Precipitation of the wettest month
-28,2,attributes,attribute > choice > quantitative > unit,mm
-28,2,attributes,attribute > choice > quantitative > lowerLimit,0
-28,2,attributes,attribute > choice > quantitative > methodID,1
-29,1,methods,method > subject,stratum definition
-29,1,methods,method > name,Strata definition/Recce
-29,1,methods,method > description,Standard Recce stratum definition
-29,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation 2013; Field protocols. Landcare Research, Lincoln."
-29,2,attributes,attribute > choice > quantitative > methodID,1
-29,2,attributes,attribute > choice > quantitative > unit,m
-29,2,attributes,attribute > choice > quantitative > lowerLimit,0
-29,2,attributes,attribute > choice > quantitative > upperLimit,999
-29,3,strata,stratum > stratumName,Tier 1
-29,3,strata,stratum > methodID,1
-29,3,strata,stratum > order,1
-29,3,strata,stratum > lowerLimit,0
-29,3,strata,stratum > upperLimit,0.3
-29,4,strata,stratum > stratumName,Tier 2
-29,4,strata,stratum > methodID,1
-29,4,strata,stratum > order,2
-29,4,strata,stratum > lowerLimit,0.3
-29,4,strata,stratum > upperLimit,2
-29,5,strata,stratum > stratumName,Tier 3
-29,5,strata,stratum > methodID,1
-29,5,strata,stratum > order,3
-29,5,strata,stratum > lowerLimit,2
-29,5,strata,stratum > upperLimit,5
-29,6,strata,stratum > stratumName,Tier 4
-29,6,strata,stratum > methodID,1
-29,6,strata,stratum > order,4
-29,6,strata,stratum > lowerLimit,5
-29,6,strata,stratum > upperLimit,12
-29,7,strata,stratum > stratumName,Tier 5
-29,7,strata,stratum > methodID,1
-29,7,strata,stratum > order,5
-29,7,strata,stratum > lowerLimit,12
-29,7,strata,stratum > upperLimit,25
-29,8,strata,stratum > stratumName,Tier 6
-29,8,strata,stratum > methodID,1
-29,8,strata,stratum > order,6
-29,8,strata,stratum > lowerLimit,25
-29,8,strata,stratum > upperLimit,50
-29,9,strata,stratum > stratumName,Tier 7
-29,9,strata,stratum > methodID,1
-29,9,strata,stratum > order,7
-30,1,methods,method > subject,plant cover
-30,1,methods,method > name,Plant cover/Braun-Blanquet (original)
-30,1,methods,method > description,"Original Braun-Blanquet scala (levels: r,+,1,2,3,4,5)"
-30,2,attributes,attribute > choice > ordinal > methodID,1
-30,2,attributes,attribute > choice > ordinal > code,r
-30,2,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; very few individuals
-30,2,attributes,attribute > choice > ordinal > order,1
-30,3,attributes,attribute > choice > ordinal > methodID,1
-30,3,attributes,attribute > choice > ordinal > code,+
-30,3,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; few individuals
-30,3,attributes,attribute > choice > ordinal > order,2
-30,4,attributes,attribute > choice > ordinal > methodID,1
-30,4,attributes,attribute > choice > ordinal > code,1
-30,4,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; numerous individuals
-30,4,attributes,attribute > choice > ordinal > order,3
-30,5,attributes,attribute > choice > ordinal > methodID,1
-30,5,attributes,attribute > choice > ordinal > code,2
-30,5,attributes,attribute > choice > ordinal > definition,5-25 percent cover
-30,5,attributes,attribute > choice > ordinal > order,4
-30,6,attributes,attribute > choice > ordinal > methodID,1
-30,6,attributes,attribute > choice > ordinal > code,3
-30,6,attributes,attribute > choice > ordinal > definition,26-50 percent cover
-30,6,attributes,attribute > choice > ordinal > order,5
-30,7,attributes,attribute > choice > ordinal > methodID,1
-30,7,attributes,attribute > choice > ordinal > code,4
-30,7,attributes,attribute > choice > ordinal > definition,51-75 percent cover
-30,7,attributes,attribute > choice > ordinal > order,6
-30,8,attributes,attribute > choice > ordinal > methodID,1
-30,8,attributes,attribute > choice > ordinal > code,5
-30,8,attributes,attribute > choice > ordinal > definition,76-100 percent cover
-30,8,attributes,attribute > choice > ordinal > order,7
-31,1,methods,method > subject,plant cover
-31,1,methods,method > name,Plant cover/Braun-Blanquet (new)
-31,1,methods,method > description,"New Braun-Blanquet scala (levels: r, +, 1, 2m, 2a, 2b, 3, 4, 5)"
-31,2,attributes,attribute > choice > ordinal > methodID,1
-31,2,attributes,attribute > choice > ordinal > code,r
-31,2,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; very few individuals
-31,2,attributes,attribute > choice > ordinal > order,1
-31,3,attributes,attribute > choice > ordinal > methodID,1
-31,3,attributes,attribute > choice > ordinal > code,+
-31,3,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; few individuals
-31,3,attributes,attribute > choice > ordinal > order,2
-31,4,attributes,attribute > choice > ordinal > methodID,1
-31,4,attributes,attribute > choice > ordinal > code,1
-31,4,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; numerous individuals
-31,4,attributes,attribute > choice > ordinal > order,3
-31,5,attributes,attribute > choice > ordinal > methodID,1
-31,5,attributes,attribute > choice > ordinal > code,2m
-31,5,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; many individuals
-31,5,attributes,attribute > choice > ordinal > order,4
-31,6,attributes,attribute > choice > ordinal > methodID,1
-31,6,attributes,attribute > choice > ordinal > code,2a
-31,6,attributes,attribute > choice > ordinal > definition,"between 5 and 15 percent cover, any number of individuals"
-31,6,attributes,attribute > choice > ordinal > order,5
-31,7,attributes,attribute > choice > ordinal > methodID,1
-31,7,attributes,attribute > choice > ordinal > code,2b
-31,7,attributes,attribute > choice > ordinal > definition,"between 16 and 25 percent cover, any number of individuals"
-31,7,attributes,attribute > choice > ordinal > order,6
-31,8,attributes,attribute > choice > ordinal > methodID,1
-31,8,attributes,attribute > choice > ordinal > code,3
-31,8,attributes,attribute > choice > ordinal > definition,"between 26 and 50 percent cover, any number of individuals"
-31,8,attributes,attribute > choice > ordinal > order,7
-31,9,attributes,attribute > choice > ordinal > methodID,1
-31,9,attributes,attribute > choice > ordinal > code,4
-31,9,attributes,attribute > choice > ordinal > definition,"between 51 and 75 percent cover, any number of individuals"
-31,9,attributes,attribute > choice > ordinal > order,8
-31,10,attributes,attribute > choice > ordinal > methodID,1
-31,10,attributes,attribute > choice > ordinal > code,5
-31,10,attributes,attribute > choice > ordinal > definition,"more than 75 percent, any number of individuals"
-31,10,attributes,attribute > choice > ordinal > order,9
-32,1,methods,method > subject,plant cover
-32,1,methods,method > name,Plant cover/Recce
-32,1,methods,method > description,"Standard Recce scala (levels: 1,2,3,4,5,6)"
-32,2,attributes,attribute > choice > ordinal > methodID,1
-32,2,attributes,attribute > choice > ordinal > code,1
-32,2,attributes,attribute > choice > ordinal > definition,less than one percent cover
-32,2,attributes,attribute > choice > ordinal > order,1
-32,3,attributes,attribute > choice > ordinal > methodID,1
-32,3,attributes,attribute > choice > ordinal > code,2
-32,3,attributes,attribute > choice > ordinal > definition,1-5 percent cover
-32,3,attributes,attribute > choice > ordinal > order,2
-32,4,attributes,attribute > choice > ordinal > methodID,1
-32,4,attributes,attribute > choice > ordinal > code,3
-32,4,attributes,attribute > choice > ordinal > definition,6-25 percent cover
-32,4,attributes,attribute > choice > ordinal > order,3
-32,5,attributes,attribute > choice > ordinal > methodID,1
-32,5,attributes,attribute > choice > ordinal > code,4
-32,5,attributes,attribute > choice > ordinal > definition,26-50 percent cover
-32,5,attributes,attribute > choice > ordinal > order,4
-32,6,attributes,attribute > choice > ordinal > methodID,1
-32,6,attributes,attribute > choice > ordinal > code,5
-32,6,attributes,attribute > choice > ordinal > definition,51-75 percent cover
-32,6,attributes,attribute > choice > ordinal > order,5
-32,7,attributes,attribute > choice > ordinal > methodID,1
-32,7,attributes,attribute > choice > ordinal > code,6
-32,7,attributes,attribute > choice > ordinal > definition,76-100 percent cover
-32,7,attributes,attribute > choice > ordinal > order,6
-33,1,methods,method > subject,Plant cover
-33,1,methods,method > name,Presence
-33,1,methods,method > description,Presence absence scale
-33,2,attributes,attribute > choice > qualitative > methodID,1
-33,2,attributes,attribute > choice > qualitative > code,1
-33,2,attributes,attribute > choice > qualitative > definition,Presence
-34,1,methods,method > subject,stratum definition
-34,1,methods,method > name,Strata definition/TurboVeg
-34,1,methods,method > description,Standard TurboVeg stratum definition (levels: 0-9)
-34,1,methods,method > choice > citationString,"Hennekens, S.M. and Schaminée, J.H. (2001), TURBOVEG, a comprehensive data base management system for vegetation data. Journal of Vegetation Science, 12: 589-591. https://doi.org/10.2307/3237010"
-34,2,strata,stratum > methodID,1
-34,2,strata,stratum > stratumName,1
-34,2,strata,stratum > definition,Tree layer (high)
-34,2,strata,stratum > order,1
-34,3,strata,stratum > methodID,1
-34,3,strata,stratum > stratumName,2
-34,3,strata,stratum > definition,Tree layer (middle)
-34,3,strata,stratum > order,2
-34,4,strata,stratum > methodID,1
-34,4,strata,stratum > stratumName,3
-34,4,strata,stratum > definition,Tree layer (low)
-34,4,strata,stratum > order,3
-34,5,strata,stratum > methodID,1
-34,5,strata,stratum > stratumName,4
-34,5,strata,stratum > definition,Shrub layer (high)
-34,5,strata,stratum > order,4
-34,6,strata,stratum > methodID,1
-34,6,strata,stratum > stratumName,5
-34,6,strata,stratum > definition,Shrub layer (low)
-34,6,strata,stratum > order,5
-34,7,strata,stratum > methodID,1
-34,7,strata,stratum > stratumName,6
-34,7,strata,stratum > definition,Herb layer
-34,7,strata,stratum > order,6
-34,8,strata,stratum > methodID,1
-34,8,strata,stratum > stratumName,7
-34,8,strata,stratum > definition,Juvenile
-34,9,strata,stratum > methodID,1
-34,9,strata,stratum > stratumName,8
-34,9,strata,stratum > definition,Seedling (less than 1 year)
-34,10,strata,stratum > methodID,1
-34,10,strata,stratum > stratumName,9
-34,10,strata,stratum > definition,Moss layer
+template_id,node_id,main_element,node_path,node_value,
+1,1,methods,method > subject,plot area,
+1,1,methods,method > name,Plot area/m2,
+1,1,methods,method > description,Plot area measured in squared meters.,
+1,2,attributes,attribute > choice > quantitative > unit,m2,
+1,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+1,2,attributes,attribute > choice > quantitative > methodID,1,
+2,1,methods,method > subject,plot area,
+2,1,methods,method > name,Plot area/cm2,
+2,1,methods,method > description,Plot area measured in squared centimeters.,
+2,2,attributes,attribute > choice > quantitative > unit,cm2,
+2,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+2,2,attributes,attribute > choice > quantitative > methodID,1,
+3,1,methods,method > subject,plot dimension,
+3,1,methods,method > name,Plot dimension/m,
+3,1,methods,method > description,"Plot dimension (radius, length, width) measured in meters.",
+3,2,attributes,attribute > choice > quantitative > unit,m,
+3,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+3,2,attributes,attribute > choice > quantitative > methodID,1,
+4,1,methods,method > subject,plot dimension,
+4,1,methods,method > name,Plot dimension/cm,
+4,1,methods,method > description,"Plot dimension (radius, length, width) measured in centimeters.",
+4,2,attributes,attribute > choice > quantitative > unit,cm,
+4,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+4,2,attributes,attribute > choice > quantitative > methodID,1,
+5,1,methods,method > subject,plant cover,
+5,1,methods,method > name,Plant cover/%,
+5,1,methods,method > description,Plant cover as percentage of ground covered by the projection.,
+5,2,attributes,attribute > choice > quantitative > unit,%,
+5,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+5,2,attributes,attribute > choice > quantitative > upperLimit,100,
+5,2,attributes,attribute > choice > quantitative > methodID,1,
+6,1,methods,method > subject,plant count,
+6,1,methods,method > name,Individual plant counts,
+6,1,methods,method > description,Number of plant individuals,
+6,2,attributes,attribute > choice > quantitative > unit,individuals,
+6,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+6,2,attributes,attribute > choice > quantitative > methodID,1,
+7,1,methods,method > subject,plant frequency,
+7,1,methods,method > name,Plant frequency/%,
+7,1,methods,method > description,Frequency of occurrence in fixed subunits of the plot,
+7,2,attributes,attribute > choice > quantitative > unit,%,
+7,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+7,2,attributes,attribute > choice > quantitative > upperLimit,100,
+7,2,attributes,attribute > choice > quantitative > methodID,1,
+8,1,methods,method > subject,basal area,
+8,1,methods,method > name,Basal area/m2*ha-1,
+8,1,methods,method > description,Basal area in square meters per hectare,
+8,2,attributes,attribute > choice > quantitative > unit,m2*ha-1,
+8,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+8,2,attributes,attribute > choice > quantitative > methodID,1,
+9,1,methods,method > subject,stratum height,
+9,1,methods,method > name,Stratum height/m,
+9,1,methods,method > description,Stratum height in meters above the ground,
+9,2,attributes,attribute > choice > quantitative > unit,m,
+9,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+9,2,attributes,attribute > choice > quantitative > methodID,1,
+10,1,methods,method > subject,stratum height,
+10,1,methods,method > name,Stratum height/cm,
+10,1,methods,method > description,Stratum height in cm above the ground,
+10,2,attributes,attribute > choice > quantitative > unit,cm,
+10,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+10,2,attributes,attribute > choice > quantitative > methodID,1,
+11,1,methods,method > subject,plant height,
+11,1,methods,method > name,Plant height/m,
+11,1,methods,method > description,Plant height in meters above the ground,
+11,2,attributes,attribute > choice > quantitative > unit,m,
+11,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+11,2,attributes,attribute > choice > quantitative > methodID,1,
+12,1,methods,method > subject,plant height,
+12,1,methods,method > name,Plant height/cm,
+12,1,methods,method > description,Plant height in cm above the ground,
+12,2,attributes,attribute > choice > quantitative > unit,cm,
+12,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+12,2,attributes,attribute > choice > quantitative > methodID,1,
+13,1,methods,method > subject,stem diameter,
+13,1,methods,method > name,DBH/cm,
+13,1,methods,method > description,"Diameter at breast height, in cm",
+13,2,attributes,attribute > choice > quantitative > unit,cm,
+13,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+13,2,attributes,attribute > choice > quantitative > methodID,1,
+14,1,methods,method > subject,surface cover,
+14,1,methods,method > name,Surface cover/%,
+14,1,methods,method > description,Surface covered by a surface type as percentage of ground covered by the projection.,
+14,2,attributes,attribute > choice > quantitative > unit,%,
+14,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+14,2,attributes,attribute > choice > quantitative > upperLimit,100,
+14,2,attributes,attribute > choice > quantitative > methodID,1,
+15,1,methods,method > subject,pH,
+15,1,methods,method > name,pH/0-14,
+15,1,methods,method > description,pH scale from 0 to 14,
+15,2,attributes,attribute > choice > quantitative > unit,dimensionless,
+15,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+15,2,attributes,attribute > choice > quantitative > upperLimit,14,
+15,2,attributes,attribute > choice > quantitative > methodID,1,
+16,1,methods,method > subject,slope,
+16,1,methods,method > name,Slope/degrees,
+16,1,methods,method > description,Slope measured using degrees,
+16,2,attributes,attribute > choice > quantitative > unit,degrees,
+16,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+16,2,attributes,attribute > choice > quantitative > upperLimit,90,
+16,2,attributes,attribute > choice > quantitative > methodID,1,
+17,1,methods,method > subject,slope,
+17,1,methods,method > name,Slope/percent,
+17,1,methods,method > description,Slope measured using percent,
+17,2,attributes,attribute > choice > quantitative > unit,%,
+17,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+17,2,attributes,attribute > choice > quantitative > upperLimit,100,
+17,2,attributes,attribute > choice > quantitative > methodID,1,
+18,1,methods,method > subject,aspect,
+18,1,methods,method > name,Aspect/degrees,
+18,1,methods,method > description,Aspect measured using degrees from North,
+18,2,attributes,attribute > choice > quantitative > unit,degrees,
+18,2,attributes,attribute > choice > quantitative > lowerLimit,-360,
+18,2,attributes,attribute > choice > quantitative > upperLimit,360,
+18,2,attributes,attribute > choice > quantitative > methodID,1,
+19,1,methods,method > subject,aspect,
+19,1,methods,method > name,Aspect/radians,
+19,1,methods,method > description,Aspect measured using radians from North,
+19,2,attributes,attribute > choice > quantitative > unit,radians,
+19,2,attributes,attribute > choice > quantitative > lowerLimit,-6.2832,
+19,2,attributes,attribute > choice > quantitative > upperLimit,6.2832,
+19,2,attributes,attribute > choice > quantitative > methodID,1,
+20,1,methods,method > subject,elevation,
+20,1,methods,method > name,Elevation/m,
+20,1,methods,method > description,Elevation measured using meters above sea level,
+20,2,attributes,attribute > choice > quantitative > unit,m,
+20,2,attributes,attribute > choice > quantitative > methodID,1,
+21,1,methods,method > subject,location,
+21,1,methods,method > name,LonLat/degrees,
+21,1,methods,method > description,"Longitude and latitude of a specific location, measured in degrees",
+21,2,attributes,attribute > choice > quantitative > unit,degrees,
+21,2,attributes,attribute > choice > quantitative > lowerLimit,-180,
+21,2,attributes,attribute > choice > quantitative > upperLimit,180,
+21,2,attributes,attribute > choice > quantitative > methodID,1,
+22,1,methods,method > subject,climate,
+22,1,methods,method > name,Climate MAT/Celsius,
+22,1,methods,method > description,Mean annual temperature,
+22,2,attributes,attribute > choice > quantitative > unit,Celsius,
+22,2,attributes,attribute > choice > quantitative > methodID,1,
+23,1,methods,method > subject,climate,
+23,1,methods,method > name,Climate TWM/Celsius,
+23,1,methods,method > description,Temperature of the warmest month,
+23,2,attributes,attribute > choice > quantitative > unit,Celsius,
+23,2,attributes,attribute > choice > quantitative > methodID,1,
+24,1,methods,method > subject,climate,
+24,1,methods,method > name,Climate TCM/Celsius,
+24,1,methods,method > description,Temperature of the coldest month,
+24,2,attributes,attribute > choice > quantitative > unit,Celsius,
+24,2,attributes,attribute > choice > quantitative > methodID,1,
+25,1,methods,method > subject,climate,
+25,1,methods,method > name,Climate MDR/Celsius,
+25,1,methods,method > description,Mean diurnal range,
+25,2,attributes,attribute > choice > quantitative > unit,Celsius,
+25,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+25,2,attributes,attribute > choice > quantitative > methodID,1,
+26,1,methods,method > subject,climate,
+26,1,methods,method > name,Climate MAP/mm,
+26,1,methods,method > description,Mean annual precipitation,
+26,2,attributes,attribute > choice > quantitative > unit,mm,
+26,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+26,2,attributes,attribute > choice > quantitative > methodID,1,
+27,1,methods,method > subject,climate,
+27,1,methods,method > name,Climate PDM/mm,
+27,1,methods,method > description,Precipitation of the driest month,
+27,2,attributes,attribute > choice > quantitative > unit,mm,
+27,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+27,2,attributes,attribute > choice > quantitative > methodID,1,
+28,1,methods,method > subject,climate,
+28,1,methods,method > name,Climate PWM/mm,
+28,1,methods,method > description,Precipitation of the wettest month,
+28,2,attributes,attribute > choice > quantitative > unit,mm,
+28,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+28,2,attributes,attribute > choice > quantitative > methodID,1,
+29,1,methods,method > subject,stratum definition,
+29,1,methods,method > name,Strata definition/Recce woody,
+29,1,methods,method > description,Strata definition/standard Recce woody (levels: Tier 1-Tier 7),
+29,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation; Field protocols. Landcare Research, Lincoln.",
+29,2,attributes,attribute > choice > quantitative > methodID,1,
+29,2,attributes,attribute > choice > quantitative > unit,m,
+29,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+29,2,attributes,attribute > choice > quantitative > upperLimit,999,
+29,3,strata,stratum > stratumName,Tier 1,
+29,3,strata,stratum > methodID,1,
+29,3,strata,stratum > order,1,
+29,3,strata,stratum > lowerLimit,25,
+29,4,strata,stratum > stratumName,Tier 2,
+29,4,strata,stratum > methodID,1,
+29,4,strata,stratum > order,2,
+29,4,strata,stratum > lowerLimit,12,
+29,4,strata,stratum > upperLimit,25,
+29,5,strata,stratum > stratumName,Tier 3,
+29,5,strata,stratum > methodID,1,
+29,5,strata,stratum > order,3,
+29,5,strata,stratum > lowerLimit,5,
+29,5,strata,stratum > upperLimit,12,
+29,6,strata,stratum > stratumName,Tier 4,
+29,6,strata,stratum > methodID,1,
+29,6,strata,stratum > order,4,
+29,6,strata,stratum > lowerLimit,2,
+29,6,strata,stratum > upperLimit,5,
+29,7,strata,stratum > stratumName,Tier 5,
+29,7,strata,stratum > methodID,1,
+29,7,strata,stratum > order,5,
+29,7,strata,stratum > lowerLimit,0.3,
+29,7,strata,stratum > upperLimit,2,
+29,8,strata,stratum > stratumName,Tier 6,
+29,8,strata,stratum > methodID,1,
+29,8,strata,stratum > order,6,
+29,8,strata,stratum > lowerLimit,0,
+29,8,strata,stratum > upperLimit,0.3,
+29,9,strata,stratum > stratumName,Tier 7,
+29,9,strata,stratum > definition,Epiphytes,
+30,1,methods,method > subject,plant cover,
+30,1,methods,method > name,Plant cover/Braun-Blanquet (original),
+30,1,methods,method > description,"Original Braun-Blanquet scala (levels: r,+,1,2,3,4,5)",
+30,2,attributes,attribute > choice > ordinal > methodID,1,
+30,2,attributes,attribute > choice > ordinal > code,r,
+30,2,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; very few individuals,
+30,2,attributes,attribute > choice > ordinal > order,1,
+30,3,attributes,attribute > choice > ordinal > methodID,1,
+30,3,attributes,attribute > choice > ordinal > code,+,
+30,3,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; few individuals,
+30,3,attributes,attribute > choice > ordinal > order,2,
+30,4,attributes,attribute > choice > ordinal > methodID,1,
+30,4,attributes,attribute > choice > ordinal > code,1,
+30,4,attributes,attribute > choice > ordinal > definition,less than 5 percent cover; numerous individuals,
+30,4,attributes,attribute > choice > ordinal > order,3,
+30,5,attributes,attribute > choice > ordinal > methodID,1,
+30,5,attributes,attribute > choice > ordinal > code,2,
+30,5,attributes,attribute > choice > ordinal > definition,5-25 percent cover,
+30,5,attributes,attribute > choice > ordinal > order,4,
+30,6,attributes,attribute > choice > ordinal > methodID,1,
+30,6,attributes,attribute > choice > ordinal > code,3,
+30,6,attributes,attribute > choice > ordinal > definition,26-50 percent cover,
+30,6,attributes,attribute > choice > ordinal > order,5,
+30,7,attributes,attribute > choice > ordinal > methodID,1,
+30,7,attributes,attribute > choice > ordinal > code,4,
+30,7,attributes,attribute > choice > ordinal > definition,51-75 percent cover,
+30,7,attributes,attribute > choice > ordinal > order,6,
+30,8,attributes,attribute > choice > ordinal > methodID,1,
+30,8,attributes,attribute > choice > ordinal > code,5,
+30,8,attributes,attribute > choice > ordinal > definition,76-100 percent cover,
+30,8,attributes,attribute > choice > ordinal > order,7,
+31,1,methods,method > subject,plant cover,
+31,1,methods,method > name,Plant cover/Braun-Blanquet (new),
+31,1,methods,method > description,"New Braun-Blanquet scala (levels: r, +, 1, 2m, 2a, 2b, 3, 4, 5)",
+31,2,attributes,attribute > choice > ordinal > methodID,1,
+31,2,attributes,attribute > choice > ordinal > code,r,
+31,2,attributes,attribute > choice > ordinal > definition,less than 5 percent cover, very few individuals
+31,2,attributes,attribute > choice > ordinal > order,1,
+31,3,attributes,attribute > choice > ordinal > methodID,1,
+31,3,attributes,attribute > choice > ordinal > code,+,
+31,3,attributes,attribute > choice > ordinal > definition,less than 5 percent cover, few individuals
+31,3,attributes,attribute > choice > ordinal > order,2,
+31,4,attributes,attribute > choice > ordinal > methodID,1,
+31,4,attributes,attribute > choice > ordinal > code,1,
+31,4,attributes,attribute > choice > ordinal > definition,less than 5 percent cover, numerous individuals
+31,4,attributes,attribute > choice > ordinal > order,3,
+31,5,attributes,attribute > choice > ordinal > methodID,1,
+31,5,attributes,attribute > choice > ordinal > code,2m,
+31,5,attributes,attribute > choice > ordinal > definition,less than 5 percent cover, many individuals
+31,5,attributes,attribute > choice > ordinal > order,4,
+31,6,attributes,attribute > choice > ordinal > methodID,1,
+31,6,attributes,attribute > choice > ordinal > code,2a,
+31,6,attributes,attribute > choice > ordinal > definition,"between 5 and 15 percent cover, any number of individuals",
+31,6,attributes,attribute > choice > ordinal > order,5,
+31,7,attributes,attribute > choice > ordinal > methodID,1,
+31,7,attributes,attribute > choice > ordinal > code,2b,
+31,7,attributes,attribute > choice > ordinal > definition,"between 16 and 25 percent cover, any number of individuals",
+31,7,attributes,attribute > choice > ordinal > order,6,
+31,8,attributes,attribute > choice > ordinal > methodID,1,
+31,8,attributes,attribute > choice > ordinal > code,3,
+31,8,attributes,attribute > choice > ordinal > definition,"between 26 and 50 percent cover, any number of individuals",
+31,8,attributes,attribute > choice > ordinal > order,7,
+31,9,attributes,attribute > choice > ordinal > methodID,1,
+31,9,attributes,attribute > choice > ordinal > code,4,
+31,9,attributes,attribute > choice > ordinal > definition,"between 51 and 75 percent cover, any number of individuals",
+31,9,attributes,attribute > choice > ordinal > order,8,
+31,10,attributes,attribute > choice > ordinal > methodID,1,
+31,10,attributes,attribute > choice > ordinal > code,5,
+31,10,attributes,attribute > choice > ordinal > definition,"more than 75 percent, any number of individuals",
+31,10,attributes,attribute > choice > ordinal > order,9,
+32,1,methods,method > subject,plant cover,
+32,1,methods,method > name,Plant cover/Recce,
+32,1,methods,method > description,"Standard Recce scala (levels: 1,2,3,4,5,6)",
+32,2,attributes,attribute > choice > ordinal > methodID,1,
+32,2,attributes,attribute > choice > ordinal > code,1,
+32,2,attributes,attribute > choice > ordinal > definition,less than one percent cover,
+32,2,attributes,attribute > choice > ordinal > order,1,
+32,3,attributes,attribute > choice > ordinal > methodID,1,
+32,3,attributes,attribute > choice > ordinal > code,2,
+32,3,attributes,attribute > choice > ordinal > definition,1-5 percent cover,
+32,3,attributes,attribute > choice > ordinal > order,2,
+32,4,attributes,attribute > choice > ordinal > methodID,1,
+32,4,attributes,attribute > choice > ordinal > code,3,
+32,4,attributes,attribute > choice > ordinal > definition,6-25 percent cover,
+32,4,attributes,attribute > choice > ordinal > order,3,
+32,5,attributes,attribute > choice > ordinal > methodID,1,
+32,5,attributes,attribute > choice > ordinal > code,4,
+32,5,attributes,attribute > choice > ordinal > definition,26-50 percent cover,
+32,5,attributes,attribute > choice > ordinal > order,4,
+32,6,attributes,attribute > choice > ordinal > methodID,1,
+32,6,attributes,attribute > choice > ordinal > code,5,
+32,6,attributes,attribute > choice > ordinal > definition,51-75 percent cover,
+32,6,attributes,attribute > choice > ordinal > order,5,
+32,7,attributes,attribute > choice > ordinal > methodID,1,
+32,7,attributes,attribute > choice > ordinal > code,6,
+32,7,attributes,attribute > choice > ordinal > definition,76-100 percent cover,
+32,7,attributes,attribute > choice > ordinal > order,6,
+33,1,methods,method > subject,Plant cover,
+33,1,methods,method > name,Presence,
+33,1,methods,method > description,Presence absence scale,
+33,2,attributes,attribute > choice > qualitative > methodID,1,
+33,2,attributes,attribute > choice > qualitative > code,1,
+33,2,attributes,attribute > choice > qualitative > definition,Presence,
+34,1,methods,method > subject,stratum definition,
+34,1,methods,method > name,Strata definition/TurboVeg,
+34,1,methods,method > description,Standard TurboVeg stratum definition (levels: 0-9),
+34,1,methods,method > choice > citationString,"Hennekens, S.M. and Schaminée, J.H. (2001), TURBOVEG, a comprehensive data base management system for vegetation data. Journal of Vegetation Science, 12: 589-591. https://doi.org/10.2307/3237010",
+34,2,strata,stratum > methodID,1,
+34,2,strata,stratum > stratumName,1,
+34,2,strata,stratum > definition,Tree layer (high),
+34,2,strata,stratum > order,1,
+34,3,strata,stratum > methodID,1,
+34,3,strata,stratum > stratumName,2,
+34,3,strata,stratum > definition,Tree layer (middle),
+34,3,strata,stratum > order,2,
+34,4,strata,stratum > methodID,1,
+34,4,strata,stratum > stratumName,3,
+34,4,strata,stratum > definition,Tree layer (low),
+34,4,strata,stratum > order,3,
+34,5,strata,stratum > methodID,1,
+34,5,strata,stratum > stratumName,4,
+34,5,strata,stratum > definition,Shrub layer (high),
+34,5,strata,stratum > order,4,
+34,6,strata,stratum > methodID,1,
+34,6,strata,stratum > stratumName,5,
+34,6,strata,stratum > definition,Shrub layer (low),
+34,6,strata,stratum > order,5,
+34,7,strata,stratum > methodID,1,
+34,7,strata,stratum > stratumName,6,
+34,7,strata,stratum > definition,Herb layer,
+34,7,strata,stratum > order,6,
+34,8,strata,stratum > methodID,1,
+34,8,strata,stratum > stratumName,7,
+34,8,strata,stratum > definition,Juvenile,
+34,9,strata,stratum > methodID,1,
+34,9,strata,stratum > stratumName,8,
+34,9,strata,stratum > definition,Seedling (less than 1 year),
+34,10,strata,stratum > methodID,1,
+34,10,strata,stratum > stratumName,9,
+34,10,strata,stratum > definition,Moss layer,
+35,1,methods,method > subject,stratum definition,
+35,1,methods,method > name,Strata definition/Recce non-woody,
+35,1,methods,method > description,"Strata definition/standard Recce non-woody (levels: Tier 1-Tier 4, Tier 5A, Tier 5B, Tier 6A, Tier 6B, Tier 7)",
+35,1,methods,method > choice > citationString,"Hurst, JM and Allen, RB. (2007) The Recce method for describing Zealand vegetation; Field protocols. Landcare Research, Lincoln.",
+35,2,attributes,attribute > choice > quantitative > methodID,1,
+35,2,attributes,attribute > choice > quantitative > unit,m,
+35,2,attributes,attribute > choice > quantitative > lowerLimit,0,
+35,2,attributes,attribute > choice > quantitative > upperLimit,999,
+35,3,strata,stratum > stratumName,Tier 1,
+35,3,strata,stratum > methodID,1,
+35,3,strata,stratum > order,1,
+35,3,strata,stratum > lowerLimit,25,
+35,4,strata,stratum > stratumName,Tier 2,
+35,4,strata,stratum > methodID,1,
+35,4,strata,stratum > order,2,
+35,4,strata,stratum > lowerLimit,12,
+35,4,strata,stratum > upperLimit,25,
+35,5,strata,stratum > stratumName,Tier 3,
+35,5,strata,stratum > methodID,1,
+35,5,strata,stratum > order,3,
+35,5,strata,stratum > lowerLimit,5,
+35,5,strata,stratum > upperLimit,12,
+35,6,strata,stratum > stratumName,Tier 4,
+35,6,strata,stratum > methodID,1,
+35,6,strata,stratum > order,4,
+35,6,strata,stratum > lowerLimit,2,
+35,6,strata,stratum > upperLimit,5,
+35,7,strata,stratum > stratumName,Tier 5A,
+35,7,strata,stratum > methodID,1,
+35,7,strata,stratum > order,5,
+35,7,strata,stratum > lowerLimit,1,
+35,7,strata,stratum > upperLimit,2,
+35,8,strata,stratum > stratumName,Tier 5B,
+35,8,strata,stratum > methodID,1,
+35,8,strata,stratum > order,6,
+35,8,strata,stratum > lowerLimit,0.3,
+35,8,strata,stratum > upperLimit,1,
+35,9,strata,stratum > stratumName,Tier 6A,
+35,9,strata,stratum > methodID,1,
+35,9,strata,stratum > order,7,
+35,9,strata,stratum > lowerLimit,0.1,
+35,9,strata,stratum > upperLimit,0.3,
+35,10,strata,stratum > stratumName,Tier 6B,
+35,10,strata,stratum > methodID,1,
+35,10,strata,stratum > order,8,
+35,10,strata,stratum > lowerLimit,0,
+35,10,strata,stratum > upperLimit,0.1,
+35,11,strata,stratum > stratumName,Tier 7,
+35,11,strata,stratum > definition,Epiphytes,
+36,1,methods,method > subject,plant cover,
+36,1,methods,method > name,Plant cover/Ordinal scale (levels: 1-9) ,
+36,1,methods,method > description,Ordinal scale (levels: 1-9) ,
+36,2,attributes,attribute > choice > ordinal > methodID,1,
+36,2,attributes,attribute > choice > ordinal > code,1,
+36,2,attributes,attribute > choice > ordinal > definition,1 percent,
+36,2,attributes,attribute > choice > ordinal > order,1,
+36,3,attributes,attribute > choice > ordinal > methodID,1,
+36,3,attributes,attribute > choice > ordinal > code,2,
+36,3,attributes,attribute > choice > ordinal > definition,2 percent,
+36,3,attributes,attribute > choice > ordinal > order,2,
+36,4,attributes,attribute > choice > ordinal > methodID,1,
+36,4,attributes,attribute > choice > ordinal > code,3,
+36,4,attributes,attribute > choice > ordinal > definition,3 percent,
+36,4,attributes,attribute > choice > ordinal > order,3,
+36,5,attributes,attribute > choice > ordinal > methodID,1,
+36,5,attributes,attribute > choice > ordinal > code,4,
+36,5,attributes,attribute > choice > ordinal > definition,4 percent,
+36,5,attributes,attribute > choice > ordinal > order,4,
+36,6,attributes,attribute > choice > ordinal > methodID,1,
+36,6,attributes,attribute > choice > ordinal > code,5,
+36,6,attributes,attribute > choice > ordinal > definition,8 percent,
+36,6,attributes,attribute > choice > ordinal > order,5,
+36,7,attributes,attribute > choice > ordinal > methodID,1,
+36,7,attributes,attribute > choice > ordinal > code,6,
+36,7,attributes,attribute > choice > ordinal > definition,18 percent,
+36,7,attributes,attribute > choice > ordinal > order,6,
+36,8,attributes,attribute > choice > ordinal > methodID,1,
+36,8,attributes,attribute > choice > ordinal > code,7,
+36,8,attributes,attribute > choice > ordinal > definition,38 percent,
+36,8,attributes,attribute > choice > ordinal > order,7,
+36,9,attributes,attribute > choice > ordinal > methodID,1,
+36,9,attributes,attribute > choice > ordinal > code,8,
+36,9,attributes,attribute > choice > ordinal > definition,68 percent,
+36,9,attributes,attribute > choice > ordinal > order,8,
+36,10,attributes,attribute > choice > ordinal > methodID,1,
+36,10,attributes,attribute > choice > ordinal > code,9,
+36,10,attributes,attribute > choice > ordinal > definition,88 percent,
+36,10,attributes,attribute > choice > ordinal > order,9,
+37,1,methods,method > subject,plant cover,
+37,1,methods,method > name,"Plant cover/Barkman (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ",
+37,1,methods,method > description,"Barkman scale (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ",
+37,2,attributes,attribute > choice > ordinal > methodID,1,
+37,2,attributes,attribute > choice > ordinal > code,r,
+37,2,attributes,attribute > choice > ordinal > definition,1 percent,
+37,3,attributes,attribute > choice > ordinal > methodID,1,
+37,3,attributes,attribute > choice > ordinal > code,+r,
+37,3,attributes,attribute > choice > ordinal > definition,1 percent,
+37,4,attributes,attribute > choice > ordinal > methodID,1,
+37,4,attributes,attribute > choice > ordinal > code,+p,
+37,4,attributes,attribute > choice > ordinal > definition,1 percent,
+37,5,attributes,attribute > choice > ordinal > methodID,1,
+37,5,attributes,attribute > choice > ordinal > code,+a,
+37,5,attributes,attribute > choice > ordinal > definition,1 percent,
+37,6,attributes,attribute > choice > ordinal > methodID,1,
+37,6,attributes,attribute > choice > ordinal > code,+b,
+37,6,attributes,attribute > choice > ordinal > definition,2 percent,
+37,7,attributes,attribute > choice > ordinal > methodID,1,
+37,7,attributes,attribute > choice > ordinal > code,1p,
+37,7,attributes,attribute > choice > ordinal > definition,1 percent,
+37,8,attributes,attribute > choice > ordinal > methodID,1,
+37,8,attributes,attribute > choice > ordinal > code,1a,
+37,8,attributes,attribute > choice > ordinal > definition,2 percent,
+37,9,attributes,attribute > choice > ordinal > methodID,1,
+37,9,attributes,attribute > choice > ordinal > code,1b,
+37,9,attributes,attribute > choice > ordinal > definition,3 percent,
+37,10,attributes,attribute > choice > ordinal > methodID,1,
+37,10,attributes,attribute > choice > ordinal > code,2m,
+37,10,attributes,attribute > choice > ordinal > definition,4 percent,
+37,11,attributes,attribute > choice > ordinal > methodID,1,
+37,11,attributes,attribute > choice > ordinal > code,2a,
+37,11,attributes,attribute > choice > ordinal > definition,8 percent,
+37,12,attributes,attribute > choice > ordinal > methodID,1,
+37,12,attributes,attribute > choice > ordinal > code,2b,
+37,12,attributes,attribute > choice > ordinal > definition,18 percent,
+37,13,attributes,attribute > choice > ordinal > methodID,1,
+37,13,attributes,attribute > choice > ordinal > code,3a,
+37,13,attributes,attribute > choice > ordinal > definition,31 percent,
+37,14,attributes,attribute > choice > ordinal > methodID,1,
+37,14,attributes,attribute > choice > ordinal > code,3b,
+37,14,attributes,attribute > choice > ordinal > definition,43 percent,
+37,15,attributes,attribute > choice > ordinal > methodID,1,
+37,15,attributes,attribute > choice > ordinal > code,4a,
+37,15,attributes,attribute > choice > ordinal > definition,56 percent,
+37,16,attributes,attribute > choice > ordinal > methodID,1,
+37,16,attributes,attribute > choice > ordinal > code,4b,
+37,16,attributes,attribute > choice > ordinal > definition,68 percent,
+37,17,attributes,attribute > choice > ordinal > methodID,1,
+37,17,attributes,attribute > choice > ordinal > code,5a,
+37,17,attributes,attribute > choice > ordinal > definition,81 percent,
+37,18,attributes,attribute > choice > ordinal > methodID,1,
+37,18,attributes,attribute > choice > ordinal > code,5b,
+37,18,attributes,attribute > choice > ordinal > definition,93 percent,
+38,1,methods,method > subject,plant cover,
+38,1,methods,method > name,Plant cover/Constancy classes (levels: 1-5),
+38,1,methods,method > description,Constancy classes (levels: 1-5),
+38,2,attributes,attribute > choice > ordinal > methodID,1,
+38,2,attributes,attribute > choice > ordinal > code,1,
+38,2,attributes,attribute > choice > ordinal > definition,10 percent,
+38,2,attributes,attribute > choice > ordinal > order,1,
+38,3,attributes,attribute > choice > ordinal > methodID,1,
+38,3,attributes,attribute > choice > ordinal > code,2,
+38,3,attributes,attribute > choice > ordinal > definition,30 percent,
+38,3,attributes,attribute > choice > ordinal > order,2,
+38,4,attributes,attribute > choice > ordinal > methodID,1,
+38,4,attributes,attribute > choice > ordinal > code,3,
+38,4,attributes,attribute > choice > ordinal > definition,50 percent,
+38,4,attributes,attribute > choice > ordinal > order,3,
+38,5,attributes,attribute > choice > ordinal > methodID,1,
+38,5,attributes,attribute > choice > ordinal > code,4,
+38,5,attributes,attribute > choice > ordinal > definition,70 percent,
+38,5,attributes,attribute > choice > ordinal > order,4,
+38,6,attributes,attribute > choice > ordinal > methodID,1,
+38,6,attributes,attribute > choice > ordinal > code,5,
+38,6,attributes,attribute > choice > ordinal > definition,90 percent,
+38,6,attributes,attribute > choice > ordinal > order,5,
+39,1,methods,method > subject,plant cover,
+39,1,methods,method > name,Plant cover/Daubermire (levels: 1-6),
+39,1,methods,method > description,Daubermire scale (levels: 1-6),
+39,2,attributes,attribute > choice > ordinal > methodID,1,
+39,2,attributes,attribute > choice > ordinal > code,1,
+39,2,attributes,attribute > choice > ordinal > definition,2.5 percent,
+39,2,attributes,attribute > choice > ordinal > order,1,
+39,3,attributes,attribute > choice > ordinal > methodID,1,
+39,3,attributes,attribute > choice > ordinal > code,2,
+39,3,attributes,attribute > choice > ordinal > definition,15 percent,
+39,3,attributes,attribute > choice > ordinal > order,2,
+39,4,attributes,attribute > choice > ordinal > methodID,1,
+39,4,attributes,attribute > choice > ordinal > code,3,
+39,4,attributes,attribute > choice > ordinal > definition,37.5 percent,
+39,4,attributes,attribute > choice > ordinal > order,3,
+39,5,attributes,attribute > choice > ordinal > methodID,1,
+39,5,attributes,attribute > choice > ordinal > code,4,
+39,5,attributes,attribute > choice > ordinal > definition,62.5 percent,
+39,5,attributes,attribute > choice > ordinal > order,4,
+39,6,attributes,attribute > choice > ordinal > methodID,1,
+39,6,attributes,attribute > choice > ordinal > code,5,
+39,6,attributes,attribute > choice > ordinal > definition,85 percent,
+39,6,attributes,attribute > choice > ordinal > order,5,
+39,7,attributes,attribute > choice > ordinal > methodID,1,
+39,7,attributes,attribute > choice > ordinal > code,6,
+39,7,attributes,attribute > choice > ordinal > definition,97.5 percent,
+39,7,attributes,attribute > choice > ordinal > order,6,
+40,1,methods,method > subject,plant cover,
+40,1,methods,method > name,"Plant cover/Dengler (levels: r,+,1,2a,2b,3,4,5)",
+40,1,methods,method > description,"Dengler scale (levels: r,+,1,2a,2b,3,4,5)",
+40,2,attributes,attribute > choice > ordinal > methodID,1,
+40,2,attributes,attribute > choice > ordinal > code,r,
+40,2,attributes,attribute > choice > ordinal > definition,0.5 percent,
+40,2,attributes,attribute > choice > ordinal > order,1,
+40,3,attributes,attribute > choice > ordinal > methodID,1,
+40,3,attributes,attribute > choice > ordinal > code,+,
+40,3,attributes,attribute > choice > ordinal > definition,1.8 percent,
+40,3,attributes,attribute > choice > ordinal > order,2,
+40,4,attributes,attribute > choice > ordinal > methodID,1,
+40,4,attributes,attribute > choice > ordinal > code,1,
+40,4,attributes,attribute > choice > ordinal > definition,3.8 percent,
+40,4,attributes,attribute > choice > ordinal > order,3,
+40,5,attributes,attribute > choice > ordinal > methodID,1,
+40,5,attributes,attribute > choice > ordinal > code,2a,
+40,5,attributes,attribute > choice > ordinal > definition,7.5 percent,
+40,5,attributes,attribute > choice > ordinal > order,4,
+40,6,attributes,attribute > choice > ordinal > methodID,1,
+40,6,attributes,attribute > choice > ordinal > code,2b,
+40,6,attributes,attribute > choice > ordinal > definition,17.5 percent,
+40,6,attributes,attribute > choice > ordinal > order,5,
+40,7,attributes,attribute > choice > ordinal > methodID,1,
+40,7,attributes,attribute > choice > ordinal > code,3,
+40,7,attributes,attribute > choice > ordinal > definition,37.5 percent,
+40,7,attributes,attribute > choice > ordinal > order,6,
+40,8,attributes,attribute > choice > ordinal > methodID,1,
+40,8,attributes,attribute > choice > ordinal > code,4,
+40,8,attributes,attribute > choice > ordinal > definition,62.5 percent,
+40,8,attributes,attribute > choice > ordinal > order,7,
+40,9,attributes,attribute > choice > ordinal > methodID,1,
+40,9,attributes,attribute > choice > ordinal > code,5,
+40,9,attributes,attribute > choice > ordinal > definition,87.5 percent,
+40,9,attributes,attribute > choice > ordinal > order,8,
+41,1,methods,method > subject,plant cover,
+41,1,methods,method > name,"Plant cover/Doing (levels: r,p,a,m,01-10)",
+41,1,methods,method > description,"Doing scale (levels: r,p,a,m,01-10)",
+41,2,attributes,attribute > choice > ordinal > methodID,1,
+41,2,attributes,attribute > choice > ordinal > code,r,
+41,2,attributes,attribute > choice > ordinal > definition,1 percent,
+41,2,attributes,attribute > choice > ordinal > order,1,
+41,3,attributes,attribute > choice > ordinal > methodID,1,
+41,3,attributes,attribute > choice > ordinal > code,p,
+41,3,attributes,attribute > choice > ordinal > definition,1 percent,
+41,3,attributes,attribute > choice > ordinal > order,2,
+41,4,attributes,attribute > choice > ordinal > methodID,1,
+41,4,attributes,attribute > choice > ordinal > code,a,
+41,4,attributes,attribute > choice > ordinal > definition,2 percent,
+41,4,attributes,attribute > choice > ordinal > order,3,
+41,5,attributes,attribute > choice > ordinal > methodID,1,
+41,5,attributes,attribute > choice > ordinal > code,m,
+41,5,attributes,attribute > choice > ordinal > definition,4 percent,
+41,5,attributes,attribute > choice > ordinal > order,4,
+41,6,attributes,attribute > choice > ordinal > methodID,1,
+41,6,attributes,attribute > choice > ordinal > code,01,
+41,6,attributes,attribute > choice > ordinal > definition,10 percent,
+41,6,attributes,attribute > choice > ordinal > order,5,
+41,7,attributes,attribute > choice > ordinal > methodID,1,
+41,7,attributes,attribute > choice > ordinal > code,02,
+41,7,attributes,attribute > choice > ordinal > definition,20 percent,
+41,7,attributes,attribute > choice > ordinal > order,6,
+41,8,attributes,attribute > choice > ordinal > methodID,1,
+41,8,attributes,attribute > choice > ordinal > code,03,
+41,8,attributes,attribute > choice > ordinal > definition,30 percent,
+41,8,attributes,attribute > choice > ordinal > order,7,
+41,9,attributes,attribute > choice > ordinal > methodID,1,
+41,9,attributes,attribute > choice > ordinal > code,04,
+41,9,attributes,attribute > choice > ordinal > definition,40 percent,
+41,9,attributes,attribute > choice > ordinal > order,8,
+41,10,attributes,attribute > choice > ordinal > methodID,1,
+41,10,attributes,attribute > choice > ordinal > code,05,
+41,10,attributes,attribute > choice > ordinal > definition,50 percent,
+41,10,attributes,attribute > choice > ordinal > order,9,
+41,11,attributes,attribute > choice > ordinal > methodID,1,
+41,11,attributes,attribute > choice > ordinal > code,06,
+41,11,attributes,attribute > choice > ordinal > definition,60 percent,
+41,11,attributes,attribute > choice > ordinal > order,10,
+41,12,attributes,attribute > choice > ordinal > methodID,1,
+41,12,attributes,attribute > choice > ordinal > code,07,
+41,12,attributes,attribute > choice > ordinal > definition,70 percent,
+41,12,attributes,attribute > choice > ordinal > order,11,
+41,13,attributes,attribute > choice > ordinal > methodID,1,
+41,13,attributes,attribute > choice > ordinal > code,08,
+41,13,attributes,attribute > choice > ordinal > definition,80 percent,
+41,13,attributes,attribute > choice > ordinal > order,12,
+41,14,attributes,attribute > choice > ordinal > methodID,1,
+41,14,attributes,attribute > choice > ordinal > code,09,
+41,14,attributes,attribute > choice > ordinal > definition,90 percent,
+41,14,attributes,attribute > choice > ordinal > order,13,
+41,15,attributes,attribute > choice > ordinal > methodID,1,
+41,15,attributes,attribute > choice > ordinal > code,10,
+41,15,attributes,attribute > choice > ordinal > definition,97 percent,
+41,15,attributes,attribute > choice > ordinal > order,14,
+42,1,methods,method > subject,plant cover,
+42,1,methods,method > name,"Plant cover/Domin (levels: +,1-10)",
+42,1,methods,method > description,"Domin scale (levels: +,1-10)",
+42,2,attributes,attribute > choice > ordinal > methodID,1,
+42,2,attributes,attribute > choice > ordinal > code,+,
+42,2,attributes,attribute > choice > ordinal > definition,0.1 percent,
+42,2,attributes,attribute > choice > ordinal > order,1,
+42,3,attributes,attribute > choice > ordinal > methodID,1,
+42,3,attributes,attribute > choice > ordinal > code,1,
+42,3,attributes,attribute > choice > ordinal > definition,2 percent,
+42,3,attributes,attribute > choice > ordinal > order,2,
+42,4,attributes,attribute > choice > ordinal > methodID,1,
+42,4,attributes,attribute > choice > ordinal > code,2,
+42,4,attributes,attribute > choice > ordinal > definition,3 percent,
+42,4,attributes,attribute > choice > ordinal > order,3,
+42,5,attributes,attribute > choice > ordinal > methodID,1,
+42,5,attributes,attribute > choice > ordinal > code,3,
+42,5,attributes,attribute > choice > ordinal > definition,4 percent,
+42,5,attributes,attribute > choice > ordinal > order,4,
+42,6,attributes,attribute > choice > ordinal > methodID,1,
+42,6,attributes,attribute > choice > ordinal > code,4,
+42,6,attributes,attribute > choice > ordinal > definition,7 percent,
+42,6,attributes,attribute > choice > ordinal > order,5,
+42,7,attributes,attribute > choice > ordinal > methodID,1,
+42,7,attributes,attribute > choice > ordinal > code,5,
+42,7,attributes,attribute > choice > ordinal > definition,18 percent,
+42,7,attributes,attribute > choice > ordinal > order,6,
+42,8,attributes,attribute > choice > ordinal > methodID,1,
+42,8,attributes,attribute > choice > ordinal > code,6,
+42,8,attributes,attribute > choice > ordinal > definition,29.5 percent,
+42,8,attributes,attribute > choice > ordinal > order,7,
+42,9,attributes,attribute > choice > ordinal > methodID,1,
+42,9,attributes,attribute > choice > ordinal > code,7,
+42,9,attributes,attribute > choice > ordinal > definition,42 percent,
+42,9,attributes,attribute > choice > ordinal > order,8,
+42,10,attributes,attribute > choice > ordinal > methodID,1,
+42,10,attributes,attribute > choice > ordinal > code,8,
+42,10,attributes,attribute > choice > ordinal > definition,63 percent,
+42,10,attributes,attribute > choice > ordinal > order,9,
+42,11,attributes,attribute > choice > ordinal > methodID,1,
+42,11,attributes,attribute > choice > ordinal > code,9,
+42,11,attributes,attribute > choice > ordinal > definition,83 percent,
+42,11,attributes,attribute > choice > ordinal > order,10,
+42,12,attributes,attribute > choice > ordinal > methodID,1,
+42,12,attributes,attribute > choice > ordinal > code,10,
+42,12,attributes,attribute > choice > ordinal > definition,95.5 percent,
+42,12,attributes,attribute > choice > ordinal > order,11,
+43,1,methods,method > subject,plant cover,
+43,1,methods,method > name,Plant cover/Hill (levels: 1-5),
+43,1,methods,method > description,Hill scale (levels: 1-5),
+43,2,attributes,attribute > choice > ordinal > methodID,1,
+43,2,attributes,attribute > choice > ordinal > code,1,
+43,2,attributes,attribute > choice > ordinal > definition,1 percent,
+43,2,attributes,attribute > choice > ordinal > order,1,
+43,3,attributes,attribute > choice > ordinal > methodID,1,
+43,3,attributes,attribute > choice > ordinal > code,2,
+43,3,attributes,attribute > choice > ordinal > definition,3.5 percent,
+43,3,attributes,attribute > choice > ordinal > order,2,
+43,4,attributes,attribute > choice > ordinal > methodID,1,
+43,4,attributes,attribute > choice > ordinal > code,3,
+43,4,attributes,attribute > choice > ordinal > definition,7.5 percent,
+43,4,attributes,attribute > choice > ordinal > order,3,
+43,5,attributes,attribute > choice > ordinal > methodID,1,
+43,5,attributes,attribute > choice > ordinal > code,4,
+43,5,attributes,attribute > choice > ordinal > definition,15 percent,
+43,5,attributes,attribute > choice > ordinal > order,4,
+43,6,attributes,attribute > choice > ordinal > methodID,1,
+43,6,attributes,attribute > choice > ordinal > code,5,
+43,6,attributes,attribute > choice > ordinal > definition,60 percent,
+43,6,attributes,attribute > choice > ordinal > order,5,
+44,1,methods,method > subject,plant cover,
+44,1,methods,method > name,Plant cover/Hult (levels: 1-5),
+44,1,methods,method > description,Hult scale (levels: 1-5),
+44,2,attributes,attribute > choice > ordinal > methodID,1,
+44,2,attributes,attribute > choice > ordinal > code,1,
+44,2,attributes,attribute > choice > ordinal > definition,3.125 percent,
+44,2,attributes,attribute > choice > ordinal > order,1,
+44,3,attributes,attribute > choice > ordinal > methodID,1,
+44,3,attributes,attribute > choice > ordinal > code,2,
+44,3,attributes,attribute > choice > ordinal > definition,9.375 percent,
+44,3,attributes,attribute > choice > ordinal > order,2,
+44,4,attributes,attribute > choice > ordinal > methodID,1,
+44,4,attributes,attribute > choice > ordinal > code,3,
+44,4,attributes,attribute > choice > ordinal > definition,18.75 percent,
+44,4,attributes,attribute > choice > ordinal > order,3,
+44,5,attributes,attribute > choice > ordinal > methodID,1,
+44,5,attributes,attribute > choice > ordinal > code,4,
+44,5,attributes,attribute > choice > ordinal > definition,37.5 percent,
+44,5,attributes,attribute > choice > ordinal > order,4,
+44,6,attributes,attribute > choice > ordinal > methodID,1,
+44,6,attributes,attribute > choice > ordinal > code,5,
+44,6,attributes,attribute > choice > ordinal > definition,75 percent,
+44,6,attributes,attribute > choice > ordinal > order,5,
+45,1,methods,method > subject,plant cover,
+45,1,methods,method > name,Plant cover/Hurst & Allen (levels: 1-6),
+45,1,methods,method > description,Hurst & Allen scale (levels: 1-6),
+45,2,attributes,attribute > choice > ordinal > methodID,1,
+45,2,attributes,attribute > choice > ordinal > code,1,
+45,2,attributes,attribute > choice > ordinal > definition,0.5 percent,
+45,2,attributes,attribute > choice > ordinal > order,1,
+45,3,attributes,attribute > choice > ordinal > methodID,1,
+45,3,attributes,attribute > choice > ordinal > code,2,
+45,3,attributes,attribute > choice > ordinal > definition,3 percent,
+45,3,attributes,attribute > choice > ordinal > order,2,
+45,4,attributes,attribute > choice > ordinal > methodID,1,
+45,4,attributes,attribute > choice > ordinal > code,3,
+45,4,attributes,attribute > choice > ordinal > definition,15.5 percent,
+45,4,attributes,attribute > choice > ordinal > order,3,
+45,5,attributes,attribute > choice > ordinal > methodID,1,
+45,5,attributes,attribute > choice > ordinal > code,4,
+45,5,attributes,attribute > choice > ordinal > definition,38 percent,
+45,5,attributes,attribute > choice > ordinal > order,4,
+45,6,attributes,attribute > choice > ordinal > methodID,1,
+45,6,attributes,attribute > choice > ordinal > code,5,
+45,6,attributes,attribute > choice > ordinal > definition,63 percent,
+45,6,attributes,attribute > choice > ordinal > order,5,
+45,6,attributes,attribute > choice > ordinal > methodID,1,
+45,6,attributes,attribute > choice > ordinal > code,6,
+45,6,attributes,attribute > choice > ordinal > definition,88 percent,
+45,6,attributes,attribute > choice > ordinal > order,6,
+46,1,methods,method > subject,plant cover,
+46,1,methods,method > name,"Plant cover/Londo (levels: *1,*2,*4,1-10) ",
+46,1,methods,method > description,"Londo scale (levels: *1,*2,*4,1-10) ",
+46,2,attributes,attribute > choice > ordinal > methodID,1,
+46,2,attributes,attribute > choice > ordinal > code,*1,
+46,2,attributes,attribute > choice > ordinal > definition,0.5 percent,
+46,2,attributes,attribute > choice > ordinal > order,1,
+46,3,attributes,attribute > choice > ordinal > methodID,1,
+46,3,attributes,attribute > choice > ordinal > code,*2,
+46,3,attributes,attribute > choice > ordinal > definition,2 percent,
+46,3,attributes,attribute > choice > ordinal > order,2,
+46,4,attributes,attribute > choice > ordinal > methodID,1,
+46,4,attributes,attribute > choice > ordinal > code,*4,
+46,4,attributes,attribute > choice > ordinal > definition,4 percent,
+46,4,attributes,attribute > choice > ordinal > order,3,
+46,5,attributes,attribute > choice > ordinal > methodID,1,
+46,5,attributes,attribute > choice > ordinal > code,1,
+46,5,attributes,attribute > choice > ordinal > definition,10 percent,
+46,5,attributes,attribute > choice > ordinal > order,4,
+46,6,attributes,attribute > choice > ordinal > methodID,1,
+46,6,attributes,attribute > choice > ordinal > code,2,
+46,6,attributes,attribute > choice > ordinal > definition,20 percent,
+46,6,attributes,attribute > choice > ordinal > order,5,
+46,7,attributes,attribute > choice > ordinal > methodID,1,
+46,7,attributes,attribute > choice > ordinal > code,3,
+46,7,attributes,attribute > choice > ordinal > definition,30 percent,
+46,7,attributes,attribute > choice > ordinal > order,6,
+46,8,attributes,attribute > choice > ordinal > methodID,1,
+46,8,attributes,attribute > choice > ordinal > code,4,
+46,8,attributes,attribute > choice > ordinal > definition,40 percent,
+46,8,attributes,attribute > choice > ordinal > order,7,
+46,9,attributes,attribute > choice > ordinal > methodID,1,
+46,9,attributes,attribute > choice > ordinal > code,5,
+46,9,attributes,attribute > choice > ordinal > definition,50 percent,
+46,9,attributes,attribute > choice > ordinal > order,8,
+46,10,attributes,attribute > choice > ordinal > methodID,1,
+46,10,attributes,attribute > choice > ordinal > code,6,
+46,10,attributes,attribute > choice > ordinal > definition,60 percent,
+46,10,attributes,attribute > choice > ordinal > order,9,
+46,11,attributes,attribute > choice > ordinal > methodID,1,
+46,11,attributes,attribute > choice > ordinal > code,7,
+46,11,attributes,attribute > choice > ordinal > definition,70 percent,
+46,11,attributes,attribute > choice > ordinal > order,10,
+46,12,attributes,attribute > choice > ordinal > methodID,1,
+46,12,attributes,attribute > choice > ordinal > code,8,
+46,12,attributes,attribute > choice > ordinal > definition,80 percent,
+46,12,attributes,attribute > choice > ordinal > order,11,
+46,13,attributes,attribute > choice > ordinal > methodID,1,
+46,13,attributes,attribute > choice > ordinal > code,9,
+46,13,attributes,attribute > choice > ordinal > definition,90 percent,
+46,13,attributes,attribute > choice > ordinal > order,12,
+46,14,attributes,attribute > choice > ordinal > methodID,1,
+46,14,attributes,attribute > choice > ordinal > code,10,
+46,14,attributes,attribute > choice > ordinal > definition,97 percent,
+46,14,attributes,attribute > choice > ordinal > order,13,
+47,1,methods,method > subject,plant cover,
+47,1,methods,method > name,Plant cover/North-Carolina (levels: 1-10) ,
+47,1,methods,method > description,North-Carolina scale (levels: 1-10) ,
+47,2,attributes,attribute > choice > ordinal > methodID,1,
+47,2,attributes,attribute > choice > ordinal > code,1,
+47,2,attributes,attribute > choice > ordinal > definition,0.1 percent,
+47,2,attributes,attribute > choice > ordinal > order,1,
+47,3,attributes,attribute > choice > ordinal > methodID,1,
+47,3,attributes,attribute > choice > ordinal > code,2,
+47,3,attributes,attribute > choice > ordinal > definition,0.5 percent,
+47,3,attributes,attribute > choice > ordinal > order,2,
+47,4,attributes,attribute > choice > ordinal > methodID,1,
+47,4,attributes,attribute > choice > ordinal > code,3,
+47,4,attributes,attribute > choice > ordinal > definition,1.5 percent,
+47,4,attributes,attribute > choice > ordinal > order,3,
+47,5,attributes,attribute > choice > ordinal > methodID,1,
+47,5,attributes,attribute > choice > ordinal > code,4,
+47,5,attributes,attribute > choice > ordinal > definition,3.5 percent,
+47,5,attributes,attribute > choice > ordinal > order,4,
+47,6,attributes,attribute > choice > ordinal > methodID,1,
+47,6,attributes,attribute > choice > ordinal > code,5,
+47,6,attributes,attribute > choice > ordinal > definition,7.5 percent,
+47,6,attributes,attribute > choice > ordinal > order,5,
+47,7,attributes,attribute > choice > ordinal > methodID,1,
+47,7,attributes,attribute > choice > ordinal > code,6,
+47,7,attributes,attribute > choice > ordinal > definition,17.5 percent,
+47,7,attributes,attribute > choice > ordinal > order,6,
+47,8,attributes,attribute > choice > ordinal > methodID,1,
+47,8,attributes,attribute > choice > ordinal > code,7,
+47,8,attributes,attribute > choice > ordinal > definition,37.5 percent,
+47,8,attributes,attribute > choice > ordinal > order,7,
+47,9,attributes,attribute > choice > ordinal > methodID,1,
+47,9,attributes,attribute > choice > ordinal > code,8,
+47,9,attributes,attribute > choice > ordinal > definition,62.5 percent,
+47,9,attributes,attribute > choice > ordinal > order,8,
+47,10,attributes,attribute > choice > ordinal > methodID,1,
+47,10,attributes,attribute > choice > ordinal > code,9,
+47,10,attributes,attribute > choice > ordinal > definition,85 percent,
+47,10,attributes,attribute > choice > ordinal > order,9,
+47,11,attributes,attribute > choice > ordinal > methodID,1,
+47,11,attributes,attribute > choice > ordinal > code,10,
+47,11,attributes,attribute > choice > ordinal > definition,97.5 percent,
+47,11,attributes,attribute > choice > ordinal > order,9,
+48,1,methods,method > name,"Plant cover/Pfadenhauer (levels: +,1a,1b,2a,2b,3,4,5) ",
+48,1,methods,method > description,"Pfadenhauer scale (levels: +,1a,1b,2a,2b,3,4,5) ",
+48,2,attributes,attribute > choice > ordinal > methodID,1,
+48,2,attributes,attribute > choice > ordinal > code,+,
+48,2,attributes,attribute > choice > ordinal > definition,1 percent,
+48,2,attributes,attribute > choice > ordinal > order,1,
+48,3,attributes,attribute > choice > ordinal > methodID,1,
+48,3,attributes,attribute > choice > ordinal > code,1a,
+48,3,attributes,attribute > choice > ordinal > definition,2 percent,
+48,3,attributes,attribute > choice > ordinal > order,2,
+48,4,attributes,attribute > choice > ordinal > methodID,1,
+48,4,attributes,attribute > choice > ordinal > code,1b,
+48,4,attributes,attribute > choice > ordinal > definition,4 percent,
+48,4,attributes,attribute > choice > ordinal > order,3,
+48,5,attributes,attribute > choice > ordinal > methodID,1,
+48,5,attributes,attribute > choice > ordinal > code,2a,
+48,5,attributes,attribute > choice > ordinal > definition,10 percent,
+48,5,attributes,attribute > choice > ordinal > order,4,
+48,6,attributes,attribute > choice > ordinal > methodID,1,
+48,6,attributes,attribute > choice > ordinal > code,2b,
+48,6,attributes,attribute > choice > ordinal > definition,20 percent,
+48,6,attributes,attribute > choice > ordinal > order,5,
+48,7,attributes,attribute > choice > ordinal > methodID,1,
+48,7,attributes,attribute > choice > ordinal > code,3,
+48,7,attributes,attribute > choice > ordinal > definition,38 percent,
+48,7,attributes,attribute > choice > ordinal > order,6,
+48,8,attributes,attribute > choice > ordinal > methodID,1,
+48,8,attributes,attribute > choice > ordinal > code,4,
+48,8,attributes,attribute > choice > ordinal > definition,63 percent,
+48,8,attributes,attribute > choice > ordinal > order,7,
+48,9,attributes,attribute > choice > ordinal > methodID,1,
+48,9,attributes,attribute > choice > ordinal > code,5,
+48,9,attributes,attribute > choice > ordinal > definition,88 percent,
+48,9,attributes,attribute > choice > ordinal > order,8,

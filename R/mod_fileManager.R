@@ -12,7 +12,15 @@ mod_fileManager_ui <- function(id){
   
   sidebarLayout(
     tags$div(class = "col-sm-2 well", role = "complementary", 
-             fileInput(ns("upload"), "Upload files", width = "100%", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", "xls", "xlsx", ".xml"))
+             tagList(
+               tags$label("Upload a file"),
+               tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                      title = "Supported data formats: 
+                      \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+                      \nTurboVeg data: .xml 
+                      \nSee 'About > How to use this app' for more information."),
+               fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", "xls", "xlsx", ".xml"))
+             )
     ),
     mainPanel(
       width = 10, 
@@ -20,12 +28,16 @@ mod_fileManager_ui <- function(id){
         column(
           10, 
           offset = 1,
-          tagList(
-            tags$label("File browser"),
+          tagList(       
+            tags$label("Uploaded files"),
+            tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                   title = "These files are available for further operations. Pick a file for edits in the File Editor"),
             uiOutput(ns("file_browser")),
             tags$hr(),
             div(
               tags$label("File Editor"),
+              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                     title = "Review and and edit files before importing to VegX"),
               uiOutput(ns("file_editor")),
               style = "margin-bottom: 20px"
             )
@@ -50,17 +62,24 @@ mod_fileManager_server <- function(id, action_log, log_path){
     #### Upload ####
     # Process and render uploaded files
     observeEvent(input$upload, {
+      if(any(input$upload$name %in% names(user_data))){
+        existing_files = input$upload$name[which(input$upload$name %in% names(user_data))]
+        showModal(
+          modalDialog(paste0("The following existing files will be replaced by the your upload: ", paste0(existing_files, collapse = ", ")), footer = NULL, easyClose = T)
+        )
+      }
+      
       lapply(input$upload$name, function(file_name){     
         tryCatch(
           expr = {
             file_info = input$upload[which(input$upload$name == file_name),]
-            file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
+            file_ext = tools::file_ext(file_name)
             if(file_ext == "csv"){
-              user_data[[file_name]] = utils::read.csv(file_info$datapath) %>% 
+              user_data[[file_name]] = utils::read.csv(file_info$datapath, fileEncoding="UTF-8") %>% 
                 rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("tab", "tsv", "txt")){
-              user_data[[file_name]]  = utils::read.delim(file_info$datapath) %>% 
+              user_data[[file_name]]  = utils::read.delim(file_info$datapath, fileEncoding="UTF-8") %>% 
                 rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("xls", "xlsx")){
@@ -72,11 +91,12 @@ mod_fileManager_server <- function(id, action_log, log_path){
             } else (
               stop("Unsupported file format.")
             )
-  
-            new_action_log_record(log_path, "File info", paste0("File '", file_name,"' uploaded"))
+            new_action_log_record(log_path, "File info", paste0("File '", file_name,"' uploaded."))
           }, error = function(e){
             shiny::showNotification("Upload failed. Please consult the log for more information.", type = "error")
             new_action_log_record(log_path, "File error", paste0("Upload of file '", file_name,"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+          }, finally = {
+            shinyjs::reset("upload")
           }
         )
       })
@@ -140,7 +160,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
         fluidRow(
           column(width = 12,
                  actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
-                 actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs")
+                 actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
           )
         ),
         if(file_ext == "xml"){
@@ -189,7 +209,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
         }
         
         # Update action log
-        new_action_log_record(log_path, "File info", paste0("Entered edit mode for file '", file_focus(),"'"))
+        new_action_log_record(log_path, "File info", paste0("Entered edit mode for file '", file_focus(),"'."))
         action_log(read_action_log(log_path))
       })
     
@@ -211,7 +231,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                        
                        output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      }
-
+                     
                      # Restore UI state
                      insertUI(selector = paste0("#", ns("save_edits")),
                               where = "beforeBegin",
@@ -257,7 +277,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    }
                    
                    # Update action log
-                   new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded"))
+                   new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded."))
                    action_log(read_action_log(log_path))
                  })
     
@@ -312,7 +332,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    
                    # Update action log 
                    shiny::showNotification(paste0(file_name, " deleted"))
-                   new_action_log_record(log_path, "File info", paste0("File '", file_name,"' deleted"))
+                   new_action_log_record(log_path, "File info", paste0("File '", file_name,"' deleted."))
                    action_log(read_action_log(log_path))
                  })
     

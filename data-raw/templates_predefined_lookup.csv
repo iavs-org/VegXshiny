@@ -27,9 +27,23 @@ template_id,target_element,subject,name,description,user_defined
 26,methods,climate,Climate MAP/mm,Mean annual precipitation,0
 27,methods,climate,Climate PDM/mm,Precipitation of the driest month,0
 28,methods,climate,Climate PWM/mm,Precipitation of the wettest month,0
-29,strata,strata definition,Strata definition/Recce,Standard Recce stratum definition,0
+29,strata,strata definition,Strata definition/standard Recce woody (levels: Tier 1-Tier 7),"Standard Recce height tiers used for predominantly woody vegetation. Hurst & Allen (2007): The Recce method for decribing New Zealand vegetation. Landcare Research Manaaki Whenua, Lincoln, New Zealand",0
 30,methods,plant cover,"Plant cover/standard Braun-Blanquet (levels: r,+,1,2,3,4,5)","Standard Braun-Blanquet scala (levels: r,+,1,2,3,4,5)",0
 31,methods,plant cover,"Plant cover/extended Braun-Blanquet (levels: r,+,1,2m,2a,2b,3,4,5)","Extended Braun-Blanquet scala (levels: r,+,1,2m,2a,2b,3,4,5)",0
-32,methods,plant cover,"Plant cover/Recce (levels: 1,2,3,4,5,6)","Standard Recce scala (levels: 1,2,3,4,5,6)",0
+32,methods,plant cover,Plant cover/Recce (levels: 1-6),"Standard Recce scala (levels: 1,2,3,4,5,6)",0
 33,methods,plant cover,Plant cover/presence-absence (levels: 1),Presence absence scale,0
-34,strata,strata definition,Strata definition/Turboveg,Standard TurboVeg stratum definition (levels: 0-9),
+34,strata,strata definition,Strata definition/TurboVeg,Standard TurboVeg stratum definition (levels: 0-9),0
+35,strata,strata definition,"Strata definition/standard Recce non-woody (levels: Tier 1-Tier 4, Tier 5A, Tier 5B, Tier 6A, Tier 6B, Tier 7)","Standard Recce height tiers used for predominantly non-woody vegetation. Hurst & Allen (2007): The Recce method for decribing New Zealand vegetation. Landcare Research Manaaki Whenua, Lincoln, New Zealand",0
+36,methods,plant cover,Plant cover/Ordinal scale (levels: 1-9) ,Ordinal scale (levels: 1-9) ,0
+37,methods,plant cover,"Plant cover/Barkman (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ","Barkman scale (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ",0
+38,methods,plant cover,Plant cover/Constancy classes (levels: 1-5),Constancy classes (levels: 1-5),0
+39,methods,plant cover,Plant cover/Daubermire (levels: 1-6),Daubermire scale (levels: 1-6),0
+40,methods,plant cover,"Plant cover/Dengler (levels: r,+,1,2a,2b,3,4,5)","Dengler scale (levels: r,+,1,2a,2b,3,4,5)",0
+41,methods,plant cover,"Plant cover/Doing (levels: r,p,a,m,01-10)","Doing scale (levels: r,p,a,m,01-10)",0
+42,methods,plant cover,"Plant cover/Domin (levels: +,1-10)","Domin scale (levels: +,1-10)",0
+43,methods,plant cover,Plant cover/Hill (levels: 1-5),Hill scale (levels: 1-5),0
+44,methods,plant cover,Plant cover/Hult (levels: 1-5),Hult scale (levels: 1-5),0
+45,methods,plant cover,Plant cover/Hurst & Allen (levels: 1-6),Hurst & Allen scale (levels: 1-6),0
+46,methods,plant cover,"Plant cover/Londo (levels: *1,*2,*4,1-10) ","Londo scale (levels: *1,*2,*4,1-10) ",0
+47,methods,plant cover,Plant cover/North-Carolina (levels: 1-10) ,North-Carolina scale (levels: 1-10) ,0
+48,methods,plant cover,"Plant cover/Pfadenhauer (levels: +,1a,1b,2a,2b,3,4,5) ","Pfadenhauer scale (levels: +,1a,1b,2a,2b,3,4,5) ",0

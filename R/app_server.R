@@ -12,10 +12,10 @@
 #' @noRd 
 
 app_server <- function(input, output, session) {
-  options(shiny.maxRequestSize=100*1024^2) # Set max upload size to 100MB
+  options(shiny.maxRequestSize=50*1024^2) # Set max upload size to 100MB
   
   log_path = tempfile("log_", fileext = ".csv")
-  new_action_log_record(log_path, "System info", "Session started", append = F, col.names = T)
+  new_action_log_record(log_path, "System info", "Session started.", append = F, col.names = T)
   
   # ---------------------------------------------------------------------------------------- #
   # Create xml objects
@@ -26,7 +26,7 @@ app_server <- function(input, output, session) {
   
   # VegX document
   vegx_doc = new_vegx_document()
-
+  
   # ---------------------------------------------------------------------------------------- #
   # Create global reactive values
   vegx_txt = reactiveVal({
@@ -44,6 +44,7 @@ app_server <- function(input, output, session) {
   templates_lookup = reactiveVal({
     templates_predefined_lookup
   })
+  
   # --------------------------------------------------------------------------------------- #
   # Create global observers
   observe({
@@ -73,6 +74,19 @@ app_server <- function(input, output, session) {
     })
   })
   
+  observe({
+    browser_info = shinybrowser::get_all_info()
+    if(browser_info$dimensions$width < 800 | browser_info$device == "Mobile"){
+      showModal(
+        modalDialog(
+          div(class = "text-center text-danger", tags$h4("Your display dimensions may not be fully compatible with this application.")),
+          tags$p("Consider resizing you browser window or running VegXShiny on a device with a larger screen."),
+          size = "m", easyClose = T)
+      )
+    }
+  })
+  
+  
   # --------------------------------------------------------------------------------------- #
   # File Upload
   user_data = mod_fileManager_server("fileManager", action_log, log_path)
@@ -85,6 +99,9 @@ app_server <- function(input, output, session) {
   
   # 2. TurboVeg XML Data
   mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
+  
+  # 3. VegX XML Data
+  mod_vegxImport_server("vegxImport", user_data, vegx_doc, vegx_txt, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # XML Viewer

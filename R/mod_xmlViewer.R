@@ -50,8 +50,8 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                                  tags$label("Warning", style = "color:red"),
                                  tags$p("Editing raw XML may corrupt the document and is recommended for expert use only."),
                                  footer = tagList(
-                                   tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                             actionButton(ns("confirm_edit"), class = "pull-right btn-success", "Understood", icon("check")))
+                                   tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+                                             actionButton(ns("confirm_edit"), class = "pull-right btn-success", "Proceed", icon("check")))
                                  ),
                                  size = "l",
                      )
@@ -102,7 +102,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                      updateAceEditor(session, "xml_viewer", readOnly = T)
                      
                      shiny::showNotification("Edits saved.")
-                     new_action_log_record(log_path, "Document info", paste0("Saved manual edits to XML document"))
+                     new_action_log_record(log_path, "Document info", paste0("Saved manual edits to XML document."))
                    }, error = function(e){
                      shiny::showNotification("Document error. Please consult the log for more information.")
                      new_action_log_record(log_path, "Document error", paste0("Document edit failed with the following exception:<ul><li>", e, "</li></ul>"))
@@ -129,7 +129,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    is_valid = xml2::xml_validate(vegx_doc, schema = vegx_schema_full)
                    if(is_valid){
                      shiny::showNotification("Validation successful.", type = "message")
-                     new_action_log_record(log_path, "Validation info", "Document validation successful")
+                     new_action_log_record(log_path, "Validation info", "Document validation successful.")
                    } else {
                      shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
                      new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following exceptions: <ul>", 

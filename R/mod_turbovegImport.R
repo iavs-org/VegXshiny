@@ -42,6 +42,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     ns <- session$ns
     
     tv_dfs = reactiveVal()
+    upload_valid = reactiveVal(F)
     output$tv_summary = renderText("No summary available.")
     
     dropdown_empty = reactive({
@@ -72,8 +73,16 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
             return()
           } 
           tv_import = tv_to_df(user_data[[input$tv_file]])
+          if(all(lengths(tv_import) == 0)){
+            showNotification("Uploaded file is not a valid Turboveg XML document.", type = "error")
+            stop()
+          }
           tv_dfs(tv_import)
+          upload_valid(T)
           showNotification("Turboveg file read.")
+        }, error = function(e){
+          upload_valid(F)
+          tv_dfs(NULL)
         }, finally = {
           shinyjs::enable("read_tv")
           shinyjs::enable("tv_file")
@@ -82,7 +91,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     )
     
     observeEvent(
-      eventExpr = tv_dfs(),
+      eventExpr = upload_valid(),
       handlerExpr = {
         if(!isTruthy(tv_dfs())){
           output$tv_summary = renderText("No summary available.")
@@ -105,7 +114,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
       eventExpr = input$submit, 
       handlerExpr = {
         # Build Modal UI elements
-        if(isTruthy(tv_dfs())){
+        if(upload_valid()){
           modal_content = tagList(
             div(class = "text-center text-info", icon("check"), 
                 tags$p("This will convert the uploaded document into VegX document. Depending on the document size, this process may take a while."),
@@ -161,7 +170,6 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Project ####
-              browser()
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$project_title)){
                 mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
@@ -216,7 +224,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
               }
               
-              # Undefined header
+              # Undefined header data
               udf_method_nodes = lapply(input$udf_header_import, function(name){
                 new_vegx_node(node_paths = c("method > subject", "method > name", "method > description"),
                               node_values = c("Turboveg udf_header", name, "TurboVeg undefined method"),
@@ -339,7 +347,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               # Strata definition #####
               setProgress(value = 0.4, "Layer definitions")
               stratadef_template_id = templates_lookup() %>% 
-                dplyr::filter(name == "Strata definition/Turboveg") %>% 
+                dplyr::filter(name == "Strata definition/TurboVeg") %>% 
                 pull(template_id) %>% 
                 unique()
               
