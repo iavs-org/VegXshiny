@@ -83,7 +83,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
           })
           
           upload_valid(T)
-          showNotification("VegX document checked and validated.")
+          showNotification("VegX document read and validated.")
         }, error = function(e){
           upload_valid(F)
         }, finally = {
