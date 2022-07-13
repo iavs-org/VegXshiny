@@ -12,7 +12,7 @@ tv_to_df = function(tv_xml){
   # ----------------------------------------------------------- #
   # Plot data ####
   plot_nodes = tv_xml %>% xml_child("Plots") %>% xml_children()
-  withProgress(message = "Reading TurboVeg XML", expr = {
+  withProgress(message = "Reading Turboveg XML", expr = {
     progress_mod  = ceiling(length(plot_nodes)/min(length(plot_nodes), 10))
     progress_incr = 1 / min(length(plot_nodes), 10)
     

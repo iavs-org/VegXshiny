@@ -1,6 +1,6 @@
 Package: VegXshiny
 Title: VegXshiny
-Version: 0.0.9
+Version: 0.0.1
 Authors@R: person('Christian', 'König', email = 'chr.koenig@outlook.com', role = c('cre', 'aut'))
 Description: A web application for the conversion of vegetation data into a common exchange format defined by the VegX standard.
 License: MIT + file LICENSE
@@ -26,7 +26,7 @@ LazyData: true
 RoxygenNote: 7.1.2
 Language: en-US
 Depends: 
-    R (>= 4.2)
+    R (>= 4.0)
 URL: https://github.com/ChrKoenig/VegXshiny
 BugReports: https://github.com/ChrKoenig/VegXshiny/issues
 VignetteBuilder: knitr

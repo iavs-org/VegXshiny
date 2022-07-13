@@ -14,8 +14,8 @@ mod_turbovegImport_ui <- function(id){
     fluidRow(
       column(
         width = 10, offset = 1,
-        tags$h2 ("TurboVeg Import"),
-        tags$p("Select a TurboVeg XML file and read the data into R", class = "text-info annotation"),
+        tags$h2 ("Turboveg Import"),
+        tags$p("Select a Turboveg XML file and read the data into R", class = "text-info annotation"),
         fluidRow(
           column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
           column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg XML", style = "height: 35px; line-height: 0px")))
@@ -60,7 +60,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
       updateSelectizeInput(session, inputId = "tv_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
     })
     
-    # Read TurboVeg XML into tabular format
+    # Read Turboveg XML into tabular format
     observeEvent(
       eventExpr = input$read_tv,
       handlerExpr = {  
@@ -91,7 +91,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     )
     
     observeEvent(
-      eventExpr = upload_valid(),
+      eventExpr = tv_dfs(),
       handlerExpr = {
         if(!isTruthy(tv_dfs())){
           output$tv_summary = renderText("No summary available.")
@@ -126,13 +126,13 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
             )
           )
           modal_footer = tagList(
-            tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check")))
+            tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
+                      actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check")))
           )
         } else {
-          modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please read in a TurboVeg XML file."))
-          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Confirm", icon("check"))))
+          modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please read in a Turboveg XML file."))
+          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
+                                           shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check"))))
           )
         }
         
@@ -159,6 +159,9 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
       eventExpr = input$confirm_import,
       handlerExpr = {
         tryCatch({
+          # Remove attributes and child nodes from vegx_doc
+          vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
+          
           withProgress(
             message = "Importing data",
             expr = {
@@ -227,7 +230,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               # Undefined header data
               udf_method_nodes = lapply(input$udf_header_import, function(name){
                 new_vegx_node(node_paths = c("method > subject", "method > name", "method > description"),
-                              node_values = c("Turboveg udf_header", name, "TurboVeg undefined method"),
+                              node_values = c("Turboveg udf_header", name, "Turboveg undefined method"),
                               id = NULL, log_path, vegx_schema, write_log = F)
               })
               
@@ -312,7 +315,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                                        "node_id" = new_node_id(),
                                        "main_element" = "methods",
                                        "node_path" = c("method > subject", "method > name", "method > description"),
-                                       "node_value" = c("plant cover", coverscale$description, paste0("TurboVeg cover scale (Code: ", coverscale$code, ")")))
+                                       "node_value" = c("plant cover", coverscale$description, paste0("Turboveg cover scale (Code: ", coverscale$code, ")")))
                 
                 if(coverscale$code == "00"){            # The only quantitative cover scale in turboveg
                   attributes_df = data.frame("template_id" = template_id,
@@ -347,7 +350,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               # Strata definition #####
               setProgress(value = 0.4, "Layer definitions")
               stratadef_template_id = templates_lookup() %>% 
-                dplyr::filter(name == "Strata definition/TurboVeg") %>% 
+                dplyr::filter(name == "Strata definition/Turboveg") %>% 
                 pull(template_id) %>% 
                 unique()
               
@@ -485,7 +488,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               # Action log 
               setProgress(value = 1)
               showNotification("Import finished.")
-              new_action_log_record(log_path, "Import info", "Data imported from TurboVeg file")
+              new_action_log_record(log_path, "Import info", "Data imported from Turboveg file")
               action_log(read_action_log(log_path))
             })  
         }, error = function(e){

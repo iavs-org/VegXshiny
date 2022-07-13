@@ -47,8 +47,9 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # Create global observers
+  node_info = reactiveVal()
   observe({
-    tryCatch({
+    try({
       if(length(input$nodeHoveredInfo) != 0){
         node_lineage = unlist(input$nodeHoveredInfo$nodeLineage)
         if(node_lineage[1] != "choice"){
@@ -61,16 +62,13 @@ app_server <- function(input, output, session) {
           if(is.null(node_attributes[["minOccurs"]])){node_attributes$minOccurs = 1}
           if(is.null(node_attributes[["maxOccurs"]])){node_attributes$maxOccurs = 1}
           node_attributes = node_attributes[order(names(node_attributes))]
-          node_info = list(
-            tree = input$nodeHoveredInfo$tree,
-            nodeId = input$nodeHoveredInfo$nodeId,
-            nodeAttributes = node_attributes
+          node_info_hovered = list(
+            node_lineage = rev(node_lineage),
+            node_attributes = node_attributes
           )
-          session$sendCustomMessage("node_tooltip", node_info)  
+          node_info(node_info_hovered)
         }
       }
-    }, error = function(e){
-      shiny::showNotification("Error in tree selection. Please contact the authors.", type = "error")
     })
   })
   
@@ -86,6 +84,9 @@ app_server <- function(input, output, session) {
     }
   })
   
+  # --------------------------------------------------------------------------------------- #
+  # About
+  mod_aboutVegX_server("about", vegx_schema, node_info)
   
   # --------------------------------------------------------------------------------------- #
   # File Upload
@@ -97,7 +98,7 @@ app_server <- function(input, output, session) {
   # 1. Tabular Data
   mod_tableImport_server("tableImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
-  # 2. TurboVeg XML Data
+  # 2. Turboveg XML Data
   mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
   # 3. VegX XML Data

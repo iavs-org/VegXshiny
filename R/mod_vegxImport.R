@@ -59,7 +59,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
       updateSelectizeInput(session, inputId = "vegx_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
     })
     
-    # Read TurboVeg XML into tabular format
+    # Read Turboveg XML into tabular format
     observeEvent(
       eventExpr = input$read_vegx,
       handlerExpr = {  
@@ -98,11 +98,11 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
       handlerExpr = {
         if(upload_valid()){
           modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will replace the current VegX document with the uploaded file."))
-          modal_footer = tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+          modal_footer = tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                                    actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check")))
         } else {
           modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Please read in a valid VegX file."))
-          modal_footer = tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+          modal_footer = tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                                    shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check"))))
         }
         

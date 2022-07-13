@@ -1,5 +1,14 @@
 body {
    font-size: 20px;
+   padding-bottom: 60px;
+}
+
+tbody > ul {
+  margin-bottom: 0px!important;
+}
+
+code, pre {
+  background-color: transparent;
 }
 
 .form-control {
@@ -107,12 +116,7 @@ body {
   line-height: 0.7;
 }
 
-tbody > ul {
-  margin-bottom: 0px!important;
-}
-
 .multicol { 
-  height: 150px;
   webkit-column-count: 3; /* Chrome, Safari, Opera */ 
   moz-column-count: 3;    /* Firefox */ 
   column-count: 3; 

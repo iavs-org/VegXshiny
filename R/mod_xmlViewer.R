@@ -50,7 +50,7 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                                  tags$label("Warning", style = "color:red"),
                                  tags$p("Editing raw XML may corrupt the document and is recommended for expert use only."),
                                  footer = tagList(
-                                   tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+                                   tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                                              actionButton(ns("confirm_edit"), class = "pull-right btn-success", "Proceed", icon("check")))
                                  ),
                                  size = "l",

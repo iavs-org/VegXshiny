@@ -78,7 +78,7 @@ check_input_completeness = function(values, values_mandatory = NA, values_groupi
 #' @param header The header of the output UI
 #' @param labels The labels of the output table 
 #' @param values The values of the output table
-#' @param inputs_complete A logical flag (usually obtained with check_input_completeness)
+#' @param inputs_complete A logical flag (usually obtained with check_input_completeness())
 #'
 #' @return a rendered UI element
 #' @noRd
@@ -106,6 +106,12 @@ render_mapping_summary = function(header = NA, labels, values, inputs_complete){
   )
 }
 
+#' Render a summary of the current vegX document
+#'
+#' @param vegx_doc vegx xml-document
+#'
+#' @return a rendered summary of the vegx document
+#' @noRd
 render_export_summary = function(vegx_doc){
   node_summary = lapply(xml_children(vegx_doc), function(node){
     data.frame(
@@ -119,6 +125,28 @@ render_export_summary = function(vegx_doc){
     return(renderText("VegX document is empty"))
   }
   return(renderTable(bind_rows(node_summary)))
+}
+
+render_node_info = function(node_info){
+  if(length(node_info) == 0){
+    div()
+  } else {
+    lineage = isolate(node_info$node_lineage)
+    attrs = isolate(node_info$node_attributes)
+    tagList(
+      tags$label("Node summary"),
+      tags$p(paste0(lineage, collapse = " > "), style = "color:grey; font-size: 14px"),
+      tags$p(attrs$annotation, class = "text-info"),
+      tags$label("Properties"),
+      renderTable(
+        colnames = F,
+        data.frame(
+          "property" = names(attrs),
+          "value" = unlist(attrs)
+        ) %>% dplyr::filter(!property %in% c("annotation", "name"))
+      )
+    )
+  }
 }
 
 #' Convert a VegX xml document to a list of rectangular tables

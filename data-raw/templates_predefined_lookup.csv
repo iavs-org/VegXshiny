@@ -32,7 +32,7 @@ template_id,target_element,subject,name,description,user_defined
 31,methods,plant cover,"Plant cover/extended Braun-Blanquet (levels: r,+,1,2m,2a,2b,3,4,5)","Extended Braun-Blanquet scala (levels: r,+,1,2m,2a,2b,3,4,5)",0
 32,methods,plant cover,Plant cover/Recce (levels: 1-6),"Standard Recce scala (levels: 1,2,3,4,5,6)",0
 33,methods,plant cover,Plant cover/presence-absence (levels: 1),Presence absence scale,0
-34,strata,strata definition,Strata definition/TurboVeg,Standard TurboVeg stratum definition (levels: 0-9),0
+34,strata,strata definition,Strata definition/Turboveg,Standard Turboveg stratum definition (levels: 0-9),0
 35,strata,strata definition,"Strata definition/standard Recce non-woody (levels: Tier 1-Tier 4, Tier 5A, Tier 5B, Tier 6A, Tier 6B, Tier 7)","Standard Recce height tiers used for predominantly non-woody vegetation. Hurst & Allen (2007): The Recce method for decribing New Zealand vegetation. Landcare Research Manaaki Whenua, Lincoln, New Zealand",0
 36,methods,plant cover,Plant cover/Ordinal scale (levels: 1-9) ,Ordinal scale (levels: 1-9) ,0
 37,methods,plant cover,"Plant cover/Barkman (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ","Barkman scale (levels: r,+r,+p,+a,+b,1p,1a,1b,1m,2a,2b,3a,3b,4a,4b,5a,5b) ",0

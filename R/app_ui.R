@@ -10,7 +10,7 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     
-    # Detect device & Browser info
+    # Detect device & browser info
     shinybrowser::detect(),
     
     # Application UI logic 
@@ -18,22 +18,17 @@ app_ui <- function(request) {
                position = "fixed-top",
                theme=bslib::bs_theme(version = 3, bootswatch = "darkly"),
                header = tags$style(type="text/css", "body {padding-top: 80px;}"),
-               
-               
-               navbarMenu(title = "About ", icon = icon("home", class = "icon-padded-right"),
-                          tabPanel("The VegX standard", mod_aboutVegX_ui("aboutVegX")),
-                          tabPanel("How to use this app", mod_aboutVegXshiny_ui("aboutVegXshiny"))
-               ),
-               
+               tabPanel("About", icon = icon("info", class = "icon-padded-right"),
+                        mod_aboutVegX_ui("about")),
                
                tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
                navbarMenu(title = "Import to VegX", icon = icon("magic", class = "icon-padded-right"), 
-                 tabPanel("Import from Tables", mod_tableImport_ui("tableImport")),
-                 tabPanel("Import from TurboVeg", mod_turbovegImport_ui("turbovegImport")),
-                 tabPanel("Import from VegX", mod_vegxImport_ui("vegxImport"))
+                          tabPanel("Import from Tables", mod_tableImport_ui("tableImport")),
+                          tabPanel("Import from Turboveg", mod_turbovegImport_ui("turbovegImport")),
+                          tabPanel("Import from VegX", mod_vegxImport_ui("vegxImport"))
                ),
                
                tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
@@ -46,7 +41,7 @@ app_ui <- function(request) {
                
                tabPanel("Action Log", icon = icon("history", class = "icon-padded-right"),
                         mod_actionLog_ui("actionLog")
-               ),
+               )
     )
   )
 }

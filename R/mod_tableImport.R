@@ -526,7 +526,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(3, selectizeInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(4, selectizeInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 )
               )
             )
@@ -1035,12 +1035,12 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         if(all(sapply(reactiveValuesToList(inputs_complete), isTRUE))){
           modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will add all mappings to your VegX document."))
           modal_footer = tagList(
-            tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+            tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                       actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check")))
           )
         } else {
           modal_content = div(class = "text-center text-danger", icon("exclamation"), tags$p("Submission incomplete. Please review your entries."))
-          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Return", class = "pull-left btn-danger", icon = icon("times")), 
+          modal_footer = tagList(tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                                            shinyjs::disabled(actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check"))))
           )
         }
@@ -1068,6 +1068,9 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
       eventExpr = input$confirm_import,
       handlerExpr = {
         tryCatch({
+          # Remove attributes and child nodes from vegx_doc
+          vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
+          
           #-------------------------------------------------------------------------#
           withProgress(
             message = "Importing data",
@@ -1320,7 +1323,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               # node IDs and create the actual observation elements. 
               #
               # The workflow below follows this rationale.
-              if(!is.null(input$observations_input_control) && input$observations_input_control != ""){
+              if(!is.null(input$observations_input_control) && all(input$observations_input_control != "")){
                 setProgress(value = 0.2, "Plot observations")
                 # Fetch user data assigned in observation mappings
                 data_upload = sapply(input$observations_input_control, function(obs_category){
@@ -1521,6 +1524,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   }
                   
                   #------------------#
+                  browser()
                   aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
                   method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                   
@@ -1555,7 +1559,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   # 3. Build lookup (if qualitative scale was used)
                   if(method_is_quantitative){
                     measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(aggOrgObs_measurementScale_nodes$attributes[[1]]$node, "id"),
-                                                         taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement])
+                                                         taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]) %>% 
+                      dplyr::distinct()
                   } else {
                     measurementScale_lookup = lapply(aggOrgObs_measurementScale_nodes$attributes, function(x){
                       data.frame(attributeID = xml2::xml_attr(x$node, "id"),
@@ -1582,7 +1587,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     aggOrgObs_df = aggOrgObs_mappings %>% 
                       left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
                       left_join(organisms_lookup, by = "organismName") %>% 
-                      left_join(measurementScale_lookup, by = "taxon_measurement") %>%
+                      left_join(measurementScale_lookup, by = "taxon_measurement") %>%       # TODO: FIX WRONG JOIN FOR QUANTITATIVE SCALE?!
                       left_join(strata_lookup, by = "stratumName") %>%                       # TODO: Check for correct join (2 strataDefs with overlapping category names)
                       left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% 
                       dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 

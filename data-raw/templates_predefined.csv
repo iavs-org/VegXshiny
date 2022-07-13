@@ -316,8 +316,8 @@ template_id,node_id,main_element,node_path,node_value
 33,2,attributes,attribute > choice > qualitative > code,1
 33,2,attributes,attribute > choice > qualitative > definition,Presence
 34,1,methods,method > subject,stratum definition
-34,1,methods,method > name,Strata definition/TurboVeg
-34,1,methods,method > description,Standard TurboVeg stratum definition (levels: 0-9)
+34,1,methods,method > name,Strata definition/Turboveg
+34,1,methods,method > description,Standard Turboveg stratum definition (levels: 0-9)
 34,1,methods,method > choice > citationString,"Hennekens, S.M. and Schaminée, J.H. (2001), TURBOVEG, a comprehensive data base management system for vegetation data. Journal of Vegetation Science, 12: 589-591. https://doi.org/10.2307/3237010"
 34,2,strata,stratum > methodID,1
 34,2,strata,stratum > stratumName,1

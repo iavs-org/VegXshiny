@@ -13,32 +13,31 @@ knitr::opts_chunk$set(
 )
 ```
 
-# VegXshiny
+# VegXshiny - An interactive web application for vegetation ecologists
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
 [![Codecov test coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: beta-testing](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-## Introduction
+The increasing digitization of research data has motivated data standardization efforts across scientific disciplines. The vegetation ecological community has recognized the need for a standardized 
+exchange format since at least 2003 and developed the initial the version of the Veg-X standard in 2008 (Wiser et al., 2011). Veg-X is implemented as an XML schema that provides both flexibility
+and precision in representing vegetation data of different origin and format.
 
-A primary technical impediment to large-scale sharing of vegetation data is the lack of a recognized international exchange standard for linking the panoply of tools and database implementations that exist among various organizations and individuals participating in vegetation research. 
+Despite being community-driven and designed to be *"maximally compatible with existing standards and databases\"* (Wiser et al., 2011), Veg-X has not found wide adoption
+among vegetation ecologists to this date. One of the reasons for this is the complexity of the format and the lack of ecoinformatics tools to easily access it. A major step towards improving the 
+accessibility of Veg-X was the publication of the VegX R-package (De Cáceres, 2018), which provides tools for importing, integrating and exporting vegetation data using the Veg-X standard. 
+While the VegX package allows users to create Veg-X documents using R programming language, interest in a simple GUI-based application for Veg-X remained high.
 
-## The Veg-X exchange standard
+![*VegXshiny has an intuitive graphical user interface to guide the user through the conversion process*](inst/app/www/images/vegxshiny_UI.png){width=700px}
 
-The **Veg-X exchange standard** for plot-based vegetation data (Wiser et al. 2011) is intended to be used to share and merge vegetation-plot data of different kinds. Veg-X allows for observations of vegetation at both individual plant and aggregated observation levels. It ensures that observations are fixed to physical sample plots at specific points in space and time, and makes a distinction between the entity of interest (e.g. an individual tree) and the observational act (i.e. a measurement). The standard supports repeated measurements of both individual organisms and plots, and enables the connection between the entity observed and the taxonomic concept associated with that observation to be maintained.
+**VegXshiny aims to make the conversion of vegetation data into Veg-X documents as easy as possible.** The graphical user interface of VegXshiny helps users, who have no experience with
+programming or markup languages, to build valid Veg-X documents and implement best practices in terms of data management and interoperability. Dynamic import dialogs guide
+users through the process of mapping their data to the corresponding Veg-X elements, while ensuring that the generated XML conforms to the Veg-X standard. The ability to view and edit 
+input files and output VegX documents gives users full control over their data. Finally, an interactive tree viewer of the Veg-X schema helps making the standard accessible and understandable.
 
-Veg-X is written as an **XML schema**, which is a definition of user-defined tags to structure textual information in order to create self-describing datasets. XML (Extensible Markup Language) is an open standard, and XML files are both machine and human-readable (they are stored in plain-text ASCII format). Visit folder [vegxschema](https://github.com/iavs-org/VegX/tree/master/vegxschema) to see the XML schema representation of the standard. This schema should be used to evaluate whether a given Veg-X XML document conforms to the definitions and data structure of the standard.
-
-## An R package to use the Veg-X standard
-
-A barrier to the use of a standard like Veg-X is its complexity. To make the exchange schema of Veg-X usable by the wider community requires the development of informatics tools for mapping data from different input formats (e.g. relevé tables from different databases, forest inventory data or stem-mapped forest plots) into Veg-X, mechanisms to create unique identifiers to allow source datasets to be combined, and tools to export data for data analysis and visualization. The **VegXshiny R package** has been designed for this purpose. 
-
-### Acknowledgements
-
-Developments endorsed and funded by the [International Association for Vegetation Science](http://iavs.org/)
-
+The development of VegXshiny is endorsed by the [International Association for Vegetation Science (IAVS)](http://iavs.org/).
 
 **VegXShiny R package development**:
 
@@ -56,3 +55,10 @@ Developments endorsed and funded by the [International Association for Vegetatio
 * Martin Kleikamp
 * Brad Boyle
 * Christian König
+
+**References**:
+
+Wiser, S.K., Spencer, N., de Cáceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X – an exchange standard for plot-based vegetation data. – Journal of Vegetation Science 22: 598–609.
+
+De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX
+

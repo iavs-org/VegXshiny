@@ -17,8 +17,8 @@ mod_fileManager_ui <- function(id){
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                       title = "Supported data formats: 
                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-                      \nTurboVeg data: .xml 
-                      \nSee 'About > How to use this app' for more information."),
+                      \nTurboveg data: .xml 
+                      \nSee 'About > Tutorial' for more information."),
                fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", "xls", "xlsx", ".xml"))
              )
     ),
@@ -119,7 +119,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
             file_ext = stringr::str_split(file_name, "\\.", simplify = T)[-1]
             icon = switch(file_ext,                                       # Assign appropriate file icon
                           "csv" = icon("file-csv", "fa-9x black"),
-                          "txt" = icon("file-csv", "fa-9x black"),
+                          "txt" = icon("file", "fa-9x black"),
                           "xls" = icon("file-excel", "fa-9x black"),
                           "xlsx" = icon("file-excel", "fa-9x black"),
                           "xml" = icon("file-code", "fa-9x black"),
