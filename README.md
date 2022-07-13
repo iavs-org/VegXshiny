@@ -32,13 +32,13 @@ package allows users to create Veg-X documents using R programming
 language, interest in a simple GUI-based application for Veg-X remained
 high.
 
-<figure>
-<img src="inst/app/www/images/vegxshiny_UI.png" width="700"
-alt="VegXshiny has an intuitive graphical user interface to guide the user through the conversion process" />
-<figcaption aria-hidden="true"><em>VegXshiny has an intuitive graphical
-user interface to guide the user through the conversion
-process</em></figcaption>
-</figure>
+<center>
+
+<img src="inst/app/www/images/vegxshiny_UI.png" width="700" />
+
+*VegXshiny has an intuitive graphical user interface to guide the user
+through the conversion process*
+</center>
 
 **VegXshiny aims to make the conversion of vegetation data into Veg-X
 documents as easy as possible.** The graphical user interface of

@@ -17,7 +17,6 @@ Imports:
     shinybrowser,
     shinyjs,
     shinyTree (>= 0.3.0),
-    shinyWidgets,
     stringr,
     tidyr,
     xml2

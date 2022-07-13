@@ -51,7 +51,7 @@ mod_aboutVegX_ui <- function(id){
                 tags$li("Christian K\u00f6nig")),
         
         tags$h2("References"),
-        tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X – an exchange standard for plot-based vegetation data. – Journal of Vegetation Science 22: 598–609."),
+        tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard for plot-based vegetation data. Journal of Vegetation Science 22: 598-609."),
         tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX")
       ),
       
