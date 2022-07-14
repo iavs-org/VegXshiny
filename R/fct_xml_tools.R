@@ -1,33 +1,149 @@
-#' Build a dataframe from list of element mappings
-#' @description Builds a (wide) table of node path - node value pairs from existing mappings (as e.g. stored in the `elem_mappings` reactiveVal). The number of columns corresponds to the number of mappings. The number of rows depends on the specified data sources: if all mappings point to text or id values, one row (corresponding to one node) will be generated. If there is at least one mapping to a column in user-supplied data, the output will have the equivalent number of rows and text and id values will be reused.
-#'
-#' @param mappings A named list. Root elements are named after VegX main elements. Each root element contains zero or more 2-element named lists that represent the mappings. The name of each child element is a valid VegX node path, the element `value` holds the corresponding input and the element `source` indicates whether `value` is to be taken literally ("Text") or points to a data column of values ("File").
-#' @param user_data `reactiveValues` of uploaded files
+#' Load VegX schema
 #' 
-#' @return A data.frame
-#'
+#' @description Loads a fresh copy of the source VegX XSD files
+#' 
+#' @return a list of xml2 documents
+#' 
+#' @importFrom xml2 read_xml
+#' 
 #' @noRd
-build_node_values_df = function(mappings, user_data){
-  node_values = lapply(mappings, function(mapping) return(mapping$value))  # list needed here for processing in next step
-  node_sources = sapply(mappings, function(mapping) return(mapping$source))
-  
-  # Replace 'value' with data column if source is "file"
-  for(i in which(node_sources %in% c("file", "File"))){
-    file_name = str_split(node_values[[i]], "\\$", simplify = T)[1]
-    column_name = str_split(node_values[[i]], "\\$", simplify = T)[2]
-    upload = user_data[[file_name]]
-    upload_df = jsonlite::fromJSON(upload$x$data)
-    colnames(upload_df) = upload$x$rColHeaders
-    node_values[[i]] = upload_df[,column_name]
-  }
-  
-  tryCatch({
-    return(as.data.frame(node_values, check.names = F))
-  }, error = function(e){
-    return(NULL)
-  })
+load_schema = function(){
+  list(
+    veg  = xml2::read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny", mustWork = F)),
+    misc = xml2::read_xml(system.file("extdata", "vegxschema", "veg-misc.xsd", package = "VegXshiny", mustWork = F)),
+    obs  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plotobservation.xsd", package = "VegXshiny", mustWork = F)),
+    plot = xml2::read_xml(system.file("extdata", "vegxschema", "veg-plot.xsd", package = "VegXshiny", mustWork = F)),
+    org  = xml2::read_xml(system.file("extdata", "vegxschema", "veg-organism.xsd", package = "VegXshiny", mustWork = F)),
+    comm = xml2::read_xml(system.file("extdata", "vegxschema", "veg-community.xsd", package = "VegXshiny", mustWork = F))
+  )
 }
 
+# --------------------------------------------------------------------------------------- #
+#' Simplify VegX XML schema and link across documents
+#'
+#' @description This is a recursive function to parse and simplify the VegX XSD schema. It is typically called on the root node (<xsd:element name="vegX"> in veg.xsd) and then works its way through the schema. In doing so, it does mainly two things: (1) remove 'clutter' such as attribute, annotation, sequence or complexType nodes and (2) link nodes across namespaces. 
+#'
+#' @param node An xml_node or xml_nodeset of length 1.
+#' @param ns A character string specifying the VegX namespace of the current node (veg, misc, obs, plot, org, comm).
+#' @param schema_files A named list with xsd definitions (see \link{load_schema}).
+#' @param simplify Whether to remove container elements (complexType, sequence, simpleContent, extension, ...) when linking the schema. Default is TRUE.
+#'
+#' @return This function is used for its side effects.
+#'
+#' @import dplyr
+#' @import xml2
+#' @import stringr
+#'
+#' @noRd
+link_vegx_schema = function(node, ns, schema_files, simplify = T){
+  # Pre-processing
+  if(simplify){
+    children = xml_children(node)
+    
+    # Include annotation elements as attribute
+    annotation = children[xml_name(children) == "annotation"]
+    if(length(annotation) > 0){
+      xml_attr(node, "annotation") = xml_text(annotation)
+    }
+    
+    # Include ID definition as attribute
+    attributes = children[xml_name(children) == "attribute"]
+    if(length(attributes) > 0){
+      sapply(attributes, function(attribute){
+        if(xml_has_attr(attribute, "use") && xml_attr(attribute, "use") == "required"){
+          xml_attr(node, xml_attr(attribute, "name")) = xml_attr(attribute, "use")
+        }
+      })
+    }
+    
+    # Remove annotation and attribute elements (but not attributes!)
+    xml_remove(children[xml_name(children) %in% c("attribute", "annotation")]) 
+    children = xml_children(node)
+    
+  } else {
+    # Don't remove annotation and attribute nodes, leave as is
+    children = xml_children(node)
+    children = children[!xml_name(children) %in% c("attribute", "annotation")]
+  }
+  
+  # Main logic
+  if(length(children) == 0) {    # Base case: Leaf node
+    if(xml_name(node) == "element" & xml_has_attr(node, "type")){
+      type = xml_attr(node, "type")
+      type_qualified = str_detect(type, pattern = ":")
+      
+      # If qualified, set new namespace
+      if(type_qualified){    
+        ns = str_split(type, ":", simplify = T)[1]
+        type = str_split(type, ":", simplify = T)[2]
+      }
+      
+      # If namespace belongs to VegX, graft type definition into current node
+      if(ns %in% names(schema_files)){
+        node_append = xml_find_all(schema_files[[ns]], str_glue("//*[@name='{type}']"))
+        children_append = node_append %>% xml_children %>% xml_find_all("../*[not(self::xsd:annotation)]") # Avoid duplicate annotation type definition
+        sapply(children_append, function(child){xml_add_child(node, child, .copy=T)})
+        if(simplify){ # If node_append has 'id' or 'taxonName' attribute, inherit 
+          if(xml_has_attr(node_append, "id")){xml_set_attr(node, "id", xml_attr(node_append, "id"))}
+          if(xml_has_attr(node_append, "taxonName")){xml_set_attr(node, "taxonName", xml_attr(node_append, "taxonName"))}
+        }
+        link_vegx_schema(node, ns, schema_files, simplify)
+      }
+    }
+    else {
+      parent = xml_parent(node)
+      if(xml_has_attr(node, "id")){xml_attr(parent, "id") = xml_attr(node, "id")}
+      if(xml_has_attr(node, "taxonName")){xml_attr(parent, "taxonName") = xml_attr(node, "taxonName")}
+      xml_remove(node) # This avoids issues with xsd:simpleType nodes with unnamed children
+      return()
+    }
+  } else if(simplify & (xml_name(node) %in% c("complexType", "sequence", "simpleContent", "complexContent", "extension"))){    # Not a leaf, but a container
+    parent = xml_parent(node)
+    sapply(children, function(child){ # attach all children to node's parent
+      xml_add_child(parent, child, .copy=F) 
+    }) 
+    xml_remove(node)
+    link_vegx_schema(parent, ns, schema_files, simplify) # Process simplified parent   
+  } else {     # Not a leaf, not a container: Recursively process all children
+    sapply(children, function(child){
+      link_vegx_schema(child, ns, schema_files, simplify)
+    })
+  }
+  return()
+}
+
+# --------------------------------------------------------------------------------------- #
+#' Convert a VegX schema node and all its descendents to an R list object.
+#'
+#' @param node an xml_node or xml_nodeset of length 1
+#' @param name_attr the XML attribute used for naming list elements
+#' @param ns a character string specifying the VegX namespace of the current node (veg, misc, obs, plot, org, comm)
+#' 
+#' @description This is a recursive function to build an R list from a VegX document. 
+#'
+#' @return A list with a hierarchy corresponding to `node`
+#'
+#' @noRd
+#' @import xml2
+schema_to_list = function(node, name_attr, ns = character()){
+  children = xml_children(node)
+  if (length(children) == 0) {    # Base case: Leaf node
+    return(NA_character_)
+  } else {
+    result = lapply(children, function(child){
+      schema_to_list(child, name_attr, ns = ns)
+    })
+    children_names = ifelse(xml_has_attr(children, name_attr), # Condition
+                            xml_attr(children, name_attr, ns = ns),       # True
+                            paste0(xml_name(children, ns = ns)))          # False
+    if (any(children_names != "")) {
+      names(result) = children_names
+    }
+  }
+  return(result)
+}
+
+# --------------------------------------------------------------------------------------- #
 #' Initialize an empty VegX document
 #' @description Initializes an xml document with namespace definitions and a single root node 'vegX'
 #'
@@ -49,13 +165,14 @@ new_vegx_document = function(){
   return(vegx_doc)
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Create a VegX node
-#' @description Creates and populates an instance of a VegX main element
+#' @description Creates and populates an instance of a VegX main element. Use `new_vegx_nodes()` when building many nodes at once.
 #'
 #' @param vegx_schema An `xml_document` of the vegx schema
 #' @param node_paths A character vector representing the positions of the nodes to be created starting with the VegX main element. Levels are separated with a " > "
 #' @param node_values A character vector containing the values of the nodes 
-#' @param id The id given to the new node. If NULL (default), a new id will be created.
+#' @param id The id given to the new node. If NULL (default), a new id will be created.``
 #' @param log_path The path to the sessions temporary log file
 #' 
 #' @import dplyr
@@ -65,7 +182,7 @@ new_vegx_document = function(){
 #' 
 #' @noRd
 #' 
-#' @return xml_document
+#' @return a 3-slot list containing the node and potential error and warning messages
 new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_schema, write_log = T){ 
   # Prepare data
   node_names = node_paths %>% str_split(" > ")
@@ -124,6 +241,140 @@ new_vegx_node = function(node_paths, node_values, id = NULL, log_path, vegx_sche
   return(list(node = root_node, warnings = length(conditions$warnings), errors = length(conditions$errors)))
 }
 
+# --------------------------------------------------------------------------------------- #
+#' Create a VegX nodes
+#' @description This function is a much faster alternative to repeated calls to `new_vegx_node()` when building many nodes.
+#'
+#' @param nodes_df A `data.frame` with node paths as column names and node values as values
+#' @param vegx_schema An `xml_document` of the vegx schema
+#' 
+#' @noRd
+#' 
+#' @return a list of nodes
+new_vegx_nodes = function(nodes_df, vegx_schema){
+  tryCatch({
+    #### Check node paths
+    node_names = colnames(nodes_df) %>% stringr::str_split(" > ") 
+    root_name = unique(sapply(node_names, "[[", 1))
+    
+    # Check node validity
+    # 1. Are all paths within the same main element?
+    if(length(root_name) != 1){stop(paste("Node paths points to multiple root elements:", root_name))}
+    
+    # 2. are nodepaths valid?
+    node_xpaths = sapply(node_names, function(x){
+      paste0(".//", paste0("*[@name='", x, "']", collapse = "/")) %>% 
+        str_replace_all("\\*\\[@name='choice']", "xsd:choice")
+    })
+    schema_nodes = sapply(node_xpaths, xml_find_all, x = vegx_schema)
+    
+    if(any(lengths(schema_nodes) == 0)){        # if there are invalid node paths      
+      if(all(lengths(schema_nodes) == 0)){
+        stop("No valid node paths found.")
+      }
+      nodes_valid = which(lengths(schema_nodes) != 0) # Find valid nodes
+      schema_nodes = schema_nodes[nodes_valid]        # Subset schema nodes
+      node_names = node_names[nodes_valid]            # ... and node_names
+      nodes_df = nodes_df[, nodes_valid, drop = F]    # ... and nodes_df to valid nodes
+    }
+    
+    # 3. Do all mandatory nodes have values?
+    node_xpaths_std = sapply(schema_nodes, xml_path)
+    for(i in seq_along(schema_nodes)){
+      node = schema_nodes[[i]]
+      siblings_xpath_std = node %>% xml_siblings() %>% xml_path() 
+      
+      if(!xml2::xml_has_attr(node, "minOccurs") || xml2::xml_attr(node, "minOccurs") == 1){   # if node is mandatory --> set siblings (and all descendents) to "" where node value is missing
+        node_values_missing = which(!sapply(nodes_df[,i], isTruthy))
+        sibling_columns = setdiff(which(node_xpaths_std %in% siblings_xpath_std), i)
+        if(length(node_values_missing) > 0 & length(sibling_columns) > 0){
+          nodes_df[node_values_missing, sibling_columns] = ""
+        }
+      } else { # else -> check if all mandatory siblings are in nodes_df
+        siblings_mandatory = sapply(siblings_xpath_std, function(xpath){
+          sibling = xml_find_all(vegx_schema, xpath)
+          !xml2::xml_has_attr(sibling, "minOccurs") || xml2::xml_attr(sibling, "minOccurs") == 1
+        })
+        siblings_mandatory = names(siblings_mandatory)[which(siblings_mandatory)]
+        siblings_mandatory_present = sapply(siblings_mandatory, function(sibling){
+          any(grepl(sibling, node_xpaths_std, fixed =T))
+        })
+        if(!all(siblings_mandatory_present)){
+          nodes_df[,i] = ""
+        }
+      }
+    }
+
+    "/xsd:schema/xsd:element/xsd:element[1]/xsd:element/xsd:choice"
+    "/xsd:schema/xsd:element/xsd:element[1]/xsd:element/xsd:choice/xsd:element[1]"
+    # Find correct order of nodes according to schema
+    leaf_nodes = xml_find_all(vegx_schema, paste0(".//*[@name='", root_name, "']")) %>% 
+      xml_parent() %>% 
+      xml_find_all(".//*[not(*)]")
+    
+    nodes_matched = match(unlist(sapply(schema_nodes, xml_path)), sapply(leaf_nodes, xml_path))   
+    if(anyNA(nodes_matched)){warning(paste0("Invalid node path: ", node_xpaths[which(is.na(nodes_matched))]))}
+    
+    #### Prepare data
+    # Reorder nodes_df according to schema
+    node_names = node_names[order(nodes_matched)]
+    nodes_df = nodes_df[, order(nodes_matched), drop = F]
+    node_types = sapply(schema_nodes, function(node) xml_attr(node, "type"))[order(nodes_matched)]
+    
+    suppressWarnings({
+      for(i in seq_along(node_types)){
+        if(node_types[i] == "xsd:date"){
+          nodes_df[,i] = as.character(lubridate::ymd(nodes_df[,i]))
+        } else if(node_types[i] == "xsd:decimal"){
+          nodes_df[,i] = as.numeric(nodes_df[,i])
+        } else if(node_types[i] == "xsd:integer"){
+          nodes_df[,i] = as.integer(nodes_df[,i])
+        }
+      }
+    })
+    
+    # Build nodes
+    nodes = lapply(1:nrow(nodes_df), function(i){
+      root = xml_new_root(root_name)
+      node_values = unlist(nodes_df[i,])
+      
+      for(j in 1:length(node_values)){
+        if(is.na(node_values[j]) | node_values[j] == ""){next} # Skip node if empty
+        if(length(node_names[[j]]) == 1){
+          xml_text(root) = node_values[j] # no traversal needed, just set text value of root
+        } else {
+          parent = root
+          for(k in 2:length(node_names[[j]])){
+            node_name = node_names[[j]][k]
+            if(node_name == "choice"){next}
+            if(k < length(node_names[[j]])){
+              if(! node_name %in% xml_name(xml_children(parent))){ # Only add new node if there is none with the same name
+                xml_add_child(parent, node_name)
+              } 
+              parent = xml_child(parent, node_name)
+            } else {
+              xml_add_child(parent, node_name, as.character(node_values[j]))
+            }
+          }
+        }
+      } 
+      # Check if root is empty
+      if(xml_length(root) == 0 && xml_text(root) == ""){
+        return(NULL)
+      } else {
+        id_key = paste0(root_name, "ID")
+        if(id_key %in% names(id_factory)){
+          id = id_factory[[id_key]]()
+          xml_set_attr(root, "id", id)
+        }
+        return(list(node = root))
+      }
+    })
+    return(nodes)
+  })
+}
+
+# --------------------------------------------------------------------------------------- #
 #' Merge mappings into a VegX node
 #' @description Merge mappings into an existing VegX node
 #'
@@ -184,8 +435,9 @@ merge_into_vegx_node = function(target_root, node_paths, node_values, log_path, 
   return(list(warnings = length(conditions$warnings), errors = length(conditions$errors)))
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Build XML from vegx mappings
-#' @description Utility function used by `*_vegx_node()` functions to build xml from node mappings
+#' @description Utility function used by `*_vegx_node()` functions to build xml from node mappings. 
 #'
 #' @param xml_root An object of class xml_document, xml_nodeset or xml_node
 #' @param node_paths A list of character vectors
@@ -351,6 +603,7 @@ build_xml = function(root, node_paths, node_values, vegx_schema){
   }
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Link VegX nodes
 #' @description Creates a link between related VegX nodes
 #'
@@ -376,6 +629,7 @@ link_vegx_nodes = function(target_root, target_node_path, linked_node, log_path,
   }
 }
 
+# --------------------------------------------------------------------------------------- #
 #' Build `xml_nodes` from a VegX template data frame
 #' @description Creates a link between related VegX `xml_nodes`. The function takes advantage of the fact, that `xml_nodes` in R are stored as external pointers to C objects. That means an established link between two `xml_nodes` will remain intact, even 
 #'
@@ -400,6 +654,7 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_l
       group_split()
     
     new_nodes = list() # Temporarily save new nodes in case they need to be linked
+    
     # loop over node_ids, create new nodes
     for(j in 1:length(nodes_split)){ 
       link_template = nodes_split[[j]] %>% dplyr::filter(str_detect(node_path, "ID$"))
@@ -417,99 +672,4 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_l
     }
   }
   return(node_list)
-}
-
-
-
-new_vegx_nodes = function(nodes_df, vegx_schema){
-  tryCatch({
-    #### Check node paths
-    node_names = colnames(nodes_df) %>% stringr::str_split(" > ") 
-    root_name = unique(sapply(node_names, "[[", 1))
-    
-    # Are all paths within the same main element?
-    if(length(root_name) != 1){stop(paste("Node paths points to multiple root elements:", root_name))}
-    
-    # Do all paths conform with the schema definition?
-    node_xpaths = sapply(node_names, function(x){
-      paste0(".//", paste0("*[@name='", x, "']", collapse = "/")) %>% 
-        str_replace_all("\\*\\[@name='choice']", "xsd:choice")
-    })
-    schema_nodes = sapply(node_xpaths, xml_find_all, x = vegx_schema)
-    
-    if(any(lengths(schema_nodes) == 0)){            # There are invalid node paths
-      if(all(lengths(schema_nodes) == 0)){
-        stop("No valid node paths found.")
-      }
-      nodes_valid = which(lengths(schema_nodes) != 0)
-      schema_nodes = schema_nodes[nodes_valid]
-      node_names = node_names[nodes_valid]
-      nodes_df = nodes_df[,nodes_valid, drop = F]
-    }
-    
-    leaf_nodes = xml_find_all(vegx_schema, paste0(".//*[@name='", root_name, "']")) %>% 
-      xml_parent() %>% 
-      xml_find_all(".//*[not(*)]")
-    
-    nodes_matched = match(unlist(sapply(schema_nodes, xml_path)), sapply(leaf_nodes, xml_path))
-    
-    if(anyNA(nodes_matched)){warning(paste0("Invalid node path: ", node_xpaths[which(is.na(nodes_matched))]))}
-    
-    #### Prepare data
-    # Reorder nodes_df according to schema
-    node_names = node_names[order(nodes_matched)]
-    nodes_df = nodes_df[, order(nodes_matched), drop = F]
-    node_types = sapply(schema_nodes, function(node) xml_attr(node, "type"))[order(nodes_matched)]
-    
-    suppressWarnings({
-      for(i in seq_along(node_types)){
-        if(node_types[i] == "xsd:date"){
-          nodes_df[,i] = as.character(lubridate::ymd(nodes_df[,i]))
-        } else if(node_types[i] == "xsd:decimal"){
-          nodes_df[,i] = as.numeric(nodes_df[,i])
-        } else if(node_types[i] == "xsd:integer"){
-          nodes_df[,i] = as.integer(nodes_df[,i])
-        }
-      }
-    })
-    
-    # Build nodes
-    nodes = lapply(1:nrow(nodes_df), function(i){
-      root = xml_new_root(root_name)
-      node_values = unlist(nodes_df[i,])
-      
-      for(j in 1:length(node_values)){
-        if(is.na(node_values[j]) | node_values[j] == ""){next} # Skip node if empty
-        if(length(node_names[[j]]) == 1){
-          xml_text(root) = node_values[j] # no traversal needed, just set text value of root
-        } else {
-          parent = root
-          for(k in 2:length(node_names[[j]])){
-            node_name = node_names[[j]][k]
-            if(node_name == "choice"){next}
-            if(k < length(node_names[[j]])){
-              if(! node_name %in% xml_name(xml_children(parent))){ # Only add new node if there is none with the same name
-                xml_add_child(parent, node_name)
-              } 
-              parent = xml_child(parent, node_name)
-            } else {
-              xml_add_child(parent, node_name, as.character(node_values[j]))
-            }
-          }
-        }
-      } 
-      # Check if root is empty
-      if(xml_length(root) == 0 && xml_text(root) == ""){
-        return(NULL)
-      } else {
-        id_key = paste0(root_name, "ID")
-        if(id_key %in% names(id_factory)){
-          id = id_factory[[id_key]]()
-          xml_set_attr(root, "id", id)
-        }
-        return(list(node = root))
-      }
-    })
-    return(nodes)
-  })
 }

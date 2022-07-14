@@ -4,6 +4,19 @@ schema_files = load_schema()
 vegx_schema = xml2::xml_find_all(schema_files[["veg"]], ".//*[@name='vegX']")
 link_vegx_schema(vegx_schema, "veg", schema_files, simplify = T)
 
+
+test_that("Subnodes are built only when all required fields have values", {
+  nodes_df = data.frame("plot > plotName" = LETTERS[1:4],
+                        "plot > geometry > area > value" = c(5,5,NA,5),
+                        "plot > geometry > area > attributeID" = 1,
+                        check.names = F)
+ 
+  fct_result = new_vegx_nodes(nodes_df, vegx_schema)
+  leaf_nodes = sapply(fct_result, function(node){length(xml_find_all(node$node, ".//*[not(*)]"))})
+  expect_equal(leaf_nodes, c(3,3,1,3))
+})
+
+
 #------------------------------------------------------------#
 test_that("Returns the correct number of nodes", {
   nodes_df = data.frame("party > choice > individualName" = "A",

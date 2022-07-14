@@ -38,7 +38,6 @@ mod_aboutVegX_ui <- function(id){
         tags$h2("Package development"),
         tags$ul(tags$li("Christian K\u00f6nig"),
                 tags$li("Sebastian Schmidtlein"),
-                tags$li("Miquel De C\u00e1ceres")),
         
         tags$h2("Veg-X standard development:"),
         tags$ul(tags$li("Miquel De C\u00e1ceres"),
@@ -64,7 +63,7 @@ mod_aboutVegX_ui <- function(id){
                 plots, taxa, observations and other aspects of a vegetation data set. Each main element may have a varying number of internal nodes that further demarcate thematic sections. 
                 Finally, leaf elements of a Veg-X document contain the data. A comprehensive overview of the Veg-X format can be found ", 
                 tags$a("here", href = "https://iavs-org.github.io/VegX/articles/VegXStandard.html", target = "_blank"), "."),
-        tags$p("Below is an interactive tree representation of the Veg-X schema. You can expand an element by clicking the plus icon (+). Additional information about the schema definition of the element 
+        tags$p("Below is an interactive tree viewer of the Veg-X schema. You can expand an element by clicking the plus icon (+). Additional information about the schema definition of the element 
                 (e.g. data type, number of occurrences, etc.) are displayed when hovering the mouse over it. The search box at the top of the tree allows to search for specific 
                 node names throughout the schema."),
         hr(),

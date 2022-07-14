@@ -169,20 +169,10 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
               nodes = list()
-              mappings = list()
-              
-              #-------------------------------------------------------------------------# 
-              # Project ####
-              setProgress(value = 0.05, "Projects")
-              if(isTruthy(input$project_title)){
-                mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
-                project_df = build_node_values_df(mappings$project, user_data)
-                nodes$projects = list(new_vegx_nodes(project_df, vegx_schema))
-              }
-              
+           
               #-------------------------------------------------------------------------# 
               # Plots ####
-              setProgress(value = 0.07, "Plots")
+              setProgress(value = 0.05, "Plots")
               plots_df = data.frame("plot > plotName" = tv_dfs()$std_header[["releve_nr"]], 
                                     "plot > plotUniqueIdentifier" = tv_dfs()$std_header[["releve_nr"]],
                                     check.names = F)
@@ -348,6 +338,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Strata definition #####
+              browser()
               setProgress(value = 0.4, "Layer definitions")
               stratadef_template_id = templates_lookup() %>% 
                 dplyr::filter(name == "Strata definition/Turboveg") %>% 

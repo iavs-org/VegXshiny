@@ -49,9 +49,7 @@ golem::add_module("newMethodTemplate")
 golem::add_module("newStrataDefTemplate")
 
 ## Add helper functions ----
-golem::add_fct("xml_schema")
-golem::add_fct("xml_export")
-golem::add_fct("import_tools")
+golem::add_fct("xml_tools")
 golem::add_fct("misc")
 
 ## External resources

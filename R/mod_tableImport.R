@@ -1070,7 +1070,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         tryCatch({
           # Remove attributes and child nodes from vegx_doc
           vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
-          
+
           #-------------------------------------------------------------------------#
           withProgress(
             message = "Importing data",
@@ -1078,39 +1078,38 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               # Preparations 
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
-              mappings = list()
               nodes = list()  
-              
+
               ## Project ####
               setProgress(value = 0.05, "Projects")
-              if(isTruthy(input$project_title)){
-                mappings$project[["project > title"]] = list(value = input$project_title, source = "Text")
-              }
-              if(isTruthy(input$project_abstract)){
-                mappings$project[["project > abstract"]] = list(value = input$project_abstract, source = "Text")
-              }
-              if(isTruthy(input$party_name) & isTruthy(input$party_role)){
-                mappings$project[["project > personnel > role"]] = list(value = input$party_role, source = "Text")
-              }
-              if(length(mappings$project) != 0){
-                project_df = build_node_values_df(mappings$project, user_data) 
-                nodes$projects = list(new_vegx_node(colnames(project_df), project_df[1,], id = NULL, log_path, vegx_schema, write_log = F))  
+              if(isTruthy(input$party_name) & isTruthy(input$party_type)){
+                parties_df = data.frame(input$party_name, check.names = F)
+                names(parties_df) = paste0("party > choice > ", tolower(input$party_type), "Name")
+                nodes$parties = new_vegx_nodes(parties_df, vegx_schema)
               }
               
               if(isTruthy(input$project_citation)){
-                mappings$literatureCitations[["literatureCitation > citationString"]]  = list(value = input$project_citation, source = "Text")
-                literatureCitations_df = build_node_values_df(mappings$literatureCitations, user_data)
-                nodes$literatureCitations = list(new_vegx_node(colnames(literatureCitations_df), literatureCitations_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
-                link_vegx_nodes(nodes$projects[[1]]$node, "project > documentCitationID", nodes$literatureCitations[[1]]$node, log_path, vegx_schema)
+                citations_df = data.frame("literatureCitation > citationString" = input$project_citation, check.names = F)
+                nodes$literatureCitations = new_vegx_nodes(citations_df, vegx_schema)
               }
               
-              if(isTruthy(input$party_name)){
-                mappings$parties[[paste0("party > choice > ", tolower(input$party_type), "Name")]] = list(value = input$party_name, source = "Text")
-                parties_df = build_node_values_df(mappings$parties, user_data)
-                nodes$parties = list(new_vegx_node(colnames(parties_df), parties_df[1,], id = NULL, log_path, vegx_schema, write_log = F))
-                link_vegx_nodes(nodes$projects[[1]]$node, "project > personnel > partyID", nodes$parties[[1]]$node, log_path, vegx_schema)
+              project_df = data.frame("project > title" = input$project_title, check.names = F)
+              if(isTruthy(input$project_abstract)){
+                project_df[["project > abstract"]] = input$project_abstract
+              }
+              if(isTruthy(input$party_name) & isTruthy(input$party_role)){
+                project_df[["project > personnel > role"]] = input$party_role
+              }
+              if(length(nodes$parties) > 0 && isTruthy(input$party_role)){
+                project_df[["project > personnel > partyID"]] = xml_attr(nodes$parties[[1]]$node, "id")
+                project_df[["project > personnel > role"]] = input$party_role
+              }
+              if(length(nodes$literatureCitations) > 0){
+                project_df[["project > documentCitationID"]] = xml_attr(nodes$literatureCitations[[1]]$node, "id")
               }
               
+              nodes$projects = new_vegx_nodes(project_df, vegx_schema)
+
               #-------------------------------------------------------------------------#
               ## Plots ####
               if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
@@ -1524,7 +1523,6 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   }
                   
                   #------------------#
-                  browser()
                   aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
                   method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                   

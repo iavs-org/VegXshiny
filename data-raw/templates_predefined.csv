@@ -755,10 +755,10 @@ template_id,node_id,main_element,node_path,node_value
 45,6,attributes,attribute > choice > ordinal > code,5
 45,6,attributes,attribute > choice > ordinal > definition,63 percent
 45,6,attributes,attribute > choice > ordinal > order,5
-45,6,attributes,attribute > choice > ordinal > methodID,1
-45,6,attributes,attribute > choice > ordinal > code,6
-45,6,attributes,attribute > choice > ordinal > definition,88 percent
-45,6,attributes,attribute > choice > ordinal > order,6
+45,7,attributes,attribute > choice > ordinal > methodID,1
+45,7,attributes,attribute > choice > ordinal > code,6
+45,7,attributes,attribute > choice > ordinal > definition,88 percent
+45,7,attributes,attribute > choice > ordinal > order,6
 46,1,methods,method > subject,plant cover
 46,1,methods,method > name,"Plant cover/Londo (levels: *1,*2,*4,1-10) "
 46,1,methods,method > description,"Londo scale (levels: *1,*2,*4,1-10) "
