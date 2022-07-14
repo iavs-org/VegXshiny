@@ -5,7 +5,5 @@
 .Rdata
 .httr-oauth
 .DS_Store
-inst/app/www/logs/log_test.csv
-inst/doc
 codecov
-draw-projects
+R/deprecated
