@@ -12,6 +12,8 @@ coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.sv
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
+## Background
+
 The increasing digitization of research data has motivated data
 standardization efforts across scientific disciplines. The vegetation
 ecological community has recognized the need for a standardized exchange
@@ -55,21 +57,12 @@ standard accessible and understandable.
 The development of VegXshiny is endorsed by the [International
 Association for Vegetation Science (IAVS)](http://iavs.org/).
 
-**VegXShiny R package development**:
+<div style="text-align:center">
 
--   Christian König
--   Sebastian Schmidtlein
+<a href="http://37.120.167.83" target="_blank"> CLICK HERE TO OPEN THE
+APP ONLINE </a>
 
-**Veg-X standard development**:
-
--   Miquel De Cáceres
--   Sebastian Schmidtlein
--   Susan K. Wiser
--   Nick Spencer
--   Robert K. Peet
--   Martin Kleikamp
--   Brad Boyle
--   Christian König
+</div>
 
 **References**:
 
@@ -79,3 +72,19 @@ data. – Journal of Vegetation Science 22: 598–609.
 
 De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package,
 <https://iavs-org.github.io/VegX>
+
+### VegXShiny R package development:
+
+-   Christian König
+-   Sebastian Schmidtlein
+
+### Veg-X standard development:
+
+-   Miquel De Cáceres
+-   Sebastian Schmidtlein
+-   Susan K. Wiser
+-   Nick Spencer
+-   Robert K. Peet
+-   Martin Kleikamp
+-   Brad Boyle
+-   Christian König

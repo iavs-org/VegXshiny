@@ -21,6 +21,8 @@ knitr::opts_chunk$set(
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
+## Background
+
 The increasing digitization of research data has motivated data standardization efforts across scientific disciplines. The vegetation ecological community has recognized the need for a standardized 
 exchange format since at least 2003 and developed the initial the version of the Veg-X standard in 2008 (Wiser et al., 2011). Veg-X is implemented as an XML schema that provides both flexibility
 and precision in representing vegetation data of different origin and format.
@@ -43,12 +45,24 @@ input files and output VegX documents gives users full control over their data. 
 
 The development of VegXshiny is endorsed by the [International Association for Vegetation Science (IAVS)](http://iavs.org/).
 
-**VegXShiny R package development**:
+<div style="text-align:center">
+  <a href="http://37.120.167.83" target="_blank">
+    CLICK HERE TO OPEN THE APP ONLINE
+  </a>
+</div>
+
+**References**:
+
+Wiser, S.K., Spencer, N., de Cáceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X – an exchange standard for plot-based vegetation data. – Journal of Vegetation Science 22: 598–609.
+
+De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX
+
+### VegXShiny R package development:
 
 * Christian König
 * Sebastian Schmidtlein
 
-**Veg-X standard development**:
+### Veg-X standard development:
 
 * Miquel De Cáceres
 * Sebastian Schmidtlein
@@ -59,9 +73,5 @@ The development of VegXshiny is endorsed by the [International Association for V
 * Brad Boyle
 * Christian König
 
-**References**:
 
-Wiser, S.K., Spencer, N., de Cáceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X – an exchange standard for plot-based vegetation data. – Journal of Vegetation Science 22: 598–609.
-
-De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX
 
