@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
 [![Codecov test coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
-[![Lifecycle: beta-testing](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 The increasing digitization of research data has motivated data standardization efforts across scientific disciplines. The vegetation ecological community has recognized the need for a standardized 
@@ -47,7 +47,6 @@ The development of VegXshiny is endorsed by the [International Association for V
 
 * Christian König
 * Sebastian Schmidtlein
-* Miquel De Cáceres
 
 **Veg-X standard development**:
 

@@ -9,7 +9,7 @@
 [![Codecov test
 coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
 [![Lifecycle:
-beta-testing](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 The increasing digitization of research data has motivated data
@@ -59,7 +59,6 @@ Association for Vegetation Science (IAVS)](http://iavs.org/).
 
 -   Christian König
 -   Sebastian Schmidtlein
--   Miquel De Cáceres
 
 **Veg-X standard development**:
 
