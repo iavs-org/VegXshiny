@@ -28,7 +28,7 @@ mod_vegxImport_ui <- function(id){
                  hr()
           )
         ),
-        actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block")
+        actionButton(ns("import"), label = "Import", width = "250px", class = "btn-success center-block")
       )
     )
   )
@@ -94,7 +94,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
     )
     
     observeEvent(
-      eventExpr = input$submit, 
+      eventExpr = input$import, 
       handlerExpr = {
         if(upload_valid()){
           modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will replace the current VegX document with the uploaded file."))

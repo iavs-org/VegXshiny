@@ -28,10 +28,10 @@ app_ui <- function(request) {
                navbarMenu(title = "Import to VegX", icon = icon("magic", class = "icon-padded-right"), 
                           tabPanel("Import from Tables", mod_tableImport_ui("tableImport")),
                           tabPanel("Import from Turboveg", mod_turbovegImport_ui("turbovegImport")),
-                          tabPanel("Import from VegX", mod_vegxImport_ui("vegxImport"))
+                          tabPanel("Load VegX", mod_vegxImport_ui("vegxImport"))
                ),
                
-               tabPanel("XML Viewer", icon = icon("code", class = "icon-padded-right"),
+               tabPanel("VegX Document", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                

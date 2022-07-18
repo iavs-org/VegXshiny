@@ -28,7 +28,7 @@ mod_turbovegImport_ui <- function(id){
                  hr()
           )
         ),
-        actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block")
+        actionButton(ns("import"), label = "Import", width = "250px", class = "btn-success center-block")
       )
     )
   )
@@ -111,7 +111,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
     )
     
     observeEvent(
-      eventExpr = input$submit, 
+      eventExpr = input$import, 
       handlerExpr = {
         # Build Modal UI elements
         if(upload_valid()){
@@ -338,7 +338,6 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               #-------------------------------------------------------------------------# 
               # Strata definition #####
-              browser()
               setProgress(value = 0.4, "Layer definitions")
               stratadef_template_id = templates_lookup() %>% 
                 dplyr::filter(name == "Strata definition/Turboveg") %>% 

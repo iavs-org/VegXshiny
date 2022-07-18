@@ -14,6 +14,9 @@ mod_xmlViewer_ui <- function(id){
     column(
       width = 10, offset = 1,
       fluidRow(
+        tags$p("Inspect, edit and validate the XML of your current VegX document", class = "text-info annotation")
+      ),
+      fluidRow(
         actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
         actionButton(ns("validate"), "Validate", width = "80px", class = "btn-xs")
       ),

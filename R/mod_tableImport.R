@@ -94,7 +94,7 @@ mod_tableImport_ui <- function(id){
                   id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
                   tags$div(
                     class = "panel-body",
-                    uiOutput(ns("aggregateOrganismObservations_ui"))
+                    uiOutput(ns("aggOrgObs_ui"))
                   )
                 )
               ),
@@ -116,7 +116,7 @@ mod_tableImport_ui <- function(id){
                   id = ns("stratumObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
                   tags$div(
                     class = "panel-body",
-                    uiOutput(ns("stratumObservations_ui"))
+                    uiOutput(ns("stratumObs_ui"))
                   )
                 )
               ),
@@ -158,7 +158,7 @@ mod_tableImport_ui <- function(id){
                   id = ns("surfaceCoverObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
                   tags$div(
                     class = "panel-body",
-                    uiOutput(ns("surfaceCoverObservations_ui"))
+                    uiOutput(ns("covObs_ui"))
                   )
                 )
               )
@@ -230,7 +230,9 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
            slope = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "slope") %>% arrange(name) %>% pull(template_id, name),
            aggOrgObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "plant count", "plant frequency", "basal area", "user-defined aggregate measurement")) %>% arrange(name) %>% pull(template_id, name),
            strataDef = templates_lookup() %>% filter(target_element == "strata", subject == "strata definition") %>% arrange(name) %>% pull(template_id, name),
-           stratumObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "user-defined stratum measurement")) %>% arrange(name) %>% pull(template_id, name))
+           stratumObs = templates_lookup() %>% filter(target_element == "methods", subject %in% c("plant cover", "user-defined stratum measurement")) %>% arrange(name) %>% pull(template_id, name),
+           covObs = templates_lookup() %>% dplyr::filter(target_element == "methods", subject == "surface cover") %>% arrange(name) %>% pull(template_id, name)
+      )
     })
     
     # Observe method inputs and trigger mod_new*Template when custom template option is selected
@@ -260,6 +262,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     observeEvent(input$aggOrgObs_measurementScale, handlerExpr = observe_method_input("aggOrgObs_measurementScale", "user-defined aggregate measurement", "method"))
     observeEvent(input$stratumObs_strataDef, handlerExpr = observe_method_input("stratumObs_strataDef", "strata definition", "strataDef"))
     observeEvent(input$stratumObs_measurementScale, handlerExpr = observe_method_input("stratumObs_measurementScale", "user-defined stratum measurement", "method"))
+    observeEvent(input$covObs_measurementScale, handlerExpr = observe_method_input("covObs_measurementScale", "surface cover", "method"))
     
     # Update method inputs to prevent re-rendering of the entire UI when `methods()` changes
     observeEvent(  
@@ -277,6 +280,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
         updateSelectizeInput(session, inputId = "stratumObs_strataDef", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
         updateSelectizeInput(session, inputId = "stratumObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$stratumObs), after = 1))
+        updateSelectizeInput(session, inputId = "covObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$covObs), after = 1))
       }
     ) 
     
@@ -297,13 +301,12 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     output$navigation_ui = renderUI({
       if(input$sidebar == "Data"){
         buttons = fluidRow(
-          column(width = 12, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right")
-          )
+          column(width = 12, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right"))
         )
       } else if(input$sidebar =="Summary") {
         buttons = fluidRow(
           column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-          column(width = 6, actionButton(ns("submit"), label = "submit", width = "250px", class = "btn-success center-block"))
+          column(width = 6, actionButton(ns("import"), label = "Import", width = "250px", class = "btn-success center-block"))
         )  
       } else {
         buttons = fluidRow(
@@ -656,31 +659,9 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
       }
     })
     
-    ## individualOrganismObservations ####
-    output$individualOrganismObservations_ui = renderUI({
-      tagList(
-        tags$p("not implemented")
-        # tags$p("Assign a dataset", class = "text-info annotation"),
-        # tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A table with one row per subplot (identified by unique combinations of plot and subplot ids) and subplot properties in columns"),
-        # selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
-        # uiOutput(ns("indOrgObs_mapping_ui"))
-      )
-    })
-    
-    # output$indOrgObs_mapping_ui = renderUI({
-    #   req(input$indOrgObs_data)
-    #   tagList(
-    #     fluidRow(
-    #       column(4, selectizeInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
-    #       column(4, selectizeInput(ns("indOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
-    #     )
-    #   )
-    # })
-    
-    
     #------------------------------------#
     ## aggregateOrganismObservations ####
-    output$aggregateOrganismObservations_ui = renderUI({
+    output$aggOrgObs_ui = renderUI({
       tagList(
         tags$label("Strata definitions"),
         br(),
@@ -760,7 +741,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     
     #------------------------------------#
     ## stratumObservations ####
-    output$stratumObservations_ui = renderUI({
+    output$stratumObs_ui = renderUI({
       tagList(
         tags$label("Strata definitions *"),
         br(),
@@ -824,16 +805,87 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     })
     
     #------------------------------------#
+    ## surfaceCoverObservations ####
+    output$covObs_ui = renderUI({
+      tagList(
+        tags$label("Measurement scale *"),
+        br(),
+        tags$p("Which scale was used to measure the observation?", class = "text-info annotation"),
+        selectizeInput(ns("covObs_measurementScale"), label = NULL, choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$covObs), after = 1)),
+        
+        hr(),
+        tags$label("Observations *"),
+        br(),
+        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each surface cover measurement is identified by a unique combination of plot, subplot (optional), date and surface type"),
+        selectizeInput(ns("covObs_data"), label = NULL, choices = c("No files found" = "")),
+        
+        uiOutput(ns("covObs_mapping_ui"))
+      )
+    })
+    
+    output$covObs_subplot_ui = renderUI({
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes"){
+        req(input$subplot_plot_unique_id, input$subplot_id)
+        tagList(
+          hr(),
+          tags$label("Subplots"),
+          br(),
+          tags$p("Were observations made at the level of subplots?", class = "text-info annotation"),
+          radioButtons(ns("covObs_hasSubplot"), label = NULL, choices = c("yes", "no"), selected = "no", inline = T)
+        )
+      }
+    })
+    
+    output$covObs_subplot_mapping_ui = renderUI({
+      if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$covObs_hasSubplot) && input$covObs_hasSubplot  == "yes"){
+        req(input$subplot_plot_unique_id, input$subplot_id)
+        column(4, selectizeInput(ns("covObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+      }
+    })
+    
+    output$covObs_mapping_ui = renderUI({
+      req(input$covObs_data)
+      tagList(
+        fluidRow(
+          column(4, selectizeInput(ns("covObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
+          uiOutput(ns("covObs_subplot_mapping_ui")),
+          column(4, selectizeInput(ns("covObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+        ),
+        fluidRow(
+          column(4, selectizeInput(ns("covObs_surfaceType"), label = "Surface type *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
+          column(4, selectizeInput(ns("covObs_surfaceCoverMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+        )
+      )
+    })
+    
+    
+    #------------------------------------#
     ## communityObservations ####
     output$communityObservations_ui = renderUI({
       tags$p("not implemented")
     })
     
-    #------------------------------------#
-    ## surfaceCoverObservations ####
-    output$surfaceCoverObservations_ui = renderUI({
-      tags$p("not implemented")
+    ## individualOrganismObservations ####
+    output$individualOrganismObservations_ui = renderUI({
+      tagList(
+        tags$p("not implemented")
+        # tags$p("Assign a dataset", class = "text-info annotation"),
+        # tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A table with one row per subplot (identified by unique combinations of plot and subplot ids) and subplot properties in columns"),
+        # selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
+        # uiOutput(ns("indOrgObs_mapping_ui"))
+      )
     })
+    
+    # output$indOrgObs_mapping_ui = renderUI({
+    #   req(input$indOrgObs_data)
+    #   tagList(
+    #     fluidRow(
+    #       column(4, selectizeInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
+    #       column(4, selectizeInput(ns("indOrgObs_date"), label = "Observation date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
+    #     )
+    #   )
+    # })
     
     #-------------------------------------------------------------------------#
     # Summary ####
@@ -881,7 +933,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup()$name[as.numeric(input$plot_location_method)], input$plot_crs),
                                inputs_complete = inputs_complete$plot_coordinates )
       } else {
-        inputs_complete$plot_coordinates = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$plot_coordinates = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -894,7 +946,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = c(input$plot_elevation, templates_lookup()$name[as.numeric(input$plot_elevation_method)]),
                                inputs_complete = inputs_complete$plot_elevation)
       } else {
-        inputs_complete$plot_elevation = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$plot_elevation = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -908,7 +960,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup()$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup()$name[as.numeric(input$plot_area_method)]),
                                inputs_complete = inputs_complete$plot_geometry)
       } else {
-        inputs_complete$plot_geometry = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$plot_geometry = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -922,7 +974,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup()$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup()$name[as.numeric(input$subplot_area_method)]),
                                inputs_complete = inputs_complete$subplot_geometry)
       } else {
-        inputs_complete$subplot_geometry = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$subplot_geometry = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -936,7 +988,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = c(input$plot_aspect, templates_lookup()$name[as.numeric(input$plot_aspect_method)], input$plot_slope, templates_lookup()$name[as.numeric(input$plot_slope_method)]),
                                inputs_complete = inputs_complete$plot_topography)
       } else {
-        inputs_complete$plot_topography = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$plot_topography = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -949,7 +1001,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                values = input$plot_parent_material, 
                                inputs_complete = inputs_complete$parent_material)
       } else {
-        inputs_complete$parent_material = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$parent_material = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -963,7 +1015,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         inputs_complete$observations = T
         tagList(
           uiOutput(ns("summary_aggOrgObs")),
-          uiOutput(ns("summary_stratumObs"))
+          uiOutput(ns("summary_stratumObs")),
+          uiOutput(ns("summary_covObs"))
         )
       }
     })
@@ -993,7 +1046,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         inputs_complete$aggOrgObs = check_input_completeness(values = values, values_mandatory = 1:length(values)) # No groupings, all values mandatory
         render_mapping_summary(header = "AggregateOrganismObservations", labels = labels, values = values, inputs_complete = inputs_complete$aggOrgObs)
       } else {
-        inputs_complete$aggOrgObs = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$aggOrgObs = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
@@ -1021,15 +1074,43 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         inputs_complete$stratumObs = check_input_completeness(values = values, values_mandatory = 1:length(values))  # No groupings, all values mandatory
         render_mapping_summary(header = "stratumObservations", labels = labels, values = values, inputs_complete = inputs_complete$stratumObs)
       } else {
-        inputs_complete$stratumObs = T  # Set to completeness to TRUE if UI is not rendered
+        inputs_complete$stratumObs = T  # Set completeness to TRUE if UI is not rendered
         return(NULL)
       }
     })
     
+    output$summary_covObs = renderUI({
+      if("surfaceCoverObservations" %in% input$observations_input_control){
+        input_values = list("Plot" = input$covObs_plot_id, 
+                            "Subplot" = input$covObs_subplot_id, 
+                            "Observation date" = input$covObs_date, 
+                            "Surface type" = input$covObs_surfaceType, 
+                            "Measurement scale" = ifelse(is.na(as.numeric(input$covObs_measurementScale)), input$covObs_measurementScale, templates_lookup()$name[templates_lookup()$template_id == input$covObs_measurementScale]), 
+                            "Measurement value" = input$covObs_surfaceCoverMeasurement)
+        
+        if(is.null(input$covObs_plot_id)){input_values[["Plot"]] = ""}
+        if(isTruthy(input$covObs_hasSubplot) && input$covObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
+        if(is.null(input$covObs_date)){input_values[["Observation date"]]= ""}
+        if(is.null(input$covObs_measurementScale)){input_values[["Measurement scale"]] = ""}
+        if(is.null(input$covObs_surfaceType)){input_values[["Surface type"]] = ""}
+        if(is.null(input$covObs_surfaceCoverMeasurement)){input_values[["Measurement value"]] = ""}
+        
+        values = Filter(Negate(is.null), input_values) %>% unlist() # removes NULL values
+        labels = names(values)
+        
+        inputs_complete$covObs = check_input_completeness(values = values, values_mandatory = 1:length(values))  # No groupings, all values mandatory
+        render_mapping_summary(header = "surfaceCoverObservations", labels = labels, values = values, inputs_complete = inputs_complete$covObs)
+      } else {
+        inputs_complete$covObs = T  # Set completeness to TRUE if UI is not rendered
+        return(NULL)
+      }
+    })
+    
+    
     #-------------------------------------------------------------------------#
     # Build Nodes ####
     observeEvent(
-      eventExpr = input$submit, 
+      eventExpr = input$import, 
       handlerExpr = {
         # Build Modal UI elements
         if(all(sapply(reactiveValuesToList(inputs_complete), isTRUE))){
@@ -1070,7 +1151,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         tryCatch({
           # Remove attributes and child nodes from vegx_doc
           vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
-
+          
           #-------------------------------------------------------------------------#
           withProgress(
             message = "Importing data",
@@ -1079,7 +1160,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
               nodes = list()  
-
+              
               ## Project ####
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$party_name) & isTruthy(input$party_type)){
@@ -1109,7 +1190,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               }
               
               nodes$projects = new_vegx_nodes(project_df, vegx_schema)
-
+              
               #-------------------------------------------------------------------------#
               ## Plots ####
               if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
@@ -1124,10 +1205,10 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 # Check identifiers
                 plot_ids = plots_df_upload[[input$plot_unique_id]]
                 if("" %in% plot_ids){
-                  stop("Plot IDs may not contain empty values")
+                  stop("Error while importing plots: Plot IDs may not contain empty values")
                 }
                 if(length(plot_ids) != length(unique(plot_ids))){
-                  stop("Plot IDs must be unique")
+                  stop("Error while importing plots: Plot IDs must be unique")
                 }
                 
                 # Build mappings table
@@ -1314,7 +1395,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               
               #-------------------------------------------------------------------------#
               ## Observations ####
-              # The central element in VegX is the plotObervation, which is referenced by all other observation types. 
+              # The central element in VegX is the plotObservation, which is referenced by all other observation types. 
               # Additionally, a number of other elements such as methods, organismNames, strata etc. may be shared by different observationTypes.
               # This provides a logical order for building up the VegX document when importing observations: First, build plotObservations from
               # all unique combinations of plot, subplot (if provided) and date across all observations. Second, systematically process potentially shared elements and 
@@ -1322,6 +1403,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               # node IDs and create the actual observation elements. 
               #
               # The workflow below follows this rationale.
+              
               if(!is.null(input$observations_input_control) && all(input$observations_input_control != "")){
                 setProgress(value = 0.2, "Plot observations")
                 # Fetch user data assigned in observation mappings
@@ -1344,13 +1426,16 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   date_input = input[[paste0(abbreviations[obs_category], "_date")]]
                   date_vec = df_upload %>% pull(date_input) 
                   tryCatch(lubridate::ymd(date_vec), warning = function(w){
-                    stop(paste0("Could not parse date field for ", obs_category))
+                    stop(paste0("Could not parse date field for ", obs_category, ". Please provide all dates in YYYY-MM-DD format."))
                   })
                   
                   # Get Identifiers
                   plotUniqueIdentifier = df_upload[,input[[paste0(abbreviations[obs_category], "_plot_id")]]]
-                  if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot == "yes"){
-                    plotUniqueIdentifier = paste(plotUniqueIdentifier, df_upload[,input[[paste0(abbreviations[obs_category], "_subplot_id")]]], sep = "-")
+                  
+                  inputName_subplot_id = paste0(abbreviations[obs_category], "_subplot_id")
+                  inputName_hasSubplot = paste0(abbreviations[obs_category], "_hasSubplot")
+                  if(isTruthy(input[[inputName_subplot_id]]) && input[[inputName_hasSubplot ]] == "yes"){
+                    plotUniqueIdentifier = paste(plotUniqueIdentifier, df_upload[,input[[inputName_subplot_id]]], sep = "-")
                   }
                   date = df_upload[,input[[paste0(abbreviations[obs_category], "_date")]]]
                   
@@ -1411,7 +1496,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
                   orgNames_nodes = new_vegx_nodes(orgNames_df, vegx_schema)
                   sapply(orgNames_nodes, function(node){xml_set_attr(node$node, "taxonName", "true")})
-
+                  
                   orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
                   orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema)
                   
@@ -1489,7 +1574,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 # -----------------------------------#
                 # AggregatOrganismObservations
-                incProgress(progress_increment, "Aggregate Organism Observations")
+                incProgress(progress_increment, "AggregateOrganismObservations")
                 if("aggregateOrganismObservations" %in% input$observations_input_control){
                   if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
                     # Build mapping table
@@ -1526,14 +1611,13 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   aggOrgObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$aggOrgObs_measurementScale)
                   method_is_quantitative = aggOrgObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                   
-                  # Check if observations contain undefined measurement categories
                   if(!method_is_quantitative){
                     node_path =  aggOrgObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_path) %>% unique()
                     codes_template = aggOrgObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_value)
                     codes_observed = sort(unique(data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]))
                     codes_unmatched = setdiff(codes_observed, codes_template)
                     
-                    if(length(codes_unmatched) != 0){
+                    if(length(codes_unmatched) != 0){   # Check if observations contain undefined measurement categories
                       attributes_addendum = data.frame(template_id = aggOrgObs_measurementScale_template$template_id[1], 
                                                        main_element = "attributes", 
                                                        node_path = "attribute > choice > ordinal > code", 
@@ -1554,7 +1638,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   nodes$methods = append(nodes$methods, aggOrgObs_measurementScale_nodes$methods)
                   nodes$attributes = append(nodes$attributes, aggOrgObs_measurementScale_nodes$attributes)
                   
-                  # 3. Build lookup (if qualitative scale was used)
+                  # 3. Build lookup
                   if(method_is_quantitative){
                     measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(aggOrgObs_measurementScale_nodes$attributes[[1]]$node, "id"),
                                                          taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]) %>% 
@@ -1585,7 +1669,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     aggOrgObs_df = aggOrgObs_mappings %>% 
                       left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
                       left_join(organisms_lookup, by = "organismName") %>% 
-                      left_join(measurementScale_lookup, by = "taxon_measurement") %>%       # TODO: FIX WRONG JOIN FOR QUANTITATIVE SCALE?!
+                      left_join(measurementScale_lookup, by = "taxon_measurement") %>%
                       left_join(strata_lookup, by = "stratumName") %>%                       # TODO: Check for correct join (2 strataDefs with overlapping category names)
                       left_join(stratumObs_lookup, by = c("stratumID", "plotObservationID")) %>% 
                       dplyr::select("aggregateOrganismObservation > plotObservationID" = plotObservationID, 
@@ -1609,8 +1693,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 }
                 
                 # -----------------------------------#
-                incProgress(progress_increment, "Stratum Observations")
                 if("stratumObservations" %in% input$observations_input_control){
+                  incProgress(progress_increment, "StratumObservations")
                   stratumObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$stratumObs_measurementScale)
                   
                   # Check if method exists already 
@@ -1627,22 +1711,22 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     
                     if(method_is_quantitative){
                       measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(attribute_nodes[[1]]$node, "id"),
-                                                           stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement])
+                                                           stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement]) %>% 
+                        dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(attribute_nodes, function(x){
                         data.frame(attributeID = xml2::xml_attr(x$node, "id"),
                                    stratumMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
                         bind_rows()
                     }
-                  } else {       # Method does not exist --> build from scratch
-                    # Check if observations contain undefined measurement categories
+                  } else {       # Method does not exist --> build from scratch (if it's not quantitative)
                     if(!method_is_quantitative){
                       node_path = stratumObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_path) %>% unique()
                       codes_template = stratumObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_value)
                       codes_observed = sort(unique(data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement]))
                       codes_unmatched = setdiff(codes_observed, codes_template)
                       
-                      if(length(codes_unmatched) != 0){
+                      if(length(codes_unmatched) != 0){    # Check if observations contain undefined measurement categories
                         attributes_addendum = data.frame(template_id = stratumObs_measurementScale_template$template_id[1], 
                                                          main_element = "attributes", 
                                                          node_path = !!node_path, 
@@ -1665,7 +1749,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     # 3. Build lookup (if qualitative scale was used)
                     if(method_is_quantitative){
                       measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(stratumObs_measurementScale_nodes$attributes[[1]]$node, "id"),
-                                                           stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement])
+                                                           stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement]) %>% 
+                        dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(stratumObs_measurementScale_nodes$attributes, function(x){
                         data.frame(attributeID = xml2::xml_attr(x$node, "id"),
@@ -1705,9 +1790,111 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                stratumID = xml2::xml_text(xml2::xml_child(x$node, search = "stratumID")))}) %>% 
                     bind_rows()
                 }
+
+                if("surfaceCoverObservations" %in% input$observations_input_control){
+                  incProgress(progress_increment, "SurfaceCoverObservations")
+                  covObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$covObs_measurementScale)
+                  
+                  # Check if method exists already 
+                  method_name = covObs_measurementScale_template[covObs_measurementScale_template$node_path == "method > name", "node_value"]
+                  method_is_quantitative = covObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
+                  methods_lookup = data.frame(
+                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
+                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                  )
+                  
+                  if(method_name %in% methods_lookup$methodName){   # Method exists already --> build lookup from nodes
+                    method_id = methods_lookup$methodID[which(methods_lookup$methodName == method_name)]
+                    attribute_nodes = nodes$attributes[sapply(nodes$attributes, function(x){xml2::xml_attr(x$node, "id") == method_id})]
+                    
+                    if(method_is_quantitative){
+                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(attribute_nodes[[1]]$node, "id"),
+                                                           surfaceCoverMeasurement = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]) %>% 
+                        dplyr::distinct()
+                    } else {
+                      measurementScale_lookup = lapply(attribute_nodes, function(x){
+                        data.frame(attributeID_measurement = xml2::xml_attr(x$node, "id"),
+                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        bind_rows()
+                    }
+                  } else {       # Method does not exist --> build from scratch (if it's not quantitative)
+                    if(!method_is_quantitative){
+                      node_path = covObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_path) %>% unique()
+                      codes_template = covObs_measurementScale_template %>% dplyr::filter(stringr::str_ends(node_path, "code")) %>% pull(node_value)
+                      codes_observed = sort(unique(data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]))
+                      codes_unmatched = setdiff(codes_observed, codes_template)
+                      
+                      if(length(codes_unmatched) != 0){  # Check if observations contain undefined measurement categories
+                        attributes_addendum = data.frame(template_id = covObs_measurementScale_template$template_id[1], 
+                                                         main_element = "attributes", 
+                                                         node_path = !!node_path, 
+                                                         node_value = codes_unmatched,
+                                                         group_value = codes_unmatched) %>% 
+                          group_by(group_value) %>% 
+                          group_modify(~add_row(.x, template_id = covObs_measurementScale_template$template_id[1], main_element = "attributes", node_path = node_path, node_value = "1")) %>%
+                          mutate(node_id = cur_group_id()+max(covObs_measurementScale_template$node_id)) %>% 
+                          ungroup() %>% 
+                          dplyr::select(template_id, node_id, main_element, node_path, node_value)
+                      }
+                      covObs_measurementScale_template = bind_rows(covObs_measurementScale_template, attributes_addendum)
+                    }
+                    
+                    # 2. Build Nodes
+                    covObs_measurementScale_nodes = templates_to_nodes(covObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
+                    nodes$methods = append(nodes$methods, covObs_measurementScale_nodes$methods)
+                    nodes$attributes = append(nodes$attributes, covObs_measurementScale_nodes$attributes)
+                    
+                    # 3. Build lookup
+                    if(method_is_quantitative){
+                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(covObs_measurementScale_nodes$attributes[[1]]$node, "id"),
+                                                           surfaceCoverMeasurement = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]) %>% 
+                        dplyr::distinct()
+                    } else {
+                      measurementScale_lookup = lapply(covObs_measurementScale_nodes$attributes, function(x){
+                        data.frame(attributeID_measurement = xml2::xml_attr(x$node, "id"),
+                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        bind_rows()
+                    }
+                  }
+                  
+                  # Build surface types
+                  surface_types = unique(data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceType])
+                  surfaceType_df = data.frame("surfaceType > surfaceName" = surface_types, check.names = F)
+                  surfaceType_nodes = new_vegx_nodes(surfaceType_df, vegx_schema)
+                  
+                  surfaceTypes_lookup = lapply(surfaceType_nodes, function(x){
+                    data.frame(attributeID_type = xml2::xml_attr(x$node, "id"),
+                               surfaceType = xml2::xml_text(xml2::xml_find_first(x$node, "..//surfaceName")))}) %>% 
+                    bind_rows()
+                  
+                  # Build mapping table
+                  plotUniqueIdentifier = data_upload[["surfaceCoverObservations"]][,input$covObs_plot_id]
+                  if(isTruthy(input$covObs_hasSubplot) && input$covObs_hasSubplot == "yes"){
+                    plotUniqueIdentifier = paste(plotUniqueIdentifier, data_upload[["surfaceCoverObservations"]][,input$covObs_subplot_id], sep = "-")
+                  }
+                  
+                  covObs_df = data.frame(plotUniqueIdentifier = plotUniqueIdentifier,
+                                         obs_date = lubridate::ymd(data_upload[["surfaceCoverObservations"]][,input$covObs_date]),
+                                         surfaceType = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceType],
+                                         surfaceCoverMeasurement = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]) %>%  
+                    left_join(plotObs_lookup, by = c("plotUniqueIdentifier", "obs_date")) %>% 
+                    left_join(surfaceTypes_lookup, by = "surfaceType") %>% 
+                    left_join(measurementScale_lookup, by = "surfaceCoverMeasurement") %>% 
+                    dplyr::select("surfaceCoverObservation > plotObservationID" = plotObservationID, 
+                                  "surfaceCoverObservation > surfaceTypeID" = attributeID_type,
+                                  "surfaceCoverObservation > surfaceCover > value" = surfaceCoverMeasurement,
+                                  "surfaceCoverObservation > surfaceCover > attributeID" = attributeID_measurement) %>% 
+                    distinct() %>% 
+                    arrange("surfaceCoverObservation > plotObservationID", "surfaceCoverObservation > surfaceTypeID")
+                  
+                  # Create nodes
+                  covObs_nodes = new_vegx_nodes(covObs_df, vegx_schema)
+                  nodes$surfaceCoverObservations = covObs_nodes
+                  
+                  # no lookup table needed
+                }
                 
                 if("communityObservations" %in% input$observations_input_control){}
-                if("surfaceCoverObservations" %in% input$observations_input_control){}
               }
               
               #-------------------------------------------------------------------------#

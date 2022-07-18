@@ -28,6 +28,10 @@ mod_aboutVegX_ui <- function(id){
                 accessibility of Veg-X was the publication of the VegX R-package (De C\u00e1ceres, 2018), which provides tools for importing, integrating and exporting vegetation data using the Veg-X standard. 
                 While the VegX package allows users to create Veg-X documents using R programming language, interest in a simple GUI-based application for Veg-X remained high."),
         
+        tags$div(style = "text-align: center",
+                 tags$img(src='www/images/vegxshiny_overview.png', align = "center", width = 900)
+        ),
+        
         tags$p(tags$span("VegXshiny aims to make the conversion of vegetation data into Veg-X documents as easy as possible.", class = "text-info"), " The graphical user interface of VegXshiny helps users, who have little 
                 experience with programming or markup languages, to build valid Veg-X documents and implement best practices in terms of data management and interoperability. Dynamic import dialogs guide 
                 users through the process of mapping their data to the corresponding Veg-X elements, while ensuring that the generated XML conforms to the Veg-X standard. The ability to view and edit 
@@ -35,11 +39,16 @@ mod_aboutVegX_ui <- function(id){
         
         tags$p("The development of VegXshiny is endorsed by the ", tags$a("International Association for Vegetation Science (IAVS)", href = "http://iavs.org/", target = "_blank"), "."),
         
-        tags$h2("Package development"),
+        
+        tags$h3("References"),
+        tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard for plot-based vegetation data. Journal of Vegetation Science 22: 598-609."),
+        tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX"),
+        
+        tags$h3("Package development"),
         tags$ul(tags$li("Christian K\u00f6nig"),
                 tags$li("Sebastian Schmidtlein")),
         
-        tags$h2("Veg-X standard development:"),
+        tags$h3("Veg-X standard development:"),
         tags$ul(tags$li("Miquel De C\u00e1ceres"),
                 tags$li("Sebastian Schmidtlein"),
                 tags$li("Susan K. Wiser"),
@@ -47,11 +56,7 @@ mod_aboutVegX_ui <- function(id){
                 tags$li("Robert K. Peet"),
                 tags$li("Martin Kleikamp"),
                 tags$li("Brad Boyle"),
-                tags$li("Christian K\u00f6nig")),
-        
-        tags$h2("References"),
-        tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard for plot-based vegetation data. Journal of Vegetation Science 22: 598-609."),
-        tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.github.io/VegX")
+                tags$li("Christian K\u00f6nig"))
       ),
       
       tabPanel(
@@ -158,7 +163,7 @@ mod_aboutVegX_ui <- function(id){
           tags$p("Only when all input categories are marked either green or grey, you will be able to proceed with the import."),
           
           tags$b(tags$li("Import")),
-          tags$p("Upon submission and subsequent confirmation, a new Veg-X document will be created from the specified mappings. ", 
+          tags$p("Pressing", tags$i("Import"), "and confirming the dialog will create a new VegX document from the specified mappings. ", 
                  tags$span("Your current Veg-X document will be overwritten by this. ", class = "text-info")),
           tags$p("Note that the import may take a while when working with large input files containing thousands of observations. A progress bar in the lower left corner indicates
                  the current status. Once the import is finished, you can view the imported Veg-X file in the ", tags$i("XML viewer"), " or export it under ", tags$i("Veg-X export."))
@@ -172,11 +177,11 @@ mod_aboutVegX_ui <- function(id){
                   A progress bar in the lower left corner indicates the current status. Once the extraction is finished, a summary of the data is displayed."),
           tags$b(tags$li("Import Turboveg data into Veg-X")),
           tags$p("Submitting the pre-processed Turboveg file will open an import dialog where you can select, which undefined Turboveg header data you want to import. Since these data lack a proper definition
-                  that could be imported to Veg-X, the selected fields will be attached as simpleUserDefined types to their corresponding plot node in the Veg-X document. Pressing ", tags$i("Confirm"), 
+                  that could be imported to Veg-X, the selected fields will be attached as simpleUserDefined types to their corresponding plot node in the Veg-X document. Pressing ", tags$i("Proceed"), 
                  "will then start the import of the Turboveg data to Veg-X.")
         ),
-        tags$h3("From Veg-X", id = ns("import_vegx"), class = "text-info"),
-        tags$p("Importing Veg-X files is analogous to importing Turboveg XML files: Pre-process an uploaded file, review the summary, and run the import. However, the import of Veg-X files is much 
+        tags$h3("Load Veg-X", id = ns("import_vegx"), class = "text-info"),
+        tags$p("Loading a Veg-X file is largely analogous to importing Turboveg XML files: pick and validate an uploaded file, review the summary, and run the import. The import of Veg-X files is much 
                 faster than the import from TurboVeg XML, since the supplied file can replace the existing Veg-X document ", tags$i("as is"), " if validation against the schema is 
                 successful.", tags$span("Veg-X files that do not conform with the schema cannot be imported.", class = "text-info")),
         
