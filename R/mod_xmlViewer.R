@@ -14,7 +14,7 @@ mod_xmlViewer_ui <- function(id){
     column(
       width = 10, offset = 1,
       fluidRow(
-        tags$p("Inspect, edit and validate the XML of your current VegX document", class = "text-info annotation")
+        tags$p("Inspect, edit and validate your current VegX document.", class = "text-info annotation")
       ),
       fluidRow(
         actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
@@ -129,17 +129,29 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
     observeEvent(eventExpr = input$validate,
                  handlerExpr = {
                    vegx_schema_full = read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny"))
-                   is_valid = xml2::xml_validate(vegx_doc, schema = vegx_schema_full)
-                   if(is_valid){
+                   schema_valid = xml2::xml_validate(vegx_doc, schema = vegx_schema_full)
+                   references_valid = check_document_links(vegx_doc)
+
+                   msg_references = "No issues related to internal ID references found."
+                   if(!length(references_valid) == 0){
+                     msg_references = paste0("Potential issues found related to internal ID references: ",
+                                            "<ul>", paste0("<li>", references_valid, "</li>", collapse = ""), "</ul>")
+                   }
+                   
+                   if(schema_valid){
                      shiny::showNotification("Validation successful.", type = "message")
-                     new_action_log_record(log_path, "Validation info", "Document validation successful.")
+                     msg_type = "Validation info"
+                     msg = paste0("<p>Document is well-formed according to VegX schema definition.</p>", msg_references)
                    } else {
                      shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
-                     new_action_log_record(log_path, "Validation error", paste0("Document validation failed with the following exceptions: <ul>", 
-                                                                                paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>"))
+                     msg_type = "Validation error"
+                     msg_val = paste0("Document validation failed with the following exceptions:", 
+                                      "<ul>", paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>")
+                     msg  = paste0(msg_val, msg_references)
                    }
                    
                    # Update action log
+                   new_action_log_record(log_path, msg_type, msg)
                    action_log(read_action_log(log_path))
                  })
   })

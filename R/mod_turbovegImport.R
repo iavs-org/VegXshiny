@@ -169,6 +169,11 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
               nodes = list()
+              
+              #-------------------------------------------------------------------------# 
+              # Project ####
+              project_df = data.frame("project > title" = "Imported Turboveg project", check.names = F)
+              nodes$projects = new_vegx_nodes(project_df, vegx_schema)
            
               #-------------------------------------------------------------------------# 
               # Plots ####

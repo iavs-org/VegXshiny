@@ -21,7 +21,10 @@ load_schema = function(){
 # --------------------------------------------------------------------------------------- #
 #' Simplify VegX XML schema and link across documents
 #'
-#' @description This is a recursive function to parse and simplify the VegX XSD schema. It is typically called on the root node (<xsd:element name="vegX"> in veg.xsd) and then works its way through the schema. In doing so, it does mainly two things: (1) remove 'clutter' such as attribute, annotation, sequence or complexType nodes and (2) link nodes across namespaces. 
+#' @description This is a recursive function to parse and simplify the VegX XSD schema. It is typically called on the root node 
+#' (<xsd:element name="vegX"> in veg.xsd) and then works its way through the schema. In doing so, it does mainly two things: 
+#' (1) remove 'clutter' such as attribute, annotation, sequence or complexType nodes and 
+#' (2) link nodes across namespaces. 
 #'
 #' @param node An xml_node or xml_nodeset of length 1.
 #' @param ns A character string specifying the VegX namespace of the current node (veg, misc, obs, plot, org, comm).
@@ -81,7 +84,10 @@ link_vegx_schema = function(node, ns, schema_files, simplify = T){
       # If namespace belongs to VegX, graft type definition into current node
       if(ns %in% names(schema_files)){
         node_append = xml_find_all(schema_files[[ns]], str_glue("//*[@name='{type}']"))
-        children_append = node_append %>% xml_children %>% xml_find_all("../*[not(self::xsd:annotation)]") # Avoid duplicate annotation type definition
+        children_append = node_append %>% xml_children
+        if(xml_has_attr(node, "annotation") || length(xml_child(node, "annotation")) != 0){
+          children_append = children_append %>% xml_find_all("../*[not(self::xsd:annotation)]") # Avoid duplicate annotation type definition  
+        }
         sapply(children_append, function(child){xml_add_child(node, child, .copy=T)})
         if(simplify){ # If node_append has 'id' or 'taxonName' attribute, inherit 
           if(xml_has_attr(node_append, "id")){xml_set_attr(node, "id", xml_attr(node_append, "id"))}
@@ -304,7 +310,7 @@ new_vegx_nodes = function(nodes_df, vegx_schema){
         }
       }
     }
-
+    
     "/xsd:schema/xsd:element/xsd:element[1]/xsd:element/xsd:choice"
     "/xsd:schema/xsd:element/xsd:element[1]/xsd:element/xsd:choice/xsd:element[1]"
     # Find correct order of nodes according to schema
@@ -673,3 +679,157 @@ templates_to_nodes = function(templates_selected, vegx_schema, log_path, write_l
   }
   return(node_list)
 }
+
+check_document_links = function(vegx_doc) {
+  # Helper functions
+  
+  # missingTargets: Get a vector of id's where references
+  # point to. After that, check if the respective target elements exist.
+  #
+  # linkName      One unambiguous string such as "<methodID> (with brackets!)"
+  #               defining the link
+  # targetName    One unambiguous string such as "method id" defining the
+  #               target
+  missingTargets <- function(linkName, targetName) {
+    # Find links
+    links <- vegx[grep(linkName, vegx)]
+    patternID <- paste(".*", linkName, "|", "<.*", sep = "")
+    ids <- sort(unique(gsub(patternID, "", links)))
+    
+    # Find targets
+    occurrencesTarget <- grep(targetName, vegx)
+    patternTar <- paste(".*", "id=\"", "|", "\".*", sep = "")
+    targets <- sub(" .*$", "", gsub(patternTar, "", vegx[occurrencesTarget]))
+    
+    # Find missing targets
+    nonexisting <- ids[which(!ids %in% targets)]
+    
+    # Rows with missing targets
+    linkidx <- which(vegx %in% links)
+    missingString <- paste(linkName, nonexisting, "</", sep = "")
+    problemRow <- linkidx[grep(missingString, vegx[linkidx])]
+    if (sum(!ids %in% targets) > 0) {
+      linkName = stringr::str_replace_all(linkName, c("<" = "", ">" = ""))
+      cat("Reference(s) to ", linkName, " point to non-existing nodes. (Lines: ", paste0(problemRow, collapse = ", "), ")\n", sep = "")
+    }
+  }  
+  
+  # orphanTargets: Check if there are orphan elements (i.e. elements
+  # that should be target of some link, which are not targeted)
+  #
+  # targetName  One unambiguous string defining the target lines such as "method id"
+  # linkNames   Vector with one or more unambiguous strings such as 
+  #             c("<methodID>", "<qualityAssessmentMethodID>") defining the
+  #             linking lines
+  
+  orphanTargets <- function(targetName, linkNames) {
+    
+    # Find target
+    targetLines <- vegx[grep(targetName, vegx)]
+    patternTar <- paste(".*", "id=\"", "|", "\".*", sep = "")
+    targets <- sub(" .*$", "", gsub(patternTar, "", targetLines))
+    
+    # Find links
+    linkNamesString <- paste(linkNames, collapse = "|")
+    linkLines <- vegx[grep(linkNamesString, vegx)] # Lines with occurrences of link strings  
+    patternLink <- paste(paste(".*", linkNames, "|", "<.*", sep = ""), collapse = "|") # pattern used for isolating actual id's
+    ids <- sort(unique(gsub(patternLink, "", linkLines)))
+    
+    # Find orphans
+    nonexisting <- targets[which(!targets %in% ids)]
+    
+    # Rows with orphans
+    targetIdx <- which(vegx %in% targetLines)
+    missingString <- paste(targetName, "=\"", nonexisting, "\">", sep = "")
+    problemRow <- grep(paste(missingString, collapse="|"), vegx)
+    
+    if (sum(!targets %in% ids) > 0) {
+      cat(targetName, " node(s) with id(s) ", paste0(nonexisting, collapse = ", "), " have no incoming references. (Lines: ", paste0(problemRow, collapse = ", "), ")\n", sep = "")
+    }  
+  }
+  
+  vegx = vegx_doc %>% as.character() %>% stringr::str_split("\n", simplify = T)
+  
+  missing_targets = capture.output({
+    # First check if all target ID's exist  
+    missingTargets("<methodID>",                      "method id")
+    missingTargets("<qualityAssessmentMethodID>",     "method id")
+    missingTargets("<attributeID>",                   "attribute id")
+    missingTargets("<qualitativeAttributeID>",        "attribute id")
+    missingTargets("<protocolID>",                    "protocol id")
+    missingTargets("<citationID>",                    "literatureCitation id")
+    missingTargets("<accordingToCitationID>",         "literatureCitation id")
+    missingTargets("<interpretationCitationID>",      "literatureCitation id")
+    missingTargets("<documentCitationID>",            "literatureCitation id")
+    missingTargets("<organismNameID>",                "organismName id")
+    missingTargets("<originalOrganismNameID>",        "organismName id")
+    missingTargets("<preferredOrganismNameID>",       "organismName id")
+    missingTargets("<organismIdentityID>",            "organismIdentity id")
+    missingTargets("<partyID>",                       "party id")
+    missingTargets("<determinationPartyID>",          "party id")
+    missingTargets("<originalIdentificationPartyID>", "party id")
+    missingTargets("<conceptAssertionPartyID>",       "party id")
+    missingTargets("<interpretationPartyID>",         "party id")
+    missingTargets("<placementPartyID>",              "party id")
+    missingTargets("<locationPartyID>",               "party id")
+    missingTargets("<elevationPartyID>",              "party id")
+    missingTargets("<depthPartyID>",                  "party id")
+    missingTargets("<observationPartyID>",            "party id")
+    missingTargets("<taxonConceptID>",                "taxonConcept id")
+    missingTargets("<communityConceptID>",            "communityConcept id")
+    missingTargets("<projectID>",                     "project id")
+    missingTargets("<relatedProjectID>",              "project id")
+    missingTargets("<plotID>",                        "plot id")
+    missingTargets("<relatedPlotID>",                 "plot id")
+    missingTargets("<relatedItemID>",                 "individualOrganism id")
+    missingTargets("<stratumObservationID>",          "stratumObservation id")
+    missingTargets("<communityObservationID>",        "communityObservation id")
+    missingTargets("<siteObservationID>",             "siteObservation id")
+    missingTargets("<plotObservationID>",             "plotObservation id")
+    missingTargets("<previousPlotObservationID>",     "plotObservation id")
+    missingTargets("<observationGroupingID>",         "observationGrouping id")
+    missingTargets("<stratumID>",                     "stratum id")
+    missingTargets("<surfaceTypeID>",                 "surfaceType id")
+  })
+  
+  # Check for orphans
+  missing_parents = capture.output({
+    orphanTargets("party id",                c("<partyID>", 
+                                               "<determinationPartyID>",
+                                               "<originalIdentificationPartyID>",
+                                               "<conceptAssertionPartyID>",
+                                               "<interpretationPartyID>",
+                                               "<placementPartyID>",
+                                               "<locationPartyID>",
+                                               "<elevationPartyID>",
+                                               "<depthPartyID>",
+                                               "<observationPartyID>"))
+    orphanTargets("literatureCitation id",   c("<citationID>",
+                                               "<accordingToCitationID>",
+                                               "<interpretationCitationID>",
+                                               "<documentCitationID>"))
+    orphanTargets("method id",               c("<methodID>",
+                                               "<qualityAssessmentMethodID>"))
+    orphanTargets("protocol id",               "<protocolID>")
+    orphanTargets("organismIdentity id",       "<organismIdentityID>")     
+    orphanTargets("taxonConcept id",           "<taxonConceptID>")
+    orphanTargets("communityConcept id",       "<communityConceptID>")
+    orphanTargets("project id",              c("<projectID>",
+                                               "<relatedProjectID>"))
+    orphanTargets("plot id",                 c("<plotID>",
+                                               "<relatedPlotID>"))
+    orphanTargets("communityObservation id",   "<communityObservationID>")
+    orphanTargets("siteObservation id",        "<siteObservationID>")
+    orphanTargets("plotObservation id",      c("<plotObservationID>",
+                                               "<previousPlotObservationID>"))
+    orphanTargets("observationGrouping id",    "<observationGroupingID>") 
+    orphanTargets("surfaceType id",            "<surfaceTypeID>")
+    orphanTargets("individualOrganism id",   c("<relatedItemID>", 
+                                               "<individualOrganismID>"))
+    orphanTargets("organismName id",         c("<organismNameID>",
+                                               "<originalOrganismNameID>",
+                                               "<preferredOrganismNameID>"))
+  })
+  
+  return(c(missing_targets, missing_parents))
+} 

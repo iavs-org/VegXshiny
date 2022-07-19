@@ -151,7 +151,8 @@ mod_tableImport_ui <- function(id){
                     class = "panel-title",
                     tags$a("SurfaceCoverObservations", class = "collapsed",
                            "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("surfaceCoverObservationsBody"))
-                    )
+                    ),
+                    tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to different surface types within a plot. Further stratification of the observation by subplot is possible.")
                   )
                 ),
                 tags$div(
@@ -812,6 +813,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         br(),
         tags$p("Which scale was used to measure the observation?", class = "text-info annotation"),
         selectizeInput(ns("covObs_measurementScale"), label = NULL, choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$covObs), after = 1)),
+        
+        uiOutput(ns("covObs_subplot_ui")),
         
         hr(),
         tags$label("Observations *"),
@@ -1860,9 +1863,9 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   # Build surface types
                   surface_types = unique(data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceType])
                   surfaceType_df = data.frame("surfaceType > surfaceName" = surface_types, check.names = F)
-                  surfaceType_nodes = new_vegx_nodes(surfaceType_df, vegx_schema)
+                  nodes$surfaceTypes = new_vegx_nodes(surfaceType_df, vegx_schema)
                   
-                  surfaceTypes_lookup = lapply(surfaceType_nodes, function(x){
+                  surfaceTypes_lookup = lapply(nodes$surfaceTypes, function(x){
                     data.frame(attributeID_type = xml2::xml_attr(x$node, "id"),
                                surfaceType = xml2::xml_text(xml2::xml_find_first(x$node, "..//surfaceName")))}) %>% 
                     bind_rows()

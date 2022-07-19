@@ -29,7 +29,7 @@ mod_vegxExport_ui <- function(id){
 mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
   moduleServer(id, function(input, output, session){
     observe({
-      vegx_txt() # Can't put observer on vegx_doc (not reactive), so use vegx_txt (readctive) instead 
+      vegx_txt() # Can't put observer on vegx_doc (not reactive), so use vegx_txt (reactive) instead 
       output$summary = tryCatch({
         render_export_summary(vegx_doc)
       }, error = function(e){
