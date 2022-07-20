@@ -181,9 +181,8 @@ mod_aboutVegX_ui <- function(id){
                  "will then start the import of the Turboveg data to Veg-X.")
         ),
         tags$h3("Load Veg-X", id = ns("import_vegx"), class = "text-info"),
-        tags$p("Loading a Veg-X file is largely analogous to importing Turboveg XML files: pick and validate an uploaded file, review the summary, and run the import. The import of Veg-X files is much 
-                faster than the import from TurboVeg XML, since the supplied file can replace the existing Veg-X document ", tags$i("as is"), " if validation against the schema is 
-                successful.", tags$span("Veg-X files that do not conform with the schema cannot be imported.", class = "text-info")),
+        tags$p("The process of loading a Veg-X file is largely analogous to importing Turboveg XML files: pick and validate an uploaded file, review the summary, and run the import. The import of Veg-X files is much 
+                faster than the import from TurboVeg XML, since the supplied file can replace the existing Veg-X document ", tags$i("as is"), " after passing some basic validity checks."),
         
         tags$h2("XML Viewer", id = ns("xml_viewer"), class = "text-info"),
         tags$p("The XML Viewer previews the current Veg-X document. Clicking the 'Edit' button enters the edit mode, where you can modify the raw XML of the Veg-X document. Caution needs to be taken here, 
@@ -216,11 +215,11 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Generally, VegXshiny tries to handly irregular data without failing. If the import fails anyways, you may consult the ", tags$i("Action Log"), " for details on why the data could not be imported."),
         
         tags$h3("My files are too large to upload, what should I do?", class = "text-info"),
-        tags$p("The application currently supports uploads up to a size of 50 MB. Larger files may lead to a significant slowdown of the server and compromise the responiseness of the application. If
-               you need to handle files you can install VegXshiny from github and run the application locally:"),
+        tags$p("The online version of VegXshiny supports uploads up to a size of 50 MB. Larger files may lead to a significant slowdown of the server and compromise the responiseness of the application. If
+               you need to handle larger files you can install VegXshiny from github and run the application locally:"),
         tags$code("install.packages(\"devtools\")"), tags$br(),
         tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), tags$br(),
-        tags$code("VegXshiny::run_app()"), tags$br(),
+        tags$code("VegXshiny::run_app(max_upload_size_MB = 100)  # Set max upload limit"), tags$br(),
         tags$p("Alternatively or you can can write an import script using the", tags$a("VegX R-package", href = "https://github.com/iavs-org/VegX", target="_blank"), ".")
       ),
       

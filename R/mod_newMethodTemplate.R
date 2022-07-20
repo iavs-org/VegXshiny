@@ -133,7 +133,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
                            "node_id" = new_node_id(),
                            "main_element" = "attributes",
                            "node_path" = c("attribute > choice > quantitative > unit", "attribute > choice > quantitative > precision", "attribute > choice > quantitative > lowerLimit", "attribute > choice > quantitative > upperLimit", "attribute > choice > quantitative > methodID"),
-                           "node_value" = c(quant_attr_df[i,1] , quant_attr_df[i,2], quant_attr_df[i,3], quant_attr_df[i,4], 1))
+                           "node_value" = c(quant_attr_df[i,1] , quant_attr_df[i,2], quant_attr_df[i,3], quant_attr_df[i,4], "{1}"))
               }) %>% bind_rows()
             }
           }
@@ -147,7 +147,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
                            "node_id" = new_node_id(),
                            "main_element" = "attributes",
                            "node_path" = c("attribute > choice > ordinal > code", "attribute > choice > ordinal > definition", "attribute > choice > ordinal > lowerLimit", "attribute > choice > ordinal > upperLimit", "attribute > choice > ordinal > order", "attribute > choice > ordinal > methodID"),
-                           "node_value" = c(ord_attr_df[i,1] , ord_attr_df[i,2], ord_attr_df[i,3], ord_attr_df[i,4], ord_attr_df[i,5], 1))
+                           "node_value" = c(ord_attr_df[i,1] , ord_attr_df[i,2], ord_attr_df[i,3], ord_attr_df[i,4], ord_attr_df[i,5], "{1}"))
               }) %>% bind_rows()
             }
           }
@@ -161,7 +161,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
                            "node_id" = new_node_id(),
                            "main_element" = "attributes",
                            "node_path" = c("attribute > choice > qualitative > code", "attribute > choice > qualitative > description", "attribute > choice > qualitative > methodID"),
-                           "node_value" = c(qual_attr_df[i,1] , qual_attr_df[i,2], 1))
+                           "node_value" = c(qual_attr_df[i,1] , qual_attr_df[i,2], "{1}"))
               }) %>% bind_rows()
             }
           }

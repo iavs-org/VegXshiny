@@ -99,7 +99,7 @@ mod_newStrataDefTemplate_server <- function(id, subject, templates, templates_lo
                        "node_id" = new_node_id(),
                        "main_element" = "attributes",
                        "node_path" = c("attribute > choice > quantitative > unit", "attribute > choice > quantitative > precision", "attribute > choice > quantitative > lowerLimit", "attribute > choice > quantitative > upperLimit", "attribute > choice > quantitative > methodID"),
-                       "node_value" = c(attrs_df[i,1] , attrs_df[i,2], attrs_df[i,3], attrs_df[i,4], 1))
+                       "node_value" = c(attrs_df[i,1] , attrs_df[i,2], attrs_df[i,3], attrs_df[i,4], "{1}"))
           }) %>% bind_rows()
       
           # 3. Strata
@@ -115,7 +115,7 @@ mod_newStrataDefTemplate_server <- function(id, subject, templates, templates_lo
                        "node_id" = new_node_id(),
                        "main_element" = "strata",
                        "node_path" = c("stratum > stratumName", "stratum > order", "stratum > lowerLimit", "stratum > upperLimit", "stratum > methodID"),
-                       "node_value" = c(strata_df[i,1] , strata_df[i,2], strata_df[i,3], strata_df[i,4], 1))
+                       "node_value" = c(strata_df[i,1] , strata_df[i,2], strata_df[i,3], strata_df[i,4], "{1}"))
           }) %>% bind_rows()
 
           # rowbind template and drop NAs

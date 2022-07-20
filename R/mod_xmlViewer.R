@@ -141,12 +141,12 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    if(schema_valid){
                      shiny::showNotification("Validation successful.", type = "message")
                      msg_type = "Validation info"
-                     msg = paste0("<p>Document is well-formed according to VegX schema definition.</p>", msg_references)
+                     msg = paste0("<p>Document successfully validated against VegX schema.</p>", msg_references)
                    } else {
                      shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
                      msg_type = "Validation error"
-                     msg_val = paste0("Document validation failed with the following exceptions:", 
-                                      "<ul>", paste0("<li>Error: ", attr(is_valid, "errors"), "</li>", collapse = ""), "</ul>")
+                     msg_val = paste0("Document validation against VegX schema failed with the following exceptions:", 
+                                      "<ul>", paste0("<li>Error: ", attr(schema_valid, "errors"), "</li>", collapse = ""), "</ul>")
                      msg  = paste0(msg_val, msg_references)
                    }
                    

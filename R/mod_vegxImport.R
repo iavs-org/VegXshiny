@@ -72,8 +72,8 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
             return()
           }
           vegx_schema_full = read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny"))
-          if(! xml2::xml_validate(user_data[[input$vegx_file]], schema = vegx_schema_full)){
-            showNotification("Uploaded file is not a valid VegX document.", type = "error")
+          if(length(xml_find_all(user_data[[input$vegx_file]], "../vegX")) == 0){
+            showNotification("Uploaded file hase no root node named 'vegX'.", type = "error")
             stop()
           }
           output$vegx_summary = tryCatch({
@@ -83,7 +83,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
           })
           
           upload_valid(T)
-          showNotification("VegX document read and validated.")
+          showNotification("VegX document read.")
         }, error = function(e){
           upload_valid(F)
         }, finally = {

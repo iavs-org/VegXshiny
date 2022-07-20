@@ -9,6 +9,7 @@ run_app(
   options = list(),
   enableBookmarking = NULL,
   uiPattern = "/",
+  max_upload_size_MB = 50,
   ...
 )
 }

@@ -12,7 +12,8 @@
 #' @noRd 
 
 app_server <- function(input, output, session) {
-  options(shiny.maxRequestSize=50*1024^2) # Set max upload size to 100MB
+  upload_size = get_golem_options("max_upload_size_MB")
+  options(shiny.maxRequestSize = upload_size * 1024^2) # Set max upload size
   
   log_path = tempfile("log_", fileext = ".csv")
   new_action_log_record(log_path, "System info", "Session started.", append = F, col.names = T)

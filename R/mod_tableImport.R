@@ -681,7 +681,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         tags$label("Observations *"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
-        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date, taxon and stratum (optional)"),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format), taxon and stratum (optional)"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         
         uiOutput(ns("aggOrgObs_mapping_ui"))
@@ -762,7 +762,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         tags$label("Observations *"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
-        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each stratum measurement is identified by a unique combination of plot, subplot (optional), date and stratum."),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each stratum measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and stratum."),
         selectizeInput(ns("stratumObs_data"), label = NULL, choices = c("No files found" = "")),
         
         uiOutput(ns("stratumObs_mapping_ui"))
@@ -820,7 +820,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         tags$label("Observations *"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
-        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each surface cover measurement is identified by a unique combination of plot, subplot (optional), date and surface type"),
+        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each surface cover measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and surface type"),
         selectizeInput(ns("covObs_data"), label = NULL, choices = c("No files found" = "")),
         
         uiOutput(ns("covObs_mapping_ui"))
@@ -1155,6 +1155,11 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
           # Remove attributes and child nodes from vegx_doc
           vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
           
+          # Initialize an ID factory with one id_generator per ID name as defined by id_lookup (see /data-raw)
+          id_factory = sapply(unique(id_lookup), function(x){
+            id_generator()
+          }, simplify = F)
+          
           #-------------------------------------------------------------------------#
           withProgress(
             message = "Importing data",
@@ -1163,18 +1168,18 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
               nodes = list()  
-              
+
               ## Project ####
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$party_name) & isTruthy(input$party_type)){
                 parties_df = data.frame(input$party_name, check.names = F)
                 names(parties_df) = paste0("party > choice > ", tolower(input$party_type), "Name")
-                nodes$parties = new_vegx_nodes(parties_df, vegx_schema)
+                nodes$parties = new_vegx_nodes(parties_df, vegx_schema, id_factory)
               }
               
               if(isTruthy(input$project_citation)){
                 citations_df = data.frame("literatureCitation > citationString" = input$project_citation, check.names = F)
-                nodes$literatureCitations = new_vegx_nodes(citations_df, vegx_schema)
+                nodes$literatureCitations = new_vegx_nodes(citations_df, vegx_schema, id_factory)
               }
               
               project_df = data.frame("project > title" = input$project_title, check.names = F)
@@ -1185,14 +1190,14 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 project_df[["project > personnel > role"]] = input$party_role
               }
               if(length(nodes$parties) > 0 && isTruthy(input$party_role)){
-                project_df[["project > personnel > partyID"]] = xml_attr(nodes$parties[[1]]$node, "id")
+                project_df[["project > personnel > partyID"]] = xml_attr(nodes$parties[[1]], "id")
                 project_df[["project > personnel > role"]] = input$party_role
               }
               if(length(nodes$literatureCitations) > 0){
-                project_df[["project > documentCitationID"]] = xml_attr(nodes$literatureCitations[[1]]$node, "id")
+                project_df[["project > documentCitationID"]] = xml_attr(nodes$literatureCitations[[1]], "id")
               }
               
-              nodes$projects = new_vegx_nodes(project_df, vegx_schema)
+              nodes$projects = new_vegx_nodes(project_df, vegx_schema, id_factory)
               
               #-------------------------------------------------------------------------#
               ## Plots ####
@@ -1223,12 +1228,12 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 if("Coordinates" %in% input$plot_input_control){
                   if(isTruthy(input$plot_coordinates_x) && isTruthy(input$plot_coordinates_y) && isTruthy(input$plot_location_method) && isTruthy(input$plot_crs)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_location_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueX"]] = plots_df_upload[[input$plot_coordinates_x]]
                     plots_df[["plot > location > horizontalCoordinates > coordinates > valueY"]] = plots_df_upload[[input$plot_coordinates_y]]
                     plots_df[["plot > location > horizontalCoordinates > coordinates > spatialReference"]] = input$plot_crs
-                    plots_df[["plot > location > horizontalCoordinates > coordinates > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > location > horizontalCoordinates > coordinates > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1237,10 +1242,10 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 if("Elevation" %in% input$plot_input_control){
                   if(isTruthy(input$plot_elevation) && isTruthy(input$plot_elevation_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_elevation_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > location > verticalCoordinates > elevation > value"]] = plots_df_upload[[input$plot_elevation]]
-                    plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1252,21 +1257,21 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     plots_df[["plot > geometry > shape"]] = plots_df_upload[[input$plot_shape]]
                   }
                   if(isTruthy(input$plot_length) && isTruthy(input$plot_width) && isTruthy(input$plot_dimesion_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_dimensions_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > geometry > length > value"]] = plots_df_upload[[input$plot_length]]
-                    plots_df[["plot > geometry > length > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > geometry > length > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     plots_df[["plot > geometry > width > value"]] = plots_df_upload[[input$plot_width]]
-                    plots_df[["plot > geometry > width > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > geometry > width > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_area) && isTruthy(input$plot_area_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_area_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > geometry > area > value"]] = plots_df_upload[[input$plot_area]]
-                    plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1275,19 +1280,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 
                 if("Topography" %in% input$plot_input_control){
                   if(isTruthy(input$plot_aspect) && isTruthy(input$plot_aspect_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_aspect_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > topography > aspect > value"]] = plots_df_upload[[input$plot_aspect]]
-                    plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
                   }
                   if(isTruthy(input$plot_slope) && isTruthy(input$plot_slope_method)){
-                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                    method_nodes = templates() %>% dplyr::filter(template_id ==  input$plot_slope_method) %>% templates_to_nodes(vegx_schema, id_factory)
                     
                     plots_df[["plot > topography > slope > value"]] = plots_df_upload[[input$plot_slope]]
-                    plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                    plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]], "id")
                     
                     nodes$methods = append(nodes$methods, method_nodes$methods)
                     nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1301,12 +1306,12 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 }
                 
                 # Build plot nodes 
-                plot_nodes = new_vegx_nodes(plots_df, vegx_schema)
+                plot_nodes = new_vegx_nodes(plots_df, vegx_schema, id_factory)
                 nodes$plots = append(nodes$plots, plot_nodes)
                 
                 plots_lookup = data.frame(
-                  plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                  plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+                  plotID = sapply(nodes$plots, function(x){xml_attr(x, "id")}), # The internal id used by vegXshiny
+                  plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
                 )
                 
                 #------------------------------------#
@@ -1348,12 +1353,12 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                       subplots_df[["plot > geometry > shape"]] = subplots_df_upload[[input$subplot_shape]]
                     }
                     if(isTruthy(input$subplot_length) && isTruthy(input$subplot_width) && isTruthy(input$subplot_dimesion_method)){
-                      method_nodes = templates() %>% dplyr::filter(template_id ==  input$subplot_dimensions_method) %>% templates_to_nodes(vegx_schema, log_path, write_log = F)
+                      method_nodes = templates() %>% dplyr::filter(template_id == input$subplot_dimensions_method) %>% templates_to_nodes(vegx_schema, id_factory)
                       
                       subplots_df[["plot > geometry > length > value"]] = subplots_df_upload[[input$subplot_length]]
-                      subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                      subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                       subplots_df[["plot > geometry > width > value"]] = subplots_df_upload[[input$subplot_width]]
-                      subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                      subplots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                       
                       nodes$methods = append(nodes$methods, method_nodes$methods)
                       nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
@@ -1364,19 +1369,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                       # Check if method exists already 
                       method_name = method_template[method_template$node_path == "method > name", "node_value"] 
                       methods_lookup = data.frame(
-                        methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                        methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                        methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x, "id")}), # The internal id used by vegXshiny
+                        methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//name"))}) # the mapped unique identifier in the data
                       )
                       
                       if(method_name %in% methods_lookup$methodName){  # If yes, use existing ID
-                        attributes_method_links = sapply(nodes$attributes, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//methodID"))})
+                        attributes_method_links = sapply(nodes$attributes, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//methodID"))})
                         attribute_node = nodes$attributes[[which(attributes_method_links == methods_lookup$methodID[methods_lookup$methodName == method_name])]]
-                        attribute_id = xml2::xml_attr(attribute_node$node, "id")
+                        attribute_id = xml2::xml_attr(attribute_node, "id")
                       } else {                                         # If no, create new nodes
-                        method_nodes = templates_to_nodes(method_template, vegx_schema, log_path, write_log = F)
+                        method_nodes = templates_to_nodes(method_template, vegx_schema, id_factory)
                         nodes$methods = append(nodes$methods, method_nodes$methods)
                         nodes$attributes = append(nodes$attributes, method_nodes$attributes)  
-                        attribute_id = xml2::xml_attr(method_nodes$attributes[[1]]$node, "id")
+                        attribute_id = xml2::xml_attr(method_nodes$attributes[[1]], "id")
                       }
                       
                       subplots_df[["plot > geometry > area > value"]] = subplots_df_upload[[input$subplot_area]]
@@ -1385,13 +1390,13 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   }
                   
                   # Build subplot nodes 
-                  subplot_nodes = new_vegx_nodes(subplots_df, vegx_schema)
+                  subplot_nodes = new_vegx_nodes(subplots_df, vegx_schema, id_factory)
                   nodes$plots = append(nodes$plots, subplot_nodes)
                   
                   # Update plot lookup
                   plots_lookup = data.frame(
-                    plotID = sapply(nodes$plots, function(x){xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                    plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+                    plotID = sapply(nodes$plots, function(x){xml_attr(x, "id")}), # The internal id used by vegXshiny
+                    plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
                   )
                 }
               }
@@ -1449,16 +1454,16 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   bind_rows() %>% 
                   distinct() %>% 
                   filter(stats::complete.cases(.)) %>% 
-                  mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]]$node, attr = "id"))
+                  mutate("plotObservation > projectID" = xml2::xml_attr(nodes$projects[[1]], attr = "id"))
                 
                 # 2. Check if plots have ids already
                 plots_unmatched = setdiff(plotObs_df$plotUniqueIdentifier, 
-                                          sapply(nodes$plots, function(x){xml_text(xml_find_first(x$node, "//plotUniqueIdentifier"))}))
+                                          sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}))
                 
                 if(length(plots_unmatched) > 0){
                   stop("Plot identifiers do not match between plot data and observation data")
                   plots_df_addendum =  data.frame("plot > plotName" = plots_unmatched, "plot > plotUniqueIdentifier" = plots_unmatched, check.names = F)
-                  plot_nodes_addendum = new_vegx_nodes(plots_df_addendum, vegx_schema)
+                  plot_nodes_addendum = new_vegx_nodes(plots_df_addendum, vegx_schema, id_factory)
                   nodes$plots = append(nodes$plots, plot_nodes_addendum)
                   shiny::showNotification(type = "warning", paste0("Observation data referenced unknown plots. Added ", length(plots_unmatched),
                                                                    " new plot nodes for the following plots: ", plots_unmatched))
@@ -1471,14 +1476,14 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   dplyr::select(-plotUniqueIdentifier, -plotID)
                 
                 # 4. Create nodes
-                plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema)
+                plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema, id_factory)
                 nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
                 
                 # 5. Build lookup table
                 plotObs_lookup = lapply(plotObs_nodes, function(x){
-                  data.frame(plotObservationID = xml2::xml_attr(x$node, "id"),
-                             plotID = xml2::xml_text(xml2::xml_child(x$node, search = "plotID")),
-                             obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x$node, search = "obsStartDate"))))}) %>% 
+                  data.frame(plotObservationID = xml2::xml_attr(x, "id"),
+                             plotID = xml2::xml_text(xml2::xml_child(x, search = "plotID")),
+                             obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x, search = "obsStartDate"))))}) %>% 
                   bind_rows() %>% 
                   left_join(plots_lookup, by = "plotID")
                 
@@ -1497,19 +1502,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 if(length(orgNames) > 0){ 
                   # 2. Build Nodes
                   orgNames_df = data.frame("organismName" = unique(orgNames), check.names = F)
-                  orgNames_nodes = new_vegx_nodes(orgNames_df, vegx_schema)
-                  sapply(orgNames_nodes, function(node){xml_set_attr(node$node, "taxonName", "true")})
+                  orgNames_nodes = new_vegx_nodes(orgNames_df, vegx_schema, id_factory)
+                  sapply(orgNames_nodes, function(node){xml_set_attr(node, "taxonName", "true")})
                   
-                  orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x$node, attr = "id")}), check.names = F)
-                  orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema)
+                  orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x, attr = "id")}), check.names = F)
+                  orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema, id_factory)
                   
                   nodes$organismNames = orgNames_nodes
                   nodes$organismIdentities = orgIdentities_nodes
                   
                   # 3. Build lookup table
                   orgIdentities_lookup = lapply(orgIdentities_nodes, function(x){
-                    data.frame(organismIdentityID = xml2::xml_attr(x$node, "id"),
-                               originalOrganismNameID = xml2::xml_text(xml2::xml_child(x$node, search = "originalOrganismNameID")))}) %>% 
+                    data.frame(organismIdentityID = xml2::xml_attr(x, "id"),
+                               originalOrganismNameID = xml2::xml_text(xml2::xml_child(x, search = "originalOrganismNameID")))}) %>% 
                     bind_rows()
                   
                   orgNames_lookup = bind_cols(orgNames_df, orgIdentities_df) %>% 
@@ -1559,15 +1564,15 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     }) %>% bind_rows()
                   }
                   
-                  strataDef_nodes = templates_to_nodes(strataDef_templates, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
+                  strataDef_nodes = templates_to_nodes(strataDef_templates, vegx_schema, id_factory)
                   nodes$strata = append(nodes$strata, strataDef_nodes$strata)
                   nodes$methods = append(nodes$methods, strataDef_nodes$methods)
                   nodes$attributes = append(nodes$attributes, strataDef_nodes$attributes)
                   
                   strata_lookup = lapply(nodes$strata, function(x){
-                    data.frame(methodID = xml2::xml_text(xml2::xml_child(x$node, search = "methodID")),
-                               stratumID = xml2::xml_attr(x$node, "id"),
-                               stratumName = xml2::xml_text(xml2::xml_child(x$node, search = "stratumName")))}) %>% 
+                    data.frame(methodID = xml2::xml_text(xml2::xml_child(x, search = "methodID")),
+                               stratumID = xml2::xml_attr(x, "id"),
+                               stratumName = xml2::xml_text(xml2::xml_child(x, search = "stratumName")))}) %>% 
                     bind_rows()
                 }
                 
@@ -1599,14 +1604,14 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                       arrange("stratumObservation > plotObservationID", "stratumObservation > stratumID")
                     
                     # Create nodes
-                    aggOrgObs_stratumObs_nodes = new_vegx_nodes(aggOrgObs_stratumObs_df, vegx_schema)
+                    aggOrgObs_stratumObs_nodes = new_vegx_nodes(aggOrgObs_stratumObs_df, vegx_schema, id_factory)
                     nodes$stratumObservations = append(nodes$stratumObservations, aggOrgObs_stratumObs_nodes)  
                     
                     # Build lookup table
                     stratumObs_lookup = lapply(nodes$stratumObservations, function(x){
-                      data.frame(stratumObservationID = xml2::xml_attr(x$node, "id"),
-                                 plotObservationID = xml2::xml_text(xml2::xml_child(x$node, search = "plotObservationID")),
-                                 stratumID = xml2::xml_text(xml2::xml_child(x$node, search = "stratumID")))}) %>% 
+                      data.frame(stratumObservationID = xml2::xml_attr(x, "id"),
+                                 plotObservationID = xml2::xml_text(xml2::xml_child(x, search = "plotObservationID")),
+                                 stratumID = xml2::xml_text(xml2::xml_child(x, search = "stratumID")))}) %>% 
                       bind_rows()
                   }
                   
@@ -1637,19 +1642,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   }
                   
                   # 2. Build Nodes
-                  aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
+                  aggOrgObs_measurementScale_nodes = templates_to_nodes(aggOrgObs_measurementScale_template, vegx_schema, id_factory)
                   nodes$methods = append(nodes$methods, aggOrgObs_measurementScale_nodes$methods)
                   nodes$attributes = append(nodes$attributes, aggOrgObs_measurementScale_nodes$attributes)
                   
                   # 3. Build lookup
                   if(method_is_quantitative){
-                    measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(aggOrgObs_measurementScale_nodes$attributes[[1]]$node, "id"),
+                    measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(aggOrgObs_measurementScale_nodes$attributes[[1]], "id"),
                                                          taxon_measurement = data_upload[["aggregateOrganismObservations"]][,input$aggOrgObs_taxonMeasurement]) %>% 
                       dplyr::distinct()
                   } else {
                     measurementScale_lookup = lapply(aggOrgObs_measurementScale_nodes$attributes, function(x){
-                      data.frame(attributeID = xml2::xml_attr(x$node, "id"),
-                                 taxon_measurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                      data.frame(attributeID = xml2::xml_attr(x, "id"),
+                                 taxon_measurement = xml2::xml_text(xml2::xml_find_first(x, "..//code")))}) %>% 
                       bind_rows()
                   }
                   
@@ -1691,7 +1696,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                     "aggregateOrganismObservation > aggregateOrganismMeasurement > attributeID" = attributeID)
                   }
                   
-                  aggOrgObs_nodes = new_vegx_nodes(aggOrgObs_df, vegx_schema)
+                  aggOrgObs_nodes = new_vegx_nodes(aggOrgObs_df, vegx_schema, id_factory)
                   nodes$aggregateOrganismObservations = aggOrgObs_nodes  
                 }
                 
@@ -1704,22 +1709,22 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   method_name = stratumObs_measurementScale_template[stratumObs_measurementScale_template$node_path == "method > name", "node_value"]
                   method_is_quantitative = stratumObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                   methods_lookup = data.frame(
-                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x, "id")}), # The internal id used by vegXshiny
+                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//name"))}) # the mapped unique identifier in the data
                   )
                   
                   if(method_name %in% methods_lookup$methodName){   # Method exists already --> build lookup from nodes
                     method_id = methods_lookup$methodID[which(methods_lookup$methodName == method_name)]
-                    attribute_nodes = nodes$attributes[sapply(nodes$attributes, function(x){xml2::xml_attr(x$node, "id") == method_id})]
+                    attribute_nodes = nodes$attributes[sapply(nodes$attributes, function(x){xml2::xml_attr(x, "id") == method_id})]
                     
                     if(method_is_quantitative){
-                      measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(attribute_nodes[[1]]$node, "id"),
+                      measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(attribute_nodes[[1]], "id"),
                                                            stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement]) %>% 
                         dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(attribute_nodes, function(x){
-                        data.frame(attributeID = xml2::xml_attr(x$node, "id"),
-                                   stratumMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        data.frame(attributeID = xml2::xml_attr(x, "id"),
+                                   stratumMeasurement = xml2::xml_text(xml2::xml_find_first(x, "..//code")))}) %>% 
                         bind_rows()
                     }
                   } else {       # Method does not exist --> build from scratch (if it's not quantitative)
@@ -1737,7 +1742,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                                          group_value = codes_unmatched) %>% 
                           group_by(group_value) %>% 
                           group_modify(~add_row(.x, template_id = stratumObs_measurementScale_template$template_id[1], main_element = "attributes", node_path = node_path, node_value = "1")) %>%
-                          mutate(node_id = cur_group_id()+max( stratumObs_measurementScale_template$node_id)) %>% 
+                          mutate(node_id = cur_group_id()+max(stratumObs_measurementScale_template$node_id)) %>% 
                           ungroup() %>% 
                           dplyr::select(template_id, node_id, main_element, node_path, node_value)
                       }
@@ -1745,19 +1750,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     }
                     
                     # 2. Build Nodes
-                    stratumObs_measurementScale_nodes = templates_to_nodes(stratumObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
+                    stratumObs_measurementScale_nodes = templates_to_nodes(stratumObs_measurementScale_template, vegx_schema, id_factory)
                     nodes$methods = append(nodes$methods, stratumObs_measurementScale_nodes$methods)
                     nodes$attributes = append(nodes$attributes, stratumObs_measurementScale_nodes$attributes)
                     
                     # 3. Build lookup (if qualitative scale was used)
                     if(method_is_quantitative){
-                      measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(stratumObs_measurementScale_nodes$attributes[[1]]$node, "id"),
+                      measurementScale_lookup = data.frame(attributeID = xml2::xml_attr(stratumObs_measurementScale_nodes$attributes[[1]], "id"),
                                                            stratumMeasurement = data_upload[["stratumObservations"]][,input$stratumObs_stratumMeasurement]) %>% 
                         dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(stratumObs_measurementScale_nodes$attributes, function(x){
-                        data.frame(attributeID = xml2::xml_attr(x$node, "id"),
-                                   stratumMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        data.frame(attributeID = xml2::xml_attr(x, "id"),
+                                   stratumMeasurement = xml2::xml_text(xml2::xml_find_first(x, "..//code")))}) %>% 
                         bind_rows()
                     }
                   }
@@ -1783,14 +1788,14 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     arrange("stratumObservation > plotObservationID", "stratumObservation > stratumID")
                   
                   # Create nodes
-                  stratumObs_nodes = new_vegx_nodes(stratumObs_df, vegx_schema)
+                  stratumObs_nodes = new_vegx_nodes(stratumObs_df, vegx_schema, id_factory)
                   nodes$stratumObservations = append(nodes$stratumObservations, stratumObs_nodes)  
                   
                   # Build lookup table
                   stratumObs_lookup = lapply(nodes$stratumObservations, function(x){
-                    data.frame(stratumObservationID = xml2::xml_attr(x$node, "id"),
-                               plotObservationID = xml2::xml_text(xml2::xml_child(x$node, search = "plotObservationID")),
-                               stratumID = xml2::xml_text(xml2::xml_child(x$node, search = "stratumID")))}) %>% 
+                    data.frame(stratumObservationID = xml2::xml_attr(x, "id"),
+                               plotObservationID = xml2::xml_text(xml2::xml_child(x, search = "plotObservationID")),
+                               stratumID = xml2::xml_text(xml2::xml_child(x, search = "stratumID")))}) %>% 
                     bind_rows()
                 }
 
@@ -1802,22 +1807,22 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   method_name = covObs_measurementScale_template[covObs_measurementScale_template$node_path == "method > name", "node_value"]
                   method_is_quantitative = covObs_measurementScale_template %>% dplyr::filter(main_element == "attributes") %>% pull(node_path) %>% stringr::str_detect("quantitative") %>% all()
                   methods_lookup = data.frame(
-                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x$node, "id")}), # The internal id used by vegXshiny
-                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x$node, "..//name"))}) # the mapped unique identifier in the data
+                    methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x, "id")}), # The internal id used by vegXshiny
+                    methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//name"))}) # the mapped unique identifier in the data
                   )
                   
                   if(method_name %in% methods_lookup$methodName){   # Method exists already --> build lookup from nodes
                     method_id = methods_lookup$methodID[which(methods_lookup$methodName == method_name)]
-                    attribute_nodes = nodes$attributes[sapply(nodes$attributes, function(x){xml2::xml_attr(x$node, "id") == method_id})]
+                    attribute_nodes = nodes$attributes[sapply(nodes$attributes, function(x){xml2::xml_attr(x, "id") == method_id})]
                     
                     if(method_is_quantitative){
-                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(attribute_nodes[[1]]$node, "id"),
+                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(attribute_nodes[[1]], "id"),
                                                            surfaceCoverMeasurement = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]) %>% 
                         dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(attribute_nodes, function(x){
-                        data.frame(attributeID_measurement = xml2::xml_attr(x$node, "id"),
-                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        data.frame(attributeID_measurement = xml2::xml_attr(x, "id"),
+                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x, "..//code")))}) %>% 
                         bind_rows()
                     }
                   } else {       # Method does not exist --> build from scratch (if it's not quantitative)
@@ -1843,19 +1848,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     }
                     
                     # 2. Build Nodes
-                    covObs_measurementScale_nodes = templates_to_nodes(covObs_measurementScale_template, vegx_schema = vegx_schema, log_path = log_path, write_log = F)
+                    covObs_measurementScale_nodes = templates_to_nodes(covObs_measurementScale_template, vegx_schema, id_factory)
                     nodes$methods = append(nodes$methods, covObs_measurementScale_nodes$methods)
                     nodes$attributes = append(nodes$attributes, covObs_measurementScale_nodes$attributes)
                     
                     # 3. Build lookup
                     if(method_is_quantitative){
-                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(covObs_measurementScale_nodes$attributes[[1]]$node, "id"),
+                      measurementScale_lookup = data.frame(attributeID_measurement = xml2::xml_attr(covObs_measurementScale_nodes$attributes[[1]], "id"),
                                                            surfaceCoverMeasurement = data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceCoverMeasurement]) %>% 
                         dplyr::distinct()
                     } else {
                       measurementScale_lookup = lapply(covObs_measurementScale_nodes$attributes, function(x){
-                        data.frame(attributeID_measurement = xml2::xml_attr(x$node, "id"),
-                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x$node, "..//code")))}) %>% 
+                        data.frame(attributeID_measurement = xml2::xml_attr(x, "id"),
+                                   surfaceCoverMeasurement = xml2::xml_text(xml2::xml_find_first(x, "..//code")))}) %>% 
                         bind_rows()
                     }
                   }
@@ -1863,11 +1868,11 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                   # Build surface types
                   surface_types = unique(data_upload[["surfaceCoverObservations"]][,input$covObs_surfaceType])
                   surfaceType_df = data.frame("surfaceType > surfaceName" = surface_types, check.names = F)
-                  nodes$surfaceTypes = new_vegx_nodes(surfaceType_df, vegx_schema)
+                  nodes$surfaceTypes = new_vegx_nodes(surfaceType_df, vegx_schema, id_factory)
                   
                   surfaceTypes_lookup = lapply(nodes$surfaceTypes, function(x){
-                    data.frame(attributeID_type = xml2::xml_attr(x$node, "id"),
-                               surfaceType = xml2::xml_text(xml2::xml_find_first(x$node, "..//surfaceName")))}) %>% 
+                    data.frame(attributeID_type = xml2::xml_attr(x, "id"),
+                               surfaceType = xml2::xml_text(xml2::xml_find_first(x, "..//surfaceName")))}) %>% 
                     bind_rows()
                   
                   # Build mapping table
@@ -1891,7 +1896,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                     arrange("surfaceCoverObservation > plotObservationID", "surfaceCoverObservation > surfaceTypeID")
                   
                   # Create nodes
-                  covObs_nodes = new_vegx_nodes(covObs_df, vegx_schema)
+                  covObs_nodes = new_vegx_nodes(covObs_df, vegx_schema, id_factory)
                   nodes$surfaceCoverObservations = covObs_nodes
                   
                   # no lookup table needed
@@ -1910,6 +1915,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 if(parent_missing){
                   elements_present = xml_root(vegx_doc) %>% xml_children() %>% xml_name()
                   if(length(elements_present) > 0){
+                    vegx_main_elements = xml2::xml_attr(xml_children(vegx_schema), "name")
                     elements_ordered = vegx_main_elements[vegx_main_elements %in% c(elements_present, element_name)]
                     insert_position = which(elements_ordered == element_name) - 1
                     xml_add_child(vegx_doc, element_name, .where = insert_position)
@@ -1923,8 +1929,8 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                 placeholder = xml_child(parent, "placeholder")
                 
                 for(i in 1:length(element_nodes)){
-                  if(!is.null(element_nodes[[i]]$node)){
-                    xml_add_sibling(placeholder, element_nodes[[i]]$node, .where = "before", .copy = F)  # This is much faster than xml_add_child()
+                  if(!is.null(element_nodes[[i]])){
+                    xml_add_sibling(placeholder, element_nodes[[i]], .where = "before", .copy = F)  # This is much faster than xml_add_child()
                   }
                 }
                 xml_remove(placeholder)  # Remove placeholder

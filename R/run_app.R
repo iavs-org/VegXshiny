@@ -13,6 +13,7 @@ run_app <- function(
   options = list(), 
   enableBookmarking = NULL,
   uiPattern = "/",
+  max_upload_size_MB = 50,
   ...
 ) {
   with_golem_options(
@@ -24,6 +25,8 @@ run_app <- function(
       enableBookmarking = enableBookmarking, 
       uiPattern = uiPattern
     ), 
-    golem_opts = list()
+    golem_opts = list(
+      max_upload_size_MB = max_upload_size_MB
+    )
   )
 }
