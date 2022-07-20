@@ -187,7 +187,8 @@ mod_aboutVegX_ui <- function(id){
         tags$h2("XML Viewer", id = ns("xml_viewer"), class = "text-info"),
         tags$p("The XML Viewer previews the current Veg-X document. Clicking the 'Edit' button enters the edit mode, where you can modify the raw XML of the Veg-X document. Caution needs to be taken here, 
                 as manually editing a Veg-X file can quickly invalidate it. Note that edits cannot be undone once they are saved."),
-        tags$p("Pressing the 'Validate' button tests whether the current Veg-X document complies with the Veg-X XML schema. Potential validation errors will be listed in the Action Log."),
+        tags$p("Pressing the 'Validate' button tests whether the current Veg-X document complies with the Veg-X XML schema and whether there are potential issues with 
+               references among nodes. Validation errors and other issues will be listed in the Action Log."),
         
         tags$h2("Veg-X Export", id = ns("vegx_export"), class = "text-info"),
         tags$p("Veg-X documents can be exported either as Veg-X XML file or as a zipped collection of long-format tables. The latter option may be convenient if data from Veg-X need to be imported into 
@@ -219,7 +220,7 @@ mod_aboutVegX_ui <- function(id){
                you need to handle larger files you can install VegXshiny from github and run the application locally:"),
         tags$code("install.packages(\"devtools\")"), tags$br(),
         tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), tags$br(),
-        tags$code("VegXshiny::run_app(max_upload_size_MB = 100)  # Set max upload limit"), tags$br(),
+        tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # Set max upload limit"), tags$br(),
         tags$p("Alternatively or you can can write an import script using the", tags$a("VegX R-package", href = "https://github.com/iavs-org/VegX", target="_blank"), ".")
       ),
       

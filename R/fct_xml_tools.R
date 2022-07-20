@@ -355,6 +355,16 @@ templates_to_nodes = function(templates_selected, vegx_schema, id_factory){
   return(node_list)
 }
 
+
+#' Function to check nodes in a VegX document
+#' 
+#' @param vegx_doc A vegX xml document
+#' 
+#' @author Sebastian Schmidtlein
+#' 
+#' @noRd
+#'
+#' @return A character vector of potential issues related to references among nodes within the document
 check_document_links = function(vegx_doc) {
   # Helper functions
   

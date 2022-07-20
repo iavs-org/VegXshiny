@@ -1,5 +1,6 @@
 #' Run the Shiny Application
 #'
+#' @param max_upload_size_MB The maximum size for file upload in MB
 #' @param ... arguments to pass to golem_opts. 
 #' See `?golem::get_golem_options` for more details.
 #' @inheritParams shiny::shinyApp
