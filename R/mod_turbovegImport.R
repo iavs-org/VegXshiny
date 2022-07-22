@@ -120,10 +120,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 tags$p("This will convert the uploaded document into VegX document. Depending on the document size, this process may take a while."),
             ),
             tags$p(paste0("The header data contain ", ncol(tv_dfs()$udf_header), " undefined columns. Which fields should be imported as user defined plot attributes?")),
-            tags$div(align = 'left', 
-                     class = 'multicol', 
-                     checkboxGroupInput(ns("udf_header_import"), label = NULL, choices = sort(colnames(tv_dfs()$udf_header)[-1]), inline = F)
-            )
+            selectizeInput(ns("udf_header_import"), label = NULL, choices = sort(colnames(tv_dfs()$udf_header)[-1]), multiple = T, width = "100%")
           )
           modal_footer = tagList(
             tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
@@ -162,6 +159,12 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
           # Remove attributes and child nodes from vegx_doc
           vegx_doc %>% xml_find_all("//vegX") %>% xml_children() %>% xml_remove()
           
+          # Initialize an ID factory with one id_generator per ID name as defined by id_lookup (see /data-raw)
+          id_factory = sapply(unique(id_lookup), function(x){
+            id_generator()
+          }, simplify = F)
+          
+          
           withProgress(
             message = "Importing data",
             expr = {
@@ -173,7 +176,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               #-------------------------------------------------------------------------# 
               # Project ####
               project_df = data.frame("project > title" = "Imported Turboveg project", check.names = F)
-              nodes$projects = new_vegx_nodes(project_df, vegx_schema)
+              nodes$projects = new_vegx_nodes(project_df, vegx_schema, id_factory)
            
               #-------------------------------------------------------------------------# 
               # Plots ####
@@ -183,7 +186,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                                     check.names = F)
               std_cols = colnames(tv_dfs()$std_header) 
               if("surf_area" %in% std_cols){
-                method_nodes = templates() %>% dplyr::filter(template_id == 1) %>% templates_to_nodes(vegx_schema)   # Plot area/m2
+                method_nodes = templates() %>% dplyr::filter(template_id == 1) %>% templates_to_nodes(vegx_schema, id_factory)   # Plot area/m2
                 
                 plots_df[["plot > geometry > area > value"]] = tv_dfs()$std_header[["surf_area"]]
                 plots_df[["plot > geometry > area > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
@@ -193,7 +196,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               }
               
               if("altitude" %in% std_cols){
-                method_nodes = templates() %>% dplyr::filter(template_id == 20) %>% templates_to_nodes(vegx_schema)  # Elevation/m
+                method_nodes = templates() %>% dplyr::filter(template_id == 20) %>% templates_to_nodes(vegx_schema, id_factory)  # Elevation/m
                 
                 plots_df[["plot > location > verticalCoordinates > elevation > value"]] = tv_dfs()$std_header[["altitude"]]
                 plots_df[["plot > location > verticalCoordinates > elevation > attributeID"]] = xml2::xml_attr(method_nodes$attributes[[1]], "id")
@@ -203,7 +206,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               }
               
               if("exposition" %in% std_cols){
-                method_nodes = templates() %>% dplyr::filter(template_id == 18) %>% templates_to_nodes(vegx_schema)  # Aspect/degrees
+                method_nodes = templates() %>% dplyr::filter(template_id == 18) %>% templates_to_nodes(vegx_schema, id_factory)  # Aspect/degrees
                 
                 plots_df[["plot > topography > aspect > value"]] = tv_dfs()$std_header[["exposition"]]
                 plots_df[["plot > topography > aspect > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]], "id")
@@ -213,7 +216,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               }
               
               if("inclinatio" %in% std_cols){
-                method_nodes = templates() %>% dplyr::filter(template_id == 16) %>% templates_to_nodes(vegx_schema)  # Slope/degrees
+                method_nodes = templates() %>% dplyr::filter(template_id == 16) %>% templates_to_nodes(vegx_schema, id_factory)  # Slope/degrees
                 
                 plots_df[["plot > topography > slope > value"]] = tv_dfs()$std_header[["inclinatio"]]
                 plots_df[["plot > topography > slope > attributeID"]] =  xml2::xml_attr(method_nodes$attributes[[1]], "id")
@@ -228,7 +231,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                                      "method > name" = name,
                                      "method > description" = "Turboveg undefined method",
                                      check.names = F)
-                node = new_vegx_nodes(node_df, vegx_schema)[[1]]
+                node = new_vegx_nodes(node_df, vegx_schema, id_factory)[[1]]
                 return(node)
               })
               
@@ -242,9 +245,8 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               }
               
               # Build plot nodes 
-              vegx_schema_plots = xml_find_all(vegx_schema, "./xsd:element[@name='plots']")
               plot_nodes = lapply(1:nrow(plots_df), function(i){
-                plot_node = new_vegx_nodes(plots_df[i,], vegx_schema)[[1]]
+                plot_node = new_vegx_nodes(plots_df[i,], vegx_schema, id_factory)[[1]]
                 if(length(udf_method_nodes) > 0){
                   lapply(1:nrow(udf_methods_lookup), function(j){
                     method_name = udf_methods_lookup$methodName[j]
@@ -274,7 +276,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 mutate(taxonName = ifelse(valid_name == "", "true", "false"),
                        valid_name = ifelse(valid_name == "", name, valid_name))
               
-              orgNames_nodes = new_vegx_nodes(dplyr::select(orgNames_df, organismName = name), vegx_schema)
+              orgNames_nodes = new_vegx_nodes(dplyr::select(orgNames_df, organismName = name), vegx_schema, id_factory)
               lapply(1:length(orgNames_nodes), function(i){xml_set_attr(orgNames_nodes[[i]], "taxonName", orgNames_df[i,"taxonName"])})
               
               orgNames_df$orgNameID = sapply(orgNames_nodes, function(x){xml_attr(x, "id")})
@@ -285,7 +287,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = orgNames_df$orgNameID,
                                             "organismIdentity > preferredTaxonNomenclature > preferredTaxonNameID" = orgNames_df$preferredNameID,
                                             check.names = F)
-              orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema)
+              orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema, id_factory)
               
               nodes$organismNames = orgNames_nodes
               nodes$organismIdentities = orgIdentities_nodes
@@ -335,7 +337,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 return(template)
               })
 
-              template_nodes = templates_to_nodes(bind_rows(coverscale_templates), vegx_schema) 
+              template_nodes = templates_to_nodes(bind_rows(coverscale_templates), vegx_schema, id_factory) 
               
               nodes$methods = append(nodes$methods, template_nodes$methods)
               nodes$attributes = append(nodes$attributes, template_nodes$attributes) 
@@ -356,7 +358,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               stratadef_template = templates() %>% 
                 dplyr::filter(template_id == stratadef_template_id)
               
-              template_nodes = templates_to_nodes(stratadef_template, vegx_schema)
+              template_nodes = templates_to_nodes(stratadef_template, vegx_schema, id_factory)
               nodes$strata = append(nodes$strata, template_nodes$strata)
               nodes$methods = append(nodes$methods, template_nodes$methods)
               nodes$attributes = append(nodes$attributes, template_nodes$attributes) 
@@ -376,9 +378,8 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                 inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
                 mutate("plotObservation > plotID" = plotID) %>% 
                 dplyr::select(-plotUniqueIdentifier, -plotID)
-              
-              vegx_schema_plotObs = xml_find_all(vegx_schema, "./xsd:element[@name='plotObservations']")
-              plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema_plotObs)
+
+              plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema, id_factory)
               
               nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)
               
@@ -407,9 +408,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               
               if(nrow(stratumObs_df) > 0){
                 # Create nodes
-                vegx_schema_stratumObs = xml_find_all(vegx_schema, "./xsd:element[@name='stratumObservations']")
-                stratumObs_nodes = new_vegx_nodes(stratumObs_df, vegx_schema_stratumObs)
-                
+                stratumObs_nodes = new_vegx_nodes(stratumObs_df, vegx_schema, id_factory)
                 nodes$stratumObservations = append(nodes$stratumObservations, stratumObs_nodes)  
                 
                 # Build lookup table
@@ -447,8 +446,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
                               "aggregateOrganismObservation > stratumObservationID" = stratumObservationID)
               
               
-              vegx_schema_aggOrgObs = xml_find_all(vegx_schema, "./xsd:element[@name='aggregateOrganismObservations']")
-              aggOrgObs_nodes = new_vegx_nodes(aggOrgObs_df, vegx_schema_aggOrgObs)
+              aggOrgObs_nodes = new_vegx_nodes(aggOrgObs_df, vegx_schema, id_factory)
               nodes$aggregateOrganismObservations = aggOrgObs_nodes  
               
               #-------------------------------------------------------------------------#
@@ -488,12 +486,13 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
               # Action log 
               setProgress(value = 1)
               showNotification("Import finished.")
-              new_action_log_record(log_path, "Import info", "Data imported from Turboveg file")
+              new_action_log_record(log_path, "Import info", paste0("Data imported from Turboveg file '", input$tv_file, "'."))
               action_log(read_action_log(log_path))
             })  
         }, error = function(e){
           showNotification("Import failed. Please consult the log for more information.")
-          new_action_log_record(log_path, "Import error", e$message)
+          new_action_log_record(log_path, "Import error", paste0("Import from Turboveg file '", input$tv_file, "' failed with the following exceptions:",
+                                                                 "<ul><li>Error: ", e$message, "</li></ul>"))
           action_log(read_action_log(log_path))
         }, finally = {
           removeModal()

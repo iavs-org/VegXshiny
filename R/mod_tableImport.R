@@ -269,19 +269,21 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     observeEvent(  
       eventExpr = methods(),
       handlerExpr = {
-        updateSelectizeInput(session, inputId = "plot_location_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$location), after = 1))
-        updateSelectizeInput(session, inputId = "plot_elevation_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$elevation), after = 1))
-        updateSelectizeInput(session, inputId = "plot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
-        updateSelectizeInput(session, inputId = "plot_area_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
-        updateSelectizeInput(session, inputId = "plot_aspect_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$aspect), after = 1))
-        updateSelectizeInput(session, inputId = "plot_slope_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$slope), after = 1))
-        updateSelectizeInput(session, inputId = "subplot_dimensions_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_dimension), after = 1))
-        updateSelectizeInput(session, inputId = "subplot_area_method", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$plot_area), after = 1))
-        updateSelectizeInput(session, inputId = "aggOrgObs_strataDef", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
-        updateSelectizeInput(session, inputId = "aggOrgObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$aggOrgObs), after = 1))
-        updateSelectizeInput(session, inputId = "stratumObs_strataDef", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$strataDef), after = 1))
-        updateSelectizeInput(session, inputId = "stratumObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$stratumObs), after = 1))
-        updateSelectizeInput(session, inputId = "covObs_measurementScale", selected = "", choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()$covObs), after = 1))
+        inputs = data.frame(input_id = c("plot_location_method", "plot_elevation_method", "plot_dimensions_method", "plot_area_method",
+                                         "plot_aspect_method", "plot_slope_method", "subplot_dimensions_method", "subplot_area_method",
+                                         "aggOrgObs_strataDef", "aggOrgObs_measurementScale", "stratumObs_strataDef", "stratumObs_measurementScale",
+                                         "covObs_measurementScale"),
+                            method_name = c("location", "elevation", "plot_dimension", "plot_area", 
+                                            "aspect", "slope", "plot_dimension", "plot_area", 
+                                            "strataDef", "aggOrgObs", "strataDef", "stratumObs", 
+                                            "covObs")
+        )
+
+        for(i in 1:nrow(inputs)){
+          id = inputs$input_id[i]
+          method = inputs$method_name[i]
+          updateSelectizeInput(session, inputId = id, selected = input[[id]], choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(methods()[[method]]), after = 1))
+        }
       }
     ) 
     
@@ -1168,7 +1170,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
               shinyjs::disable("confirm_import")
               shinyjs::disable("dismiss_modal")
               nodes = list()  
-
+              
               ## Project ####
               setProgress(value = 0.05, "Projects")
               if(isTruthy(input$party_name) & isTruthy(input$party_type)){
@@ -1798,7 +1800,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                stratumID = xml2::xml_text(xml2::xml_child(x, search = "stratumID")))}) %>% 
                     bind_rows()
                 }
-
+                
                 if("surfaceCoverObservations" %in% input$observations_input_control){
                   incProgress(progress_increment, "SurfaceCoverObservations")
                   covObs_measurementScale_template = templates() %>% dplyr::filter(template_id == input$covObs_measurementScale)

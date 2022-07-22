@@ -151,24 +151,29 @@ mod_fileManager_server <- function(id, action_log, log_path){
       file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
       
       if(file_ext == "xml"){
-        output_function = uiOutput
-      } else {
-        output_function = rhandsontable::rHandsontableOutput
-      }
-      ui = div(
-        id = ns(paste0("editor_", file_focus())),
-        fluidRow(
-          column(width = 12,
-                 actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
-                 actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
-          )
-        ),
-        if(file_ext == "xml"){
+        div(
+          id = ns(paste0("editor_", file_focus())),
+          fluidRow(
+            column(width = 12,
+                   actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"),
+                   actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
+            )
+          ),
           aceEditor(outputId = ns("editor"), value = as.character(user_data[[file_focus()]]), height = "500px", mode = "xml", theme = "tomorrow", readOnly = T, autoComplete = "disabled")
-        } else {
+        )
+      } else {
+        div(
+          id = ns(paste0("editor_", file_focus())),
+          fluidRow(
+            column(width = 12,
+                   actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"),
+                   actionButton(ns("reshape"), "Reshape", width = "130px", class = "btn-xs"),
+                   actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
+            )
+          ),
           rhandsontable::rHandsontableOutput(ns("editor"), height = 500)
-        }
-      )
+        )
+      }
     })
     
     observe({
@@ -233,15 +238,13 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      }
                      
                      # Restore UI state
-                     insertUI(selector = paste0("#", ns("save_edits")),
+                     insertUI(selector = paste0("#", ns("reshape")),
                               where = "beforeBegin",
-                              ui = actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"))
-                     insertUI(selector = paste0("#", ns("save_edits")),
-                              where = "beforeBegin",
-                              ui = actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs"))
+                              ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
+                     insertUI(selector = paste0("#", ns("reshape")),
+                              where = "afterEnd",
+                              ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
                      removeUI(selector = paste0("#", ns("save_edits")))
-                     removeUI(selector = paste0("#", ns("transpose")))
-                     removeUI(selector = paste0("#", ns("add_names")))
                      removeUI(selector = paste0("#", ns("discard_edits")))
                      
                      # Update action log
@@ -257,15 +260,13 @@ mod_fileManager_server <- function(id, action_log, log_path){
     observeEvent(eventExpr = input$discard_edits,
                  handlerExpr = {
                    # Restore UI state
-                   insertUI(selector = paste0("#", ns("save_edits")),
+                   insertUI(selector = paste0("#", ns("reshape")),
                             where = "beforeBegin",
-                            ui = actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"))
-                   insertUI(selector = paste0("#", ns("save_edits")),
-                            where = "beforeBegin",
-                            ui = actionButton(ns("delete"), "Delete", width = "80px", class = "btn-xs"))
+                            ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
+                   insertUI(selector = paste0("#", ns("reshape")),
+                            where = "afterEnd",
+                            ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
                    removeUI(selector = paste0("#", ns("save_edits")))
-                   removeUI(selector = paste0("#", ns("transpose")))
-                   removeUI(selector = paste0("#", ns("add_names")))
                    removeUI(selector = paste0("#", ns("discard_edits")))
                    
                    # Restore data
@@ -280,6 +281,98 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded."))
                    action_log(read_action_log(log_path))
                  })
+    
+    ##### Reshape table #####
+    observeEvent(eventExpr = input$reshape,
+                 handlerExpr = {
+                   select_choices = unlist(input$editor$params$rColnames)
+                   showModal(
+                     modalDialog(
+                       size = "l",
+                       tagList(
+                         tags$h3("Reshape data"),
+                         tags$p("Prepare your datasets for import by organizing variables in columns and observations in rows. The primary use case is to reshape multiple columns that 
+                                 code for the same variables, e.g. 'cover_tree_layer', 'cover_shrub_layer' and 'cover_herb_layer', into a tidy dataset where information on
+                                 layer and measurements are cleanly separated.", class = "text-info"),
+                         tags$div(style = "text-align: center; margin-bottom: 8px;",
+                                  tags$img(src='www/images/reshape_table.png', align = "center", width = 500)
+                         ),
+                         tags$p("This operation will create a new file in the File Manager. Note that VegXshiny requires a date and plot id column for all observation datasets. Mark the 
+                                 corresponding columns of the original dataset to be retained during the operation.", class = "text-info"),
+                         
+                         hr(),
+                         tags$label("Column selection"),
+                         tags$p("Which columns should be ..."),
+                         fluidRow(
+                           column(6, tags$p("...reshaped into long format?"),
+                                  selectizeInput(ns("columns_pivot"), label = NULL, choices = select_choices, multiple = T, width = "100%")),
+                           column(6, tags$p("...retained as id columns?"),
+                                  selectizeInput(ns("columns_id"), label = NULL, choices = select_choices, multiple = T, width = "100%"))
+                         ),
+                         
+                         tags$label("Column names"),
+                         tags$p("What should be the name of the column that is created from the ..."),
+                         fluidRow(
+                           column(6, tags$p("...names of the selected columns?"),
+                                  textInput(ns("names_to"), label = NULL, width = "100%")),
+                           column(6, tags$p("...values of the selected columns?"),
+                                  textInput(ns("values_to"), label = NULL, width = "100%"))
+                         ),
+                         
+                         tags$label("Label names"),
+                         tags$p("Should parts of the selected column names be removed?"),
+                         fluidRow(
+                           column(6, tags$p("Remove prefix:"),
+                                  textInput(ns("prefix_remove"), label = NULL, width = "100%")),
+                           column(6, tags$p("Remove suffix:"),
+                                  textInput(ns("suffix_remove"), label = NULL, width = "100%"))
+                         ),
+                         
+                         tags$label("Dataset name"),
+                         tags$p("Name of the new dataset without file extension"),
+                         textInput(ns("new_file_name"), label = NULL, width = "100%")
+                       ),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),
+                                   actionButton(ns("confirm_reshape"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       )
+                     )
+                   )
+                 })
+    
+    observeEvent(eventExpr = input$confirm_reshape,
+                 handlerExpr = {
+                   tryCatch({
+                     browser()
+                     data_df = rhandsontable::hot_to_r(input$editor) %>% 
+                       dplyr::select(c(input$columns_id, input$columns_pivot)) %>% 
+                       tidyr::pivot_longer(cols = input$columns_pivot,
+                                           names_to = input$names_to,
+                                           values_to = input$values_to,
+                                           names_pattern = paste0(input$prefix_remove, "(.*)", input$suffix_remove))
+                     
+                     # Update user data
+                     file_name = paste0(input$new_file_name, ".csv")
+                     user_data[[file_name]] = data_df %>% 
+                       rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                     
+                     # Update action log 
+                     removeModal()
+                     new_action_log_record(log_path, "File info", paste0("Created reshaped table"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Reshaped table created")
+                   }, error = function(e){
+                     removeModal()
+                     new_action_log_record(log_path, "File error", paste0("Reshaping operating for ", file_focus(), " failed with the follwing exceptions:", 
+                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                   })
+                 })
+    
+    observeEvent(eventExpr = input$dismiss_modal, 
+                 handlerExpr = removeModal())
     
     ##### Delete file #####
     observeEvent(eventExpr = input$delete,

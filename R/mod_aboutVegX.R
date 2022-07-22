@@ -208,10 +208,11 @@ mod_aboutVegX_ui <- function(id){
                integration of {VegXshiny} and {VegX} into a single R-package."),
         
         tags$h3("How to format my data correctly for VegXshiny?", class = "text-info"),
-        tags$p("VegXshiny expects tabular data in ", tags$i("tidy"), " format, where each column is a variable and each row is an observation. If your data are formatted differently, e.g. as a species-by-sites matrix,
-               you can use available tools in R such as ", tags$code("reshape::melt()"), " or ", tags$code("tidyr::pivot_longer()"), " to re-structure your data. Additional details on the expected formatting 
-               of input data can be found in the tutorial."),
-        
+        tags$p("VegXshiny expects tabular data in ", tags$i("tidy"), " format, where each column is a variable and each row is an observation. Specific details on the expected format of 
+                input data is always available when hovering the info icon next to dataset selection in the table import dialog."),
+        tags$p("If your dataset does not meet the format specifications, as for example a species-by-sites matrix, you can use the ", tags$span("Reshape tool in the File Manager", class = "text-info"), 
+               "or R-functions such as ", tags$code("reshape::melt()"), " or ", tags$code("tidyr::pivot_longer()"), " to organize your data."),
+
         tags$h3("Why did my import fail?", class = "text-info"),
         tags$p("Generally, VegXshiny tries to handly irregular data without failing. If the import fails anyways, you may consult the ", tags$i("Action Log"), " for details on why the data could not be imported."),
         

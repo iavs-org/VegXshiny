@@ -21,10 +21,6 @@ mod_newMethodTemplate_ui <- function(id){
         textInput(ns("method_citation"), label = "Citation", width = "100%"),
         hr(),
         
-        h3("Attributes"),   
-        tags$p("Define the measured properties of the method.", class = "text-info annotation"),
-        br(),
-        
         uiOutput(ns("quant_attrs_ui")),
         uiOutput(ns("ord_attrs_ui")),
         uiOutput(ns("qual_attrs_ui"))
@@ -52,7 +48,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
     output$quant_attrs_ui = renderUI({
       if(input$method_scale == "quantitative"){
         tagList(
-          tags$label("Quantitative attributes"),
+          tags$h3("Quantitative attributes"),
           br(),
           tags$p("Quantitative methods (e.g. elevation above sea level) have only one attribute that defines the continuous scale used for measurement.", class = "text-info annotation"),
           rhandsontable::rHandsontableOutput(ns("quant_attrs"))
@@ -69,7 +65,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
     output$ord_attrs_ui = renderUI({
       if(input$method_scale == "ordinal"){
         tagList(
-          tags$label("Ordinal attributes"),
+          tags$h3("Ordinal attributes"),
           br(),
           tags$p("Ordinal methods (e.g. Braun-Blanquet cover classification) have multiple attributes describing distinct measurement levels on an ordinal scale. You can add new rows for additional attributes by right-clicking in the table.", class = "text-info annotation"),
           rhandsontable::rHandsontableOutput(ns("ord_attrs"))
@@ -85,7 +81,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
     output$qual_attrs_ui = renderUI({
       if(input$method_scale == "qualitative"){
         tagList(
-          tags$label("Qualitative attributes"),
+          tags$h3("Qualitative attributes"),
           br(),
           tags$p("Qualitative methods (e.g. rock type) have multiple attributes describing distinct measurement levels on a categorical scale. You can add new rows for additional attributes by right-clicking in the table.", class = "text-info annotation"),
           rhandsontable::rHandsontableOutput(ns("qual_attrs"))

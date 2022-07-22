@@ -131,28 +131,35 @@ mod_xmlViewer_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
                    vegx_schema_full = read_xml(system.file("extdata", "vegxschema", "veg.xsd", package = "VegXshiny"))
                    schema_valid = xml2::xml_validate(vegx_doc, schema = vegx_schema_full)
                    references_valid = check_document_links(vegx_doc)
-
-                   msg_references = "No issues related to internal ID references found."
-                   if(!length(references_valid) == 0){
-                     msg_references = paste0("Potential issues found related to internal ID references: ",
-                                            "<ul>", paste0("<li>", references_valid, "</li>", collapse = ""), "</ul>")
+                   
+                   if(length(references_valid) == 0){
+                     msg_type = "info"
+                     msg_references = "No issues related to internal ID references found."  
+                   } else {
+                     msg_type = "warning"
+                     msg_references = paste0("Potential issues found related to internal ID references: ", 
+                                             "<ul>", paste0("<li>", references_valid, "</li>", collapse = ""), "</ul>")
                    }
                    
                    if(schema_valid){
-                     shiny::showNotification("Validation successful.", type = "message")
-                     msg_type = "Validation info"
-                     msg = paste0("<p>Document successfully validated against VegX schema.</p>", msg_references)
+                     msg_type = ifelse(msg_type == "warning", msg_type, "info")
+                     msg_val = "<p>Veg-X document successfully validated against schema.</p>"
                    } else {
-                     shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
-                     msg_type = "Validation error"
-                     msg_val = paste0("Document validation against VegX schema failed with the following exceptions:", 
+                     msg_type = "error"
+                     msg_val = paste0("Veg-X document validation failed with the following exceptions:", 
                                       "<ul>", paste0("<li>Error: ", attr(schema_valid, "errors"), "</li>", collapse = ""), "</ul>")
-                     msg  = paste0(msg_val, msg_references)
                    }
                    
-                   # Update action log
-                   new_action_log_record(log_path, msg_type, msg)
+                   # Update log
+                   msg = paste0(msg_val, msg_references)
+                   new_action_log_record(log_path, paste0("Validation ", msg_type), msg)
                    action_log(read_action_log(log_path))
+                   
+                   switch(msg_type,
+                          "info" = shiny::showNotification("Validation successful.", type = "message"),
+                          "warning" = shiny::showNotification("Validation successful but potential issues with ID references found. Please consult the log for more information.", type = "warning"),
+                          "error" = shiny::showNotification("Validation failed. Please consult the log for more information.", type = "error")
+                   )
                  })
   })
 }

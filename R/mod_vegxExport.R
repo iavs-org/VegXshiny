@@ -13,7 +13,7 @@ mod_vegxExport_ui <- function(id){
     column(
       width = 10, offset = 1,
       fluidRow(
-        tags$label("Document summary"),
+        tags$label("Veg-X document summary"),
         uiOutput(ns("summary")),
         hr(),
         downloadButton(ns("export_xml"), label = "Export XML"),
