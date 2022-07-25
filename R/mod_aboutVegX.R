@@ -69,7 +69,7 @@ mod_aboutVegX_ui <- function(id){
                 Finally, leaf elements of a Veg-X document contain the data. A comprehensive overview of the Veg-X format can be found ", 
                tags$a("here", href = "https://iavs-org.github.io/VegX/articles/VegXStandard.html", target = "_blank"), "."),
         tags$p("Below is an interactive tree viewer of the Veg-X schema. You can expand an element by clicking the plus icon (+). Additional information about the schema definition of the element 
-                (e.g. data type, number of occurrences, etc.) are displayed when hovering the mouse over it. The search box at the top of the tree allows to search for specific 
+                (e.g. data type, number of occurrences, etc.) is displayed when hovering the mouse over it. The search box at the top of the tree allows to search for specific 
                 node names throughout the schema."),
         hr(),
         fluidRow(
@@ -195,8 +195,8 @@ mod_aboutVegX_ui <- function(id){
                 a generic database system. ", tags$span("Note that Turboveg 3 supports the import of Veg-X XML documents.",  class = "text-info")), 
         
         tags$h2("Action Log", id = ns("action_log"), class = "text-info"),
-        tags$p("The Action Log records user actions and application messages during a session. This includes file uploads and edits, import messages, Veg-X document edits and validations and file exports.",
-               tags$span("If any problem occurrs during the session, the Action Log provides additional information.",  class = "text-info"))
+        tags$p("The Action Log records user actions and application messages during a session. This includes file uploads and edits, import messages, Veg-X document edits and validations and file exports. 
+               If any problem occurrs during the session, the Action Log provides additional information.")
       ),
       
       tabPanel(

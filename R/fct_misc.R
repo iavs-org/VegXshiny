@@ -155,13 +155,15 @@ render_node_info = function(node_info){
 #' @param resolve_ids A character vector of VegX main elements, for which ids should be resolved
 #'
 #' @importFrom tidyr pivot_longer pivot_wider drop_na
+#' @import dplyr
 #' 
 #' @return a list of data.frames
 #' @noRd
-vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentities", "aggregateOrganismObservations")){
-  # Convert xml to list of data.frame (1 row per node)
+vegx_to_df = function(vegx_doc, return_vegtable = F){
+  
+  ##### Convert XML to list of data.frame (1 row per node)
   vegx_list = xml2::as_list(vegx_doc)
-  vegx_df = lapply(vegx_list$vegX, function(main_element){
+  vegx_dfs = lapply(vegx_list$vegX, function(main_element){
     result = mapply(function(node, node_name){
       values = unlist(node)
       if(is.null(names(values))){ # Set name manually for leaf nodes (e.g. organismName)
@@ -172,42 +174,92 @@ vegx_to_df = function(vegx_doc, resolve_ids = c("attributes", "organismIdentitie
     return(bind_rows(result))
   })
   
+  ##### Resolve IDs
   # Process attributes
-  if("attributes" %in% resolve_ids && "attributes" %in% names(vegx_df)){
-    vegx_df$attributes = vegx_df$attributes %>% 
+  if("attributes" %in% names(vegx_dfs)){
+    vegx_dfs$attributes = vegx_dfs$attributes %>% 
       pivot_longer(cols = -id, names_sep = "\\.", names_to = c("attributeType", "name")) %>% 
       drop_na() %>% 
       pivot_wider(id_cols = c("id", "attributeType"), names_from = "name", values_from = "value")  
   }
+  
   # Process organisms
-  if("organisms" %in% resolve_ids && "organismNames" %in% names(vegx_df) && "organismNames" %in% names(vegx_df)){
-    vegx_df$organismIdentities = vegx_df$organismIdentities %>% 
-      left_join(vegx_df$organismNames, by = c("originalOrganismNameID" = "id")) %>% 
+  if("organismNames" %in% names(vegx_dfs) && "organismIdentities" %in% names(vegx_dfs)){
+    vegx_dfs$organismIdentities = vegx_dfs$organismIdentities %>% 
+      left_join(vegx_dfs$organismNames, by = c("originalOrganismNameID" = "id")) %>% 
       select(id, organismName)  
+    
+    vegx_dfs$organismNames = NULL
   }
   
-  if("aggregateOrganismObservations" %in% resolve_ids && "aggregateOrganismObservations" %in% names(vegx_df)){
-    if("stratumObservationID" %in% colnames(vegx_df$aggregateOrganismObservations)){
-      vegx_df$aggregateOrganismObservations = vegx_df$aggregateOrganismObservations %>% 
-        left_join(vegx_df$plotObservations, by = c("plotObservationID" = "id")) %>% 
-        left_join(vegx_df$plots, by = c("plotID" = "id")) %>% 
-        left_join(vegx_df$organismIdentities, by = c("organismIdentityID" = "id")) %>% 
-        left_join(vegx_df$stratumObservations, by = c("stratumObservationID" = "id")) %>% 
-        left_join(vegx_df$strata, by = c("stratumID" = "id")) %>% 
+  # Process organisms
+  if("aggregateOrganismObservations" %in% names(vegx_dfs)){
+    if("stratumObservationID" %in% colnames(vegx_dfs$aggregateOrganismObservations)){
+      vegx_dfs$aggregateOrganismObservations = vegx_dfs$aggregateOrganismObservations %>% 
+        left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>% 
+        left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>% 
+        left_join(vegx_dfs$organismIdentities, by = c("organismIdentityID" = "id")) %>% 
+        left_join(vegx_dfs$stratumObservations, by = c("stratumObservationID" = "id")) %>% 
+        left_join(vegx_dfs$strata, by = c("stratumID" = "id")) %>% 
         dplyr::select(id, plotUniqueIdentifier, obsStartDate, organismName, stratumName, measurementValue = aggregateOrganismMeasurement.value)
     } else {
-      vegx_df$aggregateOrganismObservations = vegx_df$aggregateOrganismObservations %>% 
-        left_join(vegx_df$plotObservations, by = c("plotObservationID" = "id")) %>% 
-        left_join(vegx_df$plots, by = c("plotID" = "id")) %>% 
-        left_join(vegx_df$strata, by = c("stratumID" = "id")) %>% 
+      vegx_dfs$aggregateOrganismObservations = vegx_dfs$aggregateOrganismObservations %>% 
+        left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>% 
+        left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>% 
+        left_join(vegx_dfs$organismIdentities, by = c("organismIdentityID" = "id")) %>% 
         dplyr::select(id, plotUniqueIdentifier, obsStartDate, organismName, measurementValue = aggregateOrganismMeasurement.value)
     }
   }
   
-  return(vegx_df)
+  if("stratumObservations" %in% names(vegx_dfs)){
+    vegx_dfs$stratumObservations = vegx_dfs$stratumObservations %>%
+      left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>%
+      left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>%
+      left_join(vegx_dfs$strata, by = c("stratumID" = "id")) %>%
+      dplyr::select(id, plotUniqueIdentifier, obsStartDate, stratumName, measurementValue = stratumMeasurement.value) %>% 
+      drop_na()
+  }
   
-  # TODO Two output options: First - long-table format with potentially resolved ids. 
-  #                          Second - vegetation-table with header and cover data (aggOrgObs) or equivalent measurement tables (for indOrgObs, stratumObs, etc.)
+  if("surfaceCoverObservations" %in% names(vegx_dfs)){
+    vegx_dfs$surfaceCoverObservations = vegx_dfs$surfaceCoverObservations %>%
+      left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>%
+      left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>%
+      left_join(vegx_dfs$surfaceTypes, by = c("surfaceTypeID" = "id")) %>%
+      dplyr::select(id, plotUniqueIdentifier, obsStartDate, surfaceName, measurementValue = surfaceCover.value) %>% 
+      drop_na()
+  }
+  
+  if(return_vegtable){
+    # 1. Join everything to plotobservations
+    header_df = vegx_dfs$plotObservations %>%                   # TODO method names
+      left_join(vegx_dfs$projects, by = c("projectID" = "id")) %>% 
+      left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>% 
+      dplyr::select(-id, -plotID, -projectID) %>% 
+      dplyr::relocate(plotUniqueIdentifier)
+    
+    if("stratumName" %in% colnames(vegx_dfs$aggregateOrganismObservations)){
+      species_df = vegx_dfs$aggregateOrganismObservations %>%     # TODO Strata
+        left_join(dplyr::select(vegx_dfs$plotObservations, -id), by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+        mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
+        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate, id), names_from = c(organismName, stratumName), values_from = measurementValue) %>% 
+        dplyr::select(-id)
+    } else {
+      species_df = vegx_dfs$aggregateOrganismObservations %>%     # TODO Strata
+        left_join(dplyr::select(vegx_dfs$plotObservations, -id), by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+        mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
+        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate, id), names_from = organismName, values_from = measurementValue) %>% 
+        dplyr::select(-id)
+    }
+    
+    # 2. Transpose table
+    vegtable = left_join(header_df, species_df) %>% 
+      as.matrix() %>% 
+      t()
+    
+    return(vegtable)
+  }
+  
+  return(vegx_dfs)
 }
 
 #' Convert a Turboveg xml document to a list of rectangular tables

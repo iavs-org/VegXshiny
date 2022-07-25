@@ -17,7 +17,8 @@ mod_vegxExport_ui <- function(id){
         uiOutput(ns("summary")),
         hr(),
         downloadButton(ns("export_xml"), label = "Export XML"),
-        downloadButton(ns("export_csv"), label = "Export CSV")
+        downloadButton(ns("export_csv"), label = "Export CSV"),
+        downloadButton(ns("export_vegtable"), label = "Export VegTable")
       )
     )
   )
@@ -51,18 +52,36 @@ mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
     output$export_csv = downloadHandler(
       filename = paste0("vegx_export-", Sys.Date(), ".zip"),
       content = function(file) {
-        vegx_df_list = vegx_to_df(vegx_doc, resolve_ids = c())
+        vegx_df_list = vegx_to_df(vegx_doc)
         if(dir.exists(paste0(tempdir(), "/export"))){unlink(paste0(tempdir(), "/export"))}  # Delete old export directory, if it exists
         dir.create(paste0(tempdir(), "/export"))                                            # Create fresh export directory
         for(df_name in names(vegx_df_list)){
-          write.csv(vegx_df_list[[df_name]], file = paste0(tempdir(), "/export/", df_name, ".csv"), row.names = F)  # Write files
+          write.csv(vegx_df_list[[df_name]], file = paste0(tempdir(), "/export/", df_name, ".csv"), row.names = F, na = "")  # Write files
         }
-       zip(file, list.files(paste0(tempdir(), "/export"), full.names = T), flags = "-j")    # Zip csvs
-       shiny::showNotification("Download successful")
-       new_action_log_record(log_path, "File info", paste0("Veg-X document exported as zip archive."))
-       action_log(read_action_log(log_path))
+        zip(file, list.files(paste0(tempdir(), "/export"), full.names = T), flags = "-j")    # Zip csvs
+        shiny::showNotification("Download successful")
+        new_action_log_record(log_path, "File info", paste0("Veg-X document exported as zip archive."))
+        action_log(read_action_log(log_path))
       },
       contentType = "application/zip"
+    )
+    
+    output$export_vegtable = downloadHandler(
+      filename = paste0("vegx_export-", Sys.Date(), ".csv"),
+      content = function(file) {
+        tryCatch({
+          vegx_df = vegx_to_df(vegx_doc, return_vegtable = T)
+          write.csv(vegx_df, file, row.names = T, na = "") 
+          shiny::showNotification("Download successful")
+          new_action_log_record(log_path, "File info", paste0("Veg-X document exported as vegetation table."))
+          action_log(read_action_log(log_path))
+        }, error = function(e){
+          shiny::showNotification("Couldn't build vegetation table. Please consult the log for more information.", type = "warning")
+          new_action_log_record(log_path, "File error", paste0("Export as vegetation table failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+          action_log(read_action_log(log_path))
+        })
+      },
+      contentType = "text/csv"
     )
   })
 }

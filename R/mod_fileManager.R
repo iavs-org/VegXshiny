@@ -193,11 +193,12 @@ mod_fileManager_server <- function(id, action_log, log_path){
         insertUI(selector = paste0("#", ns("edit")),
                  where = "beforeBegin",
                  ui = tagList(
-                   actionButton(ns("save_edits"), "Save edits",  width = "120px", class = "btn-success btn-xs",  icon("check")),
-                   actionButton(ns("discard_edits"), "Discard edits", width = "120px", class = "btn-danger btn-xs", icon = icon("times")),
+                   actionButton(ns("save_edits"), "Save edits",  width = "130px", class = "btn-success btn-xs",  icon("check")),
+                   actionButton(ns("discard_edits"), "Discard edits", width = "130px", class = "btn-danger btn-xs", icon = icon("times")),
                  )
         )
         removeUI(selector = paste0("#", ns("edit")))
+        removeUI(selector = paste0("#", ns("reshape")))
         removeUI(selector = paste0("#", ns("delete")))
         
         # Save current state of user data
@@ -225,6 +226,15 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
                      if(file_ext == "xml"){
                        user_data[[file_focus()]] = read_xml(isolate(input$editor))
+                       
+                       insertUI(selector = paste0("#", ns("save_edits")),# TODO THIS DOES NOT WORK FOR XML FILES
+                                where = "beforeBegin",
+                                ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
+                       insertUI(selector = paste0("#", ns("save_edits")),
+                                where = "afterEnd",
+                                ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
+                       removeUI(selector = paste0("#", ns("save_edits")))
+                       removeUI(selector = paste0("#", ns("discard_edits")))
                      } else {
                        # Read edits
                        data_edited = input$editor
@@ -235,17 +245,21 @@ mod_fileManager_server <- function(id, action_log, log_path){
                          rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
                        
                        output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                       
+                       # Restore UI state
+                       insertUI(selector = paste0("#", ns("save_edits")), 
+                                where = "beforeBegin",
+                                ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
+                       insertUI(selector = paste0("#", ns("save_edits")), 
+                                where = "beforeBegin",
+                                ui = actionButton(ns("reshape"), "Reshape", width = "130px", class = "btn-xs"))
+                       insertUI(selector = paste0("#", ns("save_edits")),
+                                where = "afterEnd",
+                                ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
+                       
+                       removeUI(selector = paste0("#", ns("save_edits")))
+                       removeUI(selector = paste0("#", ns("discard_edits")))
                      }
-                     
-                     # Restore UI state
-                     insertUI(selector = paste0("#", ns("reshape")),
-                              where = "beforeBegin",
-                              ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
-                     insertUI(selector = paste0("#", ns("reshape")),
-                              where = "afterEnd",
-                              ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
-                     removeUI(selector = paste0("#", ns("save_edits")))
-                     removeUI(selector = paste0("#", ns("discard_edits")))
                      
                      # Update action log
                      shiny::showNotification("Edits saved")
@@ -259,23 +273,30 @@ mod_fileManager_server <- function(id, action_log, log_path){
     ##### Discard edits #####
     observeEvent(eventExpr = input$discard_edits,
                  handlerExpr = {
-                   # Restore UI state
-                   insertUI(selector = paste0("#", ns("reshape")),
-                            where = "beforeBegin",
-                            ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
-                   insertUI(selector = paste0("#", ns("reshape")),
-                            where = "afterEnd",
-                            ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
-                   removeUI(selector = paste0("#", ns("save_edits")))
-                   removeUI(selector = paste0("#", ns("discard_edits")))
+                   file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
                    
                    # Restore data
                    user_data[[file_focus()]] = data_unedited()
                    
-                   file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
                    if(file_ext == "xml"){
                      updateAceEditor(session, "editor", value = as.character(user_data[[file_focus()]]), readOnly = T)
                    }
+                   
+                   # Restore UI state
+                   insertUI(selector = paste0("#", ns("save_edits")), 
+                            where = "beforeBegin",
+                            ui = actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"))
+                   if(file_ext != "xml"){
+                     insertUI(selector = paste0("#", ns("save_edits")), 
+                              where = "beforeBegin",
+                              ui = actionButton(ns("reshape"), "Reshape", width = "130px", class = "btn-xs"))
+                   }
+                   insertUI(selector = paste0("#", ns("save_edits")),
+                            where = "afterEnd",
+                            ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
+                   
+                   removeUI(selector = paste0("#", ns("save_edits")))
+                   removeUI(selector = paste0("#", ns("discard_edits")))
                    
                    # Update action log
                    new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded."))
