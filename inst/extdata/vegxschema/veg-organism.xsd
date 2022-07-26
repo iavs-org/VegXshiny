@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsd:schema xmlns="http://iavs.org/vegX/organism-2.0.1" targetNamespace="http://iavs.org/vegX/organism-2.0.1" xmlns:misc="http://iavs.org/vegX/misc-2.0.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <xsd:import schemaLocation="veg-misc.xsd" namespace="http://iavs.org/vegX/misc-2.0.1" />
+<xsd:schema xmlns:misc="http://iavs.org/vegX/misc-2.0.6" xmlns="http://iavs.org/vegX/organism-2.0.6" targetNamespace="http://iavs.org/vegX/organism-2.0.6" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:import schemaLocation="veg-misc.xsd" namespace="http://iavs.org/vegX/misc-2.0.6" />
     <xsd:complexType name="IndividualOrganismType">
         <xsd:annotation>
             <xsd:documentation xml:lang="en">An identified organism recorded during one or more individual organism observation events. The individual may have an identification label (e.g. tree tag number).</xsd:documentation>
@@ -16,9 +16,9 @@
                     <xsd:documentation xml:lang="en">A label that is associated with an individual (e.g. a numerical tree tag)</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="taxonNameUsageConceptID" type="xsd:string" minOccurs="0" maxOccurs="1">
+            <xsd:element name="organismIdentityID" type="xsd:string" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
-                    <xsd:documentation xml:lang="en">A reference to a specific datasetNameUsageConcept representing a taxon occurrence. </xsd:documentation>
+                    <xsd:documentation xml:lang="en">A reference to a specific organismIdentity representing a taxon occurrence. </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="birthDate" type="xsd:date" minOccurs="0">
@@ -82,7 +82,7 @@
                                             </xsd:sequence>
                                         </xsd:complexType>
                                     </xsd:element>
-                                    <xsd:element name="polarCoordinates">
+                                    <xsd:element name="polarCoordinates" minOccurs="0">
                                         <xsd:annotation>
                                             <xsd:documentation>Values specifying the polar coordinates relative to a reference point (normally the plot origin but could be a related individual) along with information about units and methods</xsd:documentation>
                                         </xsd:annotation>
@@ -248,8 +248,8 @@
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
                 <xsd:attribute name="id" type="misc:IDType" use="required" />
-                <xsd:attribute name="system" type="misc:SystemType" use="optional" />
                 <xsd:attribute name="scope" default="document" type="misc:ScopeType" use="optional" />
+                <xsd:attribute name="system" type="misc:SystemType" use="optional" />
                 <xsd:attribute name="taxonName" type="xsd:boolean" use="required">
                     <xsd:annotation>
                         <xsd:documentation>A flag to identify that the organism name is a taxon name (i.e. a name according to a nomenclature code)</xsd:documentation>
@@ -342,7 +342,7 @@
                 </xsd:annotation>
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="preferredTaxonNameID" type="xsd:string">
+                        <xsd:element name="preferredOrganismNameID" type="xsd:string">
                             <xsd:annotation>
                                 <xsd:documentation>A link to a scientific taxon name (i.e. an organism name whose attribute 'taxonName' is true) accepted to label the organism identity appropriately, as stated by the author of the data set or a third party responsible for its nomenclature.</xsd:documentation>
                             </xsd:annotation>
@@ -390,17 +390,17 @@
                     <xsd:documentation>A reference to a specific taxonNameUsageConcept through the NameUsageConcept id attribute. The individual NameUsageConcept is defined within the element veg:datasetNameUsageConcepts which is a container for all name usage concepts within the dataset.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="determinationDate" type="xsd:date">
+            <xsd:element name="determinationDate" type="xsd:date" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation xml:lang="en">The determination date for the organism or taxon observation. Recorded in ISO 8601 date format: yyyy-mm-dd.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="determinationPartyID" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+            <xsd:element xmlns:q2="http://www.bfn.de/misc-1.0.1" name="determinationPartyID" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>The party that made the determination that applies to this dataset. This is not the same as the authorship of the asserted relationship. See accordingTo.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="determinationNote" type="misc:noteType" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element xmlns:q1="http://www.bfn.de/misc-1.0.1" name="determinationNote" type="misc:noteType" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="taxonRelationshipAssertion" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation xml:lang="en">A specific taxonomic or nomenclatural assertion record.</xsd:documentation>
@@ -413,9 +413,9 @@
                             </xsd:annotation>
                             <xsd:complexType>
                                 <xsd:choice>
-                                    <xsd:element name="taxonNameID" type="xsd:string">
+                                    <xsd:element name="organismNameID" type="xsd:string">
                                         <xsd:annotation>
-                                            <xsd:documentation>A reference to a specific Taxon Name. The name is defined within the element veg:taxonName which is a container for all Taxon Names within a dataset.</xsd:documentation>
+                                            <xsd:documentation>A reference to a specific Taxon Name. The name is defined within the element veg:organismName which is a container for all Taxon Names within a dataset.</xsd:documentation>
                                         </xsd:annotation>
                                     </xsd:element>
                                     <xsd:element name="taxonConceptID" type="xsd:string">
