@@ -312,14 +312,15 @@ mod_fileManager_server <- function(id, action_log, log_path){
                        size = "l",
                        tagList(
                          tags$h3("Reshape data"),
-                         tags$p("Prepare your datasets for import by organizing variables in columns and observations in rows. The primary use case is to reshape multiple columns that 
-                                 code for the same variables, e.g. 'cover_tree_layer', 'cover_shrub_layer' and 'cover_herb_layer', into a tidy dataset where information on
-                                 layer and measurements are cleanly separated.", class = "text-info"),
+                         tags$p("Prepare your datasets for import by organizing variables in columns and observations in rows. The primary use case is to reshape columns that 
+                                 code for the same variables, e.g. 'cover_tree_layer', 'cover_shrub_layer' and 'cover_herb_layer', into a key and a value column, 
+                                e.g. 'layer_name' and 'cover_value'.", class = "text-info"),
                          tags$div(style = "text-align: center; margin-bottom: 8px;",
                                   tags$img(src='www/images/reshape_table.png', align = "center", width = "100%")
                          ),
-                         tags$p("This operation will create a new file in the File Manager. Note that VegXshiny requires a date and plot id column for all observation datasets. Mark the 
-                                 corresponding columns of the original dataset to be retained during the operation.", class = "text-info"),
+                         tags$p("This operation will create a new file in the File Manager and can be repeated to derive multiple tables. Use the color codes in the above figure and 
+                                 the below description texts to map your inputs correctly. Note that VegXshiny requires a date and plot id column 
+                                 for all observation datasets, so make sure to mark the corresponding columns as id columns.", class = "text-info"),
                          
                          hr(),
                          tags$label("Column selection"),
@@ -343,7 +344,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                          tags$label("Empty values"),
                          fluidRow(
                            column(12,
-                                  tags$p("Are empty values coded with a special string (e.g. NA, 0, etc.)?"),
+                                  tags$p("Should values with a special string (e.g. NA, 0, etc.) be removed? Enter string:"),
                                   textInput(ns("na_string"), label = NULL, width = "25%")
                            )
                          ),
