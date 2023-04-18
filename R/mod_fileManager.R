@@ -19,7 +19,7 @@ mod_fileManager_ui <- function(id){
                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
                       \nTurboveg data: .xml 
                       \nSee 'About > Tutorial' for more information."),
-               fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", "xls", "xlsx", ".xml"))
+               fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml"))
              )
     ),
     mainPanel(
@@ -76,15 +76,15 @@ mod_fileManager_server <- function(id, action_log, log_path){
             file_ext = tools::file_ext(file_name)
             if(file_ext == "csv"){
               user_data[[file_name]] = utils::read.csv(file_info$datapath, fileEncoding="UTF-8") %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("tab", "tsv", "txt")){
               user_data[[file_name]]  = utils::read.delim(file_info$datapath, fileEncoding="UTF-8") %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("xls", "xlsx")){
               user_data[[file_name]] = readxl::read_excel(file_info$datapath) %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext == "xml"){
               user_data[[file_name]] = xml2::read_xml(file_info$datapath)
@@ -168,6 +168,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
             column(width = 12,
                    actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"),
                    actionButton(ns("reshape"), "Reshape", width = "130px", class = "btn-xs"),
+                   actionButton(ns("split"), "Split", width = "130px", class = "btn-xs"),
                    actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
             )
           ),
@@ -194,6 +195,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  where = "beforeBegin",
                  ui = tagList(
                    actionButton(ns("save_edits"), "Save edits",  width = "130px", class = "btn-success btn-xs",  icon("check")),
+                   actionButton(ns("transpose"), "Transpose", width = "120px", class = "btn-info btn-xs"),
+                   actionButton(ns("add_names"), "Add col-names", width = "120px", class = "btn-info btn-xs"),
                    actionButton(ns("discard_edits"), "Discard edits", width = "130px", class = "btn-danger btn-xs", icon = icon("times")),
                  )
         )
@@ -258,6 +261,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
                                 ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
                        
                        removeUI(selector = paste0("#", ns("save_edits")))
+                       removeUI(selector = paste0("#", ns("transpose")))
+                       removeUI(selector = paste0("#", ns("add_names")))
                        removeUI(selector = paste0("#", ns("discard_edits")))
                      }
                      
@@ -296,11 +301,139 @@ mod_fileManager_server <- function(id, action_log, log_path){
                             ui = actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs"))
                    
                    removeUI(selector = paste0("#", ns("save_edits")))
+                   removeUI(selector = paste0("#", ns("transpose")))
+                   removeUI(selector = paste0("#", ns("add_names")))
                    removeUI(selector = paste0("#", ns("discard_edits")))
                    
                    # Update action log
                    new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were discarded."))
                    action_log(read_action_log(log_path))
+                 })
+    
+    ##### Transpose table #####
+    observeEvent(eventExpr = input$transpose,
+                 handlerExpr = {
+                   # Transpose data
+                   data_df = rhandsontable::hot_to_r(input$editor)
+                   data_df_tr = data.frame(t(data_df))
+                   
+                   # Overwrite user data
+                   user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df_tr)
+                   output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                   
+                   # Update action log 
+                   shiny::showNotification("File transposed")
+                   new_action_log_record(log_path, "File info", paste0("File '", file_focus(),"' transposed"))
+                   action_log(read_action_log(log_path))
+                 })
+    
+    ##### Add colnames #####
+    ###### Modal dialogue #####
+    observeEvent(eventExpr = input$add_names,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       selectInput(ns("name_source"), label = "Create column names from row", user_data[[file_focus()]]$x$rowHeaders),
+                       tags$label("Names:"),
+                       renderText(paste(rhandsontable::hot_to_r(input$editor)[input$name_source,], collapse = ", ")),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                                   actionButton(ns("confirm_add_names"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       ),
+                     )
+                   )
+                 })
+    
+    ###### Confirm  #####
+    observeEvent(eventExpr = input$confirm_add_names, 
+                 handlerExpr = {
+                   tryCatch({
+                     # Modify data
+                     data_df = rhandsontable::hot_to_r(input$editor)
+                     if(nrow(data_df) <= 1){
+                       shiny::showNotification("Can't remove last row.", type = "warning")
+                       return()
+                     }
+                     if(length(as.character(data_df[input$name_source,])) != length(unique(as.character(data_df[input$name_source,])))){
+                       shiny::showNotification("Column names must be unique", type = "warning")
+                       return()
+                     }
+                     
+                     colnames(data_df) = data_df[input$name_source,]
+                     data_df = data_df[rownames(data_df) != input$name_source,]
+                     
+                     # Overwrite user data
+                     user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df)
+                     output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     
+                     # Update action log 
+                     shiny::showNotification("Names added")
+                     new_action_log_record(log_path, "File info", paste0("Column names added to file '", file_focus(),"'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File edit error", paste0("Adding colnames to file '", file_focus(),"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                   }, finally = {
+                     removeModal()  
+                   })
+                 })
+    
+    ##### Split table #####
+    observeEvent(eventExpr = input$split,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       size = "l",
+                       tagList(
+                         tags$h3("Split table"),
+                         tags$p("Extract table from selected rows.", class = "text-info"),
+                         tags$label("Dataset name"),
+                         tags$p("Name of the new dataset without file extension *"),
+                         textInput(ns("new_file_name"), label = NULL, width = "100%")
+                       ),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),
+                                   actionButton(ns("confirm_split"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       )
+                     )
+                   )
+                   
+                 })
+    
+    observeEvent(eventExpr = input$confirm_split,
+                 handlerExpr = {
+                   tryCatch({
+                     inputs_present = isTruthy(input$new_file_name)
+                     if(!inputs_present){
+                       shiny::showNotification("Please fill out all mandatory fields.", type = "error")
+                       return()
+                     }
+                     browser()
+                     row_min = input$editor_select$select$r
+                     row_max = input$editor_select$select$r2
+                     
+                     data_df = rhandsontable::hot_to_r(input$editor) %>%
+                       dplyr::slice(row_min:row_max) 
+                     
+                     # Update user data
+                     file_name = paste0(input$new_file_name, ".csv")
+                     user_data[[file_name]] = data_df %>% 
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = T, readOnly = T) %>% 
+                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                     
+                     # Update action log 
+                     removeModal()
+                     new_action_log_record(log_path, "File info", paste0("Created new table"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("New table created")
+                   }, error = function(e){
+                     removeModal()
+                     new_action_log_record(log_path, "File error", paste0("Splitting of ", file_focus(), " failed with the following exceptions:", 
+                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                   })
                  })
     
     ##### Reshape table #####
@@ -387,21 +520,21 @@ mod_fileManager_server <- function(id, action_log, log_path){
                                            values_to = input$values_to) %>% 
                        mutate(!!input$values_to := na_if(.[[input$values_to]], input$na_string)) %>% 
                        tidyr::drop_na(!!input$values_to)
-                       
-                       # Update user data
-                       file_name = paste0(input$new_file_name, ".csv")
-                       user_data[[file_name]] = data_df %>% 
-                         rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
-                         rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-                       
-                       # Update action log 
-                       removeModal()
-                       new_action_log_record(log_path, "File info", paste0("Created reshaped table"))
-                       action_log(read_action_log(log_path))
-                       shiny::showNotification("Reshaped table created")
+                     
+                     # Update user data
+                     file_name = paste0(input$new_file_name, ".csv")
+                     user_data[[file_name]] = data_df %>% 
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
+                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                     
+                     # Update action log 
+                     removeModal()
+                     new_action_log_record(log_path, "File info", paste0("Created reshaped table"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Reshaped table created")
                    }, error = function(e){
                      removeModal()
-                     new_action_log_record(log_path, "File error", paste0("Reshaping operating for ", file_focus(), " failed with the follwing exceptions:", 
+                     new_action_log_record(log_path, "File error", paste0("Reshaping operating for ", file_focus(), " failed with the following exceptions:", 
                                                                           "<ul><li>Error: ", e$message, "</li></ul>"))
                      action_log(read_action_log(log_path))
                      shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
