@@ -83,9 +83,16 @@ mod_fileManager_server <- function(id, action_log, log_path){
                 rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
             } else if(file_ext %in% c("xls", "xlsx")){
-              user_data[[file_name]] = readxl::read_excel(file_info$datapath) %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
-                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+              excel_sheets_available = readxl::excel_sheets(file_info$datapath)
+              showModal(
+                modalDialog(
+                  selectizeInput(ns("excel_sheets_selected"), label = "Which Excel sheets should be imported?", choices = excel_sheets_available, multiple = T, width = "100%"),
+                  footer = tagList(
+                    tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                              actionButton(ns("confirm_read_excel"), class = "pull-right btn-success", "Confirm", icon("check")))
+                  ),
+                )
+              )
             } else if(file_ext == "xml"){
               user_data[[file_name]] = xml2::read_xml(file_info$datapath)
             } else (
@@ -104,6 +111,29 @@ mod_fileManager_server <- function(id, action_log, log_path){
       # Update log
       action_log(read_action_log(log_path))
     })
+    
+    ###### Confirm Excel Import #####
+    observeEvent(eventExpr = input$confirm_read_excel, 
+                 handlerExpr = {
+                   req(user_data, input$upload$name, input$excel_sheets_selected)
+                   
+                   tryCatch({
+                     file_name = input$upload$name
+                     file_info = input$upload[which(input$upload$name == file_name),]
+                     
+                     for(sheet in input$excel_sheets_selected){
+                       user_data[[paste0(sheet, ".xlsx")]] = readxl::read_excel(file_info$datapath, sheet = sheet) %>% 
+                         rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
+                         rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                     }
+                   }, error = function(e){
+                     shiny::showNotification("Import failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File error", paste0("File import from ", input$upload$name, " failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                   }, finally = {
+                     removeModal()  
+                   })
+                 })
     
     #### File browser ####
     output$file_browser = renderUI({
@@ -168,7 +198,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
             column(width = 12,
                    actionButton(ns("edit"), "Edit", width = "130px", class = "btn-xs"),
                    actionButton(ns("reshape"), "Reshape", width = "130px", class = "btn-xs"),
-                   actionButton(ns("split"), "Split", width = "130px", class = "btn-xs"),
+                   actionButton(ns("extract"), "Extract", width = "130px", class = "btn-xs"),
                    actionButton(ns("delete"), "Delete selected file", width = "130px", class = "btn-xs")
             )
           ),
@@ -379,29 +409,29 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    })
                  })
     
-    ##### Split table #####
-    observeEvent(eventExpr = input$split,
+    ##### Extract #####
+    observeEvent(eventExpr = input$extract,
                  handlerExpr = {
                    showModal(
                      modalDialog(
                        size = "l",
                        tagList(
-                         tags$h3("Split table"),
-                         tags$p("Extract table from selected rows.", class = "text-info"),
+                         tags$h3("Extract dataset"),
+                         tags$p("Extract a new dataset from the current selection", class = "text-info"),
                          tags$label("Dataset name"),
                          tags$p("Name of the new dataset without file extension *"),
                          textInput(ns("new_file_name"), label = NULL, width = "100%")
                        ),
                        footer = tagList(
                          tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),
-                                   actionButton(ns("confirm_split"), class = "pull-right btn-success", "Confirm", icon("check")))
+                                   actionButton(ns("confirm_extract"), class = "pull-right btn-success", "Confirm", icon("check")))
                        )
                      )
                    )
                    
                  })
     
-    observeEvent(eventExpr = input$confirm_split,
+    observeEvent(eventExpr = input$confirm_extract,
                  handlerExpr = {
                    tryCatch({
                      inputs_present = isTruthy(input$new_file_name)
@@ -409,15 +439,18 @@ mod_fileManager_server <- function(id, action_log, log_path){
                        shiny::showNotification("Please fill out all mandatory fields.", type = "error")
                        return()
                      }
-                     browser()
+                     
                      row_min = input$editor_select$select$r
                      row_max = input$editor_select$select$r2
+                     col_min = input$editor_select$select$c
+                     col_max = input$editor_select$select$c2
                      
                      data_df = rhandsontable::hot_to_r(input$editor) %>%
-                       dplyr::slice(row_min:row_max) 
+                       dplyr::slice(row_min:row_max) %>% 
+                       dplyr::select(col_min:col_max)
                      
                      # Update user data
-                     file_name = paste0(input$new_file_name, ".csv")
+                     file_name = paste0(input$new_file_name, ".data")
                      user_data[[file_name]] = data_df %>% 
                        rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = T, readOnly = T) %>% 
                        rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
@@ -429,7 +462,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      shiny::showNotification("New table created")
                    }, error = function(e){
                      removeModal()
-                     new_action_log_record(log_path, "File error", paste0("Splitting of ", file_focus(), " failed with the following exceptions:", 
+                     new_action_log_record(log_path, "File error", paste0("Extraction from ", file_focus(), " failed with the following exceptions:", 
                                                                           "<ul><li>Error: ", e$message, "</li></ul>"))
                      action_log(read_action_log(log_path))
                      shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
