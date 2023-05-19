@@ -39,6 +39,7 @@ usethis::use_package("testthat", type = "Suggests")
 ## Add modules ----
 golem::add_module("aboutVegX")
 golem::add_module("fileManager")
+golem::add_module("fileBrowser")
 golem::add_module("tableImport")
 golem::add_module("turbovegImport")
 golem::add_module("vegxImport")
