@@ -10,18 +10,29 @@
 mod_fileBrowser_ui <- function(id){
   ns <- NS(id)
   tagList(
-    textOutput(ns("fileBrowser_ui")),
+    uiOutput(ns("fileBrowser_ui")),
   )
 }
 
 #' fileBrowser Server Functions
 #'
 #' @noRd 
-mod_fileBrowser_server <- function(id, user_data){
+mod_fileBrowser_server <- function(id, user_data, file_focus, action_log, log_path){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    browser()
+    observeEvent(eventExpr = user_data,
+                 handlerExpr = print(user_data))
+    
+    observe({
+      if(!is.null(file_focus())){
+        browser()
+        shinyjs::removeClass(id = paste0("select_", setdiff(names(user_data), file_focus())), class = "btn-focus")
+        shinyjs::addClass(id = paste0("select_", file_focus()), class = "btn-focus") 
+      }
+    })
+    
+    
     output$fileBrowser_ui = renderUI({
       req(user_data)
       ui = fluidRow(
@@ -52,6 +63,38 @@ mod_fileBrowser_server <- function(id, user_data){
                            icon = icon("times"))
             )
             
+            # Observe click
+            observeEvent(
+              ignoreInit = F,
+              eventExpr = input[[paste0("select_", file_name)]],
+              handlerExpr = {
+                #shinyjs::removeClass(id = paste0("select_", file_focus()), class = "btn-focus")
+                file_focus(file_name)
+                #shinyjs::addClass(id = paste0("select_", file_focus()), class = "btn-focus")
+              }
+            )
+
+            # Observe delete
+            observeEvent(
+              eventExpr = input[[paste0("delete_", file_focus())]],
+              handlerExpr = {
+                # Remove user data
+                file_name = isolate(file_focus())
+                .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
+                output$editor = NULL
+
+                # Set new file focus
+                file_focus(NULL)
+
+                # Redraw file browser
+
+                # Update action log
+                shiny::showNotification(paste0(file_name, " deleted"))
+                new_action_log_record(log_path, "File info", paste0("File '", file_name,"' deleted."))
+                action_log(read_action_log(log_path))
+              }
+            )
+            
             return(file_button)
           })
         )
@@ -60,43 +103,3 @@ mod_fileBrowser_server <- function(id, user_data){
     })
   })
 }
-
-
-
-#   observeEvent(
-#     ignoreInit = F,
-#     eventExpr = input[[paste0("select_", file_name)]],
-#     handlerExpr = {
-#       shinyjs::removeClass(id = paste0("select_", file_focus()), class = "btn-focus")
-#       file_focus(file_name)
-#       shinyjs::addClass(id = paste0("select_", file_focus()), class = "btn-focus")
-#     }         
-#   )
-#   
-#   observeEvent(
-#     eventExpr = input[[paste0("delete_", file_focus())]],
-#     handlerExpr = {
-#       # Remove user data
-#       file_name = isolate(file_focus())
-#       .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
-#       output$editor = NULL
-#       
-#       # Set new file focus
-#       file_focus(NULL)
-#       
-#       # Redraw file browser
-#       
-#       # Update action log
-#       shiny::showNotification(paste0(file_name, " deleted"))
-#       new_action_log_record(log_path, "File info", paste0("File '", file_name,"' deleted."))
-#       action_log(read_action_log(log_path))
-#     }
-#   )
-# return(file_button)
-
-
-## To be copied in the UI
-# mod_fileBrowser_ui("fileBrowser_ui_1")
-
-## To be copied in the server
-# mod_fileBrowser_server("fileBrowser_ui_1")

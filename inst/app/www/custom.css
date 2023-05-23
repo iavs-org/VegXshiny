@@ -64,10 +64,6 @@ code, pre {
   background: #888!important; 
 }
 
-#fileManager-editor {
-  background: white;
-}
-
 .dataTables_wrapper .dataTables_info, .dataTables_wrapper th, .dataTables_wrapper label {
   color: #fff!important; 
 }
@@ -149,4 +145,12 @@ code, pre {
   column-count: 3; 
   moz-column-fill: auto;
   column-fill: auto;
+}
+
+#fileManager-editor {
+  background: white;
+}
+
+#edit_toolbar {
+  text-align: left;
 }
