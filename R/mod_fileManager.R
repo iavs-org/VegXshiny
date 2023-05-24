@@ -20,7 +20,6 @@ mod_fileManager_ui <- function(id){
                       \nTurboveg data: .xml 
                       \nSee 'About > Tutorial' for more information."),
                fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-               actionButton(ns("browser"), "Browser")
              )
     ),
     mainPanel(
@@ -245,10 +244,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
     })
     
     ##### General Observers ####
-    observeEvent(eventExpr = input$browser,
-                 handlerExpr = browser())
-    
-    
     observe({
       req(file_focus(), user_data[[file_focus()]])
       file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]

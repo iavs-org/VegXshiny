@@ -10,6 +10,7 @@
 mod_fileBrowser_ui <- function(id){
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     uiOutput(ns("fileBrowser_ui")),
   )
 }
@@ -25,13 +26,12 @@ mod_fileBrowser_server <- function(id, user_data, file_focus, action_log, log_pa
                  handlerExpr = print(user_data))
     
     observe({
-      if(!is.null(file_focus())){
-        browser()
-        shinyjs::removeClass(id = paste0("select_", setdiff(names(user_data), file_focus())), class = "btn-focus")
-        shinyjs::addClass(id = paste0("select_", file_focus()), class = "btn-focus") 
+      file_focus = file_focus()
+      if(!is.null(file_focus)){
+        btn_id = ns(paste0("select_", file_focus()))
+        session$sendCustomMessage("fileFocusChange", list(fileFocus = file_focus, buttonID = btn_id))  
       }
     })
-    
     
     output$fileBrowser_ui = renderUI({
       req(user_data)
@@ -54,6 +54,7 @@ mod_fileBrowser_server <- function(id, user_data, file_focus, action_log, log_pa
             
             # Create Button and Event listener
             file_button = div(
+              id = ns(paste0("container_", file_name)),
               class = "overlay-button-container",
               actionButton(ns(paste0("select_", file_name)),
                            width = "180px", height = "180px", class = "btn-success btn-overlay no-margin",
@@ -68,26 +69,25 @@ mod_fileBrowser_server <- function(id, user_data, file_focus, action_log, log_pa
               ignoreInit = F,
               eventExpr = input[[paste0("select_", file_name)]],
               handlerExpr = {
-                #shinyjs::removeClass(id = paste0("select_", file_focus()), class = "btn-focus")
                 file_focus(file_name)
-                #shinyjs::addClass(id = paste0("select_", file_focus()), class = "btn-focus")
               }
             )
-
+            
             # Observe delete
             observeEvent(
-              eventExpr = input[[paste0("delete_", file_focus())]],
+              eventExpr = input[[paste0("delete_", file_name)]],
               handlerExpr = {
                 # Remove user data
-                file_name = isolate(file_focus())
                 .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
                 output$editor = NULL
-
+                
+                # Remove Buttons
+                btn_id = ns(paste0("container_", file_name))
+                session$sendCustomMessage("deleteFileButton", btn_id)
+                
                 # Set new file focus
                 file_focus(NULL)
-
-                # Redraw file browser
-
+                
                 # Update action log
                 shiny::showNotification(paste0(file_name, " deleted"))
                 new_action_log_record(log_path, "File info", paste0("File '", file_name,"' deleted."))
