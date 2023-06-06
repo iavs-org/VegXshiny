@@ -32,7 +32,6 @@ mod_fileManager_ui <- function(id){
             tags$label("Uploaded files"),
             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                    title = "These files are available for further operations. Pick a file for edits in the File Editor"),
-            # mod_fileBrowser_ui(ns("fileBrowser")),
             uiOutput(ns("file_browser")),
             tags$hr(),
             div(
@@ -77,6 +76,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
         existing_files = input$upload$name[which(input$upload$name %in% names(user_data))]
         showModal(
           modalDialog(paste0("The following existing files will be replaced by the your upload: ", paste0(existing_files, collapse = ", ")), footer = NULL, easyClose = T)
+          # TODO creates second button in multi upload
         )
       }
       
@@ -89,12 +89,10 @@ mod_fileManager_server <- function(id, action_log, log_path){
               user_data[[file_name]] = utils::read.csv(file_info$datapath, fileEncoding="UTF-8") %>% 
                 rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-              upload_order(c(upload_order(), file_name))
             } else if(file_ext %in% c("tab", "tsv", "txt")){
               user_data[[file_name]]  = utils::read.delim(file_info$datapath, fileEncoding="UTF-8") %>% 
                 rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
                 rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-              upload_order(c(upload_order(), file_name))
             } else if(file_ext %in% c("xls", "xlsx")){
               excel_sheets_available = readxl::excel_sheets(file_info$datapath)
               showModal(
@@ -113,11 +111,9 @@ mod_fileManager_server <- function(id, action_log, log_path){
               )
             } else if(file_ext == "xml"){
               user_data[[file_name]] = xml2::read_xml(file_info$datapath)
-              upload_order(c(upload_order(), file_name))
             } else (
               stop("Unsupported file format.")
             )
-            
             new_action_log_record(log_path, "File info", paste0("File '", file_name,"' uploaded."))
           }, error = function(e){
             shiny::showNotification("Upload failed. Please consult the log for more information.", type = "error")
@@ -127,6 +123,9 @@ mod_fileManager_server <- function(id, action_log, log_path){
           }
         )
       })
+      
+      # Update upload_order
+      upload_order(c(upload_order(), input$upload$name))
       
       # Update log
       action_log(read_action_log(log_path))
@@ -159,35 +158,48 @@ mod_fileManager_server <- function(id, action_log, log_path){
     
     #### File browser ####
     create_file_buttons = function(){
-      button_list = lapply(upload_order(), function(file_name){           # Loop over file names in user_data()
-        if(is.null(user_data[[file_name]])){
-          return()
-        }
-        file_ext = tools::file_ext(file_name)
-        icon = switch(file_ext,                                       # Assign appropriate file icon
-                      "csv" = icon("file-csv", "fa-9x black"),
-                      "txt" = icon("file", "fa-9x black"),
-                      "xls" = icon("file-excel", "fa-9x black"),
-                      "xlsx" = icon("file-excel", "fa-9x black"),
-                      "xml" = icon("file-code", "fa-9x black"),
-                      icon("file", "fa-9x black"))
-        
-        # Create Button and Event listener
-        file_button = div(
-          class = "overlay-button-container",
-          actionButton(ns(paste0("select_", file_name)),
-                       width = "180px", height = "180px", class = "btn-success btn-overlay no-margin",
-                       label = div(icon, tags$br(), file_name)),
-          actionButton(inputId = ns(paste0("delete_", file_name)),
-                       class = "btn-delete btn-xs", label = "",
-                       icon = icon("times"))
+      req(upload_order)
+      ui = fluidRow(
+        class = "file-grid",
+        column(
+          12,
+          lapply(upload_order(), function(file_name){           # Loop over file names
+            if(is.null(user_data[[file_name]])){
+              return()
+            }
+            file_ext = tools::file_ext(file_name)
+            icon = switch(file_ext,                             # Assign appropriate file icon
+                          "csv" = icon("file-csv", "fa-9x black"),
+                          "txt" = icon("file", "fa-9x black"),
+                          "xls" = icon("file-excel", "fa-9x black"),
+                          "xlsx" = icon("file-excel", "fa-9x black"),
+                          "xml" = icon("file-code", "fa-9x black"),
+                          icon("file", "fa-9x black"))
+            
+            # Create Button
+            button_class = if(!is.null(file_focus()) && file_name == file_focus()){
+              "btn-success btn-overlay no-margin btn-focus"
+            } else {
+              "btn-success btn-overlay no-margin"
+            }
+            
+            file_button = div(
+              class = "overlay-button-container",
+              actionButton(ns(paste0("select_", file_name)),
+                           width = "180px", height = "180px", 
+                           class = button_class,
+                           label = div(icon, tags$br(), file_name)),
+              actionButton(inputId = ns(paste0("delete_", file_name)),
+                           class = "btn-delete btn-xs", label = "",
+                           icon = icon("times"))
+            )
+          })
         )
-      })
-      
-      return(button_list)
+      )
+      return(ui)
     }
     
-    create_file_button_observers =  function(){
+    create_file_button_observers = function(){
       lapply(upload_order(), function(file_name){
         observeEvent(
           ignoreInit = F,
@@ -200,27 +212,24 @@ mod_fileManager_server <- function(id, action_log, log_path){
         )
         
         observeEvent(
+          ignoreInit = T,
           eventExpr = input[[paste0("delete_", file_name)]],
           handlerExpr = {
-            browser()
-            # Remove user data
+            # Remove data
             .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
-            output$editor = NULL
-            
             upload_order(setdiff(upload_order(), file_name))
             
-            # Set new file focus
-            file_focus(NULL)
+            # Remove file focus
+            if(!is.null(file_focus()) && file_name == file_focus()){
+              file_focus(NULL)
+              output$editor = NULL
+            }
             
             # Redraw file browser
             output$file_browser = renderUI({
-              ui = fluidRow(
-                class = "file-grid",
-                column(
-                  12,
-                  create_file_buttons()
-                )
-              )
+              file_buttons = create_file_buttons()
+              #create_file_button_observers()
+              return(file_buttons)
             })
             
             # Update action log
@@ -233,16 +242,9 @@ mod_fileManager_server <- function(id, action_log, log_path){
     }
     
     output$file_browser = renderUI({
-      req(user_data)
-      ui = fluidRow(
-        class = "file-grid",
-        column(
-          12,
-          create_file_buttons(),
-        )
-      )
+      file_buttons = create_file_buttons()
       create_file_button_observers()
-      return(ui)
+      return(file_buttons)
     })
     
     #### File editor ####
