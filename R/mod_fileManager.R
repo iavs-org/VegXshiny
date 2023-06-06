@@ -68,6 +68,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     file_focus = reactiveVal()
     data_unedited = reactiveVal()
     upload_order = reactiveVal()
+    observer_list = reactiveVal()
     
     #### Upload ####
     # Process and render uploaded files
@@ -200,7 +201,9 @@ mod_fileManager_server <- function(id, action_log, log_path){
     }
     
     create_file_button_observers = function(){
-      lapply(upload_order(), function(file_name){
+      file_names = setdiff(upload_order(), observer_list())
+      lapply(file_names, function(file_name){
+        # Click Event
         observeEvent(
           ignoreInit = F,
           eventExpr = input[[paste0("select_", file_name)]],
@@ -211,13 +214,13 @@ mod_fileManager_server <- function(id, action_log, log_path){
           }
         )
         
+        # Delete event
         observeEvent(
           ignoreInit = T,
           eventExpr = input[[paste0("delete_", file_name)]],
           handlerExpr = {
             # Remove data
             .subset2(user_data, "impl")$.values$remove(file_name) # hacky way to remove item from reactiveValues
-            upload_order(setdiff(upload_order(), file_name))
             
             # Remove file focus
             if(!is.null(file_focus()) && file_name == file_focus()){
@@ -225,12 +228,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
               output$editor = NULL
             }
             
-            # Redraw file browser
-            output$file_browser = renderUI({
-              file_buttons = create_file_buttons()
-              #create_file_button_observers()
-              return(file_buttons)
-            })
+            # Update upload_order
+            upload_order(setdiff(upload_order(), file_name))
             
             # Update action log
             shiny::showNotification(paste0(file_name, " deleted"))
@@ -238,14 +237,20 @@ mod_fileManager_server <- function(id, action_log, log_path){
             action_log(read_action_log(log_path))
           }
         )
+        
+        # Add to observer list
+        observer_list(c(observer_list(), file_name))
       })
     }
     
-    output$file_browser = renderUI({
-      file_buttons = create_file_buttons()
-      create_file_button_observers()
-      return(file_buttons)
-    })
+    observeEvent(eventExpr = upload_order(),
+                 handlerExpr = {
+                   output$file_browser = renderUI({
+                     file_buttons = create_file_buttons()
+                     create_file_button_observers()
+                     return(file_buttons)
+                   })
+                 })
     
     #### File editor ####
     output$file_editor = renderUI({
