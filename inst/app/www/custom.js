@@ -33,7 +33,7 @@ $(function(){
   });
 });
 
-
+/*
 $(document).ready(function() {
   // Observe changes in the Shiny reactive value
   Shiny.addCustomMessageHandler('fileFocusChange', function(message) {
@@ -47,13 +47,15 @@ $(document).ready(function() {
     if (focusButton) {
       focusButton.classList.add('btn-focus');
     }
-    console.log("Focus updated")
   });
 });
 
 $(document).ready(function() {
   Shiny.addCustomMessageHandler('deleteFileButton', function(message) {
     var button = document.getElementById(message);
-    button.remove();
+    if (button) {
+      button.remove();
+    }
   });
 });
+*/

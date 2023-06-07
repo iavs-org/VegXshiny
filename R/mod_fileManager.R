@@ -32,7 +32,13 @@ mod_fileManager_ui <- function(id){
             tags$label("Uploaded files"),
             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                    title = "These files are available for further operations. Pick a file for edits in the File Editor"),
-            uiOutput(ns("file_browser")),
+            fluidRow(
+              class = "file-grid",
+              column(
+                12,
+                uiOutput(ns("file_browser"))
+              )
+            ),
             tags$hr(),
             div(
               tags$label("File Editor"),
@@ -49,13 +55,10 @@ mod_fileManager_ui <- function(id){
 }
 
 # TODO
-# - When uploading multiple files, xls and xlsx import will fail
 # - in the Browser, the toolbar UI will not show up
-# - btn-focus class is not always added when file focus changes (e.g. when saving as new file)
 # - file remains in edit mode when switching to another file, but edit_toolbar is gone
 # - crop doesnt work after transpose (reason: input$editor_select is outdated)
-# - too many notifications after deleting file
-# - Redesign rendering of file browser
+# - when upload potentially replaces multiple files, only last modal dialog is shown
 
 #' fileManager Server Functions
 #'
@@ -67,70 +70,142 @@ mod_fileManager_server <- function(id, action_log, log_path){
     user_data = reactiveValues()
     file_focus = reactiveVal()
     data_unedited = reactiveVal()
-    upload_order = reactiveVal()
+    file_order = reactiveVal()
     observer_list = reactiveVal()
+    upload_queue = reactiveVal()
+    current_file = reactiveVal()
     
     #### Upload ####
-    # Process and render uploaded files
-    observeEvent(input$upload, {
-      if(any(input$upload$name %in% names(user_data))){
-        existing_files = input$upload$name[which(input$upload$name %in% names(user_data))]
+    upload_file = function(file_name, file_info){
+      file_ext = tools::file_ext(file_name)
+      if(file_ext == "csv"){
+        file_data = utils::read.csv(file_info$datapath, fileEncoding="UTF-8") %>% 
+          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
+          rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+      } else if(file_ext %in% c("tab", "tsv", "txt")){
+        file_data = utils::read.delim(file_info$datapath, fileEncoding="UTF-8") %>% 
+          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
+          rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+      } else if(file_ext == "xml"){
+        file_data = xml2::read_xml(file_info$datapath)
+      } else if(file_ext %in% c("xls", "xlsx")){
+        excel_sheets_available = readxl::excel_sheets(file_info$datapath)
+        current_file(file_name)
         showModal(
-          modalDialog(paste0("The following existing files will be replaced by the your upload: ", paste0(existing_files, collapse = ", ")), footer = NULL, easyClose = T)
-          # TODO creates second button in multi upload
+          modalDialog(
+            selectizeInput(ns("excel_sheets_selected"), 
+                           label = "Which Excel sheets should be imported?", 
+                           choices = excel_sheets_available,
+                           selected = excel_sheets_available[1],
+                           multiple = T, 
+                           width = "100%"),
+            footer = tagList(
+              tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
+                        actionButton(ns("confirm_read_excel"), class = "pull-right btn-success", "Confirm", icon("check")))
+            ),
+          )
+        )
+      } else (
+        stop("Unsupported file format.")
+      )
+      
+      if(exists("file_data")){
+        queue_data(file_name, file_data)
+      }
+    }
+    
+    queue_data = function(file_name, file_data){
+      current_file(file_name)
+      if(!is.null(file_order()) && file_name %in% file_order()){
+        showModal(
+          modalDialog(
+            paste0("Should the existing file (", file_name,") be replaced?"), 
+            size = "m",
+            title = file_name,
+            footer = tagList(
+              tags$span(actionButton(ns("skip_file"), "Skip upload", class = "pull-left"), 
+                        actionButton(ns("upload_file"), "Overwrite existing file", class = "pull-right "))
+            )
+          )
+        )
+        upload_queue_item = list(
+          upload_confirmed = FALSE,
+          file_name = file_name,
+          file_data = file_data
+        )
+      } else {
+        upload_queue_item = list(
+          upload_confirmed = TRUE,
+          file_name = file_name,
+          file_data = file_data
         )
       }
-      
-      lapply(input$upload$name, function(file_name){     
-        tryCatch(
-          expr = {
-            file_info = input$upload[which(input$upload$name == file_name),]
-            file_ext = tools::file_ext(file_name)
-            if(file_ext == "csv"){
-              user_data[[file_name]] = utils::read.csv(file_info$datapath, fileEncoding="UTF-8") %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
-                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-            } else if(file_ext %in% c("tab", "tsv", "txt")){
-              user_data[[file_name]]  = utils::read.delim(file_info$datapath, fileEncoding="UTF-8") %>% 
-                rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T) %>% 
-                rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-            } else if(file_ext %in% c("xls", "xlsx")){
-              excel_sheets_available = readxl::excel_sheets(file_info$datapath)
-              showModal(
-                modalDialog(
-                  selectizeInput(ns("excel_sheets_selected"), 
-                                 label = "Which Excel sheets should be imported?", 
-                                 choices = excel_sheets_available,
-                                 selected = excel_sheets_available[1],
-                                 multiple = T, 
-                                 width = "100%"),
-                  footer = tagList(
-                    tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")), 
-                              actionButton(ns("confirm_read_excel"), class = "pull-right btn-success", "Confirm", icon("check")))
-                  ),
-                )
-              )
-            } else if(file_ext == "xml"){
-              user_data[[file_name]] = xml2::read_xml(file_info$datapath)
-            } else (
-              stop("Unsupported file format.")
-            )
-            new_action_log_record(log_path, "File info", paste0("File '", file_name,"' uploaded."))
-          }, error = function(e){
-            shiny::showNotification("Upload failed. Please consult the log for more information.", type = "error")
-            new_action_log_record(log_path, "File error", paste0("Upload of file '", file_name,"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
-          }, finally = {
-            shinyjs::reset("upload")
-          }
-        )
-      })
-      
-      # Update upload_order
-      upload_order(c(upload_order(), input$upload$name))
-      
-      # Update log
-      action_log(read_action_log(log_path))
-    })
+      queue = isolate(upload_queue())
+      queue[[file_name]] = upload_queue_item
+      upload_queue(queue)
+    }
+    
+    ###### Observe input$upload #####
+    observeEvent(eventExpr = input$upload, 
+                 handlerExpr = { 
+                   file_names = input$upload$name
+                   lapply(file_names, function(file_name){    
+                     tryCatch(
+                       expr = {
+                         file_info = input$upload[which(input$upload$name == file_name),]
+                         upload_file(file_name, file_info)
+                       }, error = function(e){
+                         shiny::showNotification("Upload failed. Please consult the log for more information.", type = "error")
+                         new_action_log_record(log_path, "File error", paste0("Upload of file '", file_name,"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                       }  
+                     )
+                   })
+                   
+                   # Reset upload 
+                   shinyjs::reset("upload")
+                   
+                   # Update log
+                   action_log(read_action_log(log_path))
+                 })
+    
+    
+    ###### Observe upload queue #####
+    observeEvent(eventExpr = upload_queue(),
+                 handlerExpr = {
+                   req(upload_queue)
+                   queue_items = lapply(upload_queue(), function(upload_queue_item){
+                     if(upload_queue_item$upload_confirmed){
+                       user_data[[upload_queue_item$file_name]] = upload_queue_item$file_data
+                       file_order_cleaned = setdiff(file_order(), upload_queue_item$file_name)
+                       file_order(c(file_order_cleaned, upload_queue_item$file_name))
+                       new_action_log_record(log_path, "File info", paste0("File '", upload_queue_item$file_name,"' uploaded."))
+                       return(NULL)
+                     } else {
+                       return(upload_queue_item)
+                     }
+                   })
+                   
+                   unconfirmed_queue_items = queue_items[lengths(queue_items) != 0]
+                   if(length(unconfirmed_queue_items) == 0) {
+                     upload_queue(NULL)
+                   } else {
+                     upload_queue(unconfirmed_queue_items)
+                   }
+                 })
+    
+    ###### Observe confirm/skip upload button #####
+    observeEvent(eventExpr = input$skip_file, 
+                 handlerExpr = {
+                   removeModal() 
+                 })
+    
+    observeEvent(eventExpr = input$upload_file, 
+                 handlerExpr = {
+                   queue = isolate(upload_queue())
+                   queue[[current_file()]]["upload_confirmed"] = TRUE
+                   upload_queue(queue)
+                   removeModal() 
+                 })
     
     ###### Confirm Excel Import #####
     observeEvent(eventExpr = input$confirm_read_excel, 
@@ -138,15 +213,18 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    req(user_data, input$upload$name, input$excel_sheets_selected)
                    
                    tryCatch({
-                     file_name = input$upload$name
+                     file_name = isolate(current_file())
+                     file_ext = tools::file_ext(file_name)
                      file_info = input$upload[which(input$upload$name == file_name),]
                      
                      for(sheet in input$excel_sheets_selected){
-                       sheet_name = paste0(file_name, "_", sheet)
-                       user_data[[paste0(sheet_name, ".xlsx")]] = readxl::read_excel(file_info$datapath, sheet = sheet) %>% 
+                       sheet_name = paste0(tools::file_path_sans_ext(file_name), "_", sheet, ".", file_ext)
+                       # Update user_data
+                       sheet_data = readxl::read_excel(file_info$datapath, sheet = sheet) %>% 
                          rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T) %>% 
                          rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-                       upload_order(c(upload_order(), file_name))
+                       
+                       queue_data(sheet_name, sheet_data)
                      }
                    }, error = function(e){
                      shiny::showNotification("Import failed. Please consult the log for more information.", type = "error")
@@ -159,49 +237,44 @@ mod_fileManager_server <- function(id, action_log, log_path){
     
     #### File browser ####
     create_file_buttons = function(){
-      req(upload_order)
-      ui = fluidRow(
-        class = "file-grid",
-        column(
-          12,
-          lapply(upload_order(), function(file_name){           # Loop over file names
-            if(is.null(user_data[[file_name]])){
-              return()
-            }
-            file_ext = tools::file_ext(file_name)
-            icon = switch(file_ext,                             # Assign appropriate file icon
-                          "csv" = icon("file-csv", "fa-9x black"),
-                          "txt" = icon("file", "fa-9x black"),
-                          "xls" = icon("file-excel", "fa-9x black"),
-                          "xlsx" = icon("file-excel", "fa-9x black"),
-                          "xml" = icon("file-code", "fa-9x black"),
-                          icon("file", "fa-9x black"))
-            
-            # Create Button
-            button_class = if(!is.null(file_focus()) && file_name == file_focus()){
-              "btn-success btn-overlay no-margin btn-focus"
-            } else {
-              "btn-success btn-overlay no-margin"
-            }
-            
-            file_button = div(
-              class = "overlay-button-container",
-              actionButton(ns(paste0("select_", file_name)),
-                           width = "180px", height = "180px", 
-                           class = button_class,
-                           label = div(icon, tags$br(), file_name)),
-              actionButton(inputId = ns(paste0("delete_", file_name)),
-                           class = "btn-delete btn-xs", label = "",
-                           icon = icon("times"))
-            )
-          })
+      req(file_order)
+      button_list = lapply(file_order(), function(file_name){           # Loop over file names
+        if(is.null(user_data[[file_name]])){
+          return()
+        }
+        file_ext = tools::file_ext(file_name)
+        icon = switch(file_ext,                             # Assign appropriate file icon
+                      "csv" = icon("file-csv", "fa-9x black"),
+                      "txt" = icon("file", "fa-9x black"),
+                      "xls" = icon("file-excel", "fa-9x black"),
+                      "xlsx" = icon("file-excel", "fa-9x black"),
+                      "xml" = icon("file-code", "fa-9x black"),
+                      icon("file", "fa-9x black"))
+        
+        # Create Button
+        button_class = if(!is.null(file_focus()) && file_name == file_focus()){
+          "btn-success btn-overlay no-margin btn-focus"
+        } else {
+          "btn-success btn-overlay no-margin"
+        }
+        
+        file_button = div(
+          class = "overlay-button-container",
+          title = file_name,
+          actionButton(ns(paste0("select_", file_name)),
+                       width = "180px", height = "180px", 
+                       class = button_class,
+                       label = div(class = "overlay-button-container-label", icon, tags$br(), file_name, `data-tooltip` = file_name)),
+          actionButton(inputId = ns(paste0("delete_", file_name)),
+                       class = "btn-delete btn-xs", label = "",
+                       icon = icon("times"))
         )
-      )
-      return(ui)
+      })
+      return(button_list)
     }
     
     create_file_button_observers = function(){
-      file_names = setdiff(upload_order(), observer_list())
+      file_names = setdiff(file_order(), observer_list())
       lapply(file_names, function(file_name){
         # Click Event
         observeEvent(
@@ -228,8 +301,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
               output$editor = NULL
             }
             
-            # Update upload_order
-            upload_order(setdiff(upload_order(), file_name))
+            # Update file_order
+            file_order(setdiff(file_order(), file_name))
             
             # Update action log
             shiny::showNotification(paste0(file_name, " deleted"))
@@ -243,7 +316,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
       })
     }
     
-    observeEvent(eventExpr = upload_order(),
+    observeEvent(eventExpr = file_order(),
                  handlerExpr = {
                    output$file_browser = renderUI({
                      file_buttons = create_file_buttons()
@@ -255,7 +328,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     #### File editor ####
     output$file_editor = renderUI({
       req(file_focus())
-      file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+      file_ext = tools::file_ext(file_focus())
       
       if(file_ext == "xml"){
         div(
@@ -283,7 +356,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     ##### General Observers ####
     observe({
       req(file_focus(), user_data[[file_focus()]])
-      file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+      file_ext = tools::file_ext(file_focus())
       
       if(file_ext %in% c("csv", "tab", "tsv", "txt", "xls", "xlsx")){
         output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
@@ -346,7 +419,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
         data_unedited(user_data[[file_focus()]])
         
         # Make user_data editable
-        file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+        file_ext = tools::file_ext(file_focus())
         if(file_ext == "xml"){
           updateAceEditor(session, "editor", readOnly = F)
         } else {
@@ -382,7 +455,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     observeEvent(eventExpr = input$confirm_save,
                  handlerExpr = {
                    tryCatch({
-                     file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+                     file_ext = tools::file_ext(file_focus())
                      if(file_ext == "xml"){
                        user_data[[file_focus()]] = read_xml(isolate(input$editor))
                      } else {
@@ -438,7 +511,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  handlerExpr = {
                    req(user_data, input$new_file_name)
                    tryCatch({
-                     file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+                     file_ext = tools::file_ext(file_focus())
                      if(file_ext == "xml"){
                        file_name = paste0(input$new_file_name, ".", file_ext)
                        data_edited = read_xml(isolate(input$editor))
@@ -458,6 +531,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
                      
                      # Update file browser
                      file_focus(file_name)
+                     file_order(c(file_order(), file_name))
                      
                      # Update action log
                      shiny::showNotification("Edits saved")
@@ -734,7 +808,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
     
     observeEvent(eventExpr = input$confirm_discard,
                  handlerExpr = {
-                   file_ext = stringr::str_split(file_focus(), "\\.", simplify = T)[-1]
+                   file_ext = tools::file_ext(file_focus())
                    
                    # Restore data
                    user_data[[file_focus()]] = data_unedited()

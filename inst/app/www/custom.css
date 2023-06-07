@@ -103,13 +103,28 @@ code, pre {
 }
 
 .overlay-button-container {
-      position: relative;
-      width: 180px!important;
-      height: 180px!important;
-      float: left;
-      margin: 2px;
+  position: relative;
+  width: 180px!important;
+  height: 180px!important;
+  float: left;
+  margin: 2px;
+  z-index: 1; 
 }
-    
+
+.overlay-button-container-label {
+  position: relative;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 180px;
+  white-space: nowrap;
+}
+
+.overlay-button-container-label:hover {
+  word-wrap: break-word;
+  overflow: visible;
+  white-space: normal;
+}
+
 .btn-focus {
   border-width: 2px;
   border-color: white!important;
