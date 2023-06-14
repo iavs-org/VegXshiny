@@ -52,7 +52,7 @@ code, pre {
 }
 
 .file-grid {
- min-height:160px!important;
+ min-height:185px!important;
 }
 
 .htCore {
@@ -154,12 +154,32 @@ code, pre {
   border: none;
 }
 
+.btn-dropdown-item {
+  text-align: left!important;  
+}
+
 .multicol { 
   webkit-column-count: 3; /* Chrome, Safari, Opera */ 
   moz-column-count: 3;    /* Firefox */ 
   column-count: 3; 
   moz-column-fill: auto;
   column-fill: auto;
+}
+
+.info-box {
+  display: flex;
+  max-height: 60vh;
+  flex-direction: column;
+  overflow: auto;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  color: #333;
+  font-size: 14px;
+}
+
+.info-box-item {
+ margin-bottom: 12px;
 }
 
 #fileManager-editor {
