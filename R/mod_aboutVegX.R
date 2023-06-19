@@ -118,7 +118,7 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Uploads will be listed under 'Uploaded Files' with a corresponding icon for the file type."),
         tags$p("During upload, only very basic checks on data formatting and validity are performed, and it is always a good idea to double-check files after upload. To this end, the File Manager 
                 offers functionality to view, edit and delete uploaded files. Clicking on one of the file icons under 'Uploaded files' will open an editor in the 
-                'File Editor' pane. Depending on the file type, this may either be a text editor (xml) or a spreadsheet editor (tabular data)."),  # TODO mention column type 
+                'File Editor' pane. Depending on the file type, this may either be a text editor (xml data) or a spreadsheet editor (tabular data)."), 
         
         tags$h2("Veg-X Import", id = ns("vegx_import"), class = "text-info"),
         tags$p("The import dialog is the core functionality of Veg-Xshiny. The application supports imports from tabular data, Turboveg XML and. Note that a new import will overwrite the current 

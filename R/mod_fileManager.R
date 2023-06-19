@@ -82,7 +82,7 @@ mod_fileManager_ui <- function(id){
 #' fileManager Server Functions
 #'
 #' @noRd 
-mod_fileManager_server <- function(id, action_log, log_path){
+mod_fileManager_server <- function(id, file_order, action_log, log_path){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -92,7 +92,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
     user_data = reactiveValues()       # Uploaded data
     data_unedited = reactiveVal()      # Copy of unedited file
     observer_list = reactiveVal()      # Tracks for which button in file browser observers have been created already
-    file_order = reactiveVal()         # Order of file upload / creation
     file_focus = reactiveVal()         # Currently selected file in File browser
     edit_mode = reactiveVal(F)         # Tracks whether the file editor is in editor mode
     
@@ -337,6 +336,7 @@ mod_fileManager_server <- function(id, action_log, log_path){
               if(!is.null(file_focus()) && file_name == file_focus()){
                 file_focus(NULL)
                 output$editor = NULL
+                output$file_viewer = NULL
               }
               
               # Update file_order
@@ -365,12 +365,6 @@ mod_fileManager_server <- function(id, action_log, log_path){
                  })
     
     # ------------------------------------------------------------------------ #
-    # TODO: File editor runs in error ("Must use single string to index into reactivevalues") after the following actions:
-    # upload a csv and an xml file
-    # select the xml file
-    # delete the csv file 
-    # delete the xml file
-    
     #### File editor ####
     observeEvent(eventExpr = list(edit_mode(), file_focus()),
                  handlerExpr = {
@@ -390,8 +384,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
                            size = "xs",
                            circle = FALSE,
                            inline = TRUE,
-                           actionButton(ns("save"), "Save",  width = "100px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("save_as"), "Save as",  width = "100px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("save"), "Save",  width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("save_as"), "Save as",  width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
                          reshape = shinyWidgets::dropdownButton(
                            inputId = "reshape_dropdown",
@@ -399,20 +393,21 @@ mod_fileManager_server <- function(id, action_log, log_path){
                            size = "xs",
                            circle = FALSE,
                            inline = TRUE,
-                           actionButton(ns("pivot"), "Pivot", width = "100px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("transpose"), "Transpose", width = "100px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("crop"), "Crop", width = "100px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
                          edit_names = shinyWidgets::dropdownButton(
                            inputId = "names_dropdown",
-                           label = "Edit names",
+                           label = "Edit values",
                            size = "xs",
                            circle = FALSE,
                            inline = TRUE,
                            actionButton(ns("edit_colnames"), "Edit colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("row_to_colnames"), "Row to colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("col_to_rownames"), "Column to rownames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0")
+                           actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
+                           actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item")
                          ),
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
                        )
@@ -773,7 +768,8 @@ mod_fileManager_server <- function(id, action_log, log_path){
                    })
                  })
     
-    ##### Edit names #####
+    
+    ##### Edit data #####
     ###### Edit column names ####
     observeEvent(eventExpr = input$edit_colnames,
                  handlerExpr = {
@@ -955,6 +951,110 @@ mod_fileManager_server <- function(id, action_log, log_path){
         removeModal()
       })
     })
+    
+    ###### Format date #####
+    date_valid = reactiveVal(F)
+    
+    output$date_input = renderText({
+      rhandsontable::hot_to_r(input$editor) %>% 
+        select(input$date_column) %>% 
+        drop_na() %>% 
+        slice_head(n = 1) %>% 
+        as.character()
+    })
+    
+    output$date_output = renderText({
+      req(input$conversion_spec)
+      tryCatch({
+        date_sample = rhandsontable::hot_to_r(input$editor) %>% 
+          select(input$date_column) %>% 
+          drop_na() %>% 
+          slice_head(n = 1) %>% 
+          as.character()
+        date_input = as.Date(date_sample, input$conversion_spec)
+        date_output = format(date_input, "%Y-%m-%d")
+        
+        if(is.na(date_output)){
+          date_valid(F)
+          return("Invalid output date")
+        } else {
+          date_valid(T)
+          return(date_output)
+        }
+      })  
+    })
+    
+    
+    observeEvent(eventExpr = input$format_date,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       tags$h3("Reformat dates prior to import"),
+                       tags$p("Veg-X requires dates to be in YYYY-MM-DD format. 
+                              Use established conversion specifications to define the format of your date values, e.g. use '%d.%m.%Y' 
+                              to indicate that your input date column has the format 'DD.MM.YYYY'. Please see",  
+                              tags$a("the R documentation", href = "https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime", target = "_blank"),
+                              " for more information.", class = "text-info"),
+                       selectInput(ns("date_column"), label = "Date column", user_data[[file_focus()]]$x$colHeaders, selected = NULL),
+                       fluidRow(
+                         column(3,
+                                tags$label("Date input"),
+                                textOutput(ns("date_input"))
+                         ),
+                         column(6,
+                                tags$label("Conversion specification"),
+                                textInput(ns("conversion_spec"), label = NULL)
+                         ),
+                         column(3,
+                                tags$label("Date output"),
+                                textOutput(ns("date_output"))
+                         )
+                       ),
+                       footer = tagList(
+                         tags$span(
+                           actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
+                           shinyjs::disabled(actionButton(ns("confirm_format_date"), "Confirm", class = "pull-right btn-success", icon("check")))
+                         )
+                       )
+                     )
+                   )
+                 })
+    
+    
+    observeEvent(eventExpr = date_valid(),
+                 handlerExpr = {
+                   if(date_valid()){
+                     shinyjs::enable("confirm_format_date")
+                   } else {
+                     shinyjs::disable("confirm_format_date")
+                   }
+                 })
+    
+    observeEvent(eventExpr = input$confirm_format_date,
+                 handlerExpr = {
+                   tryCatch({
+                     # Modify data
+                     data_df <- rhandsontable::hot_to_r(input$editor) 
+                     date_formatted = as.Date(data_df[[input$date_column]], input$conversion_spec)
+                     data_df[[input$date_column]] = format(date_formatted, "%Y-%m-%d")
+                     
+                     # Overwrite user data
+                     user_data[[file_focus()]] <- data_df %>%
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     output$editor <- rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     
+                     # Update action log
+                     shiny::showNotification("Date formatted")
+                     new_action_log_record(log_path, "File info", paste0("Reformatted date in column ", input$source_column  ,"  in file '", file_focus(), "'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e) {
+                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File edit error", paste0("Date formatting in file '", file_focus(), "' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                   }, finally = {
+                     removeModal()
+                   })
+                 })
     
     ##### Discard edits ####
     observeEvent(eventExpr = input$discard,

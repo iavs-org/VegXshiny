@@ -216,7 +216,7 @@ mod_tableImport_ui <- function(id){
 #' tableImport Server Functions
 #'
 #' @noRd 
-mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path){
+mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
@@ -278,7 +278,7 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
                                             "strataDef", "aggOrgObs", "strataDef", "stratumObs", 
                                             "covObs")
         )
-
+        
         for(i in 1:nrow(inputs)){
           id = inputs$input_id[i]
           method = inputs$method_name[i]
@@ -354,17 +354,27 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
     # Plots ####
     # Observe and update data inputs instead of using a reactive expression in their definition, thus preventing re-rendering of the entire UI when `user_data()` changes 
     observe({  
-      if(!is.null(input$plot_data) & length(names(user_data)) != 0){
-        file_selected = input$plot_data # save current selection
-        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
-        updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), choices)) 
+      if(!is.null(input$plot_data)){
+        if(input$plot_data %in% file_order()){
+          file_selected = input$plot_data # save current selection
+          choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+          updateSelectizeInput(session, inputId = "plot_data", selected = file_selected, choices = c(dropdown_empty(), choices))  
+        } else {
+          choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+          updateSelectizeInput(session, inputId = "plot_data", selected = NULL, choices = c(dropdown_empty(), choices))
+        }
       }
       
-      if(!is.null(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && length(names(user_data)) != 0){
-        file_selected = input$subplot_data # save current selection
-        choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
-        updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), choices))
-      }
+      if(!is.null(input$subplot_data)){
+        if(input$plot_hasSubplot == "yes" && input$subplot_data %in% file_order()){
+          file_selected = input$subplot_data # save current selection
+          choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+          updateSelectizeInput(session, inputId = "subplot_data", selected = file_selected, choices = c(dropdown_empty(), choices))
+        } else {
+          choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+          updateSelectizeInput(session, inputId = "subplot_data", selected = NULL, choices = c(dropdown_empty(), choices))
+        }
+      } 
     })
     
     output$plot_ui = renderUI({
@@ -656,12 +666,19 @@ mod_tableImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx_tx
         choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
         for(input_name in input_names){
           if(!is.null(input[[input_name]])){
-            updateSelectizeInput(session, inputId = input_name, selected = input[[input_name]], choices = c(dropdown_empty(), choices)) 
+            if(input[[input_name]] %in% file_order()){
+              file_selected = input[[input_name]] # save current selection
+              choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+              updateSelectizeInput(session, inputId = input_name, selected = file_selected, choices = c(dropdown_empty(), choices))  
+            } else {
+              choices = names(user_data)[stringr::str_ends(names(user_data), ".xml", negate = T)]
+              updateSelectizeInput(session, inputId = input_name, selected = NULL, choices = c(dropdown_empty(), choices))
+            }
           }
         }
       }
     })
-    
+
     #------------------------------------#
     ## aggregateOrganismObservations ####
     output$aggOrgObs_ui = renderUI({
