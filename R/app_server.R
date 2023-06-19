@@ -46,6 +46,7 @@ app_server <- function(input, output, session) {
     templates_predefined_lookup
   })
   
+  file_order = reactiveVal()       
   # --------------------------------------------------------------------------------------- #
   # Create global observers
   node_info = reactiveVal()
@@ -91,13 +92,13 @@ app_server <- function(input, output, session) {
   
   # --------------------------------------------------------------------------------------- #
   # File Upload
-  user_data = mod_fileManager_server("fileManager", action_log, log_path)
+  user_data = mod_fileManager_server("fileManager", file_order, action_log, log_path)
   
   # --------------------------------------------------------------------------------------- #
   # Import Wizard
   
   # 1. Tabular Data
-  mod_tableImport_server("tableImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
+  mod_tableImport_server("tableImport", file_order, user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)
   
   # 2. Turboveg XML Data
   mod_turbovegImport_server("turbovegImport", user_data, vegx_schema, vegx_doc, vegx_txt, templates, templates_lookup, action_log, log_path)

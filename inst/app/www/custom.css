@@ -52,7 +52,7 @@ code, pre {
 }
 
 .file-grid {
- min-height:160px!important;
+ min-height:185px!important;
 }
 
 .htCore {
@@ -62,10 +62,6 @@ code, pre {
 .handsontable th {
   color: #fff!important; 
   background: #888!important; 
-}
-
-#fileManager-editor {
-  background: white;
 }
 
 .dataTables_wrapper .dataTables_info, .dataTables_wrapper th, .dataTables_wrapper label {
@@ -106,6 +102,29 @@ code, pre {
   margin-bottom: 0px;
 }
 
+.overlay-button-container {
+  position: relative;
+  width: 180px!important;
+  height: 180px!important;
+  float: left;
+  margin: 2px;
+  z-index: 1; 
+}
+
+.overlay-button-container-label {
+  position: relative;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 180px;
+  white-space: nowrap;
+}
+
+.overlay-button-container-label:hover {
+  word-wrap: break-word;
+  overflow: visible;
+  white-space: normal;
+}
+
 .btn-focus {
   border-width: 2px;
   border-color: white!important;
@@ -116,10 +135,57 @@ code, pre {
   line-height: 0.7;
 }
 
+.btn-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  padding: 0;
+}
+
+.btn-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background: white;
+  color: black;
+  opacity: 0.5;
+  border: none;
+}
+
+.btn-dropdown-item {
+  text-align: left!important;  
+}
+
 .multicol { 
   webkit-column-count: 3; /* Chrome, Safari, Opera */ 
   moz-column-count: 3;    /* Firefox */ 
   column-count: 3; 
   moz-column-fill: auto;
   column-fill: auto;
+}
+
+.info-box {
+  display: flex;
+  max-height: 60vh;
+  flex-direction: column;
+  overflow: auto;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  color: #333;
+  font-size: 14px;
+}
+
+.info-box-item {
+ margin-bottom: 12px;
+}
+
+#fileManager-editor {
+  background: white;
+}
+
+#edit_toolbar {
+  text-align: left;
 }

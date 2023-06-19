@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.1",
+    "Version": "4.2.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -9,6 +9,14 @@
     ]
   },
   "Packages": {
+    "BH": {
+      "Package": "BH",
+      "Version": "1.81.0-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "68122010f01c4dcfbe58ce7112f2433d",
+      "Requirements": []
+    },
     "DT": {
       "Package": "DT",
       "Version": "0.20",
@@ -40,6 +48,17 @@
       "Repository": "CRAN",
       "Hash": "22b546dd7e337f6c0c58a39983a496bc",
       "Requirements": []
+    },
+    "anytime": {
+      "Package": "anytime",
+      "Version": "0.3.9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "74a64813f17b492da9c6afda6b128e3d",
+      "Requirements": [
+        "BH",
+        "Rcpp"
+      ]
     },
     "askpass": {
       "Package": "askpass",
@@ -1071,14 +1090,16 @@
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
-      "Version": "0.6.4",
+      "Version": "0.7.6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "02fba70d7c5c1ab0754d9c0108c029eb",
+      "Hash": "fd889b32caa37b8ed9b1e9e7ef1564bc",
       "Requirements": [
+        "anytime",
         "bslib",
         "htmltools",
         "jsonlite",
+        "rlang",
         "sass",
         "shiny"
       ]

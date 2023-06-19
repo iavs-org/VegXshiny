@@ -42,7 +42,6 @@ mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
       filename = paste0("vegx_export-", Sys.Date(), ".xml"),
       content = function(file) {
         write_xml(vegx_doc, file)
-        shiny::showNotification("Download successful")
         new_action_log_record(log_path, "File info", paste0("Veg-X document exported as xml file."))
         action_log(read_action_log(log_path))
       },
@@ -59,7 +58,6 @@ mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
           write.csv(vegx_df_list[[df_name]], file = paste0(tempdir(), "/export/", df_name, ".csv"), row.names = F, na = "")  # Write files
         }
         zip(file, list.files(paste0(tempdir(), "/export"), full.names = T), flags = "-j")    # Zip csvs
-        shiny::showNotification("Download successful")
         new_action_log_record(log_path, "File info", paste0("Veg-X document exported as zip archive."))
         action_log(read_action_log(log_path))
       },
@@ -72,7 +70,6 @@ mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
         tryCatch({
           vegx_df = vegx_to_df(vegx_doc, return_vegtable = T)
           write.csv(vegx_df, file, row.names = T, na = "") 
-          shiny::showNotification("Download successful")
           new_action_log_record(log_path, "File info", paste0("Veg-X document exported as vegetation table."))
           action_log(read_action_log(log_path))
         }, error = function(e){

@@ -32,3 +32,30 @@ $(function(){
     });
   });
 });
+
+/*
+$(document).ready(function() {
+  // Observe changes in the Shiny reactive value
+  Shiny.addCustomMessageHandler('fileFocusChange', function(message) {
+    var fileFocus = message.fileFocus;
+    var focusButton = document.getElementById(message.buttonID);
+    
+    // Remove the 'btn-focus' class from all buttons
+    $('.btn-focus').removeClass('btn-focus');
+    
+    // Add the 'btn-focus' class to the button corresponding to the current value of file_focus
+    if (focusButton) {
+      focusButton.classList.add('btn-focus');
+    }
+  });
+});
+
+$(document).ready(function() {
+  Shiny.addCustomMessageHandler('deleteFileButton', function(message) {
+    var button = document.getElementById(message);
+    if (button) {
+      button.remove();
+    }
+  });
+});
+*/

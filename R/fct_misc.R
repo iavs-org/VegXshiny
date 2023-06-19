@@ -231,31 +231,35 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
   
   if(return_vegtable){
     # 1. Join everything to plotobservations
-    header_df = vegx_dfs$plotObservations %>%                   # TODO method names
+    header_df = vegx_dfs$plotObservations %>%                 
       left_join(vegx_dfs$projects, by = c("projectID" = "id")) %>% 
       left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>% 
       dplyr::select(-id, -plotID, -projectID) %>% 
       dplyr::relocate(plotUniqueIdentifier)
     
     if("stratumName" %in% colnames(vegx_dfs$aggregateOrganismObservations)){
-      species_df = vegx_dfs$aggregateOrganismObservations %>%     # TODO Strata
-        left_join(dplyr::select(vegx_dfs$plotObservations, -id), by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+      species_df = vegx_dfs$aggregateOrganismObservations %>%  
+        arrange(organismName) %>% 
         mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
-        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate, id), names_from = c(organismName, stratumName), values_from = measurementValue) %>% 
-        dplyr::select(-id)
+        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate), names_from = c(organismName, stratumName), values_from = measurementValue)
+      
+      vegtable = header_df %>% 
+        left_join(species_df, by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+        as.matrix() %>% 
+        t()
+      
     } else {
-      species_df = vegx_dfs$aggregateOrganismObservations %>%     # TODO Strata
-        left_join(dplyr::select(vegx_dfs$plotObservations, -id), by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+      species_df = vegx_dfs$aggregateOrganismObservations %>%     
+        arrange(organismName) %>% 
         mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
-        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate, id), names_from = organismName, values_from = measurementValue) %>% 
-        dplyr::select(-id)
+        pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate), names_from = organismName, values_from = measurementValue) 
+      
+      vegtable = header_df %>% 
+        left_join(species_df, by = c("plotUniqueIdentifier", "obsStartDate")) %>% 
+        as.matrix() %>% 
+        t()
+      
     }
-    
-    # 2. Transpose table
-    vegtable = left_join(header_df, species_df) %>% 
-      as.matrix() %>% 
-      t()
-    
     return(vegtable)
   }
   

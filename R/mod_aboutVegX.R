@@ -118,7 +118,7 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Uploads will be listed under 'Uploaded Files' with a corresponding icon for the file type."),
         tags$p("During upload, only very basic checks on data formatting and validity are performed, and it is always a good idea to double-check files after upload. To this end, the File Manager 
                 offers functionality to view, edit and delete uploaded files. Clicking on one of the file icons under 'Uploaded files' will open an editor in the 
-                'File Editor' pane. Depending on the file type, this may either be a text editor (xml) or a spreadsheet editor (tabular data)."),  # TODO mention column type 
+                'File Editor' pane. Depending on the file type, this may either be a text editor (xml data) or a spreadsheet editor (tabular data)."), 
         
         tags$h2("Veg-X Import", id = ns("vegx_import"), class = "text-info"),
         tags$p("The import dialog is the core functionality of Veg-Xshiny. The application supports imports from tabular data, Turboveg XML and. Note that a new import will overwrite the current 
@@ -126,7 +126,7 @@ mod_aboutVegX_ui <- function(id){
         tags$h3("From Tables", id = ns("import_tables"), class = "text-info"),
         tags$p("Tabular data for import are generelly expected in ", tags$i("tidy"), " format, where each column is a variable and each row is an observation. This means that ", 
                tags$span("certain tabular data formats, for example species-by-sites matrices, need to be converted into tidy format prior to the import.", class = "text-info"),
-               "Available tools in R such as ", tags$code("reshape::melt()"), " or ", tags$code("tidyr::pivot_longer()"), " can help with the conversion process."),
+               "The tools privided in the file manager are designed to help with the most common conversion tasks"),
         tags$p("The import of tabular data is structured into five steps. Mandatory fields are marked with a star (*)"),
         tags$ol(
           tags$b(tags$li("Project information")),
@@ -210,7 +210,7 @@ mod_aboutVegX_ui <- function(id){
         tags$h3("How to format my data correctly for VegXshiny?", class = "text-info"),
         tags$p("VegXshiny expects tabular data in ", tags$i("tidy"), " format, where each column is a variable and each row is an observation. Specific details on the expected format of 
                 input data is always available when hovering the info icon next to dataset selection in the table import dialog."),
-        tags$p("If your dataset does not meet the format specifications, as for example a species-by-sites matrix, you can use the ", tags$span("Reshape tool in the File Manager", class = "text-info"), 
+        tags$p("If your dataset does not meet the format specifications, e.g. if you have a species-by-sites matrix, you can use the ", tags$span("Reshape tools in the File Manager", class = "text-info"), 
                "or R-functions such as ", tags$code("reshape::melt()"), " or ", tags$code("tidyr::pivot_longer()"), " to organize your data."),
 
         tags$h3("Why did my import fail?", class = "text-info"),
@@ -222,7 +222,7 @@ mod_aboutVegX_ui <- function(id){
         tags$code("install.packages(\"devtools\")"), tags$br(),
         tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), tags$br(),
         tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # Set max upload limit"), tags$br(),
-        tags$p("Alternatively or you can can write an import script using the", tags$a("VegX R-package", href = "https://github.com/iavs-org/VegX", target="_blank"), ".")
+        tags$p("Alternatively, you can can write an import script using the", tags$a("VegX R-package", href = "https://github.com/iavs-org/VegX", target="_blank"), ".")
       ),
       
       tabPanel(
