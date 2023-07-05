@@ -26,7 +26,7 @@ mod_actionLog_ui <- function(id){
 mod_actionLog_server <- function(id, action_log){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    output$action_log <- DT::renderDataTable(action_log(), 
+    output$action_log <- DT::renderDataTable(expr = action_log(), 
                                              selection = 'none',
                                              rownames = F,
                                              escape = F,

@@ -38,8 +38,8 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    output$quant_attrs = data.frame("Unit *" = character(1), "Precision" = numeric(1), "Lower limit" = numeric(1), "Upper limit" = numeric(1), check.names = F) %>% 
-      na_if(0) %>% 
+    browser()
+    output$quant_attrs = data.frame("Unit *" = NA_character_, "Precision" = NA_real_, "Lower limit" = NA_real_, "Upper limit" = NA_real_, check.names = F) %>%  
       rhandsontable::rhandsontable(useTypes = T, readOnly = F, rowHeaders = NULL) %>% 
       rhandsontable::hot_context_menu(allowRowEdit = FALSE) %>% 
       rhandsontable::hot_cols(colWidths = "120 px") %>% 
@@ -56,8 +56,7 @@ mod_newMethodTemplate_server <- function(id, subject, templates, templates_looku
       }
     })
     
-    output$ord_attrs = data.frame("Code *" = character(1), "Definition" = character(1), "Lower limit" = numeric(1), "Upper limit" = numeric(1), "Order" = integer(1), check.names = F) %>% 
-      na_if(0) %>% 
+    output$ord_attrs = data.frame("Code *" = NA_character_, "Definition" = NA_character_, "Lower limit" = NA_real_, "Upper limit" = NA_real_, "Order" = NA_integer_, check.names = F) %>% 
       rhandsontable::rhandsontable(useTypes = T, readOnly = F, rowHeaders = NULL) %>% 
       rhandsontable::hot_cols(colWidths = "120 px") %>% 
       rhandsontable::renderRHandsontable()

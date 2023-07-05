@@ -32,7 +32,7 @@ mod_fileManager_ui <- function(id){
                        the context-menu (right click) to delete rows and create subtables from your vegetation table."),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
-                       "Importing observations (e.g. species-by-sites matrices) requires the data to be in long format. Use the 'pivot' 
+                       "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
                        function to transform your observation data before import"),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
@@ -40,8 +40,7 @@ mod_fileManager_ui <- function(id){
                        respective columns."),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
-                       "Dates must be in the correct format (YYYY-MM-DD) to comply with the VegX standard. Edit malformatted date values 
-                       in the file editor or prior to the file upload."),
+                       "Use the 'format date' function in File Editor to convert a date column to the expected format of YYYY-MM-DD before starting the import dialog."),
                )
              )
     ),
@@ -756,7 +755,10 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
                      
                      # Update action log
-                     new_action_log_record(log_path, "File info", paste0("Created new table"))
+                     new_action_log_record(log_path, "File info", paste0("Cropped table to selection (",
+                                                                         "rows: ", row_min, "-", row_max , ", ",
+                                                                         "cols: ", col_min, "-", col_max,  
+                                                                         ") in  file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
                      new_action_log_record(log_path, "File error", paste0("Extraction from ", file_focus(), " failed with the following exceptions:",
@@ -775,7 +777,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    # prepare colnames df
                    colnames_df = data.frame(as.list(input$editor$params$rColnames))
-                   colnames_hot = rhandsontable::rhandsontable(colnames_df, colHeaders = NULL, rowHeaders = NULL, selectCallback = T)
+                   colnames_hot = rhandsontable::rhandsontable(colnames_df, 
+                                                               colHeaders = NULL, 
+                                                               rowHeaders = NULL, 
+                                                               rowHeights = 30, 
+                                                               selectCallback = T)
                    output$colnames_hot = rhandsontable::renderRHandsontable(colnames_hot)
                    showModal(
                      modalDialog(
@@ -805,7 +811,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      
                      # Update action log
-                     shiny::showNotification("Columnnames edited")
+                     shiny::showNotification("Column names edited")
                      new_action_log_record(log_path, "File info", paste0("Column names edited in file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
@@ -857,7 +863,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      
                      # Update action log
-                     shiny::showNotification("Columnnames added")
+                     shiny::showNotification("Column names added")
                      new_action_log_record(log_path, "File info", paste0("Column names added to file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
