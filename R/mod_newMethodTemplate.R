@@ -37,8 +37,7 @@ mod_newMethodTemplate_ui <- function(id){
 mod_newMethodTemplate_server <- function(id, subject, templates, templates_lookup){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    
-    browser()
+
     output$quant_attrs = data.frame("Unit *" = NA_character_, "Precision" = NA_real_, "Lower limit" = NA_real_, "Upper limit" = NA_real_, check.names = F) %>%  
       rhandsontable::rhandsontable(useTypes = T, readOnly = F, rowHeaders = NULL) %>% 
       rhandsontable::hot_context_menu(allowRowEdit = FALSE) %>% 
