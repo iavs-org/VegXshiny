@@ -678,7 +678,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         }
       }
     })
-
+    
     #------------------------------------#
     ## aggregateOrganismObservations ####
     output$aggOrgObs_ui = renderUI({
@@ -1226,7 +1226,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 plots_upload = user_data[[input$plot_data]]
                 plots_df_upload = jsonlite::fromJSON(plots_upload$x$data)
                 colnames(plots_df_upload) = plots_upload$x$rColHeaders
-                plots_df_upload = data.frame(plots_df_upload)
+                plots_df_upload = data.frame(plots_df_upload, check.names = F)
                 plots_df_upload[plots_df_upload==""] = NA  
                 
                 # Check identifiers
@@ -1330,7 +1330,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 
                 plots_lookup = data.frame(
                   plotID = sapply(nodes$plots, function(x){xml_attr(x, "id")}), # The internal id used by vegXshiny
-                  plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+                  plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}), # the mapped unique identifier in the data
+                  check.names = F
                 )
                 
                 #------------------------------------#
@@ -1340,7 +1341,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   subplots_upload = user_data[[input$subplot_data]]
                   subplots_df_upload = jsonlite::fromJSON(subplots_upload$x$data)
                   colnames(subplots_df_upload) = subplots_upload$x$rColHeaders
-                  subplots_df_upload = data.frame(subplots_df_upload)
+                  subplots_df_upload = data.frame(subplots_df_upload, check.names = F)
                   subplots_df_upload[subplots_df_upload==""] = NA  
                   
                   # Build mappings table
@@ -1389,7 +1390,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                       method_name = method_template[method_template$node_path == "method > name", "node_value"] 
                       methods_lookup = data.frame(
                         methodID = sapply(nodes$methods, function(x){xml2::xml_attr(x, "id")}), # The internal id used by vegXshiny
-                        methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//name"))}) # the mapped unique identifier in the data
+                        methodName = sapply(nodes$methods, function(x){xml2::xml_text(xml2::xml_find_all(x, "..//name"))}), # the mapped unique identifier in the data
+                        check.names = F
                       )
                       
                       if(method_name %in% methods_lookup$methodName){  # If yes, use existing ID
@@ -1415,7 +1417,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   # Update plot lookup
                   plots_lookup = data.frame(
                     plotID = sapply(nodes$plots, function(x){xml_attr(x, "id")}), # The internal id used by vegXshiny
-                    plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}) # the mapped unique identifier in the data
+                    plotUniqueIdentifier = sapply(nodes$plots, function(x){xml_text(xml_find_first(x, "//plotUniqueIdentifier"))}), # the mapped unique identifier in the data
+                    check.names = F
                   )
                 }
               }
@@ -1440,7 +1443,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   upload = user_data[[file_name]]
                   df_upload = jsonlite::fromJSON(upload$x$data)
                   colnames(df_upload) = upload$x$rColHeaders
-                  return(data.frame(df_upload))
+                  return(data.frame(df_upload, check.names = F))
                 }, simplify = FALSE, USE.NAMES = TRUE)
                 
                 #------------------------------------#
@@ -1466,7 +1469,9 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   }
                   date = df_upload[,input[[paste0(abbreviations[obs_category], "_date")]]]
                   
-                  return(data.frame("plotUniqueIdentifier" = plotUniqueIdentifier, "plotObservation > obsStartDate" = date, check.names = F))
+                  return(data.frame("plotUniqueIdentifier" = plotUniqueIdentifier, 
+                                    "plotObservation > obsStartDate" = date, 
+                                    check.names = F))
                 }) 
                 
                 plotObs_df = plotObs_df_list %>% 
@@ -1502,7 +1507,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 plotObs_lookup = lapply(plotObs_nodes, function(x){
                   data.frame(plotObservationID = xml2::xml_attr(x, "id"),
                              plotID = xml2::xml_text(xml2::xml_child(x, search = "plotID")),
-                             obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x, search = "obsStartDate"))))}) %>% 
+                             obs_date = lubridate::ymd(xml2::xml_text(xml2::xml_child(x, search = "obsStartDate"))),
+                             check.names = F)}) %>% 
                   bind_rows() %>% 
                   left_join(plots_lookup, by = "plotID")
                 
