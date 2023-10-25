@@ -319,39 +319,43 @@ template_id,node_id,main_element,node_path,node_value
 34,1,methods,method > name,Strata definition/Turboveg
 34,1,methods,method > description,Standard Turboveg stratum definition (levels: 0-9)
 34,1,methods,method > choice > citationString,"Hennekens, S.M. and Schaminée, J.H. (2001), TURBOVEG, a comprehensive data base management system for vegetation data. Journal of Vegetation Science, 12: 589-591. https://doi.org/10.2307/3237010"
-34,2,strata,stratum > methodID,{1}
-34,2,strata,stratum > stratumName,1
-34,2,strata,stratum > definition,Tree layer (high)
-34,2,strata,stratum > order,1
+34,2,attributes,attribute > choice > quantitative > methodID,{1}
+34,2,attributes,attribute > choice > quantitative > unit,m
+34,2,attributes,attribute > choice > quantitative > lowerLimit,0
+34,2,attributes,attribute > choice > quantitative > upperLimit,999
 34,3,strata,stratum > methodID,{1}
-34,3,strata,stratum > stratumName,2
-34,3,strata,stratum > definition,Tree layer (middle)
-34,3,strata,stratum > order,2
+34,3,strata,stratum > stratumName,1
+34,3,strata,stratum > definition,Tree layer (high)
+34,3,strata,stratum > order,1
 34,4,strata,stratum > methodID,{1}
-34,4,strata,stratum > stratumName,3
-34,4,strata,stratum > definition,Tree layer (low)
-34,4,strata,stratum > order,3
+34,4,strata,stratum > stratumName,2
+34,4,strata,stratum > definition,Tree layer (middle)
+34,4,strata,stratum > order,2
 34,5,strata,stratum > methodID,{1}
-34,5,strata,stratum > stratumName,4
-34,5,strata,stratum > definition,Shrub layer (high)
-34,5,strata,stratum > order,4
+34,5,strata,stratum > stratumName,3
+34,5,strata,stratum > definition,Tree layer (low)
+34,5,strata,stratum > order,3
 34,6,strata,stratum > methodID,{1}
-34,6,strata,stratum > stratumName,5
-34,6,strata,stratum > definition,Shrub layer (low)
-34,6,strata,stratum > order,5
+34,6,strata,stratum > stratumName,4
+34,6,strata,stratum > definition,Shrub layer (high)
+34,6,strata,stratum > order,4
 34,7,strata,stratum > methodID,{1}
-34,7,strata,stratum > stratumName,6
-34,7,strata,stratum > definition,Herb layer
-34,7,strata,stratum > order,6
+34,7,strata,stratum > stratumName,5
+34,7,strata,stratum > definition,Shrub layer (low)
+34,7,strata,stratum > order,5
 34,8,strata,stratum > methodID,{1}
-34,8,strata,stratum > stratumName,7
-34,8,strata,stratum > definition,Juvenile
+34,8,strata,stratum > stratumName,6
+34,8,strata,stratum > definition,Herb layer
+34,8,strata,stratum > order,6
 34,9,strata,stratum > methodID,{1}
-34,9,strata,stratum > stratumName,8
-34,9,strata,stratum > definition,Seedling (less than 1 year)
+34,9,strata,stratum > stratumName,7
+34,9,strata,stratum > definition,Juvenile
 34,10,strata,stratum > methodID,{1}
-34,10,strata,stratum > stratumName,9
-34,10,strata,stratum > definition,Moss layer
+34,10,strata,stratum > stratumName,8
+34,10,strata,stratum > definition,Seedling (less than 1 year)
+34,11,strata,stratum > methodID,{1}
+34,11,strata,stratum > stratumName,9
+34,11,strata,stratum > definition,Moss layer
 35,1,methods,method > subject,stratum definition
 35,1,methods,method > name,Strata definition/Recce non-woody
 35,1,methods,method > description,"Strata definition/standard Recce non-woody (levels: Tier 1-Tier 4, Tier 5A, Tier 5B, Tier 6A, Tier 6B, Tier 7)"

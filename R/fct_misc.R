@@ -108,9 +108,9 @@ render_mapping_summary = function(header = NA, labels, values, inputs_complete){
 
 #' Render a summary of the current vegX document
 #'
-#' @param vegx_doc vegx xml-document
+#' @param vegx_doc VegX xml-document
 #'
-#' @return a rendered summary of the vegx document
+#' @return a rendered summary of the VegX document
 #' @noRd
 render_export_summary = function(vegx_doc){
   node_summary = lapply(xml_children(vegx_doc), function(node){
@@ -152,7 +152,7 @@ render_node_info = function(node_info){
 #' Convert a VegX xml document to a list of rectangular tables
 #'
 #' @param vegx_doc the vegx xml-document
-#' @param resolve_ids A character vector of VegX main elements, for which ids should be resolved
+#' @param return_vegtable A flag indicating whether to return a formatted vegetation table
 #'
 #' @importFrom tidyr pivot_longer pivot_wider drop_na
 #' @import dplyr
@@ -216,7 +216,7 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
       left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>%
       left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>%
       left_join(vegx_dfs$strata, by = c("stratumID" = "id")) %>%
-      dplyr::select(id, plotUniqueIdentifier, obsStartDate, stratumName, measurementValue = stratumMeasurement.value) %>% 
+      dplyr::select(any_of(c("id", "plotUniqueIdentifier", "obsStartDate", stratumName = "stratumMeasurement.value"))) %>%  
       drop_na()
   }
   
@@ -224,12 +224,13 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
     vegx_dfs$surfaceCoverObservations = vegx_dfs$surfaceCoverObservations %>%
       left_join(vegx_dfs$plotObservations, by = c("plotObservationID" = "id")) %>%
       left_join(vegx_dfs$plots, by = c("plotID" = "id")) %>%
-      left_join(vegx_dfs$surfaceTypes, by = c("surfaceTypeID" = "id")) %>%
-      dplyr::select(id, plotUniqueIdentifier, obsStartDate, surfaceName, measurementValue = surfaceCover.value) %>% 
+      left_join(vegx_dfs$surfaceTypes, by = c("surfaceTypeID" = "id")) %>% 
+      dplyr::select(id, plotUniqueIdentifier, obsStartDate, surfaceName, measurementValue = stratumMeasurement.value) %>% 
       drop_na()
   }
   
   if(return_vegtable){
+    
     # 1. Join everything to plotobservations
     header_df = vegx_dfs$plotObservations %>%                 
       left_join(vegx_dfs$projects, by = c("projectID" = "id")) %>% 
@@ -244,7 +245,7 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
         pivot_wider(id_cols = c(plotUniqueIdentifier, obsStartDate), names_from = c(organismName, stratumName), values_from = measurementValue)
       
       vegtable = header_df %>% 
-        left_join(species_df, by = c("plotUniqueIdentifier" = "plotID", "obsStartDate")) %>% 
+        left_join(species_df, by = c("plotUniqueIdentifier", "obsStartDate")) %>% 
         as.matrix() %>% 
         t()
       

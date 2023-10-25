@@ -32,7 +32,7 @@ mod_fileManager_ui <- function(id){
                        the context-menu (right click) to delete rows and create subtables from your vegetation table."),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
-                       "Importing observations (e.g. species-by-sites matrices) requires the data to be in long format. Use the 'pivot' 
+                       "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
                        function to transform your observation data before import"),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
@@ -40,8 +40,7 @@ mod_fileManager_ui <- function(id){
                        respective columns."),
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
-                       "Dates must be in the correct format (YYYY-MM-DD) to comply with the VegX standard. Edit malformatted date values 
-                       in the file editor or prior to the file upload."),
+                       "Use the 'format date' function in File Editor to convert a date column to the expected format of YYYY-MM-DD before starting the import dialog."),
                )
              )
     ),
@@ -395,7 +394,9 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            inline = TRUE,
                            actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
                          edit_names = shinyWidgets::dropdownButton(
                            inputId = "names_dropdown",
@@ -428,10 +429,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        updateAceEditor(session, "editor", readOnly = F)
                      } else {
                        user_data[[file_focus()]] = rhandsontable::hot_to_r(input$editor) %>%
-                         rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T, 
-                                                      outsideClickDeselects = FALSE) %>% 
-                         rhandsontable::hot_cols(readOnly = F, outsideClickDeselects = FALSE) %>% 
-                         rhandsontable::hot_context_menu(allowRowEdit = TRUE, allowColEdit = TRUE)
+                         rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
                      }
                    } else {
                      output$edit_toolbar = renderUI({ 
@@ -674,8 +672,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
-                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE) %>%
-                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE) 
                      
                      new_action_log_record(log_path, "File info", paste0("File '", file_focus(),"' pivoted"))
                      action_log(read_action_log(log_path))
@@ -752,17 +749,129 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
-                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE) %>%
-                       rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
                      
                      # Update action log
-                     new_action_log_record(log_path, "File info", paste0("Created new table"))
+                     new_action_log_record(log_path, "File info", paste0("Cropped table to selection (",
+                                                                         "rows: ", row_min, "-", row_max , ", ",
+                                                                         "cols: ", col_min, "-", col_max,  
+                                                                         ") in  file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
                      new_action_log_record(log_path, "File error", paste0("Extraction from ", file_focus(), " failed with the following exceptions:",
                                                                           "<ul><li>Error: ", e$message, "</li></ul>"))
                      action_log(read_action_log(log_path))
                      shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                   }, finally = {
+                     removeModal()
+                   })
+                 })
+    
+    ###### Merge columns #####
+    observeEvent(eventExpr = input$merge_columns,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       tags$h3("Merge columns"),
+                       tags$p("Merge two columns into one. This may be particularly helpful when processing data where each data 
+                              point is identified by more than one row and column, e.g. coverage values per species and stratum at different
+                              plots and dates. Use the 'split column' function to later expand a column again.", class = "text-info"),
+                       selectizeInput(ns("merge_colname_1"), label = "Column 1", user_data[[file_focus()]]$x$colHeaders),
+                       selectizeInput(ns("merge_colname_2"), label = "Column 2", user_data[[file_focus()]]$x$colHeaders),
+                       selectizeInput(ns("merge_separator"), 
+                                      label = "Separator",
+                                      choices = c("|", ";", ",", "/", "~"), 
+                                      selected = "|", 
+                                      options=list(create=TRUE)),
+                       textInput(ns("new_colname"), label = "New column name"),
+                       checkboxInput(ns("remove_merged_columns"), label = "Remove original columns from data", value = T, width = "100%"),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
+                                   actionButton(ns("confirm_merge_columns"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       ),
+                     )
+                   )
+                 })
+    
+    
+    observeEvent(eventExpr = input$confirm_merge_columns,
+                 handlerExpr = {
+                   tryCatch({
+                     # Modify data
+                     data_df <- rhandsontable::hot_to_r(input$editor) %>% 
+                       dplyr::mutate(!!input$new_colname := paste(.[[input$merge_colname_1]], .[[input$merge_colname_2]], sep  = input$merge_separator))
+                     
+                     if(input$remove_merged_columns){
+                       data_df = data_df %>% 
+                         dplyr::select(-c(input$merge_colname_1, input$merge_colname_2))
+                     }
+                     
+                     # Overwrite user data
+                     user_data[[file_focus()]] = data_df %>% 
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     
+                     # Update action log
+                     shiny::showNotification(paste0("Columns ", input$merge_colname_1, " and ", input$merge_colname_2, " merged"))
+                     new_action_log_record(log_path, "File info", paste0("Columns ", input$merge_colname_1, " and ", input$merge_colname_2, " merged in file '", file_focus(),"'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File edit error", paste0("Merging columns in file '", file_focus(),"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                   }, finally = {
+                     removeModal()
+                   })
+                 })
+    
+    ###### Split columns #####
+    observeEvent(eventExpr = input$split_column,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       tags$h3("Split column"),
+                       tags$p("Split a column into two.", class = "text-info"),
+                       selectizeInput(ns("split_colname"), label = "Column", user_data[[file_focus()]]$x$colHeaders),
+                       selectizeInput(ns("split_separator"), 
+                                      label = "Separator",
+                                      choices = c("|", ";", ",", "/", "~"), 
+                                      selected = "|", 
+                                      options=list(create=TRUE)),
+                       textInput(ns("new_colname_1"), label = "New column name 1"),
+                       textInput(ns("new_colname_2"), label = "New column name 2"),
+                       checkboxInput(ns("remove_split_column"), label = "Remove original column from data", value = T, width = "100%"),
+                       footer = tagList(
+                         tags$span(actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
+                                   actionButton(ns("confirm_split_column"), class = "pull-right btn-success", "Confirm", icon("check")))
+                       ),
+                     )
+                   )
+                 })
+    
+    
+    observeEvent(eventExpr = input$confirm_split_column,
+                 handlerExpr = {
+                   tryCatch({
+                     # Modify data
+                     data_df <- rhandsontable::hot_to_r(input$editor) %>% 
+                       tidyr::separate(col = input$split_colname, 
+                                       into = c(input$new_colname_1, input$new_colname_2),
+                                       sep = stringr::str_escape(input$split_separator), 
+                                       remove = input$remove_split_column)
+                     
+                     # Overwrite user data
+                     user_data[[file_focus()]] = data_df %>% 
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+                     
+                     # Update action log
+                     shiny::showNotification(paste0("Column ", input$split_column, " split"))
+                     new_action_log_record(log_path, "File info", paste0("Column ", input$split_column, " split in file '", file_focus(),"'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+                     new_action_log_record(log_path, "File edit error", paste0("Splitting column in file '", file_focus(),"' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+                     action_log(read_action_log(log_path))
                    }, finally = {
                      removeModal()
                    })
@@ -775,7 +884,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    # prepare colnames df
                    colnames_df = data.frame(as.list(input$editor$params$rColnames))
-                   colnames_hot = rhandsontable::rhandsontable(colnames_df, colHeaders = NULL, rowHeaders = NULL, selectCallback = T)
+                   colnames_hot = rhandsontable::rhandsontable(colnames_df, 
+                                                               colHeaders = NULL, 
+                                                               rowHeaders = NULL, 
+                                                               rowHeights = 30, 
+                                                               selectCallback = T)
                    output$colnames_hot = rhandsontable::renderRHandsontable(colnames_hot)
                    showModal(
                      modalDialog(
@@ -805,7 +918,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      
                      # Update action log
-                     shiny::showNotification("Columnnames edited")
+                     shiny::showNotification("Column names edited")
                      new_action_log_record(log_path, "File info", paste0("Column names edited in file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
@@ -839,16 +952,22 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    tryCatch({
                      # Modify data
                      data_df = rhandsontable::hot_to_r(input$editor)
+                     new_colnames = as.character(data_df[input$source_row,])
+                     
                      if(nrow(data_df) <= 1){
                        shiny::showNotification("Can't remove last row.", type = "warning")
                        return()
                      }
-                     if(length(as.character(data_df[input$source_row,])) != length(unique(as.character(data_df[input$source_row,])))){
+                     if(length(new_colnames) != length(unique(new_colnames))){
                        shiny::showNotification("Column names must be unique", type = "warning")
                        return()
                      }
+                     if(!all(sapply(new_colnames, isTruthy))){
+                       shiny::showNotification("Column names may not be empty", type = "warning")
+                       return()
+                     }
                      
-                     colnames(data_df) = data_df[input$source_row,]
+                     colnames(data_df) = new_colnames
                      data_df = data_df[rownames(data_df) != input$source_row,]
                      
                      # Overwrite user data
@@ -857,7 +976,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      output$editor = rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      
                      # Update action log
-                     shiny::showNotification("Columnnames added")
+                     shiny::showNotification("Column names added")
                      new_action_log_record(log_path, "File info", paste0("Column names added to file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
