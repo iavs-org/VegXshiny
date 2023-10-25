@@ -189,3 +189,7 @@ code, pre {
 #edit_toolbar {
   text-align: left;
 }
+
+#actionLog-action_log td {
+  color: white;
+}

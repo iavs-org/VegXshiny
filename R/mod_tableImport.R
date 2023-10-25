@@ -1571,7 +1571,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   strata_unmatched = setdiff(strata_observed, strata_template)
                   
                   if(length(strata_unmatched) != 0){ # Add new values
-                    strataDef_templates = lapply(as.numeric(strataDef_template_ids), function(template_id){
+                    strataDef_templates = lapply(as.numeric(unique(strataDef_template_ids)), function(template_id){
                       template = templates() %>% dplyr::filter(template_id == !!template_id)
                       template_addendum = data.frame(template_id = template_id, 
                                                      main_element = "strata", 
