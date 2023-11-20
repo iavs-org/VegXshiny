@@ -94,14 +94,14 @@ mod_aboutVegX_ui <- function(id){
         
         tags$ol(
           tags$li(tags$a("File Manager", href = paste0("#", ns("file_manager")))),
-          tags$li(tags$a("Veg-X Import", href = paste0("#", ns("vegx_import"))),
+          tags$li(tags$a("Import to Veg-X", href = paste0("#", ns("vegx_import"))),
                   tags$ul(style = "list-style-type: none;",
                           tags$li(tags$a("From Tables", href = paste0("#", ns("import_tables")))),
                           tags$li(tags$a("From Turboveg XML", href = paste0("#", ns("import_turboveg")))),
                           tags$li(tags$a("From Veg-X", href = paste0("#", ns("import_vegx"))))
                   )
           ),
-          tags$li(tags$a("XML Viewer", href = paste0("#", ns("xml_viewer")))),
+          tags$li(tags$a("Veg-X Viewer", href = paste0("#", ns("xml_viewer")))),
           tags$li(tags$a("Veg-X Export", href = paste0("#", ns("vegx_export")))),
           tags$li(tags$a("Action Log", href = paste0("#", ns("action_log"))))
         ),
@@ -126,12 +126,13 @@ mod_aboutVegX_ui <- function(id){
                 'File Editor' pane. Depending on the file type, this may either be a text editor (xml data) or a spreadsheet editor (tabular data)."), 
         
         tags$h2("Veg-X Import", id = ns("vegx_import"), class = "text-info"),
-        tags$p("The import dialog is the core functionality of Veg-Xshiny. The application supports imports from tabular data, Turboveg XML and. Note that a new import will overwrite the current 
-                Veg-X document, i.e. sequential imports from different source files into the same Veg-X document are currently not possible."),
+        tags$p("The import dialog is the core functionality of Veg-Xshiny. The application supports imports from tabular data, Turboveg XML and loading Veg-X documents 
+                for further edits. Note that a new import will overwrite the current Veg-X document, i.e. sequential imports from different source files into the same 
+                Veg-X document are currently not possible."),
         tags$h3("From Tables", id = ns("import_tables"), class = "text-info"),
-        tags$p("Tabular data for import are generelly expected in ", tags$i("tidy"), " format, where each column is a variable and each row is an observation. This means that ", 
-               tags$span("certain tabular data formats, for example species-by-sites matrices, need to be converted into tidy format prior to the import.", class = "text-info"),
-               "The tools privided in the file manager are designed to help with the most common conversion tasks"),
+        tags$p("Tabular data for import are generelly expected in ", tags$i("tidy"), " format. This means that ", tags$span("certain tabular data formats, for example 
+                species-by-sites matrices, need to be converted into tidy format prior to the import.", class = "text-info"), "The tools privided in the file manager 
+                are designed to help with the most common conversion tasks."),
         tags$p("The import of tabular data is structured into five steps. Mandatory fields are marked with a star (*)"),
         tags$ol(
           tags$b(tags$li("Project information")),
@@ -143,20 +144,21 @@ mod_aboutVegX_ui <- function(id){
           tableOutput(ns("example_df_plots")),
           br(),
           tags$p("Each mapped plot property requires a measurement method. A list of common measurement methods for a given property is available in the corresponding mapping dialog. 
-                 For example, if plot area was measured in square metres, selecting \"Plot area/m2\" as measurement method will define appropriate method and attribute nodes and link them to the measurement values
+                 For example, if plot area was measured in square metres, selecting \"Plot area/m2\" as measurement method will define an appropriate method and attribute nodes and link them to the measurement values
                  during import. If none of the predefined methods is applicable, a custom method can be defined by selecting the \"...add custom method\" option."),
           
           tags$b(tags$li("Observations")),
           tags$p("Map different types of observation data to the corresponding Veg-X elements. All observations in Veg-X refer to a plotObservation, i.e. a sampling event at a specific plot at a 
                  specific point in time. Thus, ", tags$span("observation data of any type are identified at least by a unique combination of plot ID and date. ", class = "text-info"), 
-                 "Depending on the observation type, different additional mappings may be required or optionally available. For example, the import of aggregateOrganismObservations, e.g. measured species
-                 cover values during a plotObservation, would require a dataset with at least the following four columns."),
+                 "Depending on the observation type, different additional mappings may be required or optionally available. For example, the import of measured species
+                 cover values during a plotObservation (called aggregateOrganismObservations), would require a dataset with at least four columns as shown in this example: "),
           tableOutput(ns("example_df_obs")),
           br(),
           tags$p("If the aggregateOrganismObservations were made at a more granular level, e.g. for separate subplots or vegetation strata, the corresponding mappings to a data column are required as well."),
           tags$p("As in the case of plot properties, the measurement of observations requires a defined measurement method. A dropdown menu provides a list of predefined methods. If none of these  
                   predefined methods is applicable, a custom method can be created by selecting the \"...add custom method\" option."),
-          tags$p("Note that currently VegXshiny does not support the import of communityObservations and individualOrganismObservations."),
+          tags$p("Note that currently VegXshiny does not support imports into the Veg-X container for measurements applying to an entire plant community, such as successional stage (called communityObservations).  
+                 The same applies to measurements related to individual organisms, such as DBH (called individualOrganismObservations)."),
           
           tags$b(tags$li("Review inputs")),
           tags$p("Check your mapped inputs before starting the import. Color-coded boxes signify the status of the input mappings:"),
@@ -171,7 +173,7 @@ mod_aboutVegX_ui <- function(id){
           tags$p("Pressing", tags$i("Import"), "and confirming the dialog will create a new VegX document from the specified mappings. ", 
                  tags$span("Your current Veg-X document will be overwritten by this. ", class = "text-info")),
           tags$p("Note that the import may take a while when working with large input files containing thousands of observations. A progress bar in the lower left corner indicates
-                 the current status. Once the import is finished, you can view the imported Veg-X file in the ", tags$i("XML viewer"), " or export it under ", tags$i("Veg-X export."))
+                 the current status. Once the import is finished, you can view the imported Veg-X file in the ", tags$i("Veg-X viewer"), " or export it under ", tags$i("Veg-X export."))
         ),
         
         tags$h3("From Turboveg", id = ns("import_turboveg"), class = "text-info"),
@@ -189,8 +191,8 @@ mod_aboutVegX_ui <- function(id){
         tags$p("The process of loading a Veg-X file is largely analogous to importing Turboveg XML files: pick and validate an uploaded file, review the summary, and run the import. The import of Veg-X files is much 
                 faster than the import from TurboVeg XML, since the supplied file can replace the existing Veg-X document ", tags$i("as is"), " after passing some basic validity checks."),
         
-        tags$h2("XML Viewer", id = ns("xml_viewer"), class = "text-info"),
-        tags$p("The XML Viewer previews the current Veg-X document. Clicking the 'Edit' button enters the edit mode, where you can modify the raw XML of the Veg-X document. Caution needs to be taken here, 
+        tags$h2("Veg-X Viewer", id = ns("xml_viewer"), class = "text-info"),
+        tags$p("The Veg-X XML Viewer previews the current Veg-X document. Clicking the 'Edit' button enters the edit mode, where you can modify the raw XML of the Veg-X document. Caution needs to be taken here, 
                 as manually editing a Veg-X file can quickly invalidate it. Note that edits cannot be undone once they are saved."),
         tags$p("Pressing the 'Validate' button tests whether the current Veg-X document complies with the Veg-X XML schema and whether there are potential issues with 
                references among nodes. Validation errors and other issues will be listed in the Action Log."),
@@ -208,7 +210,7 @@ mod_aboutVegX_ui <- function(id){
         title = "FAQ",
         tags$h1("Frequently asked questions", class = "text-info"),
         tags$h3("What's the difference between VegXshiny and the VegX R-package?", class = "text-info"),
-        tags$p("Both packages were developed for different use cases. While VegXshiny aims to provide a frictionless and intuitive interface to convert vegetation datasets into Veg-X, the VegX R-package 
+        tags$p("The packages were developed for different use cases. While VegXshiny aims a graphical user interface to convert vegetation datasets into Veg-X, the VegX R-package 
                is designed as a programmatic tool for interactive scripting and data pipelines. The development of both packages is supported and endorsded by the IAVS. Future efforts may be directed towards an
                integration of {VegXshiny} and {VegX} into a single R-package."),
         
@@ -219,10 +221,10 @@ mod_aboutVegX_ui <- function(id){
                "or R-functions such as ", tags$code("reshape::melt()"), " or ", tags$code("tidyr::pivot_longer()"), " to organize your data."),
 
         tags$h3("Why did my import fail?", class = "text-info"),
-        tags$p("Generally, VegXshiny tries to handly irregular data without failing. If the import fails anyways, you may consult the ", tags$i("Action Log"), " for details on why the data could not be imported."),
+        tags$p("VegXshiny tries to handle irregular data without failing. If the import fails anyways, you may consult the ", tags$i("Action Log"), " for details on why the data could not be imported."),
         
         tags$h3("My files are too large to upload, what should I do?", class = "text-info"),
-        tags$p("The online version of VegXshiny supports uploads up to a size of 50 MB. Larger files may lead to a significant slowdown of the server and compromise the responiseness of the application. If
+        tags$p("The online version of VegXshiny supports uploads up to a size of 50 MB. Larger files may lead to a significant slowdown of the server and compromise the responsiveness of the application. If
                you need to handle larger files you can install VegXshiny from github and run the application locally:"),
         tags$code("install.packages(\"devtools\")"), tags$br(),
         tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), tags$br(),
