@@ -108,8 +108,13 @@ mod_aboutVegX_ui <- function(id){
         
         hr(),
         tags$h2("File Manager", id = ns("file_manager"), class = "text-info"),
-        tags$p("The File Manager is the single entry point for user-supplied data. ", tags$span("All files that contain information intended for import need to be uploaded here. ", class = "text-info"), 
-               "To upload files, click the upload widget on the left panel browse your local file system. You can select and upload multiple files at once by pressing [CTRL]. Currently, the following file types are supported: "),
+        tags$p("The File Manager is the single entry point for user-supplied 
+                data. ", tags$span("All files that contain information intended 
+                for import need to be uploaded here. ", class = "text-info"), 
+                "To upload files, click the upload widget on the left panel 
+                and browse your local file system. You can select and upload 
+                multiple files at once by pressing [CTRL]. Currently, the 
+                following file types are supported: "),
         tags$label("Tabular data:"),
         tags$ul(
           tags$li(".csv (comma-separated)"),
@@ -120,33 +125,86 @@ mod_aboutVegX_ui <- function(id){
         tags$ul(tags$li("xml")),
         tags$label("Veg-X:"),
         tags$ul(tags$li("xml")),
-        tags$p("Uploads will be listed under 'Uploaded Files' with a corresponding icon for the file type."),
-        tags$p("During upload, only very basic checks on data formatting and validity are performed, and it is always a good idea to double-check files after upload. To this end, the File Manager 
-                offers functionality to view, edit and delete uploaded files. Clicking on one of the file icons under 'Uploaded files' will open an editor in the 
-                'File Editor' pane. Depending on the file type, this may either be a text editor (xml data) or a spreadsheet editor (tabular data)."), 
-        
-        tags$h2("Veg-X Import", id = ns("vegx_import"), class = "text-info"),
-        tags$p("The import dialog is the core functionality of Veg-Xshiny. The application supports imports from tabular data, Turboveg XML and loading Veg-X documents 
-                for further edits. Note that a new import will overwrite the current Veg-X document, i.e. sequential imports from different source files into the same 
-                Veg-X document are currently not possible."),
-        tags$h3("From Tables", id = ns("import_tables"), class = "text-info"),
-        tags$p("Tabular data for import are generelly expected in ", tags$i("tidy"), " format. This means that ", tags$span("certain tabular data formats, for example 
-                species-by-sites matrices, need to be converted into tidy format prior to the import.", class = "text-info"), "The tools privided in the file manager 
-                are designed to help with the most common conversion tasks."),
-        tags$p("The import of tabular data is structured into five steps. Mandatory fields are marked with a star (*)"),
+        tags$p("If an upload of tabular data fails, check the following 
+                possible reasons:"),
+        tags$ul(
+          tags$li("Column names are expected in the first line and their 
+                  number must match the number of columns."),
+          tags$li("add content."),
+        ),
+        tags$p("Completed uploads are listed under 'Uploaded Files' with a 
+                corresponding icon for the file type."),
+        tags$p("Clicking on one of the file icons under 'Uploaded files' 
+                will activate the 'File Editor'. Depending on the file type,
+                this may either be a text editor (for xml data) or a 
+                spreadsheet editor (for tabular data). Click on the 'Edit' 
+                tab above the data view to access functions for editing and
+                reshaping the uploaded files. The following functions are
+                available for tables:"),
+        tags$ul(
+          tags$li("'Save edits > Save': Save edits overwriting the current
+                object."),
+          tags$li("'Save edits > Save as': Save edits as a new object."),
+          tags$li("'Reshape table > Pivot': Transform table from 'wide' to 
+                'long' format. Opens an input screen with detailed 
+                instructions."),
+          tags$li("'Reshape table > Transpose: Turn rows into columns"),
+          tags$li("'Reshape table > Crop: Removal of table sections"),
+          tags$li("'Reshape table > Merge columns: Merge two columns into one. 
+                This can be needed when data points are identified by more 
+                than one row and column."),
+          tags$li("'Reshape table > Split column: Reverse the merging of 
+                columns."),
+          tags$li("'Edit values > Edit colnames: The title says it all."),
+          tags$li("'Edit values > Row to colnames: Create column names from
+                a row."),
+          tags$li("'Edit values > Column to rownames: Create rownames from
+                a column."),
+          tags$li("'Edit values > Rownames to column: Transform rownames
+                into a new column."),
+          tags$li("'Edit values > Format date: Transform dates into the 
+                required format, which is YYYY-MM-DD."),
+          tags$li("'Discard edits: Exit the edit mode without saving"),
+        ),
+        tags$h2("Build Veg-X", id = ns("vegx_import"), class = "text-info"),
+        tags$p("This dialog transforms the data objects from the File 
+                Manager into Veg-X. The application supports imports from 
+                tabular data, Turboveg XML or Veg-X (for further edits). 
+                Note that a new Veg-X overwrites a previous one, i.e.
+                sequential imports from different source objects into the 
+                same Veg-X document are currently not possible."),
+        tags$h3("from Tables", id = ns("import_tables"), class = "text-info"),
+        tags$p("Tabular data for import are expected to be in ", 
+                tags$i("tidy"), " format. This means that ", tags$span("certain 
+                tabular data formats, for example species-by-sites matrices, 
+                need to be converted into tidy format prior to building 
+                Veg-X.", class = "text-info"), "The tools provided in the 
+                File Manager are designed to help with the most common 
+                conversion tasks."),
+        tags$p("The import of tabular data is structured into five steps. 
+                Mandatory fields are marked with a star (*)"),
         tags$ol(
           tags$b(tags$li("Project information")),
-          tags$p("Provide a general description of the project and its contributors. No files need to be assigned in this step."),
-          
+          tags$p("Provide a general description of the project and its 
+                contributors. No files need to be assigned in this step."),
+
           tags$b(tags$li("Plot information")),
-          tags$p("Describe static plot properties. The expected data set contains one plot per row. Each row is identified by a unique plot ID (mandatory) and may contain a variable number of
+          tags$p("Describe static plot properties. The expected data set 
+                 contains one plot per row. Each row is identified by a 
+                 unique plot ID (mandatory) and may contain a variable number of
                  static plot properties (optional):"),
           tableOutput(ns("example_df_plots")),
           br(),
-          tags$p("Each mapped plot property requires a measurement method. A list of common measurement methods for a given property is available in the corresponding mapping dialog. 
-                 For example, if plot area was measured in square metres, selecting \"Plot area/m2\" as measurement method will define an appropriate method and attribute nodes and link them to the measurement values
-                 during import. If none of the predefined methods is applicable, a custom method can be defined by selecting the \"...add custom method\" option."),
-          
+          tags$p("Each mapped plot property requires a measurement method. 
+                A list of common measurement methods for a given property 
+                is available in the corresponding mapping dialog. For example, 
+                if plot area was measured in square metres, selecting 
+                \"Plot area/m2\" as measurement method will define an 
+                appropriate method and attribute nodes and link them to the 
+                measurement values during import. If none of the predefined 
+                methods is applicable, a custom method can be defined by 
+                selecting the \"...add custom method\" option."),
+
           tags$b(tags$li("Observations")),
           tags$p("Map different types of observation data to the corresponding Veg-X elements. All observations in Veg-X refer to a plotObservation, i.e. a sampling event at a specific plot at a 
                  specific point in time. Thus, ", tags$span("observation data of any type are identified at least by a unique combination of plot ID and date. ", class = "text-info"), 
