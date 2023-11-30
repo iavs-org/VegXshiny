@@ -12,6 +12,7 @@ Imports:
     golem,
     jsonlite,
     lubridate,
+    readxl,
     rhandsontable,
     shiny,
     shinyAce,
