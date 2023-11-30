@@ -7,4 +7,4 @@
 .DS_Store
 codecov
 R/deprecated
-test_files/
+test_files

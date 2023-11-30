@@ -293,8 +293,8 @@ tv_to_df = function(tv_xml){
       header_children[which(xml_name(header_children) == "standard_record")] %>% xml_attrs() 
     }) %>% 
       bind_rows() %>%
-      na_if("null") %>% 
-      na_if("") %>% 
+      dplyr::mutate(across(everything(), na_if, "null")) %>% 
+      dplyr::mutate(across(everything(), na_if, "")) %>%
       select_if(~!all(is.na(.)))
     
     # Header data - Undefined records
@@ -307,8 +307,8 @@ tv_to_df = function(tv_xml){
       bind_rows(setNames(c(xml_attr(plot_nodes[i], "releve_nr"), udf_vals), c("releve_nr", udf_names)))
     }) %>% 
       bind_rows() %>%
-      na_if("null") %>% 
-      na_if("") %>% 
+      dplyr::mutate(across(everything(), na_if, "null")) %>% 
+      dplyr::mutate(across(everything(), na_if, "")) %>%
       select_if(~!all(is.na(.)))
     
     # ----------------------------------------------------------- #
