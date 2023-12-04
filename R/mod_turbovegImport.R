@@ -117,7 +117,7 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
         if(upload_valid()){
           modal_content = tagList(
             div(class = "text-center text-info", icon("check"), 
-                tags$p("This will convert the uploaded document into VegX document. Depending on the document size, this process may take a while."),
+                tags$p("This will convert the uploaded document into a Veg-X document. Depending on the document size, this process may take a while."),
             ),
             tags$p(paste0("The header data contain ", ncol(tv_dfs()$udf_header), " undefined columns. Which fields should be imported as user defined plot attributes?")),
             selectizeInput(ns("udf_header_import"), label = NULL, choices = sort(colnames(tv_dfs()$udf_header)[-1]), multiple = T, width = "100%")
