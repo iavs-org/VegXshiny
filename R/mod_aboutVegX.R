@@ -70,7 +70,7 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., 
                Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard 
                for plot-based vegetation data. Journal of Vegetation Science 
-               22: 598-609,",
+               22: 598-609, ",
                tags$a("doi:10.1111/j.1654-1103.2010.01245.x",
                       href = "http://dx.doi.org/10.1111/j.1654-1103.2010.01245.x", # nolint
                       target = "_blank"),
@@ -144,7 +144,7 @@ mod_aboutVegX_ui <- function(id){
                   tags$ul(style = "list-style-type: none;",
                           tags$li(tags$a("From Tables", href = paste0("#", ns("import_tables")))),
                           tags$li(tags$a("From Turboveg XML", href = paste0("#", ns("import_turboveg")))),
-                          tags$li(tags$a("From Veg-X", href = paste0("#", ns("import_vegx"))))
+                          tags$li(tags$a("Load Veg-X", href = paste0("#", ns("import_vegx"))))
                   )
           ),
           tags$li(tags$a("Veg-X Viewer", href = paste0("#", ns("xml_viewer")))),
@@ -220,13 +220,18 @@ mod_aboutVegX_ui <- function(id){
                 sequential imports from different source objects into the 
                 same Veg-X document are currently not possible."),
         tags$h3("from Tables", id = ns("import_tables"), class = "text-info"),
-        tags$p("Tabular data for import are expected to be in ", 
-                tags$i("tidy"), " format. This means that ", tags$span("certain 
-                tabular data formats, for example species-by-sites matrices, 
-                need to be converted into tidy format prior to building 
-                Veg-X.", class = "text-info"), "The tools provided in the 
-                File Manager are designed to help with the most common 
-                conversion tasks."),
+        tags$p("Tabular data for import are expected to be in a format 
+                where each variable has its own column and each observation 
+                has its row. One consequence is that a transformation is 
+                required for so-called 'header data' where, for example, 
+                variables such as date of recording or elevation are 
+                organized in rows. The tools provided in the File Manager 
+                are designed to help with the most common conversion tasks.
+                The import function is structured in such a way that you are 
+                guided step by step towards the goal. Details on the expected 
+                format of input data is always available when hovering the 
+                info icon next to the dataset selection in the table import 
+                dialog. Tutorial videos are planned for common tasks."),
         tags$p("The import of tabular data is structured into five steps. 
                 Mandatory fields are marked with a star (*)"),
         tags$ol(
@@ -248,11 +253,10 @@ mod_aboutVegX_ui <- function(id){
                 common measurement methods are available in the corresponding 
                 mapping dialog. For example, if plot area was measured in 
                 square metres, selecting \"Plot area/m2\" as measurement 
-                method will define an appropriate method (and take care of
-                attached attributes) and link it to the measurement values 
-                during import. If none of the predefined methods is 
-                applicable, a custom method can be defined by selecting the 
-                \"...add custom method\" option."),
+                method will define an appropriate method and link it to the 
+                measurement values during import. If none of the predefined
+                methods is applicable, a custom method can be defined by 
+                selecting the \"...add custom method\" option."),
 
           tags$b(tags$li("Observations")),
           tags$p("Add different types of observations, such as species
@@ -268,8 +272,8 @@ mod_aboutVegX_ui <- function(id){
                  least four columns as shown in this example: "),
           tableOutput(ns("example_df_obs")),
           br(),
-          tags$p("This is an example for a 'long table', - typically, the 
-                 species coverages are stored differently, i.e. a 
+          tags$p("This is an example for a 'long table', - the 
+                 species coverages are often stored differently, i.e. a 
                  transformation is often necessary before importing (there 
                  are tools available to help you with that).  If the 
                  aggregateOrganismObservations were made at a more granular 
@@ -342,9 +346,9 @@ mod_aboutVegX_ui <- function(id){
         
         tags$h2("Veg-X Viewer", id = ns("xml_viewer"), class = "text-info"),
         tags$p("The Veg-X XML Viewer previews the current Veg-X document. 
-               Clicking the 'Edit' button enters the edit mode, where you can 
-               modify the raw XML of the Veg-X document. Caution needs to be 
-               taken here, as manually editing a Veg-X file can quickly 
+               Clicking the 'Edit' button let you enter the edit mode, where 
+               you can modify the raw XML of the Veg-X document. Caution needs 
+               to be taken here, as manually editing a Veg-X file can quickly 
                invalidate it. Note that edits cannot be undone once they are 
                saved."),
         tags$p("Pressing the 'Validate' button tests whether the current Veg-X
@@ -383,15 +387,14 @@ mod_aboutVegX_ui <- function(id){
         
         tags$h3("How to format my data correctly for VegXshiny?", 
                 class = "text-info"),
-        tags$p("VegXshiny expects tabular data in ", tags$i("tidy"), " format, 
-               where each column is a variable and each row is an observation. 
-               Specific details on the expected format of input data is always 
-               available when hovering the info icon next to dataset selection 
-               in the table import dialog."),
-        tags$p("If your dataset does not meet the format specifications, e.g. 
-               if you have a species-by-sites matrix, you can use the ", 
-               tags$span("Reshape tools in the File Manager", 
-                         class = "text-info"), 
+        tags$p("VegXshiny expects tabular data in a format, where each column 
+               is a variable and each row is an observation. Details on the 
+               expected format of input data is always available when hovering 
+               the info icon next to the dataset selection in the table import 
+               dialog."),
+        tags$p("If your dataset does not meet the format specifications you can 
+               use the ", tags$span("Reshape tools in the File Manager", 
+                                    class = "text-info"), 
                "or R-functions such as ", 
                tags$code("reshape::melt()"), " or ", 
                tags$code("tidyr::pivot_longer()"), 
@@ -412,7 +415,7 @@ mod_aboutVegX_ui <- function(id){
         tags$code("install.packages(\"devtools\")"), tags$br(),
         tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), 
         tags$br(),
-        tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # set limit"), 
+        tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # set limit and run"), 
         tags$br(),
         tags$p("Alternatively, you can can write an import script using the", 
                tags$a("VegX R-package", 
