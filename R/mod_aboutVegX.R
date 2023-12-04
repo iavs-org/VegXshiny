@@ -86,7 +86,7 @@ mod_aboutVegX_ui <- function(id){
         tags$ul(tags$li("Brad Boyle"),
                 tags$li("Miquel De C\u00e1ceres"),
                 tags$li("Martin Kleikamp"),
-                tags$li("Christian K\u00f6nig")
+                tags$li("Christian K\u00f6nig"),
                 tags$li("Robert K. Peet"),
                 tags$li("Sebastian Schmidtlein"),
                 tags$li("Nick Spencer"),
