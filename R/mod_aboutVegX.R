@@ -221,17 +221,21 @@ mod_aboutVegX_ui <- function(id){
                 same Veg-X document are currently not possible."),
         tags$h3("from Tables", id = ns("import_tables"), class = "text-info"),
         tags$p("Tabular data for import are expected to be in a format 
-                where each variable has its own column and each observation 
-                has its row. One consequence is that a transformation is 
+                where each observation has its row and each variable has its
+                column. One consequence is that a transformation is 
                 required for so-called 'header data' where, for example, 
                 variables such as date of recording or elevation are 
-                organized in rows. The tools provided in the File Manager 
-                are designed to help with the most common conversion tasks.
-                The import function is structured in such a way that you are 
-                guided step by step towards the goal. Details on the expected 
-                format of input data is always available when hovering the 
-                info icon next to the dataset selection in the table import 
-                dialog. Tutorial videos are planned for common tasks."),
+                organized in rows. Assigning one variable to one 
+                column means that conventional species x plot matrices 
+                with multiple columns for species cover need to be transformed 
+                (in technical terms: from a 'wide' to a 'long' table format).           
+                The tools provided in the File Manager are designed to help 
+                with this and other common conversion tasks. The import function 
+                is structured in such a way that you are guided step by step 
+                towards the goal. Details on the expected format of input 
+                data is always available when hovering the info icon next 
+                to the dataset selection in the table import dialog. Tutorial 
+                videos are planned for common tasks."),
         tags$p("The import of tabular data is structured into five steps. 
                 Mandatory fields are marked with a star (*)"),
         tags$ol(
