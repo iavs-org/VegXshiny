@@ -65,14 +65,15 @@ De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package, https://iavs-org.
 
 ### Veg-X standard development:
 
-* Miquel De Cáceres
-* Sebastian Schmidtlein
-* Susan K. Wiser
-* Nick Spencer
-* Robert K. Peet
-* Martin Kleikamp
 * Brad Boyle
+* Miquel De Cáceres
+* Martin Kleikamp
 * Christian König
+* Robert K. Peet
+* Sebastian Schmidtlein
+* Nick Spencer
+* Susan K. Wiser
+
 
 
 
