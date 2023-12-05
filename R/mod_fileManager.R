@@ -485,8 +485,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        user_data[[file_focus()]] = read_xml(isolate(input$editor))
                      } else {
                        # Read edits
-                       data_edited = input$editor
-                       data_edited_df = rhandsontable::hot_to_r(data_edited)
+                       data_edited_df = rhandsontable::hot_to_r(input$editor)
                        
                        # Overwrite user data
                        user_data[[file_focus()]] = data_edited_df %>% 
@@ -502,7 +501,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_focus(),"'. All edits were saved."))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
-                     shiny::showNotification("Something went wrong", type = "error")
+                     new_action_log_record(log_path, "File error", paste0("Saving file ", file_focus(), " failed with the following exceptions:",
+                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                     user_data[[file_focus()]] = data_unedited()
                    }, finally = {
                      # Restore UI state
                      removeModal()
@@ -542,8 +545,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        user_data[[file_name]] = data_edited
                      } else {
                        file_name = paste0(input$new_file_name, ".", file_ext)
-                       data_edited = input$editor
-                       data_edited_df = rhandsontable::hot_to_r(data_edited)
+                       data_edited_df = rhandsontable::hot_to_r(input$editor)
                        
                        # Reset current file
                        user_data[[file_focus()]] = data_unedited()
@@ -564,7 +566,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      new_action_log_record(log_path, "File info", paste0("Left edit mode for file '", file_name_orig,"'. All edits were saved to ", file_name, "."))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
-                     shiny::showNotification("Something went wrong", type = "error")
+                     new_action_log_record(log_path, "File error", paste0("Saving file ", file_focus(), " failed with the following exceptions:",
+                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                     user_data[[file_focus()]] = data_unedited()
                    }, finally = {
                      # Restore UI state
                      removeModal()
@@ -887,6 +893,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    colnames_hot = rhandsontable::rhandsontable(colnames_df, 
                                                                colHeaders = NULL, 
                                                                rowHeaders = NULL, 
+                                                               useTypes = FALSE,
                                                                rowHeights = 30, 
                                                                selectCallback = T)
                    output$colnames_hot = rhandsontable::renderRHandsontable(colnames_hot)
