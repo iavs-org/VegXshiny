@@ -665,7 +665,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        shiny::showNotification("Please fill out all mandatory fields.", type = "error")
                        return()
                      }
-                     
+
                      columns_pivot = setdiff(input$columns_pivot, input$columns_id) # Ignore columns used as id cols
                      data_df = rhandsontable::hot_to_r(input$editor) %>%
                        dplyr::select(c(input$columns_id, columns_pivot)) %>%
@@ -673,6 +673,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                                            names_to = input$names_to,
                                            names_pattern = paste0(input$prefix_remove, "(.*)", input$suffix_remove),
                                            values_to = input$values_to) %>%
+                       mutate(!!input$values_to := as.character(.[[input$values_to]])) %>% 
                        mutate(!!input$values_to := na_if(.[[input$values_to]], input$na_string)) %>%
                        tidyr::drop_na(!!input$values_to)
                      
