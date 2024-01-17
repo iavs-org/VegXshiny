@@ -211,7 +211,14 @@ mod_aboutVegX_ui <- function(id){
           tags$li("Edit values > Rownames to column: Transform rownames
                 into a new column."),
           tags$li("Edit values > Format date: Transform dates into the 
-                required format, which is YYYY-MM-DD."),
+                required format, which is YYYY-MM-DD. For example, if your
+                actual values look like 17.12.2023, the complete conversion
+                specification is %d.%m.%Y and for 02/21/18 it is %m/%d/%y.
+                (the procedure follows standard r rules, frequent symbols
+                are %d (day of the month as number), %m (month as
+                number), %b (month abbreviated like Jan), %B (Month full name
+                like January), %y (Year 2 digit), %Y (Year 4 digit). The
+                separators are used verbatim (like ' ' for space."),
           tags$li("Discard edits: Exit the edit mode without saving"),
         ),
         tags$h2("Build Veg-X", id = ns("vegx_import"), class = "text-info"),
