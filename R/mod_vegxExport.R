@@ -52,8 +52,11 @@ mod_vegxExport_server <- function(id, vegx_doc, vegx_txt, action_log, log_path){
       filename = paste0("vegx_export-", Sys.Date(), ".zip"),
       content = function(file) {
         vegx_df_list = vegx_to_df(vegx_doc)
-        if(dir.exists(paste0(tempdir(), "/export"))){unlink(paste0(tempdir(), "/export"))}  # Delete old export directory, if it exists
-        dir.create(paste0(tempdir(), "/export"))                                            # Create fresh export directory
+        if(dir.exists(file.path(tempdir(), "export"))){ 
+          unlink(file.path(tempdir(), "export"))      # Delete old export directory, if it exists
+        } else {
+          dir.create(paste0(tempdir(), "/export"))      # Create fresh export directory
+        }
         for(df_name in names(vegx_df_list)){
           write.csv(vegx_df_list[[df_name]], file = paste0(tempdir(), "/export/", df_name, ".csv"), row.names = F, na = "")  # Write files
         }
