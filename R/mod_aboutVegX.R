@@ -172,11 +172,13 @@ mod_aboutVegX_ui <- function(id){
         tags$label("Veg-X:"),
         tags$ul(tags$li("xml")),
         tags$p("If an upload of tabular data fails, check the following 
-                possible reasons:"),
+                possible reasons or fixes:"),
         tags$ul(
           tags$li("Column names are expected in the first line and their 
                   number must match the number of columns."),
-          tags$li("add content."),
+          tags$li("If you have a text file and commas as column separators,
+                  use ".csv" as file extension. In case of tabs
+                  use ".tsv" or ".txt". Space is not recognized as a delimiter."
         ),
         tags$p("Completed uploads are listed under 'Uploaded Files' with a 
                 corresponding icon for the file type."),
@@ -223,26 +225,30 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Tabular data for import are expected to be in a format 
                 where each observation has its row and each variable has its
                 column. One consequence is that a transformation is 
-                required for so-called 'header data' where, for example, 
+                required for 'header data' following a convention where
                 variables such as date of recording or elevation are 
-                organized in rows. Assigning one variable to one 
-                column means that conventional species x plot matrices 
-                with multiple columns for species cover need to be transformed 
-                (in technical terms: from a 'wide' to a 'long' table format).           
-                The tools provided in the File Manager are designed to help 
-                with this and other common conversion tasks. The import function 
-                is structured in such a way that you are guided step by step 
-                towards the goal. Details on the expected format of input 
-                data is always available when hovering the info icon next 
-                to the dataset selection in the table import dialog. Tutorial 
-                videos are planned for common tasks."),
+                organized in rows. A valid 'header' table has at least one 
+                column with plot names (as far as static plot attributes like
+                spatial coordinates are concerned) and one additional column
+                with observation dates in case of non-static attributes
+                like species cover. This follows the Veg-X
+                logic. Due to limitations of the underlying packages, a
+                date column needs to be prepared outside this app if it is
+                lacking. A valid species table has a column for plot IDs, a
+                column for observation date, a column for species names and
+                one for the cover or count values. If species aggregation took
+                place in layers, an additional column for layers is needed."),
+        tags$p("The tools provided in the File Manager help with the          
+                transformations. The import function guides step by step
+                towards the goal. Details on the expected format of input data
+                is available when hovering the info icon next to the dataset
+                selection in the table import dialog. Tutorial videos are planned for common tasks."),
         tags$p("The import of tabular data is structured into five steps. 
                 Mandatory fields are marked with a star (*)"),
         tags$ol(
           tags$b(tags$li("Project information")),
           tags$p("Provide a general description of the project and its 
                 contributors. No files need to be assigned in this step."),
-
           tags$b(tags$li("Plot information")),
           tags$p("Describe static plot properties (like surface area of the 
                  plot. This is distinguished from features that belong 
@@ -329,9 +335,9 @@ mod_aboutVegX_ui <- function(id){
                target = "_blank"), ". The process has only two steps:"),
         tags$ol(
           tags$b(tags$li("Read data from Turboveg XML")),
-          tags$p("Choose an uploaded Turboveg XML file and prepare the data for 
-                 import. This step extracts the data from Turboveg XML into 
-                 an import-ready format. A progress bar in the lower left 
+          tags$p("Choose an uploaded Turboveg 2 XML file and prepare the
+                 data for import. This step extracts the data from Turboveg XML
+                 into an import-ready format. A progress bar in the lower left 
                  corner indicates the current status. Once the extraction is 
                  finished, a summary of the data is displayed."),
           tags$b(tags$li("Import Turboveg data into Veg-X")),
