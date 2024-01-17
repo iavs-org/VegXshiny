@@ -178,7 +178,7 @@ mod_aboutVegX_ui <- function(id){
                   number must match the number of columns."),
           tags$li("If you have a text file and commas as column separators,
                   use "csv" as file extension. In case of tabs
-                  use "tsv" or "txt". Space is not recognized as a delimiter."
+                  use "tsv" or "txt". Space is not recognized as a delimiter.")
         ),
         tags$p("Completed uploads are listed under 'Uploaded Files' with a 
                 corresponding icon for the file type."),
