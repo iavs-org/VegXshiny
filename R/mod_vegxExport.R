@@ -16,9 +16,9 @@ mod_vegxExport_ui <- function(id){
         tags$label("Veg-X document summary"),
         uiOutput(ns("summary")),
         hr(),
-        downloadButton(ns("export_xml"), label = "Export XML"),
-        downloadButton(ns("export_csv"), label = "Export CSV"),
-        downloadButton(ns("export_vegtable"), label = "Export VegTable")
+        downloadButton(ns("export_xml"), label = "Veg-X"),
+        downloadButton(ns("export_csv"), label = "Long tables"),
+        downloadButton(ns("export_vegtable"), label = "Wide table")
       )
     )
   )
