@@ -49,11 +49,11 @@ of mapping their data to the corresponding Veg-X elements, while
 ensuring that the generated XML conforms to the Veg-X standard. The
 ability to view and edit input files and output VegX documents gives
 users full control over their data. Finally, an interactive tree viewer
-of the Veg-X schema helps making the standard accessible and
-understandable.
+of the Veg-X schema helps making the standard accessible.
 
 The development of VegXshiny is endorsed by the [International
-Association for Vegetation Science (IAVS)](http://iavs.org/).
+Association for Vegetation Science (IAVS)](http://iavs.org/) and was
+funded by the German Reseach Foundation (DFG, project number 460840087)."
 
 <div style="text-align:center">
 
