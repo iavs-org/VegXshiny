@@ -808,17 +808,23 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
     
                    tryCatch({
-                     data_df = rhandsontable::hot_to_r(input$editor) %>% dplyr::select(-cols_to_delete)
+                     message("Before hot_to_r")
+                     data_df = rhandsontable::hot_to_r(input$editor)
+                     message("After hot_to_r")
+                     data_df = data_df %>% dplyr::select(-cols_to_delete)
+                     message("After select")
     
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
                        rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     message("After updating user data")
     
                      # Update action log
                      new_action_log_record(log_path, "File info", paste0("Deleted columns (",
                                                                          "cols: ", paste(cols_to_delete, collapse = ", "),  
                                                                          ") in  file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
+                     message("After updating action log")
                    }, error = function(e){
                      new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
                                                                           "<ul><li>Error: ", e$message, "</li></ul>"))
