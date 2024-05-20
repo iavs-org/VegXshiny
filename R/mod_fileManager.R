@@ -804,26 +804,26 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     observeEvent(eventExpr = input$confirm_delete_columns,
                  handlerExpr = {
                    tryCatch({
-                     cols_to_delete = input$editor_select$select$c
+                     col_to_delete = input$editor_select$select$c
 
-                     # Check if cols_to_delete is NULL or empty
-                     if (is.null(cols_to_delete) || length(cols_to_delete) == 0) {
-                       stop("No columns selected for deletion")
+                     # Check if col_to_delete is NULL or empty
+                     if (is.null(col_to_delete) || length(col_to_delete) == 0) {
+                       stop("No column selected for deletion")
                      }
 
                      # Get the data from the user_data list
                      data_df = rhandsontable::hot_to_r(user_data[[file_focus()]])
 
-                     # Delete the columns using dplyr
-                     data_df = data_df %>% dplyr::select(-c(cols_to_delete))
+                     # Delete the column using dplyr
+                     data_df = data_df %>% dplyr::select(-col_to_delete)
 
                      # Convert the dataframe back to a rhandsontable object
                      user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df)
 
                      # Update action log
-                     new_action_log_record(log_path, "File info", paste0("Deleted columns (",
-                                                                         "cols: ", paste(cols_to_delete, collapse = ", "),  
-                                                                         ") in  file '", file_focus(),"'"))
+                     new_action_log_record(log_path, "File info", paste0("Deleted column '",
+                                                                         col_to_delete,  
+                                                                         "' in  file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
                    }, error = function(e){
                      new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
@@ -834,7 +834,6 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      removeModal()
                    })
                  })
-
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
