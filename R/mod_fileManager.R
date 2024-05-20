@@ -807,7 +807,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  cols_to_delete = input$editor_select$select$c
 
                  data_df = rhandsontable::hot_to_r(input$editor) %>%
-                   dplyr::select(-cols_to_delete)
+                   dplyr::select(-dplyr::all_of(cols_to_delete))
 
                  # Update user data
                  user_data[[file_focus()]] = data_df %>%
