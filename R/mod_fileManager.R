@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom rhandsontable rhandsontable renderRHandsontable
+library(shinyWidgets)
 mod_fileManager_ui <- function(id){
   ns <- NS(id)
   
