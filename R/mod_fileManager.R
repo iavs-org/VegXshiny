@@ -805,7 +805,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                 message("Observer triggered")
                message("input$editor_select$select: ", paste(input$editor_select$select, collapse = ", "))
-                  cols_to_delete = input$editor_select$select$c
+                  cols_to_delete = tail(input$editor_select$select, n = 1)
                    message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
     
                    tryCatch({
