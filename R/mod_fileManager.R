@@ -803,14 +803,19 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
 
     observeEvent(eventExpr = input$confirm_delete_columns,
                  handlerExpr = {
-                message("Observer triggered")
-               message("input$editor_select$select: ", paste(input$editor_select$select, collapse = ", "))
-                  cols_to_delete = tail(input$editor_select$select, n = 1)
+                   message("Observer triggered")
+                   message("input$editor_select$select: ", paste(input$editor_select$select, collapse = ", "))
+                   cols_to_delete = tail(input$editor_select$select, n = 1)
                    message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
-    
+
                    tryCatch({
+                     # Convert cols_to_delete to a numeric range if it's a character string
+                     if(is.character(cols_to_delete)) {
+                       cols_to_delete = eval(parse(text = cols_to_delete))
+                     }
+
                      data_df = rhandsontable::hot_to_r(input$editor) %>% dplyr::select(-cols_to_delete)
-    
+
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
                        rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
