@@ -809,6 +809,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      # Get the data from the user_data list
                      data_df = user_data[[file_focus()]]
     
+                     # Check if data_df is a dataframe, if not try to convert it
+                     if (!is.data.frame(data_df)) {
+                       data_df <- rhandsontable::hot_to_r(data_df)
+                     }
+    
                      # Delete the columns directly from the dataframe
                      data_df = data_df[ , !(names(data_df) %in% cols_to_delete)]
     
@@ -829,7 +834,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      removeModal()
                    })
                  })
-                 
+
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
