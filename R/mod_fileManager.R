@@ -68,6 +68,14 @@ mod_fileManager_ui <- function(id){
                      title = "Review and and edit files before importing to VegX"),
               
               uiOutput(ns("edit_toolbar")),
+
+              pickerInput(inputId = ns("columns_to_delete"),
+                          label = "Columns to delete:",
+                          choices = NULL,  # The choices will be updated in the server function
+                          options = list(`actions-box` = TRUE),
+                          multiple = TRUE),
+              actionButton(inputId = ns("delete_columns"), label = "Delete selected columns"),
+
               uiOutput(ns("file_viewer")),
               style = "margin-bottom: 20px"
             )
@@ -776,71 +784,40 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  })
     
     ###### Delete selected columns #####
-    observeEvent(eventExpr = input$delete_columns,
-             handlerExpr = {
-               cols_to_delete = input$editor_select$select$c
+    observeEvent(input$delete_columns, {
+      cols_to_delete = input$columns_to_delete
 
-               if(length(cols_to_delete) == 0){
-                 shiny::showNotification("No columns selected", type = "warning")
-                 return()
-               } 
+      if(length(cols_to_delete) == 0){
+        shiny::showNotification("No columns selected", type = "warning")
+        return()
+      } 
 
-               showModal(
-                 modalDialog(
-                   size = "l",
-                   tagList(
-                     tags$h3("Delete columns"),
-                     tags$p("Delete the selected columns:", class = "text-info"),
-                     tags$p(paste0("Columns: ", paste(cols_to_delete, collapse = ", ")))
-                   ),
-                   footer = tagList(
-                     tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),
-                               actionButton(ns("confirm_delete_columns"), class = "pull-right btn-success", "Confirm", icon("check")))
-                   )
-                 )
-               )
-             })
+      tryCatch({
+        data_df = rhandsontable::hot_to_r(input$editor)
 
-observeEvent(eventExpr = input$confirm_delete_columns,
-             handlerExpr = {
-               message("Observer triggered")
-               message("input$editor_select$select: ", paste(input$editor_select$select, collapse = ", "))
-               cols_to_delete = tail(input$editor_select$select, n = 1)
-               message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
+        # Get the column names to keep
+        cols_to_keep = setdiff(names(data_df), cols_to_delete)
 
-               tryCatch({
-                 # Convert cols_to_delete to a numeric range if it's a character string
-                 if(is.character(cols_to_delete)) {
-                   cols_to_delete = eval(parse(text = cols_to_delete))
-                 }
+        # Subset the data frame to only keep the desired columns
+        data_df = data_df[, cols_to_keep, drop = FALSE]
 
-                 data_df = rhandsontable::hot_to_r(input$editor)
+        # Update user data
+        user_data[[file_focus()]] = data_df %>%
+          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
 
-                 # Get the column names to keep
-                 cols_to_keep = setdiff(names(data_df), names(data_df)[cols_to_delete])
+        # Update action log
+        new_action_log_record(log_path, "File info", paste0("Deleted columns (",
+                                                            "cols: ", paste(cols_to_delete, collapse = ", "),  
+                                                            ") in  file '", file_focus(),"'"))
+        action_log(read_action_log(log_path))
+      }, error = function(e){
+        new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
+                                                            "<ul><li>Error: ", e$message, "</li></ul>"))
+        action_log(read_action_log(log_path))
+        shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+      })
+    })
 
-                 # Subset the data frame to only keep the desired columns
-                 data_df = data_df[, cols_to_keep]
-
-                 # Update user data
-                 user_data[[file_focus()]] = data_df %>%
-                   rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
-    
-                     # Update action log
-                     new_action_log_record(log_path, "File info", paste0("Deleted columns (",
-                                                                         "cols: ", paste(cols_to_delete, collapse = ", "),  
-                                                                         ") in  file '", file_focus(),"'"))
-                     action_log(read_action_log(log_path))
-                   }, error = function(e){
-                     new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
-                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
-                     action_log(read_action_log(log_path))
-                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
-                   }, finally = {
-                     removeModal()
-                   })
-                 })
-             
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
