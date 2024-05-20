@@ -803,12 +803,12 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
 
     observeEvent(eventExpr = input$confirm_delete_columns,
                  handlerExpr = {
+                   message("Observer triggered")
                    cols_to_delete = input$editor_select$select$c
                    message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
     
                    tryCatch({
-                     data_df = rhandsontable::hot_to_r(input$editor) %>%
-                       dplyr::select(-cols_to_delete)
+                     data_df = rhandsontable::hot_to_r(input$editor) %>% dplyr::select(-cols_to_delete)
     
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
