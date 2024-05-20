@@ -802,32 +802,36 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
              })
 
     observeEvent(eventExpr = input$confirm_delete_columns,
-             handlerExpr = {
-               tryCatch({
-                 cols_to_delete = input$editor_select$select$c
+                 handlerExpr = {
+                   tryCatch({
+                     cols_to_delete = input$editor_select$select$c
 
-                 data_df = rhandsontable::hot_to_r(input$editor) %>%
-                   dplyr::select(-cols_to_delete)
+                     data_df = rhandsontable::hot_to_r(input$editor)
 
-                 # Update user data
-                 user_data[[file_focus()]] = data_df %>%
-                   rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     # Loop over cols_to_delete and delete each column one by one
+                     for (col in cols_to_delete) {
+                       data_df = data_df %>% dplyr::select(-col)
+                     }
 
-                 # Update action log
-                 new_action_log_record(log_path, "File info", paste0("Deleted columns (",
-                                                                     "cols: ", paste(cols_to_delete, collapse = ", "),  
-                                                                     ") in  file '", file_focus(),"'"))
-                 action_log(read_action_log(log_path))
-               }, error = function(e){
-                 new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
-                                                                      "<ul><li>Error: ", e$message, "</li></ul>"))
-                 action_log(read_action_log(log_path))
-                 shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
-               }, finally = {
-                 removeModal()
-               })
-             })
-             
+                     # Update user data
+                     user_data[[file_focus()]] = data_df %>%
+                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+
+                     # Update action log
+                     new_action_log_record(log_path, "File info", paste0("Deleted columns (",
+                                                                         "cols: ", paste(cols_to_delete, collapse = ", "),  
+                                                                         ") in  file '", file_focus(),"'"))
+                     action_log(read_action_log(log_path))
+                   }, error = function(e){
+                     new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
+                                                                          "<ul><li>Error: ", e$message, "</li></ul>"))
+                     action_log(read_action_log(log_path))
+                     shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
+                   }, finally = {
+                     removeModal()
+                   })
+                 })
+
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
