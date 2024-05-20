@@ -805,18 +805,15 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    tryCatch({
                      cols_to_delete = input$editor_select$select$c
-
-                     data_df = rhandsontable::hot_to_r(input$editor)
-
-                     # Loop over cols_to_delete and delete each column one by one
-                     for (col in cols_to_delete) {
-                       data_df = data_df %>% dplyr::select(-col)
-                     }
-
+                     message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
+    
+                     data_df = rhandsontable::hot_to_r(input$editor) %>%
+                       dplyr::select(-cols_to_delete)
+    
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
                        rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
-
+    
                      # Update action log
                      new_action_log_record(log_path, "File info", paste0("Deleted columns (",
                                                                          "cols: ", paste(cols_to_delete, collapse = ", "),  
@@ -831,7 +828,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      removeModal()
                    })
                  })
-
+             
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
