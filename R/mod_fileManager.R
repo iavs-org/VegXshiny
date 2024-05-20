@@ -395,6 +395,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("delete_columns"), "Delete columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
@@ -775,7 +776,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  })
     
     ###### Delete selected columns #####
-    observeEvent(eventExpr = input$delete_columns_button,
+    observeEvent(eventExpr = input$delete_columns,
              handlerExpr = {
                cols_to_delete = input$editor_select$select$c
 
