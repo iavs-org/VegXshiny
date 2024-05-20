@@ -815,8 +815,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      data_df = rhandsontable::hot_to_r(user_data[[file_focus()]])
 
                      # Delete the column using dplyr
-                     data_df = data_df %>% dplyr::select(-col_to_delete)
-
+                     data_df = data_df %>% dplyr::select(-dplyr::all_of(cols_to_delete))
                      # Convert the dataframe back to a rhandsontable object
                      user_data[[file_focus()]] = rhandsontable::rhandsontable(data_df)
 
