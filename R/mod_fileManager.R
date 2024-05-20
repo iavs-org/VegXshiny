@@ -803,28 +803,23 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
 
     observeEvent(eventExpr = input$confirm_delete_columns,
                  handlerExpr = {
-                   message("Observer triggered")
-                   cols_to_delete = input$editor_select$select$c
+                message("Observer triggered")
+               message("input$editor_select$select: ", paste(input$editor_select$select, collapse = ", "))
+                  cols_to_delete = input$editor_select$select$c
                    message("cols_to_delete: ", paste(cols_to_delete, collapse = ", "))
     
                    tryCatch({
-                     message("Before hot_to_r")
-                     data_df = rhandsontable::hot_to_r(input$editor)
-                     message("After hot_to_r")
-                     data_df = data_df %>% dplyr::select(-cols_to_delete)
-                     message("After select")
+                     data_df = rhandsontable::hot_to_r(input$editor) %>% dplyr::select(-cols_to_delete)
     
                      # Update user data
                      user_data[[file_focus()]] = data_df %>%
                        rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
-                     message("After updating user data")
     
                      # Update action log
                      new_action_log_record(log_path, "File info", paste0("Deleted columns (",
                                                                          "cols: ", paste(cols_to_delete, collapse = ", "),  
                                                                          ") in  file '", file_focus(),"'"))
                      action_log(read_action_log(log_path))
-                     message("After updating action log")
                    }, error = function(e){
                      new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
                                                                           "<ul><li>Error: ", e$message, "</li></ul>"))
