@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom rhandsontable rhandsontable renderRHandsontable
-library(shinyWidgets)
+
 mod_fileManager_ui <- function(id){
   ns <- NS(id)
   
@@ -70,11 +70,11 @@ mod_fileManager_ui <- function(id){
               
               uiOutput(ns("edit_toolbar")),
 
-              pickerInput(inputId = ns("columns_to_delete"),
-                          label = "Columns to delete:",
-                          choices = NULL,  # The choices will be updated in the server function
-                          options = list(`actions-box` = TRUE),
-                          multiple = TRUE),
+              selectInput(inputId = "columns_to_delete",
+                label = "Columns to delete:",
+                choices = names(data_df()),
+                multiple = TRUE)
+
               actionButton(inputId = ns("delete_columns"), label = "Delete selected columns"),
 
               uiOutput(ns("file_viewer")),
