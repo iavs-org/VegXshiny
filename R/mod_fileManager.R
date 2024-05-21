@@ -73,7 +73,7 @@ mod_fileManager_ui <- function(id){
               selectInput(inputId = "columns_to_delete",
                 label = "Columns to delete:",
                 choices = names(data_df()),
-                multiple = TRUE)
+                multiple = TRUE),
 
               actionButton(inputId = ns("delete_columns"), label = "Delete selected columns"),
 
