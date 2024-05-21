@@ -70,17 +70,10 @@ mod_fileManager_ui <- function(id){
               
               uiOutput(ns("edit_toolbar")),
 
-              selectInput(inputId = "columns_to_delete",
-                label = "Columns to delete:",
-                choices = names(data_df()),
-                multiple = TRUE),
-
-              actionButton(inputId = ns("delete_columns"), label = "Delete selected columns"),
-
               uiOutput(ns("file_viewer")),
               style = "margin-bottom: 20px"
             )
-          )  
+          )
         )
       )
     )
@@ -404,7 +397,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("delete_columns"), "Delete columns", width = "110px", class = "btn-xs btn-dropdown-item"),
+ #                          actionButton(ns("delete_columns"), "Delete columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
@@ -785,39 +778,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  })
     
     ###### Delete selected columns #####
-    observeEvent(input$delete_columns, {
-      cols_to_delete = input$columns_to_delete
 
-      if(length(cols_to_delete) == 0){
-        shiny::showNotification("No columns selected", type = "warning")
-        return()
-      } 
-
-      tryCatch({
-        data_df = rhandsontable::hot_to_r(input$editor)
-
-        # Get the column names to keep
-        cols_to_keep = setdiff(names(data_df), cols_to_delete)
-
-        # Subset the data frame to only keep the desired columns
-        data_df = data_df[, cols_to_keep, drop = FALSE]
-
-        # Update user data
-        user_data[[file_focus()]] = data_df %>%
-          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
-
-        # Update action log
-        new_action_log_record(log_path, "File info", paste0("Deleted columns (",
-                                                            "cols: ", paste(cols_to_delete, collapse = ", "),  
-                                                            ") in  file '", file_focus(),"'"))
-        action_log(read_action_log(log_path))
-      }, error = function(e){
-        new_action_log_record(log_path, "File error", paste0("Deletion from ", file_focus(), " failed with the following exceptions:",
-                                                            "<ul><li>Error: ", e$message, "</li></ul>"))
-        action_log(read_action_log(log_path))
-        shiny::showNotification("Operation failed. Please consult the log for more information.", type = "error")
-      })
-    })
 
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
