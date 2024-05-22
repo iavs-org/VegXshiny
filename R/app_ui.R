@@ -15,9 +15,10 @@ app_ui <- function(request) {
     
     # Application UI logic 
     navbarPage("VegXshiny",  
-               position = "fixed-top",
-               theme=bslib::bs_theme(version = 3, bootswatch = "darkly"),
-               header = tags$style(type="text/css", "body {padding-top: 80px;}"),
+               position = "static-top",
+               theme=bslib::bs_theme(version = 3, bootswatch = "united", primary = "#009933"),
+               header = tags$style(type="text/css"),
+
                tabPanel("About", icon = icon("info", class = "icon-padded-right"),
                         mod_aboutVegX_ui("about")),
                
@@ -35,7 +36,7 @@ app_ui <- function(request) {
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel("VegX Export", icon = icon("file-export", class = "icon-padded-right"),
+               tabPanel("Veg-X Export", icon = icon("file-export", class = "icon-padded-right"),
                         mod_vegxExport_ui("vegxExport")
                ),
                

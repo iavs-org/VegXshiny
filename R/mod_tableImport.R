@@ -13,13 +13,13 @@ mod_tableImport_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     
-    navs_pill_list(
+    navset_pill_list(
       id=ns("sidebar"),
       widths = c(2, 10),
       selected = "Project",
       
       # Project ####
-      nav(title = "1. Project", value = "Project",
+      nav_panel(title = "1. Project", value = "Project",
           column(
             width = 10, offset = 1,
             h2("Project"),
@@ -30,7 +30,7 @@ mod_tableImport_ui <- function(id){
       ),
       
       # Plots ####
-      nav(title = "2. Plots", value = "Plots",
+      nav_panel(title = "2. Plots", value = "Plots",
           column(
             width = 10, offset = 1,
             h2("Plots"),
@@ -42,7 +42,7 @@ mod_tableImport_ui <- function(id){
       
       
       # Observations ####
-      nav(title = "3. Observations", value = "Observations",  
+      nav_panel(title = "3. Observations", value = "Observations",  
           column(
             width = 10, offset = 1,
             h2("Observations"),
@@ -168,7 +168,7 @@ mod_tableImport_ui <- function(id){
       ),
       
       # Summary ####
-      nav(title = "4. Summary", value = "Summary",
+      nav_panel(title = "4. Summary", value = "Summary",
           column(
             width = 10, offset = 1,
             h2("Summary"),

@@ -16,57 +16,44 @@ mod_aboutVegX_ui <- function(id){
       id = ns("about_tabset"),
       tabPanel(
         title = "Overview",
-        tags$h1("VegXshiny", style = "text-align: center",  
-                class = "text-info"),
-        tags$h4("An interactive web application for vegetation ecologists", 
-                style = "text-align: center; color: grey;"),
-        
-        tags$p("The increasing digitization of research data has motivated data 
-               standardization efforts across scientific disciplines. The 
-               vegetation science community has recognized the need for a 
-               standardized exchange format since at least 2003 and developed 
-               the initial version of the Veg-X standard in 2008 
-               (Wiser et al., 2011). Veg-X is implemented as an XML schema 
-               that provides both flexibility and precision in representing 
-               vegetation data of different origin and format."), 
-        
-        tags$p("Veg-X has not found wide adoption among vegetation ecologists 
-               to this date. One of the reasons for this was the lack of tools 
-               to easily create Veg-X documents. A major step towards improving 
-               the usability of Veg-X was the publication of the VegX R-package 
-               (De Cáceres, 2018), which provides tools for importing, 
-               integrating and exporting vegetation data using the Veg-X 
-               standard. While the VegX package allows users to create Veg-X 
-               documents using R programming language, interest in a GUI-based 
-               application for Veg-X remained high."),
-        
-        tags$div(style = "text-align: center",
-                 tags$img(src='www/images/vegxshiny_overview.png', 
-                          align = "center", width = 900)
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/VegXshiny.svg', width = 360)
         ),
+        tags$p("A tool to organize plant community data in Veg-X exchange
+               format", style = "text-align: left; color: #009933;"),
         
-        tags$p(tags$span("VegXshiny aims to make the conversion of vegetation 
-               data into Veg-X documents as easy as possible.", 
-               class = "text-info"), " The graphical user interface of 
-               VegXshiny helps users, who have no experience with programming 
-               or markup languages (XML in this case), to build valid Veg-X 
-               documents and implement best practices in terms of data 
-               management and interoperability. Dynamic import dialogs guide 
-               users through the process of mapping their data to the 
-               corresponding Veg-X elements, while ensuring that the generated 
-               XML conforms to the Veg-X standard. The ability to view and edit 
-               input files and output Veg-X documents gives users full control 
-               over their data. Finally, an interactive tree viewer of the 
-               Veg-X schema helps making the standard accessible and 
-               understandable."),
+        tags$p("Veg-X (Wiser et al., 2011) is an XML schema that 
+               provides both flexibility and precision in representing 
+               vegetation data of different origins and formats."), 
         
+        tags$p("The Veg-X R package (De Cáceres, 2018) allows to 
+               import, integrate, and export vegetation data using the Veg-X 
+               standard. Based on this, VegXshiny was developed as a GUI-based 
+               application for creating Veg-X documents from small to medium
+               sized datasets."),
+        
+        tags$p("The figure below shows the general workflow. The core is the 
+               conversion part, where dialogs guide the user through the process 
+               of mapping data to the appropriate Veg-X elements."),
+        
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/flowchart.svg', 
+                          align = "center", width = 400)
+        ),
+
+        tags$p("-------------"),
         tags$p("The development of VegXshiny is endorsed by the ", 
                tags$a("International Association for Vegetation Science (IAVS)",
                       href = "http://iavs.org/", target = "_blank"),
-               "and received funding by the German Reseach Foundation (DFG, 
+               "and received funding by the German Research Foundation (DFG, 
                project number 460840087)."),
-
-        tags$h3("References"),
+        
+        tags$p("Package development: Christian K\u00f6nig, Sebastian Schmidtlein"),
+        
+        tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
+                Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
+                Schmidtlein, Nick Spencer, Susan K. Wiser"),
+        tags$p("References", style = "text-align: left; color: #009933;"),
         tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., 
                Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard 
                for plot-based vegetation data. Journal of Vegetation Science 
@@ -76,26 +63,15 @@ mod_aboutVegX_ui <- function(id){
                       target = "_blank"),
                "."),
         tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. 
-               R-package, https://iavs-org.github.io/VegX"),
+               R-package, https://iavs-org.github.io/VegX")
         
-        tags$h3("Package development"),
-        tags$ul(tags$li("Christian K\u00f6nig"),
-                tags$li("Sebastian Schmidtlein")),
-        
-        tags$h3("Veg-X standard development:"),
-        tags$ul(tags$li("Brad Boyle"),
-                tags$li("Miquel De C\u00e1ceres"),
-                tags$li("Martin Kleikamp"),
-                tags$li("Christian K\u00f6nig"),
-                tags$li("Robert K. Peet"),
-                tags$li("Sebastian Schmidtlein"),
-                tags$li("Nick Spencer"),
-                tags$li("Susan K. Wiser"))
       ),
       
       tabPanel(
         title = "Veg-X Schema",
-        h1("The Veg-X Schema", class = "text-info"),
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/VegX_Schema.svg', width = 360)
+        ),
         
         tags$p("The heart of the Veg-X standard is its XML schema. An XML 
                schema is composed of nested tags (elements) with defined 
@@ -134,7 +110,9 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "Tutorial",
-        tags$h1("Tutorial", class = "text-info"),
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/Tutorial.svg', width = 360)
+        ),
         tags$p("The User Interface of VegXshiny has five main components. The 
                functionality of each component is described here."),
         
@@ -391,7 +369,9 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "FAQ",
-        tags$h1("Frequently asked questions", class = "text-info"),
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/FAQ.svg', width = 360)
+        ),
         tags$h3("What's the difference between VegXshiny and the VegX 
                 R-package?", class = "text-info"),
         tags$p("The packages were developed for different use cases. While 
@@ -443,11 +423,58 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "Contact",
-        tags$h1("Contact", class = "text-info"),
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/Contact.svg', width = 360)
+        ),
         tags$p("For questions and feedback, please open an issue on ",
                tags$a("Github", href = "https://github.com/iavs-org/VegXshiny", 
                       target="_blank"))
-      )
+      ),
+      tabPanel(
+        title = "Privacy",
+        tags$div(style = "text-align: left",
+                 tags$img(src='www/images/Privacy.svg', width = 360)
+        ),
+        tags$p("Uploaded user data is not collected. This website does not use 
+               cookies.")
+      ),
+      tabPanel(
+      title = "Legals",
+      tags$div(style = "text-align: left",
+               tags$img(src='www/images/Legals.svg', width = 360)
+      ),
+      tags$h3("Anbieter", class = "text-info"),
+      tags$p(HTML("Karlsruher Institut für Technologie (KIT)<br/>
+             </br/>
+             Rechtlicher Sitz:</br/>
+             Kaiserstr. 12<br/>
+             76131 Karlsruhe<br/>
+             Deutschland<br/>
+             Tel. +49 721 608-0<br/>
+             Email: info@kit.edu<br/>
+             Umsatzsteueridentifikationsnummer: DE266749428<br/>
+             <br/>
+             Rechtsform: Körperschaft des öffentlichen Rechts</br/>
+             Vertretungsberechtigt: Prof. Dr. Oliver Kraft</br/>
+             </br/>
+             Projektkoordination:</br/>
+             Prof. Dr. Sebastian Schmidtlein</br/>
+             Institut für Geographie und Geoökologie</br/>
+             Kaiserstr. 12</br/>
+             76131 Karlsruhe</br/>
+             Deutschland</br/>
+             Email: schmidtlein@kit.edu</br/>")),
+      tags$h3("Links", class = "text-info"),
+      tags$p(HTML("Die Web-Seiten des Karlsruher Instituts für Technologie 
+             enthalten Verweise (Links) zu Informationsangeboten auf Servern, 
+             die nicht der Kontrolle und Verantwortlichkeit des Karlsruher 
+             Instituts für Technologie unterliegen. Das Karlsruher Institut für 
+             Technologie übernimmt keine Verantwortung und keine Garantie für 
+             diese Informationen und billigt oder unterstützt diese auch nicht 
+             inhaltlich."))
+      ),
+    
+      
     )
   )
 }

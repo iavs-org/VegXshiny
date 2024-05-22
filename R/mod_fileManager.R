@@ -6,7 +6,7 @@
 #'
 #' @noRd 
 #'
-#' @importFrom rhandsontable rhandsontable renderRHandsontable
+#' @importFrom rhandsontable renderRHandsontable
 
 mod_fileManager_ui <- function(id){
   ns <- NS(id)
@@ -23,7 +23,7 @@ mod_fileManager_ui <- function(id){
                fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
                tags$hr(),
                tags$label("Tips"),
-               div(class="info-box",
+               div(class = "info-box",
                    div(class = "text-info info-box-item",
                        icon("lightbulb", class = "icon-padded-right"),
                        "Read the tutorial before starting your import."),
