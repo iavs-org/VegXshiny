@@ -12,15 +12,16 @@ mod_fileManager_ui <- function(id){
   ns <- NS(id)
   
   sidebarLayout(
-    tags$div(class = "col-sm-2 well", style = "min-width:150px;", role = "complementary", 
+    tags$div(class = "col-sm-2 well", style = "min-width:150px; margin-top: 67px;", role = "complementary", 
              tagList(
+               tags$img(src = "www/images/File_manager.svg", width = "360px", style = "position: absolute; top: -90px;"),
                tags$label("Upload a file"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                       title = "Supported data formats: 
                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
                       \nTurboveg data: .xml 
                       \nSee 'About > Tutorial' for more information."),
-               fileInput(ns("upload"), label = NULL, width = "100%", multiple = T, placeholder = "Select a file", accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+               fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
                tags$hr(),
                tags$label("Tips"),
                div(class = "info-box",
@@ -46,6 +47,7 @@ mod_fileManager_ui <- function(id){
              )
     ),
     mainPanel(
+      style = "margin-top: 90px;", 
       width = 10, 
       fluidRow(
         column(

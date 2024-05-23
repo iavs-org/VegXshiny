@@ -20,7 +20,7 @@ mod_aboutVegX_ui <- function(id){
                  tags$img(src='www/images/VegXshiny.svg', width = 360)
         ),
         tags$p("A tool to organize plant community data in Veg-X exchange
-               format", style = "text-align: left; color: #009933;"),
+               format", style = "text-align: left; color: #18bc9c;"),
         
         tags$p("Veg-X (Wiser et al., 2011) is an XML schema that 
                provides both flexibility and precision in representing 
@@ -32,9 +32,10 @@ mod_aboutVegX_ui <- function(id){
                application for creating Veg-X documents from small to medium
                sized datasets."),
         
-        tags$p("The figure below shows the general workflow. The core is the 
+        tags$p("The figure below shows the typical workflow. The core is the 
                conversion part, where dialogs guide the user through the process 
-               of mapping data to the appropriate Veg-X elements."),
+               of mapping data to the appropriate Veg-X elements. VegXshiny can
+               also be used for validating existing Veg-X documents."),
         
         tags$div(style = "text-align: left",
                  tags$img(src='www/images/flowchart.svg', 
@@ -435,8 +436,7 @@ mod_aboutVegX_ui <- function(id){
         tags$div(style = "text-align: left",
                  tags$img(src='www/images/Privacy.svg', width = 360)
         ),
-        tags$p("Uploaded user data is not collected. This website does not use 
-               cookies.")
+        tags$p("All data is deleted at the end of a session. No data is collected. This site does not use cookies.")
       ),
       tabPanel(
       title = "Legals",

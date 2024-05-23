@@ -14,13 +14,12 @@ app_ui <- function(request) {
     shinybrowser::detect(),
     
     # Application UI logic 
-    navbarPage("VegXshiny",  
+    navbarPage("",
                position = "static-top",
-               theme=bslib::bs_theme(version = 3, bootswatch = "united", primary = "#009933"),
-               header = tags$style(type="text/css"),
-
-               tabPanel("About", icon = icon("info", class = "icon-padded-right"),
-                        mod_aboutVegX_ui("about")),
+               theme=bslib::bs_theme(version = 3, bootswatch = "flatly"),
+               header = tags$style(type = "text/css", 
+                                   ".navbar-header { display: none; }"),
+               tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
                tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")

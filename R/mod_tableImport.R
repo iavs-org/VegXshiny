@@ -23,7 +23,7 @@ mod_tableImport_ui <- function(id){
           column(
             width = 10, offset = 1,
             h2("Project"),
-            tags$p("Describe your project and its contributors. Imported files can be assigned in the next steps.", class = "text-info annotation no-margin"),
+            tags$p("Describe your project and its contributors. Imported files can be assigned in the next steps", class = "text-info annotation no-margin"),
             hr(),
             uiOutput(ns("project_ui"))
           )
