@@ -35,8 +35,8 @@ mod_aboutVegX_ui <- function(id){
                also be used for validating existing Veg-X documents."),
         
         tags$div(style = "text-align: left",
-                 tags$img(src='www/images/Flowchart.svg', 
-                          align = "center", width = 300)
+                 tags$img(src='www/images/Flowchart_horizontal.svg', 
+                          align = "center", width = 620)
         ),
 
         tags$p("-------------"),
