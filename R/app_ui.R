@@ -18,20 +18,22 @@ app_ui <- function(request) {
                position = "static-top",
                theme=bslib::bs_theme(version = 3, bootswatch = "flatly"),
                header = tags$style(type = "text/css", 
-                                   ".navbar-header { display: none; }"),
+                                   ".navbar-header { display: none; }",
+                                   ".dropdown-menu { font-size: 0.9em; }"
+               ),   
                tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("Prepare", icon = icon("folder-open", class = "icon-padded-right"),
+               tabPanel("Prepare", icon = icon("file-import", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu(title = "Transform", icon = icon("magic", class = "icon-padded-right"), 
-                          tabPanel("from Tables", mod_tableImport_ui("tableImport")),
-                          tabPanel("from Turboveg", mod_turbovegImport_ui("turbovegImport")),
-                          tabPanel("from Veg-X", mod_vegxImport_ui("vegxImport"))
+               navbarMenu(title = "Transform", icon = icon("wand-sparkles", class = "icon-padded-right"), 
+                          tabPanel("Table", mod_tableImport_ui("tableImport")),
+                          tabPanel("Turboveg", mod_turbovegImport_ui("turbovegImport")),
+                          tabPanel("Veg-X", mod_vegxImport_ui("vegxImport"))
                ),
                
-               tabPanel("Inspect", icon = icon("code", class = "icon-padded-right"),
+               tabPanel("Inspect", icon = icon("eye", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
@@ -39,7 +41,7 @@ app_ui <- function(request) {
                         mod_vegxExport_ui("vegxExport")
                ),
                
-               tabPanel("Action Log", icon = icon("history", class = "icon-padded-right"),
+               tabPanel("Log", icon = icon("stethoscope", class = "icon-padded-right"),
                         mod_actionLog_ui("actionLog")
                )
     )
