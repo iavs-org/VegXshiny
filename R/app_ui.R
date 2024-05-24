@@ -21,21 +21,21 @@ app_ui <- function(request) {
                                    ".navbar-header { display: none; }"),
                tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
+               tabPanel("Prepare", icon = icon("folder-open", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu(title = "Build Veg-X", icon = icon("magic", class = "icon-padded-right"), 
+               navbarMenu(title = "Transform", icon = icon("magic", class = "icon-padded-right"), 
                           tabPanel("from Tables", mod_tableImport_ui("tableImport")),
                           tabPanel("from Turboveg", mod_turbovegImport_ui("turbovegImport")),
                           tabPanel("from Veg-X", mod_vegxImport_ui("vegxImport"))
                ),
                
-               tabPanel("Veg-X Document", icon = icon("code", class = "icon-padded-right"),
+               tabPanel("Inspect", icon = icon("code", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel("Veg-X Export", icon = icon("file-export", class = "icon-padded-right"),
+               tabPanel("Collect", icon = icon("file-export", class = "icon-padded-right"),
                         mod_vegxExport_ui("vegxExport")
                ),
                

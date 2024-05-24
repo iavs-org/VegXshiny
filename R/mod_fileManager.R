@@ -10,70 +10,71 @@
 
 mod_fileManager_ui <- function(id){
   ns <- NS(id)
+  tagList(
+    tags$h1("Upload and prepare your data", style = "margin-top: 0;"),
+    sidebarLayout(
+      tags$div(class = "col-sm-2 well", style = "min-width:150px;", role = "complementary", 
+               tagList(
   
-  sidebarLayout(
-    tags$div(class = "col-sm-2 well", style = "min-width:150px; margin-top: 67px;", role = "complementary", 
-             tagList(
-               tags$img(src = "www/images/File_manager.svg", width = "360px", style = "position: absolute; top: -90px;"),
-               tags$label("Upload a file"),
-               tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                      title = "Supported data formats: 
-                      \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-                      \nTurboveg data: .xml 
-                      \nSee 'About > Tutorial' for more information."),
-               fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-               tags$hr(),
-               tags$label("Tips"),
-               div(class = "info-box",
-                   div(class = "text-info info-box-item",
-                       icon("lightbulb", class = "icon-padded-right"),
-                       "Read the tutorial before starting your import."),
-                   div(class = "text-info info-box-item",
-                       icon("lightbulb", class = "icon-padded-right"),
-                       "You can reshape and split your original data in the file editor. Use the 'crop' function in combination with 
-                       the context-menu (right click) to delete rows and create subtables from your vegetation table."),
-                   div(class = "text-info info-box-item",
-                       icon("lightbulb", class = "icon-padded-right"),
-                       "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
-                       function to transform your observation data before import"),
-                   div(class = "text-info info-box-item",
-                       icon("lightbulb", class = "icon-padded-right"),
-                       "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
-                       respective columns."),
-                   div(class = "text-info info-box-item",
-                       icon("lightbulb", class = "icon-padded-right"),
-                       "Use the 'format date' function in File Editor to convert a date column to the expected format of YYYY-MM-DD before starting the import dialog."),
+                 tags$label("Upload a file"),
+                 tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                        title = "Supported data formats: 
+                        \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+                        \nTurboveg data: .xml 
+                        \nSee 'About > Tutorial' for more information."),
+                 fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+                 tags$hr(),
+                 tags$label("Tips"),
+                 div(class = "info-box",
+                     div(class = "text-info info-box-item",
+                         icon("lightbulb", class = "icon-padded-right"),
+                         "Read the tutorial before starting your import."),
+                     div(class = "text-info info-box-item",
+                         icon("lightbulb", class = "icon-padded-right"),
+                         "You can reshape and split your original data in the file editor. Use the 'crop' function in combination with 
+                         the context-menu (right click) to delete rows and create subtables from your vegetation table."),
+                     div(class = "text-info info-box-item",
+                         icon("lightbulb", class = "icon-padded-right"),
+                         "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
+                         function to transform your observation data before import"),
+                     div(class = "text-info info-box-item",
+                         icon("lightbulb", class = "icon-padded-right"),
+                         "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
+                         respective columns."),
+                     div(class = "text-info info-box-item",
+                         icon("lightbulb", class = "icon-padded-right"),
+                         "Use the 'format date' function in File Editor to convert a date column to the expected format of YYYY-MM-DD before starting the import dialog."),
+                 )
                )
-             )
-    ),
-    mainPanel(
-      style = "margin-top: 90px;", 
-      width = 10, 
-      fluidRow(
-        column(
-          10, 
-          offset = 1,
-          tagList(       
-            tags$label("Uploaded files"),
-            tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                   title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
-            fluidRow(
-              class = "file-grid",
-              column(
-                12,
-                uiOutput(ns("file_browser"))
-              )
-            ),
-            tags$hr(),
-            div(
-              tags$label("File Editor"),
+      ),
+      mainPanel(
+        width = 10, 
+        fluidRow(
+          column(
+            10, 
+            offset = 1,
+            tagList(       
+              tags$label("Uploaded files"),
               tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                     title = "Review and and edit files before importing to VegX"),
-              
-              uiOutput(ns("edit_toolbar")),
-
-              uiOutput(ns("file_viewer")),
-              style = "margin-bottom: 20px"
+                     title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
+              fluidRow(
+                class = "file-grid",
+                column(
+                  12,
+                  uiOutput(ns("file_browser"))
+                )
+              ),
+              tags$hr(),
+              div(
+                tags$label("File Editor"),
+                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                       title = "Review and and edit files before importing to VegX"),
+                
+                uiOutput(ns("edit_toolbar")),
+  
+                uiOutput(ns("file_viewer")),
+                style = "margin-bottom: 20px"
+              )
             )
           )
         )

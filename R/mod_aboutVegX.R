@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+
 mod_aboutVegX_ui <- function(id){
   ns <- NS(id)
   
@@ -16,12 +17,8 @@ mod_aboutVegX_ui <- function(id){
       id = ns("about_tabset"),
       tabPanel(
         title = "Overview",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/VegXshiny.svg', width = 360)
-        ),
-        tags$p("A tool to organize plant community data in Veg-X exchange
-               format", style = "text-align: left; color: #18bc9c;"),
-        
+        tags$h1("VegXshiny - A tool to organize plant community data in Veg-X exchange
+               format"),
         tags$p("Veg-X (Wiser et al., 2011) is an XML schema that 
                provides both flexibility and precision in representing 
                vegetation data of different origins and formats."), 
@@ -43,6 +40,7 @@ mod_aboutVegX_ui <- function(id){
         ),
 
         tags$p("-------------"),
+        tags$h2("Acknowledgments"),
         tags$p("The development of VegXshiny is endorsed by the ", 
                tags$a("International Association for Vegetation Science (IAVS)",
                       href = "http://iavs.org/", target = "_blank"),
@@ -54,7 +52,7 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
                 Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
                 Schmidtlein, Nick Spencer, Susan K. Wiser"),
-        tags$p("References", style = "text-align: left; color: #009933;"),
+        tags$h2("References"),
         tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., 
                Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard 
                for plot-based vegetation data. Journal of Vegetation Science 
@@ -70,9 +68,7 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "Veg-X Schema",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/VegX_Schema.svg', width = 360)
-        ),
+        tags$h1("How Veg-X is structured"),
         
         tags$p("The heart of the Veg-X standard is its XML schema. An XML 
                schema is composed of nested tags (elements) with defined 
@@ -111,44 +107,42 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "Tutorial",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/Tutorial.svg', width = 360)
-        ),
+        tags$h1("Tutorial"),
         tags$p("The User Interface of VegXshiny has five main components. The 
                functionality of each component is described here."),
         
         tags$ol(
-          tags$li(tags$a("File Manager", href = paste0("#", ns("file_manager")))),
-          tags$li(tags$a("Import to Veg-X", href = paste0("#", ns("vegx_import"))),
+          tags$li(tags$a("Prepare", href = paste0("#", ns("file_manager")))),
+          tags$li(tags$a("Transform and validate", href = paste0("#", ns("vegx_import"))),
                   tags$ul(style = "list-style-type: none;",
                           tags$li(tags$a("From Tables", href = paste0("#", ns("import_tables")))),
                           tags$li(tags$a("From Turboveg XML", href = paste0("#", ns("import_turboveg")))),
                           tags$li(tags$a("Load Veg-X", href = paste0("#", ns("import_vegx"))))
                   )
           ),
-          tags$li(tags$a("Veg-X Viewer", href = paste0("#", ns("xml_viewer")))),
-          tags$li(tags$a("Veg-X Export", href = paste0("#", ns("vegx_export")))),
+          tags$li(tags$a("Inspect and edit", href = paste0("#", ns("xml_viewer")))),
+          tags$li(tags$a("Collect", href = paste0("#", ns("vegx_export")))),
           tags$li(tags$a("Action Log", href = paste0("#", ns("action_log"))))
         ),
         
         hr(),
-        tags$h2("File Manager", id = ns("file_manager"), class = "text-info"),
-        tags$p("The File Manager is the single entry point for user-supplied 
+        tags$h2("Prepare", id = ns("file_manager")),
+        tags$p("This File Manager is the single entry point for user-supplied 
                 data. ", tags$span("All files that contain information intended 
                 for import need to be uploaded here. ", class = "text-info"), 
                 "To upload files, click the upload widget on the left panel 
                 and browse your local file system. You can select and upload 
                 multiple files at once by pressing [CTRL]. Currently, the 
                 following file types are supported: "),
-        tags$label("Tabular data:"),
+        tags$h4("Tabular data:"),
         tags$ul(
           tags$li(".csv (comma-separated)"),
           tags$li(".txt, .tsv (tab-separated)"),
           tags$li(".xls, .xslx")
         ),
-        tags$label("Turboveg 2:"),
+        tags$h4("Turboveg 2:"),
         tags$ul(tags$li("xml")),
-        tags$label("Veg-X:"),
+        tags$h4("Veg-X:"),
         tags$ul(tags$li("xml")),
         tags$p("If an upload of tabular data fails, check the following 
                 possible reasons or fixes:"),
@@ -200,14 +194,14 @@ mod_aboutVegX_ui <- function(id){
                 separators are used verbatim (like ' ' for space."),
           tags$li("Discard edits: Exit the edit mode without saving"),
         ),
-        tags$h2("Build Veg-X", id = ns("vegx_import"), class = "text-info"),
+        tags$h2("Transform and validate", id = ns("vegx_import")),
         tags$p("This dialog transforms the data objects from the File 
                 Manager into Veg-X. The application supports imports from 
                 tabular data, Turboveg XML or Veg-X (for further edits). 
                 Note that a new Veg-X overwrites a previous one, i.e.
                 sequential imports from different source objects into the 
                 same Veg-X document are currently not possible."),
-        tags$h3("from Tables", id = ns("import_tables"), class = "text-info"),
+        tags$h3("Build Veg-X from Tables", id = ns("import_tables")),
         tags$p("Tabular data for import are expected to be in a format 
                 where each observation has its row and each variable has its
                 column. One consequence is that a transformation is 
@@ -232,10 +226,10 @@ mod_aboutVegX_ui <- function(id){
         tags$p("The import of tabular data is structured into five steps. 
                 Mandatory fields are marked with a star (*)"),
         tags$ol(
-          tags$b(tags$li("Project information")),
+          tags$p(tags$li("Project information")),
           tags$p("Provide a general description of the project and its 
                 contributors. No files need to be assigned in this step."),
-          tags$b(tags$li("Plot information")),
+          tags$p(tags$li("Plot information")),
           tags$p("Describe static plot properties (like surface area of the 
                  plot. This is distinguished from features that belong 
                  to a plotObservation, such as the date of a recording). 
@@ -254,7 +248,7 @@ mod_aboutVegX_ui <- function(id){
                 methods is applicable, a custom method can be defined by 
                 selecting the \"...add custom method\" option."),
 
-          tags$b(tags$li("Observations")),
+          tags$p(tags$li("Observations")),
           tags$p("Add different types of observations, such as species
                  cover, vegetation layers, or soil properties. All observations 
                  in Veg-X refer to a plotObservation, i.e. a sampling event at 
@@ -286,7 +280,7 @@ mod_aboutVegX_ui <- function(id){
                  communityObservations). The same applies to measurements 
                  related to individual organisms, such as DBH (called 
                  individualOrganismObservations)."),
-          tags$b(tags$li("Review inputs")),
+          tags$p(tags$li("Review inputs")),
           tags$p("Check your mapped inputs before starting the import. 
                  Color-coded boxes indicate the status:"),
           tags$ul(style = "margin-bottom: 10px",
@@ -300,7 +294,7 @@ mod_aboutVegX_ui <- function(id){
           tags$p("Only when all input categories are marked either green or 
                  grey, you will be able to proceed with the import."),
           
-          tags$b(tags$li("Import")),
+          tags$p(tags$li("Import")),
           tags$p("Pressing", tags$i("Import"), "and confirming the dialog will 
                  create a new Veg-X document from the specified mappings. ", 
                  tags$span("Your current Veg-X document will be overwritten by 
@@ -313,20 +307,19 @@ mod_aboutVegX_ui <- function(id){
                  ", tags$i("Veg-X export."))
         ),
         
-        tags$h3("From Turboveg", id = ns("import_turboveg"), 
-                class = "text-info"),
+        tags$h3("Build Veg-X from Turboveg", id = ns("import_turboveg")),
         tags$p("You can import data from ", 
                tags$a("Turboveg 2 standard XML files", 
                href = "https://www.synbiosys.alterra.nl/turboveg/help/idh_export_xml.htm",  # nolint
                target = "_blank"), ". The process has only two steps:"),
         tags$ol(
-          tags$b(tags$li("Read data from Turboveg XML")),
+          tags$p(tags$li("Read data from Turboveg XML")),
           tags$p("Choose an uploaded Turboveg 2 XML file and prepare the
                  data for import. This step extracts the data from Turboveg XML
                  into an import-ready format. A progress bar in the lower left 
                  corner indicates the current status. Once the extraction is 
                  finished, a summary of the data is displayed."),
-          tags$b(tags$li("Import Turboveg data into Veg-X")),
+          tags$p(tags$li("Import Turboveg data into Veg-X")),
           tags$p("Submitting the pre-processed Turboveg file will open an 
                  import dialog where you can select, which 'undefined' Turboveg 
                  header data you want to import (i.e. data lacking information 
@@ -336,11 +329,11 @@ mod_aboutVegX_ui <- function(id){
                  ", tags$i("Proceed"), "will then start the import of the 
                  Turboveg data to Veg-X.")
         ),
-        tags$h3("Load Veg-X", id = ns("import_vegx"), class = "text-info"),
+        tags$h3("Load Veg-X", id = ns("import_vegx")),
         tags$p("Choose an uploaded Veg-X file for validation. Review the 
                summary and run the import."),
         
-        tags$h2("Veg-X Viewer", id = ns("xml_viewer"), class = "text-info"),
+        tags$h2("Inspect and edit", id = ns("xml_viewer")),
         tags$p("The Veg-X XML Viewer previews the current Veg-X document. 
                Clicking the 'Edit' button let you enter the edit mode, where 
                you can modify the raw XML of the Veg-X document. Caution needs 
@@ -352,7 +345,7 @@ mod_aboutVegX_ui <- function(id){
                are potential issues with references among nodes. Validation 
                errors and other issues will be listed in the Action Log."),
         
-        tags$h2("Veg-X Export", id = ns("vegx_export"), class = "text-info"),
+        tags$h2("Collect", id = ns("vegx_export")),
         tags$p("Veg-X documents can be exported either as Veg-X XML file or as 
                a zipped collection of long-format tables. The latter option may 
                be convenient if data from Veg-X need to be imported into 
@@ -360,7 +353,7 @@ mod_aboutVegX_ui <- function(id){
                supports the import of Veg-X XML documents.",  
                class = "text-info")), 
         
-        tags$h2("Action Log", id = ns("action_log"), class = "text-info"),
+        tags$h2("Action Log", id = ns("action_log")),
         tags$p("The Action Log records user actions and application messages 
                during a session. This includes file uploads and edits, import 
                messages, Veg-X document edits and validations and file exports. 
@@ -370,19 +363,7 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "FAQ",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/FAQ.svg', width = 360)
-        ),
-        tags$h3("What's the difference between VegXshiny and the VegX 
-                R-package?", class = "text-info"),
-        tags$p("The packages were developed for different use cases. While 
-               VegXshiny aims a graphical user interface to convert vegetation 
-               datasets into Veg-X, the VegX R-package is designed as a 
-               programmatic tool for interactive scripting and data pipelines. 
-               The development of both packages is supported and endorsded by 
-               the IAVS. Future efforts may be directed towards an integration 
-               of {VegXshiny} and {VegX} into a single R-package."),
-        
+        tags$h1("Frequently asked questions"),
         tags$h3("How to format my data correctly for VegXshiny?", 
                 class = "text-info"),
         tags$p("VegXshiny expects tabular data in a format, where each column 
@@ -424,25 +405,19 @@ mod_aboutVegX_ui <- function(id){
       
       tabPanel(
         title = "Contact",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/Contact.svg', width = 360)
-        ),
+        tags$h1("Contact"),
         tags$p("For questions and feedback, please open an issue on ",
                tags$a("Github", href = "https://github.com/iavs-org/VegXshiny", 
                       target="_blank"))
       ),
       tabPanel(
         title = "Privacy",
-        tags$div(style = "text-align: left",
-                 tags$img(src='www/images/Privacy.svg', width = 360)
-        ),
+        tags$h1("Privacy"),
         tags$p("All data is deleted at the end of a session. No data is collected. This site does not use cookies.")
       ),
       tabPanel(
       title = "Legals",
-      tags$div(style = "text-align: left",
-               tags$img(src='www/images/Legals.svg', width = 360)
-      ),
+      tags$h1("Impressum"),
       tags$h3("Anbieter", class = "text-info"),
       tags$p(HTML("Karlsruher Institut für Technologie (KIT)<br/>
              </br/>

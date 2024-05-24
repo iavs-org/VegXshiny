@@ -11,9 +11,39 @@ code, pre {
   background-color: transparent;
 }
 
+
 .form-control {
   height: 34px;
 }
+
+.h1, h1 {
+  text-align: left;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #2c3e50;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+.h2, h2 {
+  text-align: left;
+  font-size: 1em;
+  font-weight: bold;
+  font-style: italic;
+  color: #2c3e50;
+  padding-top: 20px;
+  padding-bottom: 5px;
+}
+
+.h3, h3 {
+  text-align: left;
+  font-size: 1em;
+  font-style: italic;
+  color: #2c3e50;
+  padding-top: 20px;
+  padding-bottom: 5px;
+}
+
 
 .frame {
   border-style: solid;
