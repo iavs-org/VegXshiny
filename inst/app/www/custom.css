@@ -1,5 +1,5 @@
 body {
-   font-size: 20px;
+   font-size: 18px;
    padding-bottom: 60px;
 }
 
@@ -11,6 +11,13 @@ code, pre {
   background-color: transparent;
 }
 
+.container-fluid {
+  padding-left: 0;
+}
+
+.content {
+  max-width: 1000px;
+}
 
 .form-control {
   height: 34px;
@@ -209,6 +216,10 @@ code, pre {
 
 .info-box-item {
  margin-bottom: 12px;
+}
+
+#about-about_tabset .tab-content {
+  max-width: 1200px;
 }
 
 #fileManager-editor {

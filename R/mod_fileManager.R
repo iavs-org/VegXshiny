@@ -10,78 +10,81 @@
 
 mod_fileManager_ui <- function(id){
   ns <- NS(id)
-  tabsetPanel(
-    tabPanel("Data handling",
-             tagList(
+
+  fluidPage(
+    tabsetPanel(
+      tabPanel("Data handling",
                tagList(
-                 tags$head(
-                   tags$style(
-                     ".tab-content  {
-                      padding-left: 20px;
-                      padding-right: 20px;
-                     }"
-                   )
-                 ),
-               tags$h1("Upload and prepare your data", style = "margin-top: 0;"),
-               fluidRow(
-                 column(
-                   12,
-                   tags$label("Upload a file"),
-                   tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                          title = "Supported data formats: 
-                   \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-                   \nTurboveg data: .xml 
-                   \nSee 'About > Tutorial' for more information."),
-                   fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-                   tags$hr(),
-                   tags$label("Uploaded files"),
-                   tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                          title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
-                   fluidRow(
-                     class = "file-grid",
-                     column(
-                       12,
-                       uiOutput(ns("file_browser"))
+                 tagList(
+                   tags$head(
+                     tags$style(
+                       ".tab-content  {
+                        padding-left: 20px;
+                        padding-right: 20px;
+                       }"
                      )
                    ),
-                   tags$hr(),
-                   div(
-                     tags$label("File Editor"),
+                 tags$h1("Upload and prepare your data"),
+                 fluidRow(
+                   column(
+                     12,
+                     tags$label("Upload a file"),
                      tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                            title = "Review and and edit files before importing to VegX"),
-                     
-                     uiOutput(ns("edit_toolbar")),
-                     
-                     uiOutput(ns("file_viewer")),
-                     style = "margin-bottom: 20px"
+                            title = "Supported data formats: 
+                     \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+                     \nTurboveg data: .xml 
+                     \nSee 'About > Tutorial' for more information."),
+                     fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+                     tags$hr(),
+                     tags$label("Uploaded files"),
+                     tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                            title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
+                     fluidRow(
+                       class = "file-grid",
+                       column(
+                         12,
+                         uiOutput(ns("file_browser"))
+                       )
+                     ),
+                     tags$hr(),
+                     div(
+                       tags$label("File Editor"),
+                       tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                              title = "Review and and edit files before importing to VegX"),
+                       
+                       uiOutput(ns("edit_toolbar")),
+                       
+                       uiOutput(ns("file_viewer")),
+                       style = "margin-bottom: 20px"
+                     )
                    )
                  )
                )
-             )
+            )
+      ),
+      tabPanel("Tips",
+        tagList(
+          tags$h1("Upload and prepare your data"),
+            div(class = "info-box",
+                div(class = "text-info info-box-item",
+                    icon("lightbulb", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem;", "You can reshape and split your original data in the file editor. Use the 'crop' function in  
+                    the context-menu (right click) to delete rows and create subtables.")),
+                div(class = "text-info info-box-item",
+                    icon("lightbulb", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem;", "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
+                           function to transform your observation data before import.")),
+                div(class = "text-info info-box-item",
+                    icon("lightbulb", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem;", "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
+                           respective columns.")),
+                div(class = "text-info info-box-item",
+                    icon("lightbulb", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
+                div(class = "text-info info-box-item",
+                    icon("lightbulb", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem;", "Check out the tutorial.")),
           )
-    ),
-    tabPanel("Tips",
-      tagList(
-        tags$h1("Upload and prepare your data", style = "margin-top: 0;"),
-          div(class = "info-box",
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "You can reshape and split your original data in the file editor. Use the 'crop' function in  
-                  the context-menu (right click) to delete rows and create subtables.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
-                         function to transform your observation data before import.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
-                         respective columns.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Check out the tutorial.")),
         )
       )
     )

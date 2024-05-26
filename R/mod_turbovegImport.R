@@ -11,24 +11,27 @@ mod_turbovegImport_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
-    fluidRow(
-      column(
-        width = 10, offset = 1,
-        tags$h2 ("Turboveg Import"),
-        tags$p("Select a Turboveg XML file and read the data into R", class = "text-info annotation"),
+    tabsetPanel(
+      tabPanel("Turboveg2 XML to R",
         fluidRow(
-          column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
-          column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg XML", style = "height: 35px; line-height: 0px")))
-        ),
-        
-        fluidRow(
-          column(12, 
-                 tags$h3("Document summary"),
-                 uiOutput(ns("tv_summary")),
-                 hr()
+          column(
+            width = 12,
+            tags$h1 (""),
+            fluidRow(
+              column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
+              column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg2 XML", style = "height: 35px; line-height: 0px")))
+            ),
+            
+            fluidRow(
+              column(12, 
+                     tags$h3("Document summary"),
+                     uiOutput(ns("tv_summary")),
+                     hr()
+              )
+            ),
+            actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right")
           )
-        ),
-        actionButton(ns("import"), label = "Import", width = "250px", class = "btn-success center-block")
+        )
       )
     )
   )
