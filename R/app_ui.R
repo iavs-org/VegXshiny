@@ -10,6 +10,9 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     
+    # Include the custom.js file
+    tags$head(tags$script(src = "www/custom.js")),
+    
     # Detect device & browser info
     shinybrowser::detect(),
     
@@ -27,13 +30,13 @@ app_ui <- function(request) {
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu(title = "Transform", icon = icon("wand-sparkles", class = "icon-padded-right"), 
+               navbarMenu(title = "Import", icon = icon("wand-sparkles", class = "icon-padded-right"), 
                           tabPanel("Table", mod_tableImport_ui("tableImport")),
                           tabPanel("Turboveg", mod_turbovegImport_ui("turbovegImport")),
                           tabPanel("Veg-X", mod_vegxImport_ui("vegxImport"))
                ),
                
-               tabPanel("Inspect", icon = icon("eye", class = "icon-padded-right"),
+               tabPanel("Review", icon = icon("eye", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                

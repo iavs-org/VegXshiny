@@ -27,7 +27,9 @@ mod_aboutVegX_ui <- function(id){
                import, integrate, and export vegetation data using the Veg-X 
                standard. Based on this, VegXshiny was developed as a GUI-based 
                application for creating Veg-X documents from small to medium
-               sized datasets."),
+               sized datasets. Note that so far not all of the Veg-X
+               elements can be imported with VegXshiny, but we are working on 
+               it."),
         
         tags$p("The figure below shows the typical workflow. The core is the 
                conversion part, where dialogs guide the user through the process 
@@ -113,21 +115,21 @@ mod_aboutVegX_ui <- function(id){
         
         tags$ol(
           tags$li(tags$a("Prepare", href = paste0("#", ns("file_manager")))),
-          tags$li(tags$a("Transform and validate", href = paste0("#", ns("vegx_import"))),
+          tags$li(tags$a("Import", href = paste0("#", ns("vegx_import"))),
                   tags$ul(style = "list-style-type: none;",
-                          tags$li(tags$a("From Tables", href = paste0("#", ns("import_tables")))),
-                          tags$li(tags$a("From Turboveg XML", href = paste0("#", ns("import_turboveg")))),
-                          tags$li(tags$a("Load Veg-X", href = paste0("#", ns("import_vegx"))))
+                          tags$li(tags$a("Tables", href = paste0("#", ns("import_tables")))),
+                          tags$li(tags$a("Turboveg XML", href = paste0("#", ns("import_turboveg")))),
+                          tags$li(tags$a("Veg-X", href = paste0("#", ns("import_vegx"))))
                   )
           ),
-          tags$li(tags$a("Inspect and edit", href = paste0("#", ns("xml_viewer")))),
+          tags$li(tags$a("Review", href = paste0("#", ns("xml_viewer")))),
           tags$li(tags$a("Collect", href = paste0("#", ns("vegx_export")))),
           tags$li(tags$a("Action Log", href = paste0("#", ns("action_log"))))
         ),
         
         hr(),
         tags$h2("Prepare", id = ns("file_manager")),
-        tags$p("This File Manager is the single entry point for user-supplied 
+        tags$p("This is the single entry point for user-supplied 
                 data. ", tags$span("All files that contain information intended 
                 for import need to be uploaded here. ", class = "text-info"), 
                 "To upload files, click the upload widget on the left panel 
@@ -151,7 +153,8 @@ mod_aboutVegX_ui <- function(id){
                   number must match the number of columns."),
           tags$li("If you have a text file and commas as column separators,
                   use '.csv' as file extension. In case of tabs
-                  use '.tsv' or '.txt'. Space is not recognized as a delimiter.")
+                  use '.tsv' or '.txt'."), 
+          tags$li("Space is currently not recognized as a delimiter.")
         ),
         tags$p("Completed uploads are listed under 'Uploaded Files' with a 
                 corresponding icon for the file type."),
@@ -162,41 +165,87 @@ mod_aboutVegX_ui <- function(id){
                 tab above the data view to access functions for editing and
                 reshaping the uploaded files. The following functions are
                 available for tables:"),
-        tags$ul(
-          tags$li("Save edits > Save: Save edits overwriting the current
-                object."),
-          tags$li("Save edits > Save as: Save edits as a new object."),
-          tags$li("Reshape table > Pivot: Transform table from 'wide' to 
-                'long' format. Opens an input screen with detailed 
-                instructions."),
-          tags$li("Reshape table > Transpose: Turn rows into columns"),
-          tags$li("Reshape table > Crop: Removal of table sections"),
-          tags$li("Reshape table > Merge columns: Merge two columns into one. 
-                This can be needed when data points are identified by more 
-                than one row and column."),
-          tags$li("Reshape table > Split column: Reverse the merging of 
-                columns."),
-          tags$li("Edit values > Edit colnames: The title says it all."),
-          tags$li("Edit values > Row to colnames: Create column names from
-                a row."),
-          tags$li("Edit values > Column to rownames: Create rownames from
-                a column."),
-          tags$li("Edit values > Rownames to column: Transform rownames
-                into a new column."),
-          tags$li("Edit values > Format date: Transform dates into the 
-                required format, which is YYYY-MM-DD. For example, if your
-                actual values look like 17.12.2023, the complete conversion
-                specification is %d.%m.%Y and for 02/21/18 it is %m/%d/%y.
-                (the procedure follows standard r rules, frequent symbols
-                are %d (day of the month as number), %m (month as
-                number), %b (month abbreviated like Jan), %B (Month full name
-                like January), %y (Year 2 digit), %Y (Year 4 digit). The
-                separators are used verbatim (like ' ' for space."),
-          tags$li("Discard edits: Exit the edit mode without saving"),
-        ),
-        tags$h2("Transform and validate", id = ns("vegx_import")),
-        tags$p("This dialog transforms the data objects from the File 
-                Manager into Veg-X. The application supports imports from 
+        
+
+      
+        tagList(
+          div(class = "info-box",
+              ## Save edits
+              div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1em; color: #18bc9c;", "Save edits (click to expand)")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Save: Save edits overwriting the current object")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Save as: Save edits as a new object")),
+              
+              ## Reshape table
+              div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1em; color: #18bc9c;", "Reshape table (click to expand)")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Pivot: Transform table from 'wide' to 
+                'long' format. Opens an input screen with detailed instructions")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Transpose: Turn rows into columns")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Crop: Removal of table sections")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Merge columns: Merge two columns into one. 
+                            This can be needed when data points are identified by more than one column")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Split column: Reverse the merging of
+                            columns")),
+
+              ## Edit values
+              div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1em; color: #18bc9c;", "Edit 
+                            values (click to expand)")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Row to 
+                            colnames: Create column names from a row")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Column 
+                            to rownames: Create rownames from a column")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Rownames 
+                            to column: Transform rownames into a new column")),
+              div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem; color: black;", "Format 
+                  date: Transform dates into the required format, which is 
+                  YYYY-MM-DD. For example, if your actual values look like 
+                  17.12.2023, the complete conversion specification is %d.%m.%Y 
+                  and for 02/21/18 it is %m/%d/%y.(the procedure follows 
+                  standard r rules, frequent symbols are %d (day of the month as 
+                  number), %m (month as number), %b (month abbreviated like 
+                  Jan), %B (Month full name like January), %y (Year 2 digit), 
+                  %Y (Year 4 digit). The separators are used verbatim (like ' ' 
+                  for space)")),
+
+              ## Discard edits
+              div(class = "info-box-item collapsible",
+                  icon("caret-right", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1em; color:black;", "Discard
+                            edits: Exit the edit mode without saving")),
+              
+          )
+        ),    
+        
+        tags$h2("Import", id = ns("vegx_import")),
+        tags$p("This dialog transforms the uploaded data (see 'Prepare') 
+                into Veg-X. The application supports imports from 
                 tabular data, Turboveg XML or Veg-X (for further edits). 
                 Note that a new Veg-X overwrites a previous one, i.e.
                 sequential imports from different source objects into the 
@@ -218,11 +267,11 @@ mod_aboutVegX_ui <- function(id){
                 column for observation date, a column for species names and
                 one for the cover or count values. If species aggregation took
                 place in layers, an additional column for layers is needed."),
-        tags$p("The tools provided in the File Manager help with the          
+        tags$p("The tools provided in the preparation step help with the          
                 transformations. The import function guides step by step
                 towards the goal. Details on the expected format of input data
                 is available when hovering the info icon next to the dataset
-                selection in the table import dialog. Tutorial videos are planned for common tasks."),
+                selection in the table import dialog."),
         tags$p("The import of tabular data is structured into five steps. 
                 Mandatory fields are marked with a star (*)"),
         tags$ol(
@@ -280,7 +329,7 @@ mod_aboutVegX_ui <- function(id){
                  communityObservations). The same applies to measurements 
                  related to individual organisms, such as DBH (called 
                  individualOrganismObservations)."),
-          tags$p(tags$li("Review inputs")),
+          tags$p(tags$li("Check inputs")),
           tags$p("Check your mapped inputs before starting the import. 
                  Color-coded boxes indicate the status:"),
           tags$ul(style = "margin-bottom: 10px",
@@ -333,7 +382,7 @@ mod_aboutVegX_ui <- function(id){
         tags$p("Choose an uploaded Veg-X file for validation. Review the 
                summary and run the import."),
         
-        tags$h2("Inspect and edit", id = ns("xml_viewer")),
+        tags$h2("Review", id = ns("xml_viewer")),
         tags$p("The Veg-X XML Viewer previews the current Veg-X document. 
                Clicking the 'Edit' button let you enter the edit mode, where 
                you can modify the raw XML of the Veg-X document. Caution needs 
@@ -353,7 +402,7 @@ mod_aboutVegX_ui <- function(id){
                supports the import of Veg-X XML documents.",  
                class = "text-info")), 
         
-        tags$h2("Action Log", id = ns("action_log")),
+        tags$h2("Log", id = ns("action_log")),
         tags$p("The Action Log records user actions and application messages 
                during a session. This includes file uploads and edits, import 
                messages, Veg-X document edits and validations and file exports. 
@@ -367,13 +416,13 @@ mod_aboutVegX_ui <- function(id){
         tags$h3("How to format my data correctly for VegXshiny?", 
                 class = "text-info"),
         tags$p("VegXshiny expects tabular data in a format, where each column 
-               is a variable and each row is an observation. Details on the 
-               expected format of input data is always available when hovering 
-               the info icon next to the dataset selection in the table import 
-               dialog."),
+               is a variable and each row is an observation. In the import 
+               dialog, details on the expected format of input data is always 
+               available when hovering the info icon next to the dataset 
+               selection."),
         tags$p("If your dataset does not meet the format specifications you can 
-               use the ", tags$span("Reshape tools in the File Manager", 
-                                    class = "text-info"), 
+               use the ", tags$span("Reshape tools in the file manager (see 
+                                    'Prepare')", class = "text-info"), 
                "or R-functions such as ", 
                tags$code("reshape::melt()"), " or ", 
                tags$code("tidyr::pivot_longer()"), 
@@ -381,22 +430,31 @@ mod_aboutVegX_ui <- function(id){
 
         tags$h3("Why did my import fail?", class = "text-info"),
         tags$p("If the import fails, you may consult the ", 
-               tags$i("Action Log"), " for details on why the data could not 
-               be imported."),
+               tags$i("Log"),". It sometimes provides useful details 
+               on why the data could not be imported."),
         
         tags$h3("My files are too large to upload, what should I do?", 
                 class = "text-info"),
-        tags$p("The online version of VegXshiny supports uploads up to a size 
-               of 50 MB. Larger files may lead to a significant slowdown of the 
-               server and compromise the responsiveness of the application. If
-               you need to handle larger files you can install VegXshiny from 
-               github and run the application locally:"),
-        tags$code("install.packages(\"devtools\")"), tags$br(),
-        tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), 
-        tags$br(),
-        tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # set limit and run"), 
-        tags$br(),
-        tags$p("Alternatively, you can can write an import script using the", 
+        tags$p("The online version of VegXshiny currently supports uploads up to 
+               a size of 50 MB. If you need to handle larger 
+               files you can install VegXshiny from github and run the 
+               application locally:"),
+        
+        tagList(
+          tags$style(
+            HTML(".code-block {
+                  margin: 20px; /* Adjust this value to your preference */
+                }
+              ")
+          ),
+          tags$div(
+            class = "code-block",
+            tags$code("install.packages(\"devtools\")"), tags$br(),
+            tags$code("devtools::install_github(\"iavs-org/VegXshiny\")"), tags$br(),
+            tags$code("VegXshiny::run_app(max_upload_size_MB = 99)  # set limit and run")
+          )
+        ),
+        tags$p("With R skills, you can import using the", 
                tags$a("VegX R-package", 
                       href = "https://github.com/iavs-org/VegX", 
                       target="_blank"), 

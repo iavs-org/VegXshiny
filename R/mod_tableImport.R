@@ -8,207 +8,224 @@
 #'
 #' @importFrom shiny NS tagList 
 #' @import bslib
+
 mod_tableImport_ui <- function(id){
   ns <- NS(id)
-  tagList(
-    shinyjs::useShinyjs(),
-    
-    navset_pill_list(
-      id=ns("sidebar"),
-      widths = c(2, 10),
-      selected = "Project",
-      
-      # Project ####
-      nav_panel(title = "1. Project", value = "Project",
-          column(
-            width = 10, offset = 1,
-            h2("Project"),
-            tags$p("Describe your project and its contributors. Imported files can be assigned in the next steps", class = "text-info annotation no-margin"),
-            hr(),
-            uiOutput(ns("project_ui"))
-          )
-      ),
-      
-      # Plots ####
-      nav_panel(title = "2. Plots", value = "Plots",
-          column(
-            width = 10, offset = 1,
-            h2("Plots"),
-            tags$p("Describe static plot properties. Properties of observations (e.g. date, observer) can be assigned in the next step.", class = "text-info annotation no-margin"),
-            hr(),
-            uiOutput(ns("plot_ui"))
-          )
-      ),
-      
-      
-      # Observations ####
-      nav_panel(title = "3. Observations", value = "Observations",  
-          column(
-            width = 10, offset = 1,
-            h2("Observations"),
-            tags$p("Import your observation data", class = "text-info annotation no-margin"),
-            hr(),
-            tags$h4("Observation categories"),
-            checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = T, 
-                               choiceNames = c("Individual organisms", "Aggregate organisms", "Stratum", "Community", "Surface cover"),
-                               choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", 
-                                                "stratumObservations", "communityObservations", "surfaceCoverObservations")),
-            
-            tags$div(
-              id = ns("observationsAccordion"), class = "panel-group", "role" = "tablist",
-              tags$div(
-                id = ns("individualOrganismObservations"),
-                class = "panel panel-default",
+  tabsetPanel(
+    tabPanel("Table import",
+      tagList(
+        shinyjs::useShinyjs(),
+        
+        tags$head(
+          tags$style(HTML("
+           .col-sm-3 {
+              max-width: 250px;
+              margin-top: 35px;
+           }
+           .col-sm-12 {
+             padding-left: 0;
+             padding-right: 0;
+           }
+         "))
+        ),
+        navset_pill_list(
+          id=ns("sidebar"),
+          widths = c(3, 9),
+          selected = "Project",
+          
+          # Project ####
+          nav_panel(title = "1. Project", value = "Project",
+              column(
+                width = 12,
+                h1("Project"),
+                tags$p("Describe your project and its contributors. Files can be assigned in the next steps", class = "text-info annotation no-margin"),
+                hr(),
+                uiOutput(ns("project_ui"))
+              )
+          ),
+          
+          # Plots ####
+          nav_panel(title = "2. Plots", value = "Plots",
+              column(
+                width = 12,
+                h1("Plots"),
+                tags$p("Describe static plot properties. Properties of observations (e.g. date, observer) can be assigned in the next step.", class = "text-info annotation no-margin"),
+                hr(),
+                uiOutput(ns("plot_ui"))
+              )
+          ),
+          
+          
+          # Observations ####
+          nav_panel(title = "3. Observations", value = "Observations",  
+              column(
+                width = 12,
+                h1("Observations"),
+                tags$p("Import your observation data", class = "text-info annotation no-margin"),
+                hr(),
+                tags$h4("Observation categories"),
+                checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = T, 
+                                   choiceNames = c("Individual organisms", "Aggregate organisms", "Stratum", "Community", "Surface cover"),
+                                   choiceValues = c("individualOrganismObservations", "aggregateOrganismObservations", 
+                                                    "stratumObservations", "communityObservations", "surfaceCoverObservations")),
+                
                 tags$div(
-                  id = ns("individualOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("IndividualOrganismObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("individualOrganismObservationsBody"))
-                    )
-                  )
-                ),
-                tags$div(
-                  id = ns("individualOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  id = ns("observationsAccordion"), class = "panel-group", "role" = "tablist",
                   tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("individualOrganismObservations_ui"))
-                  )
-                )
-              ),
-              
-              tags$div(
-                id = ns("aggregateOrganismObservations"),
-                class = "panel panel-default",
-                tags$div(
-                  id = ns("aggregateOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("AggregateOrganismObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
+                    id = ns("individualOrganismObservations"),
+                    class = "panel panel-default",
+                    tags$div(
+                      id = ns("individualOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                      tags$h4(
+                        class = "panel-title",
+                        tags$a("IndividualOrganismObservations", class = "collapsed",
+                               "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("individualOrganismObservationsBody"))
+                        )
+                      )
                     ),
-                    tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to all occurrences of an organism during a plot observation based on an aggregation factor, e.g. a measurement of the overall cover/biomass/etc. of a specific taxon. Further stratification of the observation by vegetation layer and subplot is possible.")
+                    tags$div(
+                      id = ns("individualOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                      tags$div(
+                        class = "panel-body",
+                        uiOutput(ns("individualOrganismObservations_ui"))
+                      )
+                    )
                   ),
-                ),
-                tags$div(
-                  id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                  
                   tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("aggOrgObs_ui"))
-                  )
-                )
-              ),
-              
-              tags$div(
-                id = ns("stratumObservations"),
-                class = "panel panel-default",
-                tags$div(
-                  id = ns("stratumObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("StratumObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("stratumObservationsBody"))
+                    id = ns("aggregateOrganismObservations"),
+                    class = "panel panel-default",
+                    tags$div(
+                      id = ns("aggregateOrganismObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                      tags$h4(
+                        class = "panel-title",
+                        tags$a("AggregateOrganismObservations", class = "collapsed",
+                               "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("aggregateOrganismObservationsBody"))
+                        ),
+                        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to all occurrences of an organism during a plot observation based on an aggregation factor, e.g. a measurement of the overall cover/biomass/etc. of a specific taxon. Further stratification of the observation by vegetation layer and subplot is possible.")
+                      ),
                     ),
-                    tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to an entire stratum during a plot observation, e.g. a measurement of the total cover of the herb layer. Note that taxon-specific stratum observations such as abundance estimates for a taxon in a specific layer can be imported under aggregateOrganismObservations.")
-                  )
-                ),
-                tags$div(
-                  id = ns("stratumObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                    tags$div(
+                      id = ns("aggregateOrganismObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                      tags$div(
+                        class = "panel-body",
+                        uiOutput(ns("aggOrgObs_ui"))
+                      )
+                    )
+                  ),
+                  
                   tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("stratumObs_ui"))
-                  )
-                )
-              ),
-              
-              tags$div(
-                id = ns("communityObservations"),
-                class = "panel panel-default",
-                tags$div(
-                  id = ns("communityObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("CommunityObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("communityObservationsBody"))
+                    id = ns("stratumObservations"),
+                    class = "panel panel-default",
+                    tags$div(
+                      id = ns("stratumObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                      tags$h4(
+                        class = "panel-title",
+                        tags$a("StratumObservations", class = "collapsed",
+                               "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("stratumObservationsBody"))
+                        ),
+                        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to an entire stratum during a plot observation, e.g. a measurement of the total cover of the herb layer. Note that taxon-specific stratum observations such as abundance estimates for a taxon in a specific layer can be imported under aggregateOrganismObservations.")
+                      )
+                    ),
+                    tags$div(
+                      id = ns("stratumObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                      tags$div(
+                        class = "panel-body",
+                        uiOutput(ns("stratumObs_ui"))
+                      )
+                    )
+                  ),
+                  
+                  tags$div(
+                    id = ns("communityObservations"),
+                    class = "panel panel-default",
+                    tags$div(
+                      id = ns("communityObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                      tags$h4(
+                        class = "panel-title",
+                        tags$a("CommunityObservations", class = "collapsed",
+                               "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("communityObservationsBody"))
+                        )
+                      )
+                    ),
+                    tags$div(
+                      id = ns("communityObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                      tags$div(
+                        class = "panel-body",
+                        uiOutput(ns("communityObservations_ui"))
+                      )
+                    )
+                  ),
+                  
+                  tags$div(
+                    id = ns("surfaceCoverObservations"),
+                    class = "panel panel-default",
+                    tags$div(
+                      id = ns("surfaceCoverObservationsHeading"), class = "panel-heading" , "role" = "tab",
+                      tags$h4(
+                        class = "panel-title",
+                        tags$a("SurfaceCoverObservations", class = "collapsed",
+                               "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("surfaceCoverObservationsBody"))
+                        ),
+                        tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to different surface types within a plot. Further stratification of the observation by subplot is possible.")
+                      )
+                    ),
+                    tags$div(
+                      id = ns("surfaceCoverObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
+                      tags$div(
+                        class = "panel-body",
+                        uiOutput(ns("covObs_ui"))
+                      )
                     )
                   )
-                ),
-                tags$div(
-                  id = ns("communityObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
-                  tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("communityObservations_ui"))
-                  )
-                )
-              ),
-              
-              tags$div(
-                id = ns("surfaceCoverObservations"),
-                class = "panel panel-default",
-                tags$div(
-                  id = ns("surfaceCoverObservationsHeading"), class = "panel-heading" , "role" = "tab",
-                  tags$h4(
-                    class = "panel-title",
-                    tags$a("SurfaceCoverObservations", class = "collapsed",
-                           "role"="button", "data-toggle"="collapse", "data-parent"=paste0("#", ns("observationsAccordion")), "href"=paste0("#", ns("surfaceCoverObservationsBody"))
-                    ),
-                    tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "An observation applying to different surface types within a plot. Further stratification of the observation by subplot is possible.")
-                  )
-                ),
-                tags$div(
-                  id = ns("surfaceCoverObservationsBody"), class="panel-collapse collapse", "role"="tabpanel",
-                  tags$div(
-                    class = "panel-body",
-                    uiOutput(ns("covObs_ui"))
-                  )
                 )
               )
-            )
+          ),
+          
+          # Summary ####
+          nav_panel(title = "4. Summary", value = "Summary",
+              column(
+                width = 12,
+                h1("Summary"),
+                tags$p("Check your entries", class = "text-info annotation no-margin"),
+                hr(),
+                
+                h3("Project", style = "margin-bottom: 6px"),
+                fluidRow(
+                  column(12,
+                         uiOutput(ns("summary_project"))
+                  )
+                ),
+                
+                h3("Plots"),
+                fluidRow(
+                  column(12,
+                         uiOutput(ns("summary_plot_id")),
+                         uiOutput(ns("summary_plot_coordinates")),
+                         uiOutput(ns("summary_plot_elevation")),
+                         uiOutput(ns("summary_plot_geometry")),
+                         uiOutput(ns("summary_subplot_geometry")),
+                         uiOutput(ns("summary_plot_topography")),
+                         uiOutput(ns("summary_plot_parent_material"))
+                  )
+                ),
+                
+                h3("Observations"),
+                fluidRow(
+                  column(12,
+                         uiOutput(ns("summary_observations"))
+                  )
+                )
+              )
           )
-      ),
-      
-      # Summary ####
-      nav_panel(title = "4. Summary", value = "Summary",
-          column(
-            width = 10, offset = 1,
-            h2("Summary"),
-            tags$p("Review your entries", class = "text-info annotation no-margin"),
-            hr(),
-            
-            h3("Project", style = "margin-bottom: 6px"),
-            fluidRow(
-              column(12,
-                     uiOutput(ns("summary_project"))
-              )
-            ),
-            
-            h3("Plots"),
-            fluidRow(
-              column(12,
-                     uiOutput(ns("summary_plot_id")),
-                     uiOutput(ns("summary_plot_coordinates")),
-                     uiOutput(ns("summary_plot_elevation")),
-                     uiOutput(ns("summary_plot_geometry")),
-                     uiOutput(ns("summary_subplot_geometry")),
-                     uiOutput(ns("summary_plot_topography")),
-                     uiOutput(ns("summary_plot_parent_material"))
-              )
-            ),
-            
-            h3("Observations"),
-            fluidRow(
-              column(12,
-                     uiOutput(ns("summary_observations"))
-              )
-            )
-          )
+        ),
+        
+        # Navigation bar ####
+        div(
+          uiOutput(ns("navigation_ui")),
+          style = "margin-bottom: 100px"
+        )
       )
-    ),
-    
-    # Navigation bar ####
-    div(
-      uiOutput(ns("navigation_ui")),
-      style = "margin-bottom: 100px"
     )
   )
 }
@@ -308,22 +325,22 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         )
       } else if(input$sidebar =="Summary") {
         buttons = fluidRow(
-          column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-          column(width = 6, actionButton(ns("import"), label = "Import", width = "250px", class = "btn-success center-block"))
+          column(width = 2, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
+          column(width = 2, offset = 8, actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right"))
         )  
       } else {
         buttons = fluidRow(
-          column(width = 3, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
-          column(width = 3, offset = 6, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right"))
+          column(width = 2, actionButton(ns("previous_tab"), label = div(icon("angle-left"), "Back"), width = "100px", class = "pull-left")),
+          column(width = 2, offset = 8, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right"))
         )
       }
       
       fluidRow(
-        column(2),  
+        column(3),  
         column(
-          10,
+          9,
           column(
-            width = 10, offset = 1,
+            width = 12,
             hr(),
             buttons
           )
