@@ -62,8 +62,9 @@ mod_fileManager_ui <- function(id){
                )
             )
       ),
-      tabPanel("Tips",
-        tagList(
+      tabPanel("Help",
+        div(
+          class = "content",
           tags$h1("Upload and prepare your data"),
             div(class = "info-box",
                 div(class = "text-info info-box-item",
@@ -81,10 +82,123 @@ mod_fileManager_ui <- function(id){
                 div(class = "text-info info-box-item",
                     icon("lightbulb", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
-                div(class = "text-info info-box-item",
-                    icon("lightbulb", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem;", "Check out the tutorial.")),
-          )
+          ),
+          
+          br(),
+          tags$p("This is the single entry point for user-supplied 
+                  data. ", tags$span("All files that contain information intended 
+                  for import need to be uploaded here. ", class = "text-info"), 
+                 "To upload files, click the upload widget on the left panel 
+                  and browse your local file system. You can select and upload 
+                  multiple files at once by pressing [CTRL]. Currently, the 
+                  following file types are supported: "),
+          tags$h4("Tabular data:"),
+          tags$ul(
+            tags$li(".csv (comma-separated)"),
+            tags$li(".txt, .tsv (tab-separated)"),
+            tags$li(".xls, .xslx")
+          ),
+          tags$h4("Turboveg 2:"),
+          tags$ul(tags$li("xml")),
+          tags$h4("Veg-X:"),
+          tags$ul(tags$li("xml")),
+          tags$p("If an upload of tabular data fails, check the following 
+                  possible reasons or fixes:"),
+          tags$ul(
+            tags$li("Column names are expected in the first line and their 
+                    number must match the number of columns."),
+            tags$li("If you have a text file and commas as column separators,
+                    use '.csv' as file extension. In case of tabs
+                    use '.tsv' or '.txt'."), 
+            tags$li("Space is currently not recognized as a delimiter.")
+          ),
+          tags$p("Completed uploads are listed under 'Uploaded Files' with a 
+                  corresponding icon for the file type."),
+          tags$p("Clicking on one of the file icons under 'Uploaded files' 
+                  will activate the 'File Editor'. Depending on the file type,
+                  this may either be a text editor (for xml data) or a 
+                  spreadsheet editor (for tabular data). Click on the 'Edit' 
+                  tab above the data view to access functions for editing and
+                  reshaping the uploaded files. The following functions are
+                  available for tables:"),
+          
+          
+          
+          tagList(
+            div(class = "info-box",
+                ## Save edits
+                div(class = "info-box-item",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1em", "Save edits")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Save: Save edits overwriting the current object")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Save as: Save edits as a new object")),
+                
+                ## Reshape table
+                div(class = "info-box-item",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1em", "Reshape table")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Pivot: Transform table from 'wide' to 
+                  'long' format. Opens an input screen with detailed instructions")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Transpose: Turn rows into columns")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Crop: Removal of table sections")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Merge columns: Merge two columns into one. 
+                              This can be needed when data points are identified by more than one column")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Split column: Reverse the merging of
+                              columns")),
+                
+                ## Edit values
+                div(class = "info-box-item",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1em;", "Edit 
+                              values")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Row to 
+                              colnames: Create column names from a row")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Column 
+                              to rownames: Create rownames from a column")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Rownames 
+                              to column: Transform rownames into a new column")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Format 
+                    date: Transform dates into the required format, which is 
+                    YYYY-MM-DD. For example, if your actual values look like 
+                    17.12.2023, the complete conversion specification is %d.%m.%Y 
+                    and for 02/21/18 it is %m/%d/%y.(the procedure follows 
+                    standard r rules, frequent symbols are %d (day of the month as 
+                    number), %m (month as number), %b (month abbreviated like 
+                    Jan), %B (Month full name like January), %y (Year 2 digit), 
+                    %Y (Year 4 digit). The separators are used verbatim (like ' ' 
+                    for space)")),
+                
+                ## Discard edits
+                div(class = "info-box-item collapsible",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1em; color:black;", "Discard
+                              edits: Exit the edit mode without saving")),
+                
+            )
+          ),              
+          
         )
       )
     )

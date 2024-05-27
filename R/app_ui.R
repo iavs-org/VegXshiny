@@ -26,7 +26,7 @@ app_ui <- function(request) {
                ),   
                tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("Upload", icon = icon("file-import", class = "icon-padded-right"),
+               tabPanel("Start", icon = icon("file-import", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                

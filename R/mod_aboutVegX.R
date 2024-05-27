@@ -123,7 +123,7 @@ mod_aboutVegX_ui <- function(id){
                functionality of each component is described here."),
         
           tags$ol(
-            tags$li(tags$a("Prepare", href = paste0("#", ns("file_manager")))),
+            tags$li(tags$a("Start", href = paste0("#", ns("file_manager")))),
             tags$li(tags$a("Import", href = paste0("#", ns("vegx_import"))),
                     tags$ul(style = "list-style-type: none;",
                             tags$li(tags$a("Tables", href = paste0("#", ns("import_tables")))),
@@ -137,7 +137,7 @@ mod_aboutVegX_ui <- function(id){
           ),
           
           hr(),
-          tags$h2("Prepare", id = ns("file_manager")),
+          tags$h2("Start", id = ns("file_manager")),
           tags$p("This is the single entry point for user-supplied 
                   data. ", tags$span("All files that contain information intended 
                   for import need to be uploaded here. ", class = "text-info"), 
@@ -180,57 +180,57 @@ mod_aboutVegX_ui <- function(id){
           tagList(
             div(class = "info-box",
                 ## Save edits
-                div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                div(class = "info-box-item",
                     icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1em; color: #18bc9c;", "Save edits (click to expand)")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                    tags$span(style = "font-size:1em", "Save edits")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Save: Save edits overwriting the current object")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Save as: Save edits as a new object")),
                 
                 ## Reshape table
-                div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                div(class = "info-box-item",
                     icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1em; color: #18bc9c;", "Reshape table (click to expand)")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                    tags$span(style = "font-size:1em", "Reshape table")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Pivot: Transform table from 'wide' to 
                   'long' format. Opens an input screen with detailed instructions")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Transpose: Turn rows into columns")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Crop: Removal of table sections")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Merge columns: Merge two columns into one. 
                               This can be needed when data points are identified by more than one column")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Split column: Reverse the merging of
                               columns")),
   
                 ## Edit values
-                div(class = "info-box-item collapsible", style = "cursor: pointer;",
+                div(class = "info-box-item",
                     icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1em; color: #18bc9c;", "Edit 
-                              values (click to expand)")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                    tags$span(style = "font-size:1em;", "Edit 
+                              values")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Row to 
                               colnames: Create column names from a row")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Column 
                               to rownames: Create rownames from a column")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Rownames 
                               to column: Transform rownames into a new column")),
-                div(class = "info-box-item", style = "display: none; margin-left: 30px;",
+                div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Format 
                     date: Transform dates into the required format, which is 
