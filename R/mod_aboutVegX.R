@@ -255,10 +255,10 @@ mod_aboutVegX_ui <- function(id){
           tags$h2("Import", id = ns("vegx_import")),
           tags$p("This dialog transforms the uploaded data (see 'Prepare') 
                   into Veg-X. The application supports imports from 
-                  tabular data, Turboveg XML or Veg-X (for further edits). 
-                  Note that a new Veg-X overwrites a previous one, i.e.
-                  sequential imports from different source objects into the 
-                  same Veg-X document are currently not possible."),
+                  tabular data, Turboveg XML or Veg-X (for validation or
+                  further edits). Note that a new Veg-X overwrites a previous 
+                  one, i.e. sequential imports from different source objects 
+                  into the same Veg-X document are currently not possible."),
           tags$h3("Build Veg-X from Tables", id = ns("import_tables")),
           tags$p("Tabular data for import are expected to be in a format 
                   where each observation has its row and each variable has its

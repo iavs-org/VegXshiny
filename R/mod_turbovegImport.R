@@ -12,11 +12,11 @@ mod_turbovegImport_ui <- function(id){
   
   fluidPage(
     tabsetPanel(
-      tabPanel("Turboveg2 XML to R",
+      tabPanel("Turboveg to Veg-X",
         fluidRow(
           column(
             width = 12,
-            tags$h1 (""),
+            tags$h1 ("Conversion of Turboveg2 XML to Veg-X"),
             fluidRow(
               column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
               column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg2 XML", style = "height: 35px; line-height: 0px")))
@@ -32,7 +32,37 @@ mod_turbovegImport_ui <- function(id){
             actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right")
           )
         )
-      )
+      ),
+      tabPanel("Help",
+        div(
+          class = "content",
+            tags$h1("Help with importing Turboveg"),
+            div(class = "info-box",
+                 div(class = "text-info info-box-item",
+                     icon("lightbulb", class = "icon-padded-right"),
+                     tags$span(style = "font-size:1.8rem;", "Before a Turboveg
+                               document can be read in here, it must first be 
+                               uploaded in the 'Upload' section")),
+            ),
+            
+            br(),
+            tags$p("You can import data from ", 
+                   tags$a("Turboveg 2 standard XML files", 
+                          href = "https://www.synbiosys.alterra.nl/turboveg/help/idh_export_xml.htm",  # nolint
+                          target = "_blank"), "."),
+            tags$p("Choose an uploaded Turboveg 2 XML file and press the read
+                   button. Once the extraction is finished, a summary 
+                   is displayed."),
+            tags$p("Submitting the resulting, pre-processed data with the 
+                   ", tags$i("Import"), " button will open a dialog where you can 
+                   select, which 'undefined' Turboveg header data you want to 
+                   import (i.e. data lacking information that is required by 
+                   pre-defined Veg-X elements). The selected fields will be 
+                   attached as user-defined to their corresponding plot node in 
+                   the Veg-X document. Pressing ", tags$i("Proceed"), "will then 
+                   start the conversion to Veg-X.")
+        )
+      )      
     )
   )
 }

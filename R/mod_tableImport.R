@@ -14,7 +14,7 @@ mod_tableImport_ui <- function(id){
 
   fluidPage(
     tabsetPanel(
-      tabPanel("Table import",
+      tabPanel("Table to Veg-X",
         tagList(
           shinyjs::useShinyjs(),
           
@@ -224,7 +224,125 @@ mod_tableImport_ui <- function(id){
             style = "margin-bottom: 100px"
           )
         )
-      )
+      ),
+      tabPanel("Help",
+        div(
+          class = "content",
+          tags$h1("Help with reading tabular data"),
+          div(class = "info-box",
+             div(class = "text-info info-box-item",
+                 icon("lightbulb", class = "icon-padded-right"),
+                 tags$span(style = "font-size:1.8rem;", "Before data can be read 
+                 in here, it must first be uploaded in the 'Upload' section")),
+          ),
+          br(),
+          tags$p("Tabular data for import are expected to be in a format 
+                  where each observation has its row and each variable has its
+                  column. One consequence is that a transformation is 
+                  required for 'header data' following a convention where
+                  variables such as date of recording or elevation are 
+                  organized in rows. A valid 'header' table has at least one 
+                  column with plot names (as far as static plot attributes like
+                  spatial coordinates are concerned) and one additional column
+                  with observation dates in case of non-static attributes
+                  like species cover. This follows the Veg-X
+                  logic. Due to limitations of the underlying packages, a
+                  date column needs to be prepared outside this app if it is
+                  lacking. A valid species table has a column for plot IDs, a
+                  column for observation date, a column for species names and
+                  one for the cover or count values. If species aggregation took
+                  place in layers, an additional column for layers is needed."),
+         tags$p("The tools provided in the preparation step help with the          
+                  transformations. The import function guides step by step
+                  towards the goal. Details on the expected format of input data
+                  is available when hovering the info icon next to the dataset
+                  selection in the table import dialog."),
+         tags$p("The import of tabular data is structured into five steps. 
+                  Mandatory fields are marked with a star (*)"),
+         tags$ol(
+           tags$p(tags$li("Project information")),
+           tags$p("Provide a general description of the project and its 
+                  contributors. No files need to be assigned in this step."),
+           tags$p(tags$li("Plot information")),
+           tags$p("Describe static plot properties (like surface area of the 
+                   plot. This is distinguished from features that belong 
+                   to a plotObservation, such as the date of a recording). 
+                   The expected data set contains one plot per row. Each row is 
+                   identified by a unique plot ID (mandatory) and may contain 
+                   static plot properties (optional):"),
+           tableOutput(ns("example_df_plots")),
+           br(),
+           tags$p("Each mapped plot property needs to be linked to a 
+                  measurement method. Prefabricated descriptions of
+                  common measurement methods are available in the corresponding 
+                  mapping dialog. For example, if plot area was measured in 
+                  square metres, selecting \"Plot area/m2\" as measurement 
+                  method will define an appropriate method and link it to the 
+                  measurement values during import. If none of the predefined
+                  methods is applicable, a custom method can be defined by 
+                  selecting the \"...add custom method\" option."),
+           
+           tags$p(tags$li("Observations")),
+           tags$p("Add different types of observations, such as species
+                   cover, vegetation layers, or soil properties. All observations 
+                   in Veg-X refer to a plotObservation, i.e. a sampling event at 
+                   a specific plot at a specific point in time. Thus, 
+                   ", tags$span("observation data of any type are identified at 
+                   least by a unique combination of plot ID and date. ", 
+                                class = "text-info"), "Depending on the observation type, 
+                   other attributes are required. For example, the import of 
+                   measured species cover values (called 
+                   aggregateOrganismObservations), require a dataset with at 
+                   least four columns as shown in this example: "),
+           tableOutput(ns("example_df_obs")),
+           br(),
+           tags$p("This is an example for a 'long table', - the 
+                   species coverages are often stored differently, i.e. a 
+                   transformation is often necessary before importing (there 
+                   are tools available to help you with that).  If the 
+                   aggregateOrganismObservations were made at a more granular 
+                   level, e.g. for separate subplots or vegetation strata, 
+                   additional data columns are needed."),
+           tags$p("As in the case of plot properties, measurements of 
+                   observations require defined measurement methods. A dropdown 
+                   menu provides a list of predefined methods. If none of these  
+                   predefined methods is applicable, a custom method can be 
+                   created by selecting the \"...add custom method\" option."),
+           tags$p("Note that currently VegXshiny does not support imports into 
+                   the Veg-X container for measurements applying to an entire 
+                   plant community, such as successional stage (called 
+                   communityObservations). The same applies to measurements 
+                   related to individual organisms, such as DBH (called 
+                   individualOrganismObservations)."),
+           tags$p(tags$li("Check inputs")),
+           tags$p("Check your mapped inputs before starting the import. 
+                   Color-coded boxes indicate the status:"),
+           tags$ul(style = "margin-bottom: 10px",
+                   tags$li(tags$span("Green", style = "color: #00a97e"), 
+                           ": Inputs complete, ready for import."),
+                   tags$li(tags$span("Red", style = "color: #da3b3b"), 
+                           ": Inputs incomplete, review before import."),
+                   tags$li(tags$span("Grey", style = "color: #666666"), 
+                           ": Inputs incomplete, ignored during import."),
+           ),
+           tags$p("Only when all input categories are marked either green or 
+                   grey, you will be able to proceed with the import."),
+           
+           tags$p(tags$li("Import")),
+           tags$p("Pressing", tags$i("Import"), "and confirming the dialog will 
+                   create a new Veg-X document from the specified mappings. ", 
+                  tags$span("Your current Veg-X document will be overwritten by 
+                   this. ", class = "text-info")),
+           tags$p("Note that the import may take a while when working with large 
+                   input files containing thousands of observations. A progress 
+                   bar in the lower left corner indicates the current status. 
+                   Once the import is finished, you can view the imported Veg-X 
+                   file in the ", tags$i("Veg-X viewer"), " or export it under 
+                   ", tags$i("Veg-X export."))
+         ),
+
+        )
+      )      
     )
   )
 }

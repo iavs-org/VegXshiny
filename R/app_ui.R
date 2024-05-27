@@ -26,7 +26,7 @@ app_ui <- function(request) {
                ),   
                tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("Prepare", icon = icon("file-import", class = "icon-padded-right"),
+               tabPanel("Upload", icon = icon("file-import", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
@@ -40,7 +40,7 @@ app_ui <- function(request) {
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel("Collect", icon = icon("file-export", class = "icon-padded-right"),
+               tabPanel("Download", icon = icon("file-export", class = "icon-padded-right"),
                         mod_vegxExport_ui("vegxExport")
                ),
                

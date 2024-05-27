@@ -12,11 +12,11 @@ mod_vegxImport_ui <- function(id){
   
   fluidPage(
     tabsetPanel(
-      tabPanel("Veg-X to R",
+      tabPanel("Read Veg-X",
         fluidRow(
           column(
             width = 12,
-            tags$h1 (""),
+            tags$h1 ("Reading existing Veg-X XML"),
             fluidRow(
               column(6, selectizeInput(ns("vegx_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
               column(6, div(style = "display:left-align", actionButton(ns("read_vegx"), label = "Read VegX XML", style = "height: 35px; line-height: 0px")))
@@ -32,7 +32,24 @@ mod_vegxImport_ui <- function(id){
             actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right")
           )
         )
-      )
+      ),
+      tabPanel("Help",
+        div(
+          class = "content",
+            tags$h1("Help with reading Veg-X"),
+            div(class = "info-box",
+               div(class = "text-info info-box-item",
+                   icon("lightbulb", class = "icon-padded-right"),
+                   tags$span(style = "font-size:1.8rem;", "Before a Veg-X 
+                             document can be read in here, it must first 
+                             be uploaded in the 'Upload' section")),
+           ),
+           br(),
+           tags$p("Choose an uploaded Veg-X file for validation. Review the 
+                 summary and run the import."),
+          
+        )
+      )      
     )
   )  
 }
