@@ -101,10 +101,6 @@ code, pre {
   background: #888!important; 
 }
 
-.dataTables_wrapper .dataTables_info, .dataTables_wrapper th, .dataTables_wrapper label {
-  color: #fff!important; 
-}
-
 .nav-stacked li a {
   text-align: left !important; 
   vertical-align: middle!important;
@@ -207,6 +203,8 @@ code, pre {
   display: flex;
   flex-direction: column;
   padding: 10px;
+  padding-bottom: 0px;
+  margin-bottom: 10px;
   background-color: #f0f0f0;
   border-radius: 5px;
   color: #333;
@@ -226,8 +224,4 @@ code, pre {
 
 #edit_toolbar {
   text-align: left;
-}
-
-#actionLog-action_log td {
-  color: white;
 }

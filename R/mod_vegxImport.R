@@ -42,9 +42,8 @@ mod_vegxImport_ui <- function(id){
                    icon("lightbulb", class = "icon-padded-right"),
                    tags$span(style = "font-size:1.8rem;", "Before a Veg-X 
                              document can be read in here, it must first 
-                             be uploaded in the 'Upload' section")),
+                             be uploaded in the 'Start' section")),
            ),
-           br(),
            tags$p("Choose an uploaded Veg-X file for validation. Review the 
                  summary and run the import."),
           

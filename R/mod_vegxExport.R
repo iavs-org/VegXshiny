@@ -10,16 +10,37 @@
 mod_vegxExport_ui <- function(id){
   ns <- NS(id)
   fluidPage(
-    column(
-      width = 10, offset = 1,
-      fluidRow(
-        tags$label("Veg-X document summary"),
-        uiOutput(ns("summary")),
-        hr(),
-        downloadButton(ns("export_xml"), label = "Veg-X"),
-        downloadButton(ns("export_csv"), label = "Long tables"),
-        downloadButton(ns("export_vegtable"), label = "Wide table")
-      )
+    tabsetPanel(
+      tabPanel("Download",
+        tags$h1("Download"),
+        column(
+        width = 12,
+        fluidRow(
+            tags$label("Veg-X document summary"),
+            uiOutput(ns("summary")),
+            hr(),
+            downloadButton(ns("export_xml"), label = "Veg-X"),
+            downloadButton(ns("export_csv"), label = "Long tables"),
+            downloadButton(ns("export_vegtable"), label = "Wide table")
+          )
+        )
+      ),
+      tabPanel("Help",
+        div(
+          class = "content",
+          tags$h1("Help with downloading"),
+          tags$p("If a valid Veg-X document is available, an overview of the 
+                 structure (with the number of nodes of different types) is 
+                 shown on this page. The Veg-X document can now be downloaded 
+                 here. It is also possible to download a set of 'long tables' - 
+                 a format that can be easily processed by generic database 
+                 systems. The third option is to export a flat file (a 
+                 comma-separated 'wide table' or 'vegetation table') for generic 
+                 import into spreadsheet programs, R, etc. ", tags$span("Note 
+                 that Turboveg 3 is able to import Veg-X XML documents.",
+                 class = "text-info")), 
+        )         
+      )        
     )
   )
 }

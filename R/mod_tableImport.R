@@ -233,9 +233,8 @@ mod_tableImport_ui <- function(id){
              div(class = "text-info info-box-item",
                  icon("lightbulb", class = "icon-padded-right"),
                  tags$span(style = "font-size:1.8rem;", "Before data can be read 
-                 in here, it must first be uploaded in the 'Upload' section")),
+                 in here, it must first be uploaded in the 'Start' section")),
           ),
-          br(),
           tags$p("Tabular data for import are expected to be in a format 
                   where each observation has its row and each variable has its
                   column. One consequence is that a transformation is 

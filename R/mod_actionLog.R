@@ -11,12 +11,29 @@ mod_actionLog_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
-    fluidRow(
-      column(
-        width = 10, offset = 1,
-        DT::dataTableOutput(ns("action_log"))
-      )
-    )
+    tabsetPanel(
+      tabPanel(
+      title = "Log",
+        fluidRow(
+          tags$h1 ("Action Log"),
+          column(
+            width = 12,
+            DT::dataTableOutput(ns("action_log"))
+          )
+        )
+      ),
+      tabPanel("Help",
+        div(
+          class = "content",
+          tags$h1("Help with the Action Log"),
+          tags$p("The Action Log records user actions and application messages 
+                   during a session. This includes file uploads and edits, import 
+                   messages, Veg-X document edits and validations and file exports. 
+                   If any problem occurrs during the session, the Action Log 
+                   may provide relevant information.")
+        ) 
+      ) 
+    )  
   )
 }
 

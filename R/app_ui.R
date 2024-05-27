@@ -44,7 +44,7 @@ app_ui <- function(request) {
                         mod_vegxExport_ui("vegxExport")
                ),
                
-               tabPanel("Log", icon = icon("stethoscope", class = "icon-padded-right"),
+               tabPanel("Action Log", icon = icon("stethoscope", class = "icon-padded-right"),
                         mod_actionLog_ui("actionLog")
                )
     )

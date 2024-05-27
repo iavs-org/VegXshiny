@@ -40,11 +40,18 @@ mod_xmlViewer_ui <- function(id){
           class = "content",
           tags$h1("Help with reviewing Veg-X"),
            
-          tags$p("Click on the 'Edit' button if you need to modify the raw XML 
-                 of the current Veg-X document. Caution is advised, as 
-                 manually editing a Veg-X file can quickly invalidate it. Note 
-                 that edits cannot be undone once saved."),
-          tags$p("ressing the 'Validate' button tests whether the current Veg-X 
+          div(class = "info-box",
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Normally, no action is 
+                            required here and you can continue with the 
+                            download.")),
+          ),
+          tags$p("You can edit the data after pressing the 'Edit' button but 
+                 caution is advised, as manually editing a Veg-X document can 
+                 quickly invalidate it. Note that edits cannot be undone once 
+                 saved."),
+          tags$p("Pressing the 'Validate' button tests whether the current Veg-X 
                  document conforms to the Veg-X XML Schema and whether there are 
                  any potential problems with references to nodes. Validation 
                  errors and other problems are listed in the action log.")      

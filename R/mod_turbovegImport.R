@@ -42,10 +42,9 @@ mod_turbovegImport_ui <- function(id){
                      icon("lightbulb", class = "icon-padded-right"),
                      tags$span(style = "font-size:1.8rem;", "Before a Turboveg
                                document can be read in here, it must first be 
-                               uploaded in the 'Upload' section")),
+                               uploaded in the 'Start' section")),
             ),
-            
-            br(),
+
             tags$p("You can import data from ", 
                    tags$a("Turboveg 2 standard XML files", 
                           href = "https://www.synbiosys.alterra.nl/turboveg/help/idh_export_xml.htm",  # nolint
