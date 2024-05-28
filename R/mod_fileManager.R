@@ -66,25 +66,6 @@ mod_fileManager_ui <- function(id){
         div(
           class = "content",
           tags$h1("Upload and prepare your data"),
-            div(class = "info-box",
-                div(class = "text-info info-box-item",
-                    icon("lightbulb", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem;", "You can reshape and split your original data in the file editor. Use the 'crop' function in  
-                    the context-menu (right click) to delete rows and create subtables.")),
-                div(class = "text-info info-box-item",
-                    icon("lightbulb", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem;", "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
-                           function to transform your observation data before import.")),
-                div(class = "text-info info-box-item",
-                    icon("lightbulb", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem;", "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
-                           respective columns.")),
-                div(class = "text-info info-box-item",
-                    icon("lightbulb", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
-          ),
-          
-          br(),
           tags$p("This is the single entry point for user-supplied 
                   data. ", tags$span("All files that contain information intended 
                   for import need to be uploaded here. ", class = "text-info"), 
@@ -119,11 +100,28 @@ mod_fileManager_ui <- function(id){
                   this may either be a text editor (for xml data) or a 
                   spreadsheet editor (for tabular data). Click on the 'Edit' 
                   tab above the data view to access functions for editing and
-                  reshaping the uploaded files. The following functions are
-                  available for tables:"),
-          
-          
-          
+                  reshaping the uploaded files."), 
+
+          div(class = "info-box",
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "You can reshape and split your original data in the file editor. Use the 'crop' function in  
+                  the context-menu (right click) to delete rows and create subtables.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
+                         function to transform your observation data before import.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
+                         respective columns.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
+          ),
+                  
+          tags$p("The following list shows the table tools available:"),
+
           tagList(
             div(class = "info-box",
                 ## Save edits
