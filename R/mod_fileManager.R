@@ -14,53 +14,51 @@ mod_fileManager_ui <- function(id){
   fluidPage(
     tabsetPanel(
       tabPanel("Data handling",
-               tagList(
-                 tagList(
-                   tags$head(
-                     tags$style(
-                       ".tab-content  {
-                        padding-left: 20px;
-                        padding-right: 20px;
-                       }"
-                     )
-                   ),
-                 tags$h1("Upload and prepare your data"),
-                 fluidRow(
-                   column(
-                     12,
-                     tags$label("Upload a file"),
-                     tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                            title = "Supported data formats: 
-                     \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-                     \nTurboveg data: .xml 
-                     \nSee 'About > Tutorial' for more information."),
-                     fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-                     tags$hr(),
-                     tags$label("Uploaded files"),
-                     tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                            title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
-                     fluidRow(
-                       class = "file-grid",
-                       column(
-                         12,
-                         uiOutput(ns("file_browser"))
-                       )
-                     ),
-                     tags$hr(),
-                     div(
-                       tags$label("File Editor"),
-                       tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                              title = "Review and and edit files before importing to VegX"),
-                       
-                       uiOutput(ns("edit_toolbar")),
-                       
-                       uiOutput(ns("file_viewer")),
-                       style = "margin-bottom: 20px"
-                     )
-                   )
-                 )
+         tagList(
+           tags$head(
+             tags$style(
+               ".tab-content  {
+                padding-left: 20px;
+                padding-right: 20px;
+               }"
+             )
+           ),
+         tags$h1("Upload and prepare your data"),
+         fluidRow(
+           column(
+             12,
+             tags$label("Upload a file"),
+             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                    title = "Supported data formats: 
+             \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+             \nTurboveg data: .xml 
+             \nSee 'About > Tutorial' for more information."),
+             fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+             tags$hr(),
+             tags$label("Uploaded files"),
+             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                    title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
+             fluidRow(
+               class = "file-grid",
+               column(
+                 12,
+                 uiOutput(ns("file_browser"))
                )
-            )
+             ),
+             tags$hr(),
+             div(
+               tags$label("File Editor"),
+               tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                      title = "Review and and edit files before importing to VegX"),
+               
+               uiOutput(ns("edit_toolbar")),
+               
+               uiOutput(ns("file_viewer")),
+               style = "margin-bottom: 20px"
+             )
+           )
+         )
+        )
       ),
       tabPanel("Help",
         div(
@@ -178,25 +176,38 @@ mod_fileManager_ui <- function(id){
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Format 
-                    date: Transform dates into the required format, which is 
-                    YYYY-MM-DD. For example, if your actual values look like 
-                    17.12.2023, the complete conversion specification is %d.%m.%Y 
-                    and for 02/21/18 it is %m/%d/%y.(the procedure follows 
-                    standard r rules, frequent symbols are %d (day of the month as 
-                    number), %m (month as number), %b (month abbreviated like 
-                    Jan), %B (Month full name like January), %y (Year 2 digit), 
-                    %Y (Year 4 digit). The separators are used verbatim (like ' ' 
-                    for space)")),
-                
+                              date: For the import, dates must be listed in a 
+                              column. In case they are not, redesign the 
+                              table first and then do the date transformation.                       
+                              Veg-X requires dates to be in ISO 8601 
+                              international standard (YYYY-MM-DD, e.g. 
+                              2024-05-30). You need to specify what kind 
+                              of date you have in order to start the conversion. 
+                              For example, if the dates are numbers generated 
+                              during an Excel import on a Windows mashine, you 
+                              need to enter the string 'excel-win' (without 
+                              quotes) in the 'Original format' field. The string
+                              for MAC Excel is 'excel-mac'. Other definitions 
+                              follow R conventions. For example, if your values 
+                              look like 17.12.2023, the complete conversion 
+                              specification is %d.%m.%Y. For 02/21/18 it is 
+                              %m/%d/%y. Frequent symbols are %d (day of the 
+                              month as number), %m (month as number), %b (month 
+                              abbreviated like Jan), %B (month full name like 
+                              January), %y (Year 2 digit), %Y (Year 4 digit). 
+                              The separators are used verbatim (like ' ' for 
+                              space). See", 
+                        tags$a("the R documentation", href = "https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime", target = "_blank"),
+                              " for more information.", class = "text-info"),
+                                        
                 ## Discard edits
-                div(class = "info-box-item collapsible",
+                div(class = "info-box-item collapsible", style = "margin-top: 10px;", 
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1em; color:black;", "Discard
                               edits: Exit the edit mode without saving")),
-                
+              ) 
             )
-          ),              
-          
+          )              
         )
       )
     )
@@ -521,8 +532,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
- #                          actionButton(ns("delete_columns"), "Delete columns", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
+                            actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
                          edit_names = shinyWidgets::dropdownButton(
@@ -901,9 +911,6 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    })
                  })
     
-    ###### Delete selected columns #####
-
-
     ###### Merge columns #####
     observeEvent(eventExpr = input$merge_columns,
                  handlerExpr = {
@@ -1220,6 +1227,14 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
         as.character()
     })
     
+    observe({
+      if (!is.null(input$conversion_spec) && (
+          tolower(input$conversion_spec) == 'excel-win' ||
+          tolower(input$conversion_spec) == 'excel-mac')) {
+        date_valid(T)
+      }
+    })
+    
     output$date_output = renderText({
       req(input$conversion_spec)
       tryCatch({
@@ -1228,9 +1243,26 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
           drop_na() %>% 
           slice_head(n = 1) %>% 
           as.character()
-        date_input = as.Date(date_sample, input$conversion_spec)
-        date_output = format(date_input, "%Y-%m-%d")
-        
+          if (tolower(input$conversion_spec) == 'excel-win') {
+            orig <- "1899-12-30"
+          }  
+          if (tolower(input$conversion_spec) == 'excel-mac') {
+            orig <- "1904-01-01"
+          }  
+          if (tolower(input$conversion_spec) == 'excel-win' || 
+              tolower(input$conversion_spec) == 'excel-mac') {
+            # Convert Excel date if the value looks like numeric
+            if (grepl("^\\d*\\.?\\d*$", date_sample)) {
+              excel_date = as.numeric(date_sample)
+            } else {
+              return("The selected date column contains non-numeric values which cannot be converted to Excel date.")
+            }  
+            date_output = format(as.Date(excel_date, origin = orig), "%Y-%m-%d")
+          } else {
+            # Convert date using input$conversion_spec
+            date_input = as.Date(date_sample, input$conversion_spec)
+            date_output = format(date_input, "%Y-%m-%d")
+          }
         if(is.na(date_output)){
           date_valid(F)
           return("Invalid output date")
@@ -1247,40 +1279,62 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    showModal(
                      modalDialog(
                        tags$h3("Reformat dates prior to import"),
-                       tags$p("Veg-X requires dates to be in YYYY-MM-DD format. 
-                              Use established conversion specifications to define the format of your date values, e.g. use '%d.%m.%Y' 
-                              to indicate that your input date column has the format 'DD.MM.YYYY'. Please see",  
-                              tags$a("the R documentation", href = "https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime", target = "_blank"),
-                              " for more information.", class = "text-info"),
-                       selectInput(ns("date_column"), label = "Date column", user_data[[file_focus()]]$x$colHeaders, selected = NULL),
-                       fluidRow(
-                         column(3,
-                                tags$label("Date input"),
-                                textOutput(ns("date_input"))
-                         ),
-                         column(6,
-                                tags$label("Conversion specification"),
-                                textInput(ns("conversion_spec"), label = NULL)
-                         ),
-                         column(3,
-                                tags$label("Date output"),
-                                textOutput(ns("date_output"))
-                         )
-                       ),
-                       footer = tagList(
+                        selectInput(ns("date_column"), label = "Date column", 
+                                    user_data[[file_focus()]]$x$colHeaders, 
+                                    selected = NULL),
+                        tags$div(style = "display: flex;",
+                          tags$label("Original format"),
+                          tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                            title = "Examples: 
+                            \n44029 (Excel Windows): excel-win 
+                            \n44029 (Excel Mac): excel-mac 
+                            \n21.02.2021: %d.%m.%Y
+                            \n02/21/18: %m/%d/%y
+                            \n2021-02-21: %Y-%d-%m
+                            \nFeb 2, 2023: %b %d, %Y
+                            \nSee 'Help' for more possibilities.")
+                        ),
+                        div(class = "info-box",
+                            div(class = "text-info info-box-item",
+                                icon("lightbulb", class = "icon-padded-right"),
+                                tags$span(style = "font-size:1.8rem;", "For 
+                                  Excel imports use excel-win or excel-mac 
+                                  depending on the originating system")
+                            ),    
+                            div(class = "text-info info-box-item",
+                                icon("lightbulb", class = "icon-padded-right"),
+                                tags$span(style = "font-size:1.8rem;", "For
+                                  other formats follow R conventions (see
+                                  Help and tooltips)")
+                            )    
+                        ),
+                      textInput(ns("conversion_spec"), label = NULL),
+                      fluidRow(
+                          column(3,
+                            tags$label("Date input"),
+                            textOutput(ns("date_input"))
+                          ),
+                          column(3,
+                            tags$label("Date output"),
+                            textOutput(ns("date_output"))
+                          )
+                      ),
+                      footer = tagList(
                          tags$span(
                            actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
                            shinyjs::disabled(actionButton(ns("confirm_format_date"), "Confirm", class = "pull-right btn-success", icon("check")))
-                         )
-                       )
-                     )
-                   )
-                 })
+                        )
+                      )
+                    )
+                  )
+                })
     
     
     observeEvent(eventExpr = date_valid(),
                  handlerExpr = {
-                   if(date_valid()){
+                   if (date_valid() || !is.null(input$conversion_spec) && 
+                       (tolower(input$conversion_spec) == 'excel-win' || 
+                        tolower(input$conversion_spec) == 'excel-mac')){
                      shinyjs::enable("confirm_format_date")
                    } else {
                      shinyjs::disable("confirm_format_date")
@@ -1290,25 +1344,52 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     observeEvent(eventExpr = input$confirm_format_date,
                  handlerExpr = {
                    tryCatch({
-                     # Modify data
+
+                     # Convert non-Excel dates
                      data_df <- rhandsontable::hot_to_r(input$editor) 
-                     date_formatted = as.Date(data_df[[input$date_column]], input$conversion_spec)
-                     data_df[[input$date_column]] = format(date_formatted, "%Y-%m-%d")
+                     if (tolower(input$conversion_spec) != 'excel-win' && 
+                         tolower(input$conversion_spec) != 'excel-mac') {
+                         date_formatted = as.Date(data_df[[input$date_column]], input$conversion_spec)
+                         data_df[[input$date_column]] = format(date_formatted, "%Y-%m-%d")
+                     } else {
+                     # Convert Excel dates
+                        date_selected = data_df[[input$date_column]]
+                        convertible <- which(sapply(date_selected, function(x) {
+                          no_warning_as_numeric <- function(x) {
+                            tryCatch(as.numeric(x), warning = function(w) return(NA))
+                         }
+                         !is.na(no_warning_as_numeric(x))
+                        }))
+                        excel_dates <- as.numeric(date_selected[convertible])
+                       
+                        if (tolower(input$conversion_spec) == 'excel-win') {
+                          orig <- "1899-12-30"
+                        }  
+                        if (tolower(input$conversion_spec) == 'excel-mac') {
+                          orig <- "1904-01-01"
+                        }  
+                        vegx_dates <- as.Date(excel_dates, origin = orig)
+                        date_strings <- format(vegx_dates, "%Y-%m-%d")
+                        data_df[[input$date_column]][convertible] <- date_strings
+                        data_df[is.na(data_df)] <- NA
+                     }                     
                      
                      # Overwrite user data
-                     user_data[[file_focus()]] <- data_df %>%
-                       rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+                     user_data[[file_focus()]] <- rhandsontable::rhandsontable(data_df, useTypes = FALSE, 
+                       selectCallback = TRUE, outsideClickDeselects = FALSE)
                      output$editor <- rhandsontable::renderRHandsontable(user_data[[file_focus()]])
                      
                      # Update action log
                      shiny::showNotification("Date formatted")
-                     new_action_log_record(log_path, "File info", paste0("Reformatted date in column ", input$source_column  ,"  in file '", file_focus(), "'"))
+                     new_action_log_record(log_path, "File info", paste0("Reformatted date in column ", input$date_column  ,"  in file '", file_focus(), "'"))
                      action_log(read_action_log(log_path))
-                   }, error = function(e) {
+                   }, 
+                   error = function(e) {
                      shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
                      new_action_log_record(log_path, "File edit error", paste0("Date formatting in file '", file_focus(), "' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
                      action_log(read_action_log(log_path))
-                   }, finally = {
+                   }, 
+                   finally = {
                      removeModal()
                    })
                  })
@@ -1351,6 +1432,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    edit_mode(F)
                  })
     
+
     # Module server returns reactive user data
     return(user_data)
   })
