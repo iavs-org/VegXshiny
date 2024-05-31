@@ -176,29 +176,33 @@ mod_fileManager_ui <- function(id){
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Format 
-                              date: For the import, dates must be listed in a 
-                              column. In case they are not, redesign the 
-                              table first and then do the date transformation.                       
-                              Veg-X requires dates to be in ISO 8601 
-                              international standard (YYYY-MM-DD, e.g. 
-                              2024-05-30). You need to specify what kind 
-                              of date you have in order to start the conversion. 
-                              For example, if the dates are numbers generated 
-                              during an Excel import on a Windows mashine, you 
-                              need to enter the string 'excel-win' (without 
-                              quotes) in the 'Original format' field. The string
-                              for MAC Excel is 'excel-mac'. Other definitions 
-                              follow R conventions. For example, if your values 
-                              look like 17.12.2023, the complete conversion 
-                              specification is %d.%m.%Y. For 02/21/18 it is 
-                              %m/%d/%y. Frequent symbols are %d (day of the 
-                              month as number), %m (month as number), %b (month 
-                              abbreviated like Jan), %B (month full name like 
-                              January), %y (Year 2 digit), %Y (Year 4 digit). 
-                              The separators are used verbatim (like ' ' for 
-                              space). See", 
+                              date: For import, dates must be listed in a 
+                              column. If they are not, transpose the table (and 
+                              back-transpose if necessary). Veg-X requires dates 
+                              to be in the international ISO 8601 format 
+                              (YYYY-MM-DD, e.g. 2024-05-30). You need to specify 
+                              what type of date you have to start the 
+                              conversion. For example, if the dates are numbers 
+                              generated during an Excel import from a Windows 
+                              machine, enter the string 'excel-win' 
+                              (without quotation marks) in the 'Original format' 
+                              field. The string for MAC Excel is 'excel-mac'. 
+                              Other definitions follow R conventions. For 
+                              example, if your values look like 17.12.2023, the 
+                              full conversion specification is %d.%m.%Y. For 
+                              02/21/18 it is %m/%d/%y. Common symbols are %d 
+                              (day of month as number), %m (month as number), 
+                              %b (month abbreviated like Jan), %B (month full 
+                              name like January), %y (year 2 digit), %Y (year 
+                              4 digit). The separators are used literally (like 
+                              ' ' for space). See", 
                         tags$a("the R documentation", href = "https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime", target = "_blank"),
-                              " for more information.", class = "text-info"),
+                              " for more information.",
+                    tags$span(style = "font-size:1.8rem; color: black;", "If a 
+                              valid original format has been entered, a 
+                              conversion example will appear at the bottom.")
+                 ),
+                     
                                         
                 ## Discard edits
                 div(class = "info-box-item collapsible", style = "margin-top: 10px;", 
@@ -1295,11 +1299,11 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    showModal(
                      modalDialog(
-                       tags$h3("Reformat dates prior to import"),
+                       tags$h1("Reformat dates prior to import"),
                         selectInput(ns("date_column"), label = "Date column", 
                                     user_data[[file_focus()]]$x$colHeaders, 
                                     selected = NULL),
-                        tags$div(style = "display: flex;",
+                        tags$div(style = "display: flex; padding-top: 20px;", 
                           tags$label("Original format"),
                           tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                             title = "Example strings: 
