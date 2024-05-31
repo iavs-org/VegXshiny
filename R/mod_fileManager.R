@@ -721,7 +721,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    select_choices = unlist(input$editor$params$rColnames)
                    showModal(
-                     modalDialog(
+                     shinyjqui::draggableModalDialog(
                        size = "l",
                        tagList(
                          tags$h3("Pivot data"),
@@ -1220,11 +1220,19 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     date_valid = reactiveVal(F)
     
     output$date_input = renderText({
-      rhandsontable::hot_to_r(input$editor) %>% 
+        
+      req(input$conversion_spec)
+
+      dates <- rhandsontable::hot_to_r(input$editor) %>% 
         select(input$date_column) %>% 
-        drop_na() %>% 
-        slice_head(n = 1) %>% 
-        as.character()
+        pull() %>% 
+        .[. != ""] %>% 
+        na.omit()
+    
+      valid_dates <- !is.na(as.Date(dates, format = input$conversion_spec))
+      valid_numbers <- grepl("^\\d*\\.?\\d*$", dates)
+      first_valid_value <- dates[valid_dates | valid_numbers][1]   
+      as.character(first_valid_value)
     })
     
     observe({
@@ -1238,11 +1246,19 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     output$date_output = renderText({
       req(input$conversion_spec)
       tryCatch({
-        date_sample = rhandsontable::hot_to_r(input$editor) %>% 
-          select(input$date_column) %>% 
-          drop_na() %>% 
-          slice_head(n = 1) %>% 
-          as.character()
+          
+        # Extract a sample
+          date_sample <- rhandsontable::hot_to_r(input$editor) %>% 
+            select(input$date_column) %>% 
+            pull() %>% 
+            .[. != ""] %>% 
+            na.omit()
+
+          valid_dates <- !is.na(as.Date(date_sample, format = input$conversion_spec))
+          valid_numbers <- grepl("^\\d*\\.?\\d*$", date_sample)
+          first_valid_value <- date_sample[valid_dates | valid_numbers][1]
+          date_sample <- as.character(first_valid_value)
+        
           if (tolower(input$conversion_spec) == 'excel-win') {
             orig <- "1899-12-30"
           }  
@@ -1251,28 +1267,29 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
           }  
           if (tolower(input$conversion_spec) == 'excel-win' || 
               tolower(input$conversion_spec) == 'excel-mac') {
+            
             # Convert Excel date if the value looks like numeric
             if (grepl("^\\d*\\.?\\d*$", date_sample)) {
               excel_date = as.numeric(date_sample)
             } else {
-              return("The selected date column contains non-numeric values which cannot be converted to Excel date.")
+              return("Values that do not look like numbers will be skipped.")
             }  
             date_output = format(as.Date(excel_date, origin = orig), "%Y-%m-%d")
+          
           } else {
-            # Convert date using input$conversion_spec
+          # Convert date using input$conversion_spec
             date_input = as.Date(date_sample, input$conversion_spec)
             date_output = format(date_input, "%Y-%m-%d")
           }
-        if(is.na(date_output)){
-          date_valid(F)
-          return("Invalid output date")
-        } else {
-          date_valid(T)
-          return(date_output)
-        }
-      })  
-    })
-    
+          if(is.na(date_output)){
+            date_valid(F)
+            return("Invalid original format")
+          } else {
+            date_valid(T)
+            return(date_output)
+          }
+        })  
+      })
     
     observeEvent(eventExpr = input$format_date,
                  handlerExpr = {
@@ -1285,9 +1302,9 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                         tags$div(style = "display: flex;",
                           tags$label("Original format"),
                           tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                            title = "Examples: 
-                            \n44029 (Excel Windows): excel-win 
-                            \n44029 (Excel Mac): excel-mac 
+                            title = "Example strings: 
+                            \nExcel Windows: excel-win 
+                            \nExcel Mac: excel-mac 
                             \n21.02.2021: %d.%m.%Y
                             \n02/21/18: %m/%d/%y
                             \n2021-02-21: %Y-%d-%m
