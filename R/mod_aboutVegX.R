@@ -152,7 +152,8 @@ mod_aboutVegX_ui <- function(id){
             tags$div(class = "panel panel-default",
               tags$div(class = "panel-heading",
                 tags$h4(class = "panel-title",
-                  tags$a("Do I need to pre-format my files to use VegXshiny?",
+                  tags$a("What kind of vegetation data can be imported and which 
+                         cannot?",
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
                          href = paste0("#", ns("collapse2")))
@@ -160,23 +161,38 @@ mod_aboutVegX_ui <- function(id){
               ),
               tags$div(id = ns("collapse2"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
-                  "Apart from Turboveg-Files and Veg-X itself, VegXshiny expects 
-                   tabular data in a format, where each column is a variable and 
-                   each row is an observation. This often means that the data 
-                   has to be reformatted. In the import dialog, details on 
-                   the expected format of input data is always available when 
-                   hovering the info icon next to the dataset selection. If your 
-                   dataset does not meet the format specifications you can 
-                   use the ", 
-                   tags$span("Reshape tools in the Start section", 
-                                        class = "text-info"), 
-                   "or R-functions such as ", 
-                   tags$code("reshape::melt()"), " or ", 
-                   tags$code("tidyr::pivot_longer()"), 
-                   " to organize your data."
-                )
+                  "Veg-X is extremely flexible in accepting all kinds of 
+                  vegetation data, but VegXshiny does not cover everything. 
+                  Possible is, for example, the import of records of species in 
+                  plots (e.g. species cover in layers) together with ancillary 
+                  information about plots and observations. The most prominent 
+                  example of currently unsupported data is measurements on 
+                  individual plants (Veg-X' IndividualOrganismObervation).")
               )
-            ),
+          ),
+          # ------------
+
+                      # --- Q+A2 ---
+            tags$div(class = "panel panel-default",
+              tags$div(class = "panel-heading",
+                tags$h4(class = "panel-title",
+                  tags$a("Do I need to pre-format my files to use VegXshiny?",
+                         `data-toggle` = "collapse", 
+                         `data-parent` = "#accordion", 
+                         href = paste0("#", ns("collapse3")))
+                )
+              ),
+              tags$div(id = ns("collapse3"), class = "panel-collapse collapse",
+                tags$div(class = "panel-body",
+                  "Usually not. Turboveg files, and of course Veg-X itself, 
+                  should not need further preparation to be imported. Tabular 
+                  data must be arranged so that the rows contain 
+                  plots but this can be done in the 'File editor' in 
+                  the 'Start' section. Records need to be uniquely assigned by 
+                  plot IDs, time-dependent plot observations (like species 
+                  cover) also need a date.")
+              )
+          ),
             # ------------
         
           
@@ -187,10 +203,10 @@ mod_aboutVegX_ui <- function(id){
                   tags$a("Why did my import fail?", 
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
-                         href = paste0("#", ns("collapse3")))
+                         href = paste0("#", ns("collapse4")))
                 )
               ),
-              tags$div(id = ns("collapse3"), class = "panel-collapse collapse",
+              tags$div(id = ns("collapse4"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
                   "Check the log. It can sometimes provide useful details as to 
                   why the data could not be imported. Typical import problems 
@@ -208,13 +224,13 @@ mod_aboutVegX_ui <- function(id){
                   tags$a("My files are too large to upload, what should I do?", 
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
-                         href = paste0("#", ns("collapse4")))
+                         href = paste0("#", ns("collapse5")))
                 )
               ),
-              tags$div(id = ns("collapse4"), class = "panel-collapse collapse",
+              tags$div(id = ns("collapse5"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
                   "The online version of VegXshiny currently supports uploads up 
-                  to a size of 50 MB. If you need to handle larger files you can 
+                  to a size of 50 MB. If you are handling larger files you can 
                   install VegXshiny from github and run the application 
                   locally:"),
           
@@ -241,10 +257,10 @@ mod_aboutVegX_ui <- function(id){
                   tags$a("Can I install VegXshiny locally?", 
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
-                         href = paste0("#", ns("collapse5")))
+                         href = paste0("#", ns("collapse6")))
                 )
               ),
-              tags$div(id = ns("collapse5"), class = "panel-collapse collapse",
+              tags$div(id = ns("collapse6"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
                   "Use the following code to install VegXshiny from github and 
                   run the application:"),

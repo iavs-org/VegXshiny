@@ -37,7 +37,9 @@ mod_fileManager_ui <- function(id){
              tags$hr(),
              tags$label("Uploaded files"),
              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "These files are available for further operations. Pick a file to view or edit in the File Editor"),
+                    title = "These files are available for further cloud 
+                             operations (import to Veg-X, edit), they can not be 
+                             downloaded."),
              fluidRow(
                class = "file-grid",
                column(
@@ -49,7 +51,7 @@ mod_fileManager_ui <- function(id){
              div(
                tags$label("File Editor"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                      title = "Review and and edit files before importing to VegX"),
+                      title = "Check files, prepare import into Veg-X"),
                
                uiOutput(ns("edit_toolbar")),
                
@@ -99,27 +101,48 @@ mod_fileManager_ui <- function(id){
                   spreadsheet editor (for tabular data). Click on the 'Edit' 
                   tab above the data view to access functions for editing and
                   reshaping the uploaded files."), 
-
-          div(class = "info-box",
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "You can reshape and split your original data in the file editor. Use the 'crop' function in  
-                  the context-menu (right click) to delete rows and create subtables.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Importing observations (e.g. coverage values per species and plot) requires the data to be in long format. Use the 'pivot' 
-                         function to transform your observation data before import.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Observations are identified by a unique combination of plot_id and date. Make sure your observation data contains the 
-                         respective columns.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Use the 'format date' function to convert a date column to the expected format of YYYY-MM-DD before starting the Veg-X import.")),
-          ),
                   
-          tags$p("The following list shows the table tools available:"),
-
+          tags$h1("Editing tools"),
+          tagList(
+            tags$p("Some tips regarding tabular data:"),
+            div(class = "info-box",
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "While 
+                    the import from Turboveg is a one step procedure, tabular 
+                    data comes in so many flavours that there is no simple 
+                    one-step procedure for importing. Instead, VegXshiny needs 
+                    to be told which columns of data goes in which Veg-X 
+                    container. The import dialogue guides through this 
+                    procedure.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
+                    preparing video tutorials for common use cases and will link 
+                    to them here as they become available.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Importing observations 
+                    (e.g. coverage values per species and plot) requires the 
+                    data to be in long format. Use the 'pivot' function to 
+                    transform your observation data before import.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "All observations are 
+                    identified by a unique combination of plot_id and date. Make 
+                    sure your observation data contains the respective columns. 
+                    The dates need to be in YYYY-MM-DD format. There is a 
+                    dedicated conversion tool ('Format date') under 
+                    'Edit values'.")),
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Basic table editing 
+                    can be reached using the context menu (right click
+                    on a column or row name when the table is in editing 
+                    mode). The options are self-explanatory. More tools 
+                    are available via the buttons at the top:")),
+            )
+          ),
           tagList(
             div(class = "info-box",
                 ## Save edits
@@ -180,11 +203,12 @@ mod_fileManager_ui <- function(id){
                               column. If they are not, transpose the table (and 
                               back-transpose if necessary). Veg-X requires dates 
                               to be in the international ISO 8601 format 
-                              (YYYY-MM-DD, e.g. 2024-05-30). You need to specify 
-                              what type of date you have to start the 
-                              conversion. For example, if the dates are numbers 
-                              generated during an Excel import from a Windows 
-                              machine, enter the string 'excel-win' 
+                              (YYYY-MM-DD, e.g. 2024-05-30)."),
+                    tags$span(style = "font-size:1.8rem; color: black;", "You 
+                              need to specify what type of date you have to 
+                              start the conversion. For example, if the dates 
+                              are numbers generated during an Excel import from 
+                              a Windows machine, enter the string 'excel-win' 
                               (without quotation marks) in the 'Original format' 
                               field. The string for MAC Excel is 'excel-mac'. 
                               Other definitions follow R conventions. For 
@@ -197,25 +221,25 @@ mod_fileManager_ui <- function(id){
                               4 digit). The separators are used literally (like 
                               ' ' for space). See", 
                         tags$a("the R documentation", href = "https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime", target = "_blank"),
-                              " for more information.",
-                    tags$span(style = "font-size:1.8rem; color: black;", "If a 
-                              valid original format has been entered, a 
-                              conversion example will appear at the bottom.")
+                              " for more information. If a valid original format 
+                              has been entered, a conversion example will appear 
+                              at the bottom.")
                  ),
                      
                                         
                 ## Discard edits
-                div(class = "info-box-item collapsible", style = "margin-top: 10px;", 
+                div(class = "info-box-item", style = "margin-top: 10px;", 
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1em; color:black;", "Discard
-                              edits: Exit the edit mode without saving")),
+                              edits: Exit the edit mode without saving")
+                )
               ) 
             )
           )              
         )
       )
     )
-  )
+  
 }
 
 
@@ -410,7 +434,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     #### File browser ####
     create_file_buttons = function(){
       req(file_order)
-      button_list = lapply(file_order(), function(file_name){           # Loop over file names
+      button_list = lapply(file_order(), function(file_name){ # Loop over file names
         if(is.null(user_data[[file_name]])){
           return()
         }
@@ -549,7 +573,8 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("row_to_colnames"), "Row to colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("col_to_rownames"), "Column to rownames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("pivot_vars"), "Pivot variables", width = "130px", class = "btn-xs btn-dropdown-item")
                          ),
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
                        )
@@ -725,7 +750,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    select_choices = unlist(input$editor$params$rColnames)
                    showModal(
-                     shinyjqui::draggableModalDialog(
+                     modalDialog(
                        size = "l",
                        tagList(
                          tags$h3("Pivot data"),
@@ -921,15 +946,15 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    showModal(
                      modalDialog(
                        tags$h3("Merge columns"),
-                       tags$p("Merge two columns into one. This may be particularly helpful when processing data where each data 
+                       tags$p("Merge two columns into one. This may be needed when processing data where each data 
                               point is identified by more than one row and column, e.g. coverage values per species and stratum at different
                               plots and dates. Use the 'split column' function to later expand a column again.", class = "text-info"),
                        selectizeInput(ns("merge_colname_1"), label = "Column 1", user_data[[file_focus()]]$x$colHeaders),
                        selectizeInput(ns("merge_colname_2"), label = "Column 2", user_data[[file_focus()]]$x$colHeaders),
                        selectizeInput(ns("merge_separator"), 
                                       label = "Separator",
-                                      choices = c("|", ";", ",", "/", "~"), 
-                                      selected = "|", 
+                                      choices = c("_","|", ";", ",", "/", "~"), 
+                                      selected = "_", 
                                       options=list(create=TRUE)),
                        textInput(ns("new_colname"), label = "New column name"),
                        checkboxInput(ns("remove_merged_columns"), label = "Remove original columns from data", value = T, width = "100%"),
@@ -1415,6 +1440,31 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    })
                  })
     
+    ##### Pivot variables ####
+    
+    observeEvent(eventExpr = input$pivot_vars,
+                 handlerExpr = {
+                   showModal(
+                     modalDialog(
+                       tags$h1("Populate a column in a long table, using 
+                               defined plot to variable relationships"),
+                       
+                       # Select target column
+                       selectInput(ns("target_column"), label = "Column to
+                                   be populated", 
+                       user_data[[file_focus()]]$x$colHeaders, selected = NULL)
+                       
+                       
+                       
+                     )
+                   )   
+                 })
+
+    
+    
+    
+    
+    
     ##### Discard edits ####
     observeEvent(eventExpr = input$discard,
                  handlerExpr = {
@@ -1422,8 +1472,9 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      modalDialog(
                        size = "l",
                        tagList(
-                         tags$h3("Discard edits"),
-                         tags$p("All edits will be lost.")
+                         tags$h3("Exit and discard"),
+                         tags$p("All changes made since the last save will be 
+                                lost.")
                        ),
                        footer = tagList(
                          tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),

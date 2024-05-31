@@ -234,26 +234,26 @@ mod_tableImport_ui <- function(id){
                  icon("lightbulb", class = "icon-padded-right"),
                  tags$span(style = "font-size:1.8rem;", "Before data can be read 
                  in here, it must first be uploaded in the 'Start' section")),
-          ),
-          tags$p("Tabular data for import are expected to be in a format 
-                  where each observation has its row and each variable has its
-                  column. One consequence is that a transformation is 
-                  required for 'header data' following a convention where
-                  variables such as date of recording or elevation are 
-                  organized in rows. A valid 'header' table has at least one 
-                  column with plot names (as far as static plot attributes like
-                  spatial coordinates are concerned) and one additional column
-                  with observation dates in case of non-static attributes
-                  like species cover. This follows the Veg-X
-                  logic. Due to limitations of the underlying packages, a
-                  date column needs to be prepared outside this app if it is
-                  lacking. A valid species table has a column for plot IDs, a
-                  column for observation date, a column for species names and
-                  one for the cover or count values. If species aggregation took
-                  place in layers, an additional column for layers is needed."),
-         tags$p("The tools provided in the preparation step help with the          
-                  transformations. The import function guides step by step
-                  towards the goal. Details on the expected format of input data
+             div(class = "text-info info-box-item",
+                 icon("lightbulb", class = "icon-padded-right"),
+                 tags$span(style = "font-size:1.8rem;", "While the import from 
+                 Turboveg is a one step procedure, tabular data comes in so many 
+                 flavours that there is no simple one-step procedure for 
+                 importing. Instead, VegXshiny needs to be told which columns of 
+                 data goes in which Veg-X container. The import dialogue guides 
+                 through this procedure."))
+          ),       
+          tags$p("Tabular data for import are expected to be in a format where 
+                  each record has its row identified by a plot ID. In case of 
+                  date-dependent recordings (like species cover, in contrast to, 
+                  for example, bedrock type) there need to be an additional column 
+                  with a date. For example, a valid species table has a column 
+                  for plot IDs, a column for observation date, a column for 
+                  species names and one for the cover or count values. If 
+                  species aggregation took place in layers, an additional column 
+                  for layers is needed. The 'File editor' in the Start section
+                  provided tools for transforming the data accordingly."),
+         tags$p("Details on the expected format of input data
                   is available when hovering the info icon next to the dataset
                   selection in the table import dialog."),
          tags$p("The import of tabular data is structured into five steps. 
