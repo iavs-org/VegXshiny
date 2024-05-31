@@ -51,7 +51,7 @@ mod_fileManager_ui <- function(id){
              div(
                tags$label("File Editor"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                      title = "Check files, prepare import into Veg-X"),
+                      title = "Check files, edit for import"),
                
                uiOutput(ns("edit_toolbar")),
                
@@ -173,7 +173,8 @@ mod_fileManager_ui <- function(id){
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Merge columns: Merge two columns into one. 
-                              This can be needed when data points are identified by more than one column")),
+                              This can be needed when data points are identified by more than one column. The 
+                              merged column is appended as the last column.")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Split column: Reverse the merging of
