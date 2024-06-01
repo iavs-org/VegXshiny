@@ -37,9 +37,7 @@ mod_fileManager_ui <- function(id){
              tags$hr(),
              tags$label("Uploaded files"),
              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "These files are available for further cloud 
-                             operations (import to Veg-X, edit), they can not be 
-                             downloaded."),
+                    title = "These files are available for further cloud operations (import to Veg-X, edit); they can not be downloaded."),
              fluidRow(
                class = "file-grid",
                column(
@@ -51,7 +49,7 @@ mod_fileManager_ui <- function(id){
              div(
                tags$label("File Editor"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                      title = "Check files, edit for import"),
+                      title = "Click on a file above to open the editor"),
                
                uiOutput(ns("edit_toolbar")),
                
@@ -103,36 +101,30 @@ mod_fileManager_ui <- function(id){
                   reshaping the uploaded files."), 
                   
           tags$h1("Editing tools"),
-          tagList(
-            tags$p("Some tips regarding tabular data:"),
             div(class = "info-box",
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
-                    preparing video tutorials for common use cases and will link 
-                    to them here as they become available.")),
+              tags$p("Regarding tabular data:"),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "Importing observations 
                     (e.g. coverage values per species and plot) requires the 
-                    data to be in long format. Use the 'pivot' function to 
-                    transform your observation data before import.")),
+                    data to be in 'long' format. Use the 'pivot' function to 
+                    transform your observation data before import. Records are 
+                    identified by plot id or, in case of time-dependent 
+                    observatons, by plot id and date. Make sure your observation 
+                    data contains the respective columns.")),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Records are 
-                    identified by plot id or by plot id and date. Make 
-                    sure your observation data contains the respective 
-                    columns.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Basic table editing 
-                    can be reached using the context menu (right click
-                    on a column or row name when the table is in editing 
-                    mode). The options are self-explanatory. More tools 
-                    are available via the buttons at the top:")),
-            )
+                  tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
+                    preparing video tutorials for common use cases and will link 
+                    to them here as they become available."))
           ),
+          
           tagList(
+            tags$p("Basic table editing 
+                  can be reached using the context menu (right click
+                  on a column or row name when the table is in editing 
+                  mode). The options are self-explanatory. More tools 
+                  are available via the buttons at the top:"),      
             div(class = "info-box",
                 ## Save edits
                 div(class = "info-box-item",
@@ -186,6 +178,10 @@ mod_fileManager_ui <- function(id){
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Rownames 
                               to column: Transform rownames into a new column")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Colnames 
+                              to row: Transform column names into a new row")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Format 
@@ -740,28 +736,103 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    select_choices = unlist(input$editor$params$rColnames)
                    showModal(
+                     ## shinyjqui::draggableModalDialog would be useful but the 
+                     ## dropdown does not work with that function
                      modalDialog(
                        size = "l",
                        tagList(
+                          tags$div(class = "panel-group", id = "accordion", 
+                            
+                            # --- Example 1 ---
+                            tags$div(class = "panel panel-default",
+                              tags$div(class = "panel-heading",
+                                tags$h4(class = "panel-title",
+                                  tags$a("Example: Pivoting a table with species columns", 
+                                         `data-toggle` = "collapse", 
+                                         `data-parent` = "#accordion", 
+                                         href = paste0("#", ns("collapse1")))
+                                )
+                              ),
+                              tags$div(id = ns("collapse1"), class = "panel-collapse collapse",
+                                tags$div(class = "panel-body",
+                                  "The scope of Veg-X is the exchange of data-sets both between 
+                                  vegetation scientists and between vegetation scientists and 
+                                  database operators. VegXshiny can be used for the conversion 
+                                  of small to medium sized data-sets to Veg-X and for the 
+                                  conversion of Veg-X documents into table formats.",
+                                tags$div(style = "text-align: left",
+                                 tags$img(src='www/images/Flowchart.svg', 
+                                          align = "center", width = 580)),
+                                )
+                              )
+                            ),
+                          # ------------
+                         
+                          # --- Example 2 ---
+                            tags$div(class = "panel panel-default",
+                              tags$div(class = "panel-heading",
+                                tags$h4(class = "panel-title",
+                                  tags$a("Example 2: Pivoting a table with layer columns", 
+                                         `data-toggle` = "collapse", 
+                                         `data-parent` = "#accordion", 
+                                         href = paste0("#", ns("collapse2")))
+                                )
+                              ),
+                              tags$div(id = ns("collapse2"), class = "panel-collapse collapse",
+                                tags$div(class = "panel-body",
+                                  "The scope of Veg-X is the exchange of data-sets both between 
+                                  vegetation scientists and between vegetation scientists and 
+                                  database operators. VegXshiny can be used for the conversion 
+                                  of small to medium sized data-sets to Veg-X and for the 
+                                  conversion of Veg-X documents into table formats.",
+                                tags$div(style = "text-align: left",
+                                 tags$img(src='www/images/Flowchart.svg', 
+                                          align = "center", width = 580)),
+                                )
+                              )
+                            )
+                          ),  
+                          # ------------
+                         
+     
+                         
                          tags$h3("Pivot data"),
-                         tags$p("Prepare your datasets for import by organizing variables in columns and observations in rows. The primary use case is to reshape columns that
-                                 code for the same variables, e.g. 'cover_tree_layer', 'cover_shrub_layer' and 'cover_herb_layer', into a key and a value column,
-                                e.g. 'layer_name' and 'cover_value'.", class = "text-info"),
+                         tags$p(icon("lightbulb", class = "icon-padded-right"),
+                                "Prepare your datasets for import by organizing 
+                                 plot ID's in rows if the aren't yet. 'ID 
+                                 columns' are typically plot ID's and, for 
+                                 time-dependent observations, also a column with 
+                                dates", class = "text-info"),
+                         tags$p(icon("lightbulb", class = "icon-padded-right"),
+                                "'Wide tables' with columns that code for the 
+                                same variables, e.g. species columns with cover
+                                values or vegetation layer columns with maximum
+                                heights, are broken down to 'long tables' with
+                                plot id (and date) as id columns and cover or
+                                hight as value column.", class = "text-info"),
+
                          tags$div(style = "text-align: center; margin-bottom: 8px;",
                                   tags$img(src='www/images/pivot_table.png', align = "center", width = "100%")
                          ),
-                         tags$p("This operation will create a new file in the File Manager and can be repeated to derive multiple tables. Use the color codes in the above figure and
-                                 the below description texts to map your inputs correctly. Note that VegXshiny requires a date and plot id column
-                                 for all observation datasets, so make sure to mark the corresponding columns as id columns.", class = "text-info"),
+                         tags$p("Input tables have a plot id column and 
+                                 for all observation datasets., so make sure to mark the corresponding columns as id columns.", class = "text-info"),
                          
                          hr(),
                          tags$label("Column selection"),
-                         tags$p("Use the matching color codes in the image above and the labels below as visual clues.", class = "text-info"),
-                         tags$p("Which columns ..."),
+                         tags$p(icon("lightbulb", class = "icon-padded-right"),
+                                "Use the matching colors in the image above 
+                                and the labels below as visual clues.", 
+                                class = "text-info"),
+                         tags$p("There are two possible types of input columns: 
+                                id columns and value columns. Select id columns 
+                                from the drop-down menu and remove any unneeded 
+                                value columns from the right-hand box (you do 
+                                not need to remove id columns here as they are 
+                                ignored)."),
                          fluidRow(
-                           column(6, tags$p("...are ", tags$span("id columns", style = "color: #1976d2; font-weight: bold"), "? *"),
+                           column(6, tags$p(tags$span("ID Columns", style = "color: #1976d2; font-weight: bold"), "*"),
                                   selectizeInput(ns("columns_id"), label = NULL, choices = select_choices, multiple = T, width = "100%")),
-                           column(6, tags$p("...are ", tags$span("value columns", style = "color: #c62828; font-weight: bold"), "? *"),
+                           column(6, tags$p(tags$span("Value Columns", style = "color: #c62828; font-weight: bold"), "*"),
                                   selectizeInput(ns("columns_pivot"), label = NULL, 
                                                  choices = select_choices, 
                                                  selected = setdiff(unlist(input$editor$params$rColnames), input$columns_id),
@@ -943,8 +1014,8 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        selectizeInput(ns("merge_colname_2"), label = "Column 2", user_data[[file_focus()]]$x$colHeaders),
                        selectizeInput(ns("merge_separator"), 
                                       label = "Separator",
-                                      choices = c("_","|", ";", ",", "/", "~"), 
-                                      selected = "_", 
+                                      choices = c("|", "_",";", ",", "/", "~"), 
+                                      selected = "|", 
                                       options=list(create=TRUE)),
                        textInput(ns("new_colname"), label = "New column name"),
                        checkboxInput(ns("remove_merged_columns"), label = "Remove original columns from data", value = T, width = "100%"),
@@ -997,7 +1068,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        selectizeInput(ns("split_colname"), label = "Column", user_data[[file_focus()]]$x$colHeaders),
                        selectizeInput(ns("split_separator"), 
                                       label = "Separator",
-                                      choices = c("|", ";", ",", "/", "~"), 
+                                      choices = c("|", "_", ";", ",", "/", "~"), 
                                       selected = "|", 
                                       options=list(create=TRUE)),
                        textInput(ns("new_colname_1"), label = "New column name 1"),
