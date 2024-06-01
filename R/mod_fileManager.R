@@ -108,15 +108,6 @@ mod_fileManager_ui <- function(id){
             div(class = "info-box",
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "While 
-                    the import from Turboveg is a one step procedure, tabular 
-                    data comes in so many flavours that there is no simple 
-                    one-step procedure for importing. Instead, VegXshiny needs 
-                    to be told which columns of data goes in which Veg-X 
-                    container. The import dialogue guides through this 
-                    procedure.")),
-              div(class = "text-info info-box-item",
-                  icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
                     preparing video tutorials for common use cases and will link 
                     to them here as they become available.")),
@@ -128,12 +119,10 @@ mod_fileManager_ui <- function(id){
                     transform your observation data before import.")),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "All observations are 
-                    identified by a unique combination of plot_id and date. Make 
-                    sure your observation data contains the respective columns. 
-                    The dates need to be in YYYY-MM-DD format. There is a 
-                    dedicated conversion tool ('Format date') under 
-                    'Edit values'.")),
+                  tags$span(style = "font-size:1.8rem;", "Records are 
+                    identified by plot id or by plot id and date. Make 
+                    sure your observation data contains the respective 
+                    columns.")),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "Basic table editing 
@@ -574,8 +563,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("row_to_colnames"), "Row to colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("col_to_rownames"), "Column to rownames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("pivot_vars"), "Pivot variables", width = "130px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item")
                          ),
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
                        )
@@ -1440,31 +1428,6 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      removeModal()
                    })
                  })
-    
-    ##### Pivot variables ####
-    
-    observeEvent(eventExpr = input$pivot_vars,
-                 handlerExpr = {
-                   showModal(
-                     modalDialog(
-                       tags$h1("Populate a column in a long table, using 
-                               defined plot to variable relationships"),
-                       
-                       # Select target column
-                       selectInput(ns("target_column"), label = "Column to
-                                   be populated", 
-                       user_data[[file_focus()]]$x$colHeaders, selected = NULL)
-                       
-                       
-                       
-                     )
-                   )   
-                 })
-
-    
-    
-    
-    
     
     ##### Discard edits ####
     observeEvent(eventExpr = input$discard,

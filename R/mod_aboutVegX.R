@@ -20,23 +20,26 @@ mod_aboutVegX_ui <- function(id){
           class = "content",
           tags$h1("VegXshiny - A tool to organize plant community data in Veg-X exchange
                  format"),
-          tags$p("Veg-X (Wiser et al., 2011) is an XML schema that 
-                 provides both flexibility and precision in representing 
-                 vegetation data of different origins and formats."), 
+          tags$p("The increasing digitization of research data has motivated 
+                 data standardization efforts across scientific disciplines. 
+                 For vegetation data, Veg-X (Wiser et al., 2011) is such a 
+                 standard. It provides both flexibility and precision in 
+                 representing vegetation data of different origins and 
+                 formats. It's scope is the exchange of data-sets both between 
+                 vegetation scientists and between vegetation scientists and 
+                 database operators."), 
           
-          tags$p("The Veg-X R package (De Cáceres, 2018) allows to 
-                 import, integrate, and export vegetation data using the Veg-X 
-                 standard. Based on this, VegXshiny was developed as a GUI-based 
-                 application for creating Veg-X documents from small to medium
-                 sized datasets."),
+          tags$p("VegXshiny was developed as a GUI-based application for 
+                 creating Veg-X documents. It is build around the R package VegX
+                 (De Cáceres, 2018) and can be used for the conversion of small 
+                 to medium sized data-sets. It also allows the conversion from 
+                 Veg-X documents to table formats."),
           
           tags$p("The figure below shows a typical workflow. Start with the 
                  'Start' tab of the main menu. The second step is import, where 
                  dialogs guide the user through the process of mapping data to 
                  the appropriate Veg-X elements. Once these steps have been 
-                 completed, the VegX code can be reviewed and downloaded. 
-                 VegXshiny can also be used to validate existing Veg-X 
-                 documents."),
+                 completed, the VegX code can be reviewed and downloaded."),
           
           tags$div(style = "text-align: left",
                    tags$img(src='www/images/Flowchart.svg', 
@@ -127,6 +130,28 @@ mod_aboutVegX_ui <- function(id){
           
           tags$div(class = "panel-group", id = "accordion", 
             
+            # --- Q+A0 ---
+            tags$div(class = "panel panel-default",
+              tags$div(class = "panel-heading",
+                tags$h4(class = "panel-title",
+                  tags$a("What is the scope of VegXshiny?", 
+                         `data-toggle` = "collapse", 
+                         `data-parent` = "#accordion", 
+                         href = paste0("#", ns("collapse0")))
+                )
+              ),
+              tags$div(id = ns("collapse0"), class = "panel-collapse collapse",
+                tags$div(class = "panel-body",
+                  "The scope of Veg-X is the exchange of data-sets both between 
+                  vegetation scientists and between vegetation scientists and 
+                  database operators. VegXshiny can be used for the conversion 
+                  of small to medium sized data-sets to Veg-X and for the 
+                  conversion of Veg-X documents into table formats."
+                )
+              )
+            ),
+            
+            # ------------
             # --- Q+A1 ---
             tags$div(class = "panel panel-default",
               tags$div(class = "panel-heading",
@@ -152,8 +177,8 @@ mod_aboutVegX_ui <- function(id){
             tags$div(class = "panel panel-default",
               tags$div(class = "panel-heading",
                 tags$h4(class = "panel-title",
-                  tags$a("What kind of vegetation data can be imported and which 
-                         cannot?",
+                  tags$a("What kind of vegetation data can be converted and 
+                          which cannot?",
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
                          href = paste0("#", ns("collapse2")))
@@ -165,9 +190,8 @@ mod_aboutVegX_ui <- function(id){
                   vegetation data, but VegXshiny does not cover everything. 
                   Possible is, for example, the import of records of species in 
                   plots (e.g. species cover in layers) together with ancillary 
-                  information about plots and observations. The most prominent 
-                  example of currently unsupported data is measurements on 
-                  individual plants (Veg-X' IndividualOrganismObervation).")
+                  information about plots and observations. Currently 
+                  unsupported is plotless sampling.")
               )
           ),
           # ------------
