@@ -210,10 +210,10 @@ mod_aboutVegX_ui <- function(id){
                 tags$div(class = "panel-body",
                   "Usually not. Turboveg files, and of course Veg-X itself, 
                   should not need further preparation to be imported. Tabular 
-                  data must be arranged so that the rows contain 
-                  plots but this can be done in the 'File editor' in 
-                  the 'Start' section. Records need to be uniquely assigned by 
-                  plot IDs, time-dependent plot observations (like species 
+                  data must often be rearranged but this can be done in the 
+                  'File editor' in the 'Start' section. Tables need to be in 
+                  'long' table format and records need to be uniquely assigned 
+                  by plot IDs; time-dependent plot observations (like species 
                   cover) also need a date.")
               )
           ),

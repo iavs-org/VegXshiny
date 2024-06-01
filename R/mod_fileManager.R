@@ -550,7 +550,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
-                            actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
                            actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
                          ),
                          edit_names = shinyWidgets::dropdownButton(
@@ -563,6 +563,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            actionButton(ns("row_to_colnames"), "Row to colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("col_to_rownames"), "Column to rownames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
+                           actionButton(ns("colnames_to_row"), "Colnames to row",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item")
                          ),
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
@@ -1228,6 +1229,52 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
       }, error = function(e) {
         shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
         new_action_log_record(log_path, "File edit error", paste0("Adding new column to file '", file_focus(), "' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
+        action_log(read_action_log(log_path))
+      }, finally = {
+        removeModal()
+      })
+    })
+    
+    ###### Colnames to row ####
+    observeEvent(input$colnames_to_row, {
+      showModal(
+        modalDialog(
+          textInput(ns("new_row"), label = "Name of the new row"),
+          footer = tagList(
+            tags$span(
+              actionButton(ns("dismiss_modal"), "Dismiss", class = "pull-left btn-danger", icon = icon("times")),
+              actionButton(ns("confirm_colnames_to_row"), "Confirm", class = "pull-right btn-success", icon("check"))
+            )
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$confirm_colnames_to_row, {
+      tryCatch({
+        if(!isTruthy(input$new_row)){
+          shiny::showNotification("Please provide a name for the new row", type = "warning")
+          return()
+        }
+        
+        # Modify data
+        data_df <- rhandsontable::hot_to_r(input$editor)
+        new_row <- data.frame(matrix(names(data_df), nrow = 1), stringsAsFactors = FALSE)
+        colnames(new_row) <- colnames(data_df)
+        data_df <- rbind(new_row, data_df)
+
+        # Overwrite user data
+        user_data[[file_focus()]] <- data_df %>%
+          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
+        output$editor <- rhandsontable::renderRHandsontable(user_data[[file_focus()]])
+        
+        # Update action log
+        shiny::showNotification("Row added")
+        new_action_log_record(log_path, "File info", paste0("Row ", input$new_row, " added in file '", file_focus(), "'"))
+        action_log(read_action_log(log_path))
+      }, error = function(e) {
+        shiny::showNotification("Action failed. Please consult the log for more information.", type = "error")
+        new_action_log_record(log_path, "File edit error", paste0("Adding new row to file '", file_focus(), "' failed with the following exceptions:<ul><li>", e, "</li></ul>"))
         action_log(read_action_log(log_path))
       }, finally = {
         removeModal()
