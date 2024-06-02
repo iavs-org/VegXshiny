@@ -741,13 +741,22 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      modalDialog(
                        size = "l",
                        tagList(
+                         tags$h1("Pivot data"),
+                         tags$p(icon("lightbulb", class = "icon-padded-right"),
+                                "The Veg-X import requires a transformation of 
+                                'wide tables' with columns that code for the 
+                                same measured variable (e.g. multiple species 
+                                columns with cover values) to be transformed 
+                                into 'long tables' with one column for such 
+                                measurements.", class = "text-info"),
+                         
                           tags$div(class = "panel-group", id = "accordion", 
                             
                             # --- Example 1 ---
                             tags$div(class = "panel panel-default",
                               tags$div(class = "panel-heading",
                                 tags$h4(class = "panel-title",
-                                  tags$a("Example: Pivoting a table with species columns", 
+                                  tags$a("Pivoting with two ID columns", 
                                          `data-toggle` = "collapse", 
                                          `data-parent` = "#accordion", 
                                          href = paste0("#", ns("collapse1")))
@@ -755,14 +764,18 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                               ),
                               tags$div(id = ns("collapse1"), class = "panel-collapse collapse",
                                 tags$div(class = "panel-body",
-                                  "The scope of Veg-X is the exchange of data-sets both between 
-                                  vegetation scientists and between vegetation scientists and 
-                                  database operators. VegXshiny can be used for the conversion 
-                                  of small to medium sized data-sets to Veg-X and for the 
-                                  conversion of Veg-X documents into table formats.",
-                                tags$div(style = "text-align: left",
-                                 tags$img(src='www/images/Flowchart.svg', 
-                                          align = "center", width = 580)),
+                                  "The required index columns (plot ID, or plot 
+                                  ID and date) must be available as columns 
+                                  before pivoting. This often requires some 
+                                  preparatory work (see tutorial videos).",
+                                  tags$div(style = "text-align: left",
+                                  tags$img(src='www/images/just_pivot_species.png', 
+                                          align = "center", width = 540)),
+                                  tags$p("In this example, the value 0 is 
+                                  removed during pivoting. In a last step before
+                                  importing, the taxon column would be splitted 
+                                  into taxa and layers (Reshape table > Split 
+                                  column)."),
                                 )
                               )
                             ),
@@ -772,7 +785,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                             tags$div(class = "panel panel-default",
                               tags$div(class = "panel-heading",
                                 tags$h4(class = "panel-title",
-                                  tags$a("Example 2: Pivoting a table with layer columns", 
+                                  tags$a("Additional removal of prefixes", 
                                          `data-toggle` = "collapse", 
                                          `data-parent` = "#accordion", 
                                          href = paste0("#", ns("collapse2")))
@@ -780,57 +793,30 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                               ),
                               tags$div(id = ns("collapse2"), class = "panel-collapse collapse",
                                 tags$div(class = "panel-body",
-                                  "The scope of Veg-X is the exchange of data-sets both between 
-                                  vegetation scientists and between vegetation scientists and 
-                                  database operators. VegXshiny can be used for the conversion 
-                                  of small to medium sized data-sets to Veg-X and for the 
-                                  conversion of Veg-X documents into table formats.",
+                                  "Prefixes (such as 'Cover_' in this example) 
+                                  and suffixes can be removed during pivoting.",
                                 tags$div(style = "text-align: left",
-                                 tags$img(src='www/images/Flowchart.svg', 
-                                          align = "center", width = 580)),
+                                 tags$img(src='www/images/just_pivot_layers.png', 
+                                          align = "center", width = 540)),
                                 )
                               )
                             )
-                          ),  
                           # ------------
-                         
-     
-                         
-                         tags$h3("Pivot data"),
-                         tags$p(icon("lightbulb", class = "icon-padded-right"),
-                                "Prepare your datasets for import by organizing 
-                                 plot ID's in rows if the aren't yet. 'ID 
-                                 columns' are typically plot ID's and, for 
-                                 time-dependent observations, also a column with 
-                                dates", class = "text-info"),
-                         tags$p(icon("lightbulb", class = "icon-padded-right"),
-                                "'Wide tables' with columns that code for the 
-                                same variables, e.g. species columns with cover
-                                values or vegetation layer columns with maximum
-                                heights, are broken down to 'long tables' with
-                                plot id (and date) as id columns and cover or
-                                hight as value column.", class = "text-info"),
+                          ),                           
+                                                  
 
-                         tags$div(style = "text-align: center; margin-bottom: 8px;",
-                                  tags$img(src='www/images/pivot_table.png', align = "center", width = "100%")
-                         ),
-                         tags$p("Input tables have a plot id column and 
-                                 for all observation datasets., so make sure to mark the corresponding columns as id columns.", class = "text-info"),
-                         
                          hr(),
                          tags$label("Column selection"),
                          tags$p(icon("lightbulb", class = "icon-padded-right"),
-                                "Use the matching colors in the image above 
-                                and the labels below as visual clues.", 
-                                class = "text-info"),
-                         tags$p("There are two possible types of input columns: 
-                                id columns and value columns. Select id columns 
-                                from the drop-down menu and remove any unneeded 
-                                value columns from the right-hand box (you do 
-                                not need to remove id columns here as they are 
-                                ignored)."),
+                                "Use the matching colors in the images above 
+                                (follow the links) and of the labels below as 
+                                visual clues.", class = "text-info"),
+                         tags$p("Select id columns from the drop-down menu and 
+                                remove any other unneeded value columns from the 
+                                right-hand box (you do not need to remove id 
+                                columns here as they are ignored)."),
                          fluidRow(
-                           column(6, tags$p(tags$span("ID Columns", style = "color: #1976d2; font-weight: bold"), "*"),
+                           column(6, tags$p(tags$span("ID Columns", style = "color: #0072b2; font-weight: bold"), "*"),
                                   selectizeInput(ns("columns_id"), label = NULL, choices = select_choices, multiple = T, width = "100%")),
                            column(6, tags$p(tags$span("Value Columns", style = "color: #c62828; font-weight: bold"), "*"),
                                   selectizeInput(ns("columns_pivot"), label = NULL, 
@@ -840,14 +826,14 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                          ),
                          
                          tags$label("Column names"),
-                         tags$p("What should be the name of the column that holds the ..."),
+                         tags$p("What should be the name of the ..."),
                          fluidRow(
-                           column(6, tags$p("...", tags$span("names of the value columns", style = "color: #66bb6a; font-weight: bold"), "? *"),
+                           column(6, tags$p("... ", tags$span("column that names what has been measured", style = "color: #009e73; font-weight: bold"), "? *"),
                                   textInput(ns("names_to"), label = NULL, width = "100%")),
-                           column(6,  tags$p("...", tags$span("values of the value columns", style = "color: #651fff; font-weight: bold"), "? *"),
-                                  textInput(ns("values_to"), label = NULL, width = "100%"))
+                           column(6, tags$p("... ", tags$span("column with the measurements", style = "color: #cc79a7; font-weight: bold"), "? *"),
+                                  textInput(ns("values_to"), label = NULL, width = "100%")),
                          ),
-                         
+
                          tags$label("Empty values"),
                          fluidRow(
                            column(12,
