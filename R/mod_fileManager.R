@@ -123,8 +123,13 @@ mod_fileManager_ui <- function(id){
             tags$p("Basic table editing 
                   can be reached using the context menu (right click
                   on a column or row name when the table is in editing 
-                  mode). The options are self-explanatory. More tools 
-                  are available via the buttons at the top:"),      
+                  mode). The options are self-explanatory."), 
+            tags$p("There is currently a bug in the underlying packages that 
+                   prevents the table from being saved after removing scattered 
+                   columns. You can work around this by first saving the object 
+                   under a new name and then removing individual columns or 
+                   blocks of columns. Save the object after each removal."),
+            tags$p("More tools are available via the buttons at the top:"),      
             div(class = "info-box",
                 ## Save edits
                 div(class = "info-box-item",
@@ -132,10 +137,12 @@ mod_fileManager_ui <- function(id){
                     tags$span(style = "font-size:1em", "Save edits")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem; color: black;", "Save: Save edits overwriting the current object")),
+                    tags$span(style = "font-size:1.8rem; color: black;", 
+                      "Save: Save edits overwriting the current object")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1.8rem; color: black;", "Save as: Save edits as a new object")),
+                    tags$span(style = "font-size:1.8rem; color: black;", 
+                      "Save as: Save edits as a new object")),
                 
                 ## Reshape table
                 div(class = "info-box-item",
@@ -160,12 +167,6 @@ mod_fileManager_ui <- function(id){
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Split column: Reverse the merging of
                               columns")),
-                
-                ## Edit values
-                div(class = "info-box-item",
-                    icon("caret-right", class = "icon-padded-right"),
-                    tags$span(style = "font-size:1em;", "Edit 
-                              values")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Row to 
@@ -182,6 +183,16 @@ mod_fileManager_ui <- function(id){
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Colnames 
                               to row: Transform column names into a new row")),
+                
+                ## Edit values
+                div(class = "info-box-item",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1em;", "Edit 
+                              values")),
+                div(class = "info-box-item", style = "margin-left: 30px;",
+                    icon("caret-right", class = "icon-padded-right"),
+                    tags$span(style = "font-size:1.8rem; color: black;", "Edit 
+                              colnames: Beautify column names")),
                 div(class = "info-box-item", style = "margin-left: 30px;",
                     icon("caret-right", class = "icon-padded-right"),
                     tags$span(style = "font-size:1.8rem; color: black;", "Format 
@@ -543,11 +554,15 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            size = "xs",
                            circle = FALSE,
                            inline = TRUE,
-                           actionButton(ns("pivot"), "Pivot", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("transpose"), "Transpose", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("crop"), "Crop", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("merge_columns"), "Merge columns", width = "110px", class = "btn-xs btn-dropdown-item"),
-                           actionButton(ns("split_column"), "Split column", width = "110px", class = "btn-xs btn-dropdown-item")
+                           actionButton(ns("pivot"), "Pivot", width = "135px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("transpose"), "Transpose", width = "135px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("crop"), "Crop", width = "135px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("merge_columns"), "Merge columns", width = "135px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("split_column"), "Split column", width = "135px", class = "btn-xs btn-dropdown-item"),
+                           actionButton(ns("row_to_colnames"), "Row to colnames",  width = "135px", class = "btn-xs btn-dropdown-item rounded-0"),
+                           actionButton(ns("col_to_rownames"), "Column to rownames",  width = "135px", class = "btn-xs btn-dropdown-item rounded-0"),
+                           actionButton(ns("rownames_to_col"), "Rownames to column",  width = "135px", class = "btn-xs btn-dropdown-item rounded-0"),
+                           actionButton(ns("colnames_to_row"), "Colnames to row",  width = "135px", class = "btn-xs btn-dropdown-item rounded-0")
                          ),
                          edit_names = shinyWidgets::dropdownButton(
                            inputId = "names_dropdown",
@@ -556,10 +571,6 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                            circle = FALSE,
                            inline = TRUE,
                            actionButton(ns("edit_colnames"), "Edit colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("row_to_colnames"), "Row to colnames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("col_to_rownames"), "Column to rownames",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("rownames_to_col"), "Rownames to column",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
-                           actionButton(ns("colnames_to_row"), "Colnames to row",  width = "130px", class = "btn-xs btn-dropdown-item rounded-0"),
                            actionButton(ns("format_date"), "Format date", width = "130px", class = "btn-xs btn-dropdown-item")
                          ),
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
@@ -773,9 +784,9 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                                           align = "center", width = 540)),
                                   tags$p("In this example, the value 0 is 
                                   removed during pivoting. In a last step before
-                                  importing, the taxon column would be splitted 
-                                  into taxa and layers (Reshape table > Split 
-                                  column)."),
+                                  importing to Veg-X, the taxon column would be 
+                                  splitted into taxa and layers (Reshape table > 
+                                  Split column)."),
                                 )
                               )
                             ),

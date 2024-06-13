@@ -240,18 +240,21 @@ mod_tableImport_ui <- function(id){
                  Turboveg is a one step procedure, tabular data comes in so many 
                  flavours that there is no simple one-step procedure for 
                  importing. Instead, VegXshiny needs to be told which columns of 
-                 data goes in which Veg-X container. The import dialogue guides 
-                 through this procedure."))
+                 data goes in which Veg-X container and the data often needs to 
+                 be splitted into multiple objects corresponding to Veg-X 
+                 elements. The import dialogue guides through this procedure but
+                 there are also tutorial videos that could."))
           ),       
           tags$p("Tabular data for import are expected to be in a format where 
                   each record has its row identified by a plot ID. In case of 
                   date-dependent recordings (like species cover, in contrast to, 
                   for example, bedrock type) there need to be an additional column 
-                  with a date. For example, a valid species table has a column 
+                  with a date. For example, a valid table with species cover 
+                  values has a column 
                   for plot IDs, a column for observation date, a column for 
                   species names and one for the cover or count values. If 
-                  species aggregation took place in layers, an additional column 
-                  for layers is needed. The 'File editor' in the Start section
+                  species aggregation took place in layers, additional information 
+                  about layers is needed. The 'File editor' in the Start section
                   provided tools for transforming the data accordingly."),
          tags$p("Details on the expected format of input data
                   is available when hovering the info icon next to the dataset
@@ -268,9 +271,7 @@ mod_tableImport_ui <- function(id){
                    to a plotObservation, such as the date of a recording). 
                    The expected data set contains one plot per row. Each row is 
                    identified by a unique plot ID (mandatory) and may contain 
-                   static plot properties (optional):"),
-           tableOutput(ns("example_df_plots")),
-           br(),
+                   static plot properties (optional)."),
            tags$p("Each mapped plot property needs to be linked to a 
                   measurement method. Prefabricated descriptions of
                   common measurement methods are available in the corresponding 
@@ -282,27 +283,15 @@ mod_tableImport_ui <- function(id){
                   selecting the \"...add custom method\" option."),
            
            tags$p(tags$li("Observations")),
-           tags$p("Add different types of observations, such as species
+           tags$p("Add time-dependent observations, such as species
                    cover, vegetation layers, or soil properties. All observations 
                    in Veg-X refer to a plotObservation, i.e. a sampling event at 
-                   a specific plot at a specific point in time. Thus, 
-                   ", tags$span("observation data of any type are identified at 
+                   a specific plot at a specific point in time.", 
+                   tags$span("Observation data of any type are identified at 
                    least by a unique combination of plot ID and date. ", 
-                                class = "text-info"), "Depending on the observation type, 
-                   other attributes are required. For example, the import of 
-                   measured species cover values (called 
-                   aggregateOrganismObservations), require a dataset with at 
-                   least four columns as shown in this example: "),
-           tableOutput(ns("example_df_obs")),
-           br(),
-           tags$p("This is an example for a 'long table', - the 
-                   species coverages are often stored differently, i.e. a 
-                   transformation is often necessary before importing (there 
-                   are tools available to help you with that).  If the 
-                   aggregateOrganismObservations were made at a more granular 
-                   level, e.g. for separate subplots or vegetation strata, 
-                   additional data columns are needed."),
-           tags$p("As in the case of plot properties, measurements of 
+                                class = "text-info"), "Depending on the 
+                   observation type, specific additional attributes are required."),
+           tags$p("As in the case of plot properties, measurements during 
                    observations require defined measurement methods. A dropdown 
                    menu provides a list of predefined methods. If none of these  
                    predefined methods is applicable, a custom method can be 
@@ -552,13 +541,14 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 fluidRow(
                   column(4, selectizeInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
                   column(4, selectizeInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_location_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("plot_location_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$location), after = 1)))
                 ), 
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(12, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS)", width = "100%"))
-                )
+                  column(12, textInput(ns("plot_crs"), label = "Coordinate reference string (CRS) *", width = "100%"))
+                ),
+                tags$p("See https://spatialreference.org, EPSG:4326 applies to most GPS measurements", class = "text-info annotation")
               )
             )
           )),
@@ -582,7 +572,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 class = "panel-body",
                 fluidRow(
                   column(4, selectizeInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
-                  column(4, selectizeInput(ns("plot_elevation_method"), label = "Measurement method",
+                  column(4, selectizeInput(ns("plot_elevation_method"), label = "Method",
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$elevation), after = 1)))
                 )
               )
@@ -613,13 +603,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 fluidRow(
                   column(4, selectizeInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                   column(4, selectizeInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_dimensions_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("plot_dimensions_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectizeInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_area_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("plot_area_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
@@ -645,13 +635,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 class = "panel-body",
                 fluidRow(
                   column(4, selectizeInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_aspect_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("plot_aspect_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$aspect), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectizeInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_slope_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("plot_slope_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$slope), after = 1)))
                 )
               )
@@ -748,13 +738,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 fluidRow(
                   column(4, selectizeInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
                   column(4, selectizeInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("subplot_dimensions_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("subplot_dimensions_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
                   column(4, selectizeInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("subplot_area_method"), label = "Measurement method", 
+                  column(4, selectizeInput(ns("subplot_area_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
@@ -1084,7 +1074,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       if("Coordinates" %in% input$plot_input_control){
         inputs_complete$plot_coordinates = check_input_completeness(values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup()$name[as.numeric(input$plot_location_method)], input$plot_crs))
         render_mapping_summary(header = "Coordinates",
-                               labels = c("X-Coordinate", "Y-Coordinate", "Measurement method", "Coordinate Reference System (CRS)"),
+                               labels = c("X-Coordinate", "Y-Coordinate", "Method", "Coordinate Reference System (CRS)"),
                                values = c(input$plot_coordinates_x, input$plot_coordinates_y, templates_lookup()$name[as.numeric(input$plot_location_method)], input$plot_crs),
                                inputs_complete = inputs_complete$plot_coordinates )
       } else {
@@ -1097,7 +1087,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       if("Elevation" %in% input$plot_input_control){
         inputs_complete$plot_elevation = check_input_completeness(values = c(input$plot_elevation, templates_lookup()$name[as.numeric(input$plot_elevation_method)]))
         render_mapping_summary(header = "Elevation",
-                               labels = c("Plot elevation", "Measurement method"),
+                               labels = c("Plot elevation", "Method"),
                                values = c(input$plot_elevation, templates_lookup()$name[as.numeric(input$plot_elevation_method)]),
                                inputs_complete = inputs_complete$plot_elevation)
       } else {
@@ -1111,7 +1101,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         inputs_complete$plot_geometry = check_input_completeness(values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup()$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup()$name[as.numeric(input$plot_area_method)]),
                                                                  values_grouping = list(1, 2:4, 5:6))
         render_mapping_summary(header = "Geometry (plot)",
-                               labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                               labels = c("Plot shape", "Plot length", "Plot width", "Method (dimensions)", "Plot area", "Method (area)"), 
                                values = c(input$plot_shape, input$plot_length, input$plot_width, templates_lookup()$name[as.numeric(input$plot_dimensions_method)], input$plot_area, templates_lookup()$name[as.numeric(input$plot_area_method)]),
                                inputs_complete = inputs_complete$plot_geometry)
       } else {
@@ -1125,7 +1115,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         inputs_complete$subplot_geometry = check_input_completeness(values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup()$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup()$name[as.numeric(input$subplot_area_method)]),
                                                                     values_grouping = list(1, 2:4, 5:6))
         render_mapping_summary(header = "Geometry (subplot)",
-                               labels = c("Plot shape", "Plot length", "Plot width", "Measurement method (dimensions)", "Plot area", "Measurement method (area)"), 
+                               labels = c("Plot shape", "Plot length", "Plot width", "Method (dimensions)", "Plot area", "Method (area)"), 
                                values = c(input$subplot_shape, input$subplot_length, input$subplot_width, templates_lookup()$name[as.numeric(input$subplot_dimensions_method)], input$subplot_area, templates_lookup()$name[as.numeric(input$subplot_area_method)]),
                                inputs_complete = inputs_complete$subplot_geometry)
       } else {
