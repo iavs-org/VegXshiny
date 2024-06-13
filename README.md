@@ -3,15 +3,6 @@
 
 # VegXshiny - An interactive web application for vegetation ecologists
 
-<!-- badges: start -->
-
-[![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
-[![Codecov test
-coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-<!-- badges: end -->
-
 ## Background
 
 The increasing digitization of research data has motivated data
