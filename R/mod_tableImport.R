@@ -834,7 +834,6 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plotObs_ui = renderUI({
       tagList(
         uiOutput(ns("plotObs_subplot_ui")),
-        hr(),
         tags$label("Observers"),
         br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
@@ -853,9 +852,9 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
           column(4, selectizeInput(ns("plotObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
         ),
         fluidRow(
-          column(width = 4, textInput(ns("plotObs_party_name"), "Name", width = "100%")),
-          column(width = 4, textInput(ns("plotObs_party_role"), "Role", width = "100%")),
-          column(width = 4, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), width = "100%"))
+          column(width = 4, selectizeInput(ns("plotObs_party_name"), label = "Name", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
+          column(width = 4, textInput(ns("plotObs_party_role"), "Role", "Author", width = "100%")),
+          column(width = 4, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), selected = "Individual", width = "100%"))
         )
       )
     })
@@ -1740,7 +1739,34 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                              check.names = F)}) %>% 
                   bind_rows() %>% 
                   left_join(plots_lookup, by = "plotID")
+               
+                #------------------------------------#
+                # Build parties (observers)
+
+                # 1. Fetch data 
+                setProgress(value = 0.2, "Parties")
+                obs_party_name = c() # observation parties come from plotObs
+                obs_party_role = c() # observation party roles come from plotObs
+                obs_party_type = c() # observation party types come from plotObs
+
+                if("plotObservations" %in% input$observations_input_control){
+                  obs_party_name = c(obs_party_name, data_upload[["plotObservations"]][, input$plotObs_party_name])
+                  obs_party_role = c(obs_party_role, input$plotObs_party_role)
+                  obs_party_type = c(obs_party_type, input$plotObs_party_type)
+                }  
+
+
                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+
                 #------------------------------------#
                 # Build organismNames and organismIdentities
                 # 1. Fetch data
@@ -1761,7 +1787,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   
                   orgIdentities_df = data.frame("organismIdentity > originalOrganismNameID" = sapply(orgNames_nodes, function(x){xml2::xml_attr(x, attr = "id")}), check.names = F)
                   orgIdentities_nodes = new_vegx_nodes(orgIdentities_df, vegx_schema, id_factory)
-                  
+                 
                   nodes$organismNames = orgNames_nodes
                   nodes$organismIdentities = orgIdentities_nodes
                   
