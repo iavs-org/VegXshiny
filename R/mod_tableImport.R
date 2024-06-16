@@ -786,6 +786,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         shinyjs::hide("subplotGeometry")
       }
     })
+
     
     #-------------------------------------------------------------------------#
     # Observations ####
@@ -853,7 +854,6 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         ),
         fluidRow(
           column(width = 4, selectizeInput(ns("plotObs_party_name"), label = "Name", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
-          column(width = 4, textInput(ns("plotObs_party_role"), "Role", "Author", width = "100%")),
           column(width = 4, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), selected = "Individual", width = "100%"))
         )
       )
@@ -1250,13 +1250,11 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                             "Subplot" = input$plotObs_subplot_id, 
                             "Date" = input$plotObs_date, 
                             "Party name" = input$plotObs_party_name, 
-                            "Party role" = input$plotObs_party_role, 
                             "Party type" = input$plotObs_party_type)
         
         if(is.null(input$plotObs_plot_id)){input_values[["Plot"]] = ""}
         if(is.null(input$plotObs_date)){input_values[["Date"]]= ""}
         if(is.null(input$plotObs_party_name)){input_values[["Party name"]] = ""}
-        if(is.null(input$plotObs_party_role)){input_values[["Party role"]]= ""}
         if(is.null(input$plotObs_party_type)){input_values[["Party type"]] = ""}
         if(isTruthy(input$plotObs_hasSubplot) && input$plotObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
     
@@ -1416,13 +1414,15 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               shinyjs::disable("dismiss_modal")
               nodes = list()  
               
-              ## Project ####
-              setProgress(value = 0.05, "Projects")
+              ## Building party container ###
               if(isTruthy(input$party_name) & isTruthy(input$party_type)){
                 parties_df = data.frame(input$party_name, check.names = F)
                 names(parties_df) = paste0("party > choice > ", tolower(input$party_type), "Name")
                 nodes$parties = new_vegx_nodes(parties_df, vegx_schema, id_factory)
               }
+              
+              ## Importig project ####
+              setProgress(value = 0.05, "Projects")
               
               if(isTruthy(input$project_citation)){
                 citations_df = data.frame("literatureCitation > citationString" = input$project_citation, check.names = F)
@@ -1447,7 +1447,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               nodes$projects = new_vegx_nodes(project_df, vegx_schema, id_factory)
               
               #-------------------------------------------------------------------------#
-              ## Plots ####
+              ## Importing plots ####
               if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
                 # Fetch user data assigned to plots
                 setProgress(value = 0.1, "Plots")
@@ -1563,7 +1563,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 )
                 
                 #------------------------------------#
-                ## Subplots ####
+                ## Importing subplots ####
                 if(!is.null(input$plot_hasSubplot) && input$plot_hasSubplot == "yes" && isTruthy(input$subplot_data)){
                   # Fetch user data assigned plots
                   subplots_upload = user_data[[input$subplot_data]]
@@ -1674,6 +1674,74 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   return(data.frame(df_upload, check.names = F))
                 }, simplify = FALSE, USE.NAMES = TRUE)
                 
+                #-------------------------------------------------------------------------#
+                ## Importing parties for plotObservations ####
+                
+                # In case there is no party node yet (from project) ...
+                if (length(input$plotObs_party_name) > 0) {
+                  obsParties = data_upload[["plotObservations"]][, input$plotObs_party_name]
+               
+                  # 2. Build Nodes
+                  obsParties_df = data.frame("party" = unique(obsParties), check.names = FALSE)
+                  names(obsParties_df) = paste0("party > choice > ", tolower(input$plotObs_party_type), "Name")
+
+                  obsParties_nodes = new_vegx_nodes(obsParties_df, vegx_schema, id_factory)
+                }
+                
+                if (length(nodes$parties) > 0) {
+                  
+                  # Function to extract unique identifier from a node
+                  getNodeIdentifier <- function(node) {
+                    # Attempt to find each type of name element
+                    individualName <- xml2::xml_text(xml2::xml_find_first(node, ".//individualName"))
+                    organizationName <- xml2::xml_text(xml2::xml_find_first(node, ".//organizationName"))
+                    positionName <- xml2::xml_text(xml2::xml_find_first(node, ".//positionName"))
+                    
+                    # Construct the identifier based on which element is present
+                    if (!is.na(individualName) && nzchar(individualName)) {
+                      return(paste("individualName", individualName, sep=":"))
+                    } else if (!is.na(organizationName) && nzchar(organizationName)) {
+                      return(paste("organizationName", organizationName, sep=":"))
+                    } else if (!is.na(positionName) && nzchar(positionName)) {
+                      return(paste("positionName", positionName, sep=":"))
+                    } else {
+                      return(NA) # In case none of the elements are found
+                    }
+                  }
+                  
+                  # Extract unique identifiers for existing nodes
+                  existingIdentifiers <- sapply(nodes$parties, getNodeIdentifier)
+                  
+                  # Filter candidate nodes to exclude duplicates
+                  filteredCandidates <- Filter(function(candidate) {
+                    candidateIdentifier <- getNodeIdentifier(candidate)
+                    !candidateIdentifier %in% existingIdentifiers
+                  }, obsParties_nodes)
+                  
+                  # Find the maximum ID among existing nodes
+                  maxID <- max(sapply(nodes$parties, function(node) as.numeric(xml2::xml_attr(node, "id"))))
+  
+                  # Assign new IDs to filteredCandidates starting from maxID + 1
+                  for (i in seq_along(filteredCandidates)) {
+                    newID <- maxID + i
+                    xml2::xml_set_attr(filteredCandidates[[i]], "id", as.character(newID))
+                  }
+                  
+                  # Append non-duplicate candidate nodes to existing nodes
+                  nodes$parties <- append(nodes$parties, filteredCandidates)
+                } else {
+                  nodes$parties <- obsParties_nodes
+                }
+
+                ## Create a party lookup for plotObservations
+                partyLookup_df <- do.call(rbind, lapply(nodes$parties, function(partyNode) {
+                  partyID <- xml2::xml_attr(partyNode, "id")
+                  partyNameNode <- xml2::xml_find_first(partyNode, ".//individualName | .//organizationName | .//positionName")
+                  partyName <- xml2::xml_text(partyNameNode)
+                  return(data.frame(ID = partyID, Name = partyName, stringsAsFactors = FALSE))
+                }))
+                
+
                 #------------------------------------#
                 # Build plotObservations
                 # 1. Get unique plot-date combinations across observations, to avoid creation of duplicate plotObservations
@@ -1727,11 +1795,21 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   mutate("plotObservation > plotID" = plotID) %>% 
                   dplyr::select(-plotUniqueIdentifier, -plotID)
                 
-                # 4. Create nodes
+                # 4. Add observationPartyID
+                party_names <- data_upload[["plotObservations"]][, input$plotObs_party_name]
+                party_ids <- sapply(party_names, function(name) {
+                  id <- partyLookup_df$ID[match(name, partyLookup_df$Name)]
+                  if(is.na(id)) stop(paste0("Party name '", name, "' not found in party lookup table."))
+                  return(id)
+                })
+                plotObs_df$`plotObservation > observationPartyID` <- party_ids
+ 
+                # 5. Create nodes
                 plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema, id_factory)
                 nodes$plotObservations = append(nodes$plotObservations, plotObs_nodes)  
                 
-                # 5. Build lookup table
+               
+                # 6. Build lookup table
                 plotObs_lookup = lapply(plotObs_nodes, function(x){
                   data.frame(plotObservationID = xml2::xml_attr(x, "id"),
                              plotID = xml2::xml_text(xml2::xml_child(x, search = "plotID")),
@@ -1739,34 +1817,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                              check.names = F)}) %>% 
                   bind_rows() %>% 
                   left_join(plots_lookup, by = "plotID")
-               
-                #------------------------------------#
-                # Build parties (observers)
-
-                # 1. Fetch data 
-                setProgress(value = 0.2, "Parties")
-                obs_party_name = c() # observation parties come from plotObs
-                obs_party_role = c() # observation party roles come from plotObs
-                obs_party_type = c() # observation party types come from plotObs
-
-                if("plotObservations" %in% input$observations_input_control){
-                  obs_party_name = c(obs_party_name, data_upload[["plotObservations"]][, input$plotObs_party_name])
-                  obs_party_role = c(obs_party_role, input$plotObs_party_role)
-                  obs_party_type = c(obs_party_type, input$plotObs_party_type)
-                }  
-
-
+     
                 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-
                 #------------------------------------#
                 # Build organismNames and organismIdentities
                 # 1. Fetch data

@@ -410,7 +410,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      for(sheet in input$excel_sheets_selected){
                        sheet_name = paste0(tools::file_path_sans_ext(file_name), "_", sheet, ".", file_ext)
                        # Update user_data
-                       sheet_data = readxl::read_excel(file_info$datapath, sheet = sheet) %>% 
+                       sheet_data = readxl::read_excel(file_info$datapath, sheet = sheet, col_types = "text") %>% 
                          rhandsontable::rhandsontable(useTypes = FALSE, readOnly = T, selectCallback = TRUE,
                                                       outsideClickDeselects = TRUE) %>% 
                          rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)

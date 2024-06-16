@@ -208,7 +208,7 @@ mod_aboutVegX_ui <- function(id){
               ),
               tags$div(id = ns("collapse3"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
-                  "Usually not. Turboveg files, and of course Veg-X itself, 
+                  "Turboveg files, and of course Veg-X itself, 
                   should not need further preparation to be imported. Tabular 
                   data must often be rearranged but this can be done in the 
                   'File editor' in the 'Start' section. Tables need to be in 
@@ -224,7 +224,7 @@ mod_aboutVegX_ui <- function(id){
             tags$div(class = "panel panel-default",
               tags$div(class = "panel-heading",
                 tags$h4(class = "panel-title",
-                  tags$a("Why did my import fail?", 
+                  tags$a("Why did my upload fail?", 
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
                          href = paste0("#", ns("collapse4")))
