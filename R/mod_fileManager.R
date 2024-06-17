@@ -630,7 +630,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                        size = "l",
                        tagList(
                          tags$h3("Save edits"),
-                         tags$p("This will overwrite the existing file")
+                         tags$p("This will overwrite the existing file", file_focus())
                        ),
                        footer = tagList(
                          tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")),

@@ -236,7 +236,15 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
         dplyr::select(any_of(c("id", "plotName", "obsStartDate", "surfaceName", measurementValue = "surfaceCover.value"))) %>% 
         drop_na()
     }
+ 
+    if("plotObservations" %in% names(vegx_dfs) && "parties" %in% names(vegx_dfs)){
+      vegx_dfs$plotObservations <- vegx_dfs$plotObservations %>%
+        left_join(vegx_dfs$parties, by = c("observationPartyID" = "id")) %>%
+        rename(Author = names(vegx_dfs$parties)[2]) %>%
+        dplyr::select(-observationPartyID)
+    }
     
+   
     ##### Prepare output
     incProgress(0.9, message = "Preparing output files")
     if(return_vegtable){
@@ -247,28 +255,35 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
         dplyr::select(-id, -plotID, -projectID) %>% 
         dplyr::relocate(plotName)
       
-      if("stratumName" %in% colnames(vegx_dfs$aggregateOrganismObservations)){
-        species_df = vegx_dfs$aggregateOrganismObservations %>%  
-          arrange(organismName) %>% 
-          mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
-          pivot_wider(id_cols = c(plotName, obsStartDate), names_from = c(organismName, stratumName), values_from = measurementValue)
-        
-        vegtable = header_df %>% 
-          left_join(species_df, by = c("plotName", "obsStartDate")) %>% 
-          as.matrix() %>% 
-          t()
-        
+      if("aggregateOrganismObservations" %in% names(vegx_dfs)){
+        if("stratumName" %in% colnames(vegx_dfs$aggregateOrganismObservations)){
+          species_df = vegx_dfs$aggregateOrganismObservations %>%  
+            arrange(organismName) %>% 
+            mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
+            pivot_wider(id_cols = c(plotName, obsStartDate), names_from = c(organismName, stratumName), values_from = measurementValue)
+          
+          vegtable = header_df %>% 
+            left_join(species_df, by = c("plotName", "obsStartDate")) %>% 
+            as.matrix() %>% 
+            t()
+          
+        } else {
+          species_df = vegx_dfs$aggregateOrganismObservations %>%     
+            arrange(organismName) %>% 
+            mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
+            pivot_wider(id_cols = c(plotName, obsStartDate), names_from = organismName, values_from = measurementValue) 
+          
+          vegtable = header_df %>% 
+            left_join(species_df, by = c("plotName", "obsStartDate")) %>% 
+            as.matrix() %>% 
+            t()
+        }
       } else {
-        species_df = vegx_dfs$aggregateOrganismObservations %>%     
-          arrange(organismName) %>% 
-          mutate(organismName = str_replace_all(organismName, " ", "_")) %>% 
-          pivot_wider(id_cols = c(plotName, obsStartDate), names_from = organismName, values_from = measurementValue) 
-        
-        vegtable = header_df %>% 
-          left_join(species_df, by = c("plotName", "obsStartDate")) %>% 
-          as.matrix() %>% 
-          t()
-      }
+       # If aggregateOrganismObservations is missing, return header_df as a transposed matrix
+        vegtable = header_df %>%
+        as.matrix() %>%
+        t()
+      }  
       return(vegtable)
     } else {
       return(vegx_dfs)

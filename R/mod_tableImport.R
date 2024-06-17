@@ -562,9 +562,11 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
-                  column(4, selectizeInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_location_method"), label = "Method", 
+                  column(6, selectizeInput(ns("plot_coordinates_x"), label = "X-Coordinate", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))), 
+                  column(6, selectizeInput(ns("plot_coordinates_y"), label = "Y-Coordinate", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders)))
+                ),  
+                fluidRow(
+                  column(6, selectizeInput(ns("plot_location_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$location), after = 1)))
                 ), 
                 hr(style = "margin-top:0px; margin-bottom:15px"),
@@ -596,8 +598,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
-                  column(4, selectizeInput(ns("plot_elevation_method"), label = "Method",
+                  column(6, selectizeInput(ns("plot_elevation"), label = "Elevation", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),  
+                  column(6, selectizeInput(ns("plot_elevation_method"), label = "Method",
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$elevation), after = 1)))
                 )
               )
@@ -622,19 +624,21 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_dimensions_method"), label = "Method", 
+                  column(6, selectizeInput(ns("plot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders)))
+                ),  
+                fluidRow(
+                  column(6, selectizeInput(ns("plot_dimensions_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_area_method"), label = "Method", 
+                  column(6, selectizeInput(ns("plot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_area_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
@@ -659,14 +663,14 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_aspect_method"), label = "Method", 
+                  column(6, selectizeInput(ns("plot_aspect"), label = "Aspect", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_aspect_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$aspect), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("plot_slope_method"), label = "Method", 
+                  column(6, selectizeInput(ns("plot_slope"), label = "Slope", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_slope_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$slope), after = 1)))
                 )
               )
@@ -690,7 +694,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("plot_parent_material"), label = "Parent material", choices = c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 )
               )
             )
@@ -732,8 +736,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       
       tagList(
         fluidRow(
-          column(4, selectizeInput(inputId = ns("subplot_plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-          column(4, selectizeInput(inputId = ns("subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders)))
+          column(6, selectizeInput(inputId = ns("subplot_plot_unique_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+          column(6, selectizeInput(inputId = ns("subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders)))
         ),
         checkboxGroupInput(ns("subplot_input_control"), label = "Additional sub-plot information", inline = T, choices = "Geometry"),
         
@@ -757,19 +761,21 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               tags$div(
                 class = "panel-body",
                 fluidRow(
-                  column(4, selectizeInput(ns("subplot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("subplot_shape"), label = "Shape", choices =  c("Select a column" = "", user_data[[input$plot_data]]$x$rColHeaders))),
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(4, selectizeInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("subplot_dimensions_method"), label = "Method", 
+                  column(6, selectizeInput(ns("subplot_width"), label = "Width", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("subplot_length"), label = "Length", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders)))
+                ),
+                fluidRow(
+                  column(6, selectizeInput(ns("subplot_dimensions_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_dimension), after = 1)))
                 ),
                 hr(style = "margin-top:0px; margin-bottom:15px"),
                 fluidRow(
-                  column(4, selectizeInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
-                  column(4, selectizeInput(ns("subplot_area_method"), label = "Method", 
+                  column(6, selectizeInput(ns("subplot_area"), label = "Area", choices = c("Select a column" = "", user_data[[input$subplot_data]]$x$rColHeaders))),
+                  column(6, selectizeInput(ns("subplot_area_method"), label = "Method", 
                                            choices = append(list("Select a template" = "", "... define custom method" = "custom_template"), as.list(isolate(methods())$plot_area), after = 1)))
                 )
               )
@@ -848,13 +854,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       req(input$plotObs_data)
       tagList(
         fluidRow(
-          column(4, selectizeInput(ns("plotObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("plotObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
           uiOutput(ns("plotObs_subplot_mapping_ui")),
-          column(4, selectizeInput(ns("plotObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("plotObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
         ),
         fluidRow(
-          column(width = 4, selectizeInput(ns("plotObs_party_name"), label = "Name", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
-          column(width = 4, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), selected = "Individual", width = "100%"))
+          column(width = 6, selectizeInput(ns("plotObs_party_name"), label = "Name", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
+          column(width = 6, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), selected = "Individual", width = "100%"))
         )
       )
     })
@@ -875,7 +881,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plotObs_subplot_mapping_ui = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$plotObs_hasSubplot) && input$plotObs_hasSubplot  == "yes"){
         req(input$subplot_plot_unique_id, input$subplot_id)
-        column(4, selectizeInput(ns("plotObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders)))
+        column(6, selectizeInput(ns("plotObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -919,7 +925,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     
     output$aggOrgObs_stratumName_mapping_ui = renderUI({
       if(isTruthy(input$aggOrgObs_hasStrata) && input$aggOrgObs_hasStrata == "yes"){
-        column(4, selectizeInput(ns("aggOrgObs_stratumName"), label = "Taxon stratum *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
+        column(6, selectizeInput(ns("aggOrgObs_stratumName"), label = "Taxon stratum *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -939,7 +945,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$aggOrgObs_subplot_mapping_ui = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$aggOrgObs_hasSubplot) && input$aggOrgObs_hasSubplot  == "yes"){
         req(input$subplot_plot_unique_id, input$subplot_id)
-        column(4, selectizeInput(ns("aggOrgObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
+        column(6, selectizeInput(ns("aggOrgObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -947,14 +953,14 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       req(input$aggOrgObs_data)
       tagList(
         fluidRow(
-          column(4, selectizeInput(ns("aggOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("aggOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
           uiOutput(ns("aggOrgObs_subplot_mapping_ui")),
-          column(4, selectizeInput(ns("aggOrgObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
+          column(6, selectizeInput(ns("aggOrgObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))
         ),
         fluidRow(
-          column(4, selectizeInput(ns("aggOrgObs_taxonName"), label = "Taxon name *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("aggOrgObs_taxonName"), label = "Taxon name *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders))),
           uiOutput(ns("aggOrgObs_stratumName_mapping_ui")),
-          column(4, selectizeInput(ns("aggOrgObs_taxonMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))    
+          column(6, selectizeInput(ns("aggOrgObs_taxonMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$aggOrgObs_data]]$x$rColHeaders)))    
         )
       )
     })
@@ -1005,7 +1011,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$stratumObs_subplot_mapping_ui = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$stratumObs_hasSubplot) && input$stratumObs_hasSubplot  == "yes"){
         req(input$subplot_plot_unique_id, input$subplot_id)
-        column(4, selectizeInput(ns("stratumObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))
+        column(6, selectizeInput(ns("stratumObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -1013,13 +1019,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       req(input$stratumObs_data)
       tagList(
         fluidRow(
-          column(4, selectizeInput(ns("stratumObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("stratumObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders))),
           uiOutput(ns("stratumObs_subplot_mapping_ui")),
-          column(4, selectizeInput(ns("stratumObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))
+          column(6, selectizeInput(ns("stratumObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))
         ),
         fluidRow(
-          column(4, selectizeInput(ns("stratumObs_stratumName"), label = "Stratum name *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders))),
-          column(4, selectizeInput(ns("stratumObs_stratumMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))    
+          column(6, selectizeInput(ns("stratumObs_stratumName"), label = "Stratum name *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("stratumObs_stratumMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$stratumObs_data]]$x$rColHeaders)))    
         )
       )
     })
@@ -1062,7 +1068,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$covObs_subplot_mapping_ui = renderUI({
       if(isTruthy(input$plot_hasSubplot) && input$plot_hasSubplot  == "yes" && isTruthy(input$covObs_hasSubplot) && input$covObs_hasSubplot  == "yes"){
         req(input$subplot_plot_unique_id, input$subplot_id)
-        column(4, selectizeInput(ns("covObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+        column(6, selectizeInput(ns("covObs_subplot_id"), label = "Subplot ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
       }
     })
     
@@ -1070,13 +1076,13 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       req(input$covObs_data)
       tagList(
         fluidRow(
-          column(4, selectizeInput(ns("covObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("covObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
           uiOutput(ns("covObs_subplot_mapping_ui")),
-          column(4, selectizeInput(ns("covObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+          column(6, selectizeInput(ns("covObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
         ),
         fluidRow(
-          column(4, selectizeInput(ns("covObs_surfaceType"), label = "Surface type *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
-          column(4, selectizeInput(ns("covObs_surfaceCoverMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
+          column(6, selectizeInput(ns("covObs_surfaceType"), label = "Surface type *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders))),
+          column(6, selectizeInput(ns("covObs_surfaceCoverMeasurement"), label = "Measurement value *", choices = c("Select a column" = "", user_data[[input$covObs_data]]$x$rColHeaders)))
         )
       )
     })
@@ -1103,8 +1109,8 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     #   req(input$indOrgObs_data)
     #   tagList(
     #     fluidRow(
-    #       column(4, selectizeInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
-    #       column(4, selectizeInput(ns("indOrgObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
+    #       column(6, selectizeInput(ns("indOrgObs_plot_id"), label = "Plot unique ID *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders))),
+    #       column(6, selectizeInput(ns("indOrgObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$indOrgObs_data]]$x$rColHeaders)))
     #     )
     #   )
     # })
