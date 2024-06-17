@@ -191,7 +191,12 @@ mod_aboutVegX_ui <- function(id){
                   Possible is, for example, the import of records of species in 
                   plots (e.g. species cover in layers) together with ancillary 
                   information about plots and observations. Currently 
-                  unsupported is plotless sampling.")
+                  unsupported is plotless sampling. The plan is to add other 
+                  Veg-X elements little by little. If you need a feature 
+                  urgently, you can post a request on", 
+                  tags$a("Github", href = 
+                    "https://github.com/iavs-org/VegXshiny", target="_blank"),
+                  ".")
               )
           ),
           # ------------
