@@ -1272,7 +1272,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         if(is.null(input$plotObs_narrative)){input_values[["Measurement value"]] = ""}
         # Make sure subplots are NULL even if they are present, but not used here
         if(isTruthy(input$plotObs_hasSubplot) && input$plotObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
-        # Remove subplots if they are NULL
+        # Remove subplots from summary if they are NULL
         if(is.null(input$plotObs_subplot_id)){input_values[["Subplot"]] <- NULL} 
  
         # Determine mandatory fields
@@ -1282,7 +1282,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         if(!is.null(input_values[["Subplot"]])) {
           mandatory_fields = c(mandatory_fields, "Subplot")
         }
-        # Adjust mandatory fields based on provided information
+        # Adjust mandatory fields
         if (input$plotObs_party_name != "" || input$plotObs_party_type != "") {
           mandatory_fields = c(mandatory_fields, "Party Name", "Party Type")
         }
@@ -1482,7 +1482,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
               }
               
               nodes$projects = new_vegx_nodes(project_df, vegx_schema, id_factory)
-              
+             
               #-------------------------------------------------------------------------#
               ## Importing plots ####
               if(!is.null(input$plot_unique_id)){ # Check if UI has been rendered already
@@ -1715,18 +1715,19 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                 ## Importing parties for plotObservations ####
                 
                 # In case there is no party node yet (from project) ...
-                if (length(input$plotObs_party_name) > 0) {
+                if (nzchar(input$plotObs_party_name) && input$plotObs_party_name %in% names(data_upload[["plotObservations"]])) {
                   obsParties = data_upload[["plotObservations"]][, input$plotObs_party_name]
                
-                  # 2. Build Nodes
+                  # Build Nodes
                   obsParties_df = data.frame("party" = unique(obsParties), check.names = FALSE)
                   names(obsParties_df) = paste0("party > choice > ", tolower(input$plotObs_party_type), "Name")
 
                   obsParties_nodes = new_vegx_nodes(obsParties_df, vegx_schema, id_factory)
+                } else {
+                  obsParties_nodes = NULL
                 }
-                
-                if (length(nodes$parties) > 0) {
-                  
+               
+                if (!is.null(nodes$parties)) {
                   # Function to extract unique identifier from a node
                   getNodeIdentifier <- function(node) {
                     # Attempt to find each type of name element
@@ -1763,10 +1764,10 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                     newID <- maxID + i
                     xml2::xml_set_attr(filteredCandidates[[i]], "id", as.character(newID))
                   }
-                  
+                    
                   # Append non-duplicate candidate nodes to existing nodes
                   nodes$parties <- append(nodes$parties, filteredCandidates)
-                } else {
+                } else if (!is.null(obsParties_nodes)) {
                   nodes$parties <- obsParties_nodes
                 }
 
@@ -1777,7 +1778,6 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   partyName <- xml2::xml_text(partyNameNode)
                   return(data.frame(ID = partyID, Name = partyName, stringsAsFactors = FALSE))
                 }))
-                
 
                 #------------------------------------#
                 # Build plotObservations
@@ -1831,15 +1831,41 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                   inner_join(plots_lookup, by = "plotUniqueIdentifier") %>% 
                   mutate("plotObservation > plotID" = plotID) %>% 
                   dplyr::select(-plotUniqueIdentifier, -plotID)
-                
-                # 4. Add observationPartyID
-                party_names <- data_upload[["plotObservations"]][, input$plotObs_party_name]
-                party_ids <- sapply(party_names, function(name) {
-                  id <- partyLookup_df$ID[match(name, partyLookup_df$Name)]
-                  if(is.na(id)) stop(paste0("Party name '", name, "' not found in party lookup table."))
-                  return(id)
-                })
-                plotObs_df$`plotObservation > observationPartyID` <- party_ids
+
+                # 4. Add observationPartyIDs and observationNarrative if they exist
+                if (nzchar(input$plotObs_party_name)) {
+                  party_names <- data_upload[["plotObservations"]][, input$plotObs_party_name]
+                } else {
+                  party_names <- NULL
+                } 
+                if (nzchar(input$plotObs_narrative)) {
+                  observation_narrative <- data_upload[["plotObservations"]][, input$plotObs_narrative]
+                } else {
+                  observation_narrative <- NULL
+                }
+ 
+                # Add party_ids if party_names is provided
+                if (!is.null(party_names)) {
+                  # Find indices of party_names in partyLookup_df$Name
+                  indices <- match(party_names, partyLookup_df$Name)
+                  
+                  # Check for any unmatched names (indices are NA)
+                  if (any(is.na(indices))) {
+                    # Find and report the first unmatched name for simplicity
+                    first_unmatched <- party_names[which(is.na(indices))[1]]
+                    stop(paste0("Party name '", first_unmatched, "' not found in party lookup table."))
+                  }
+                  
+                  # Use indices to directly assign IDs
+                  party_ids <- partyLookup_df$ID[indices]
+                  
+                  # Assign the IDs to the dataframe
+                  plotObs_df$`plotObservation > observationPartyID` <- party_ids
+                }
+                # Add observationNarrative if observation_narrative is provided
+                if(!is.null(observation_narrative)) {
+                  plotObs_df$`plotObservation > observationNarrative` <- observation_narrative
+                }
  
                 # 5. Create nodes
                 plotObs_nodes = new_vegx_nodes(plotObs_df, vegx_schema, id_factory)
@@ -1854,8 +1880,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                              check.names = F)}) %>% 
                   bind_rows() %>% 
                   left_join(plots_lookup, by = "plotID")
-     
-                
+
                 #------------------------------------#
                 # Build organismNames and organismIdentities
                 # 1. Fetch data

@@ -105,13 +105,15 @@ mod_fileManager_ui <- function(id){
               tags$p("Regarding tabular data:"),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
-                  tags$span(style = "font-size:1.8rem;", "Importing observations 
-                    (e.g. coverage values per species and plot) requires the 
-                    data to be in 'long' format. Use the 'pivot' function to 
-                    transform your observation data before import. Records are 
-                    identified by plot id or, in case of time-dependent 
-                    observatons, by plot id and date. Make sure your observation 
-                    data contains the respective columns.")),
+                  tags$span(style = "font-size:1.8rem;", "Importing to Veg-X 
+                  requires the data to be in 'long' format, where each measured 
+                  variable has only one column, even if it has been measured on 
+                  different objects. For example, species cover values end up in 
+                  one column and there is a second column showing the species 
+                  values belongs to. Records are identified by plot id or, in 
+                  case of time-dependent observatons, by plot id and date. 
+                  Make sure your observation data contains the respective 
+                  columns.")),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
