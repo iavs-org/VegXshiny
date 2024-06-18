@@ -91,7 +91,6 @@ render_mapping_summary = function(header = NA, labels, values, inputs_complete){
   } else if(inputs_complete){
     div_class = "frame frame-success"
   }
-  
   div_content = renderText("-")
   if(any(values_truthy)){
     values[!values_truthy] = "-"

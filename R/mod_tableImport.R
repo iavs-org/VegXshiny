@@ -841,8 +841,6 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plotObs_ui = renderUI({
       tagList(
         uiOutput(ns("plotObs_subplot_ui")),
-        tags$label("Observers"),
-        br(),
         tags$p("Assign a dataset", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional) and date (YYYY-MM-DD format)"),
         selectizeInput(ns("plotObs_data"), label = NULL, choices = c("No files found" = "")),
@@ -858,10 +856,17 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
           uiOutput(ns("plotObs_subplot_mapping_ui")),
           column(6, selectizeInput(ns("plotObs_date"), label = "Date *", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
         ),
+        hr(),
+        tags$label("Observers"),
         fluidRow(
           column(width = 6, selectizeInput(ns("plotObs_party_name"), label = "Name", choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
-          column(width = 6, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), selected = "Individual", width = "100%"))
-        )
+          column(width = 6, selectizeInput(ns("plotObs_party_type"), label = "Type", choices = c("", "Individual", "Organization", "Position"), width = "100%"))
+        ),
+        hr(),
+        tags$label("Remarks"),
+        fluidRow(
+          column(width = 6, selectizeInput(ns("plotObs_narrative"), label = NULL, choices = c("Select a column" = "", user_data[[input$plotObs_data]]$x$rColHeaders))),
+        )  
       )
     })
     
@@ -1250,29 +1255,55 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
       }
     })
     
+    ## Plot observations ####
     output$summary_plotObs = renderUI({
-      if("plotObservations" %in% input$observations_input_control){
+      if ("plotObservations" %in% input$observations_input_control){
         input_values = list("Plot" = input$plotObs_plot_id, 
                             "Subplot" = input$plotObs_subplot_id, 
-                            "Date" = input$plotObs_date, 
-                            "Party name" = input$plotObs_party_name, 
-                            "Party type" = input$plotObs_party_type)
-        
+                            "Date" = input$plotObs_date,
+                            "Party Name" = input$plotObs_party_name,
+                            "Party Type" = input$plotObs_party_type,
+                            "Remarks" = input$plotObs_narrative)
+ print(input_values)       
         if(is.null(input$plotObs_plot_id)){input_values[["Plot"]] = ""}
         if(is.null(input$plotObs_date)){input_values[["Date"]]= ""}
-        if(is.null(input$plotObs_party_name)){input_values[["Party name"]] = ""}
-        if(is.null(input$plotObs_party_type)){input_values[["Party type"]] = ""}
+        if(is.null(input$plotObs_party_name)){input_values[["Taxon name"]] = ""}
+        if(is.null(input$plotObs_party_type)){input_values[["Measurement scale"]] = ""}
+        if(is.null(input$plotObs_narrative)){input_values[["Measurement value"]] = ""}
+        # Make sure subplots are NULL even if they are present, but not used here
         if(isTruthy(input$plotObs_hasSubplot) && input$plotObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
-    
-        values = Filter(Negate(is.null), input_values) %>% unlist() # removes NULL values
-        labels = names(values)
-
-        inputs_complete$aggOrgObs = check_input_completeness(values = values, values_mandatory = 1:length(values)) # No groupings, all values mandatory
-        render_mapping_summary(header = "plotObservations", labels = labels, values = values, inputs_complete = inputs_complete$aggOrgObs)
+        # Remove subplots if they are NULL
+        if(is.null(input$plotObs_subplot_id)){input_values[["Subplot"]] <- NULL} 
+ 
+        # Determine mandatory fields
+        mandatory_fields = c("Plot", "Date")  # Initial mandatory fields
+        
+        # Deal with subplots
+        if(!is.null(input_values[["Subplot"]])) {
+          mandatory_fields = c(mandatory_fields, "Subplot")
+        }
+        # Adjust mandatory fields based on provided information
+        if (input$plotObs_party_name != "" || input$plotObs_party_type != "") {
+          mandatory_fields = c(mandatory_fields, "Party Name", "Party Type")
+        }
+        if (input$plotObs_narrative != "") {
+          mandatory_fields = c(mandatory_fields, "Remarks")
+        }
+        if (input$plotObs_party_name == "" && input$plotObs_party_type == "" && input$plotObs_narrative == "") {
+          mandatory_fields = c(mandatory_fields, "Party Name", "Party Type", "Remarks")
+        }  
+        # Convert the names to indices based on the current input_values list
+        mandatory_indices = match(mandatory_fields, names(input_values))
+        
+        # Check if any mandatory values are missing
+        emptyStrings <- sapply(input_values, function(x) x == "")
+        inputs_complete$plotObs <- !any(emptyStrings[mandatory_indices])
+        
+        render_mapping_summary(header = "Metadata", labels = names(input_values), values = unlist(input_values), inputs_complete = inputs_complete$plotObs)
       } else {
-        inputs_complete$plotObs = T  # Set completeness to TRUE if UI is not rendered
-        return(NULL)
-      }
+      inputs_complete$plotObs = TRUE  # Set completeness to TRUE if UI is not rendered
+      return(NULL)
+    }
     })
     
     output$summary_aggOrgObs = renderUI({
