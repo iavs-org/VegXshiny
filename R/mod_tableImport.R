@@ -1264,7 +1264,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
                             "Party Name" = input$plotObs_party_name,
                             "Party Type" = input$plotObs_party_type,
                             "Remarks" = input$plotObs_narrative)
- print(input_values)       
+  
         if(is.null(input$plotObs_plot_id)){input_values[["Plot"]] = ""}
         if(is.null(input$plotObs_date)){input_values[["Date"]]= ""}
         if(is.null(input$plotObs_party_name)){input_values[["Taxon name"]] = ""}
