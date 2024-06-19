@@ -51,14 +51,13 @@ mod_aboutVegX_ui <- function(id){
                  functionality in detail."),
           
           tags$p("-------------"),
+          tags$p("Package development: Christian K\u00f6nig, Sebastian Schmidtlein"),
           tags$h2("Acknowledgments"),
           tags$p("The development of VegXshiny is endorsed by the ", 
                  tags$a("International Association for Vegetation Science (IAVS)",
                         href = "http://iavs.org/", target = "_blank"),
                  "and received funding by the German Research Foundation (DFG, 
                  project number 460840087)."),
-          
-          tags$p("Package development: Christian K\u00f6nig, Sebastian Schmidtlein"),
           
           tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
                   Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
