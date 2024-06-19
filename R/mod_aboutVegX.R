@@ -34,7 +34,7 @@ mod_aboutVegX_ui <- function(id){
           
           tags$p("VegXshiny was developed as a GUI-based application for 
                  creating Veg-X documents and is build around the R package VegX
-                 (De Cáceres, 2018). It also allows the conversion from Veg-X 
+                 (De C\u00E1ceres, 2018). It also allows the conversion from Veg-X 
                  documents to table formats."),
           
           tags$p("The figure below shows a typical workflow. Start with the 
@@ -350,34 +350,34 @@ mod_aboutVegX_ui <- function(id){
         class = "content",
         tags$h1("Impressum"),
         tags$p("Anbieter:"),
-        tags$p(HTML("Karlsruher Institut für Technologie (KIT)<br/>
+        tags$p(HTML("Karlsruher Institut f\u00FCr Technologie (KIT)<br/>
                </br/>
                Rechtlicher Sitz:</br/>
                Kaiserstr. 12<br/>
                76131 Karlsruhe<br/>
                Deutschland<br/>
                Tel. +49 721 608-0<br/>
-               Email: info@kit.edu<br/>
+               Email: info\u0040kit.edu<br/>
                Umsatzsteueridentifikationsnummer: DE266749428<br/>
                <br/>
-               Rechtsform: Körperschaft des öffentlichen Rechts</br/>
+               Rechtsform: K\u00F6rperschaft des \u00F6ffentlichen Rechts</br/>
                Vertretungsberechtigt: Prof. Dr. Oliver Kraft</br/>
                </br/>
                Projektkoordination:</br/>
                Prof. Dr. Sebastian Schmidtlein</br/>
-               Institut für Geographie und Geoökologie</br/>
+               Institut f\u00FCr Geographie und Geo\u00F6kologie</br/>
                Kaiserstr. 12</br/>
                76131 Karlsruhe</br/>
                Deutschland</br/>
-               Email: schmidtlein@kit.edu</br/>")),
+               Email: schmidtlein\u0040kit.edu</br/>")),
         tags$p("Links:"),
-        tags$p(HTML("Die Web-Seiten des Karlsruher Instituts für Technologie 
+        tags$p(HTML("Die Web-Seiten des Karlsruher Instituts f\u00FCr Technologie 
                enthalten Verweise (Links) zu Informationsangeboten auf Servern, 
                die nicht der Kontrolle und Verantwortlichkeit des Karlsruher 
-               Instituts für Technologie unterliegen. Das Karlsruher Institut für 
-               Technologie übernimmt keine Verantwortung und keine Garantie für 
-               diese Informationen und billigt oder unterstützt diese auch nicht 
-               inhaltlich."))
+               Instituts f\u00FCr Technologie unterliegen. Das Karlsruher 
+               Institut f\u00FCr Technologie \u00FCbernimmt keine Verantwortung 
+               und keine Garantie f\u00FCr diese Informationen und billigt oder 
+               unterst\u00FCtzt diese auch nicht inhaltlich."))
         ),
       )  
     )

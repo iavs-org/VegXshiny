@@ -14,7 +14,7 @@ Imports:
     lubridate,
     readxl,
     rhandsontable,
-    shiny,
+    shiny (>= 1.8.1.1),
     shinyAce,
     shinybrowser,
     shinyjs,
