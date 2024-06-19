@@ -28,10 +28,9 @@ The figure below shows a typical workflow. Start with the 'Start' tab of the mai
 
 The 'Start', 'Import', 'Review', 'Download' and 'Action Log' tabs have their own help sections, which describe their functionality in detail.
 
-Online version of this app:
 <div style="text-align:center">
   <a href="http://37.120.167.83" target="_blank">
-    CLICK HERE TO OPEN THE APP ONLINE
+    Online version of this app
   </a>
 </div>
 

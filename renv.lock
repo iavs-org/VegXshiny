@@ -52,7 +52,7 @@
     },
     "VegXshiny": {
       "Package": "VegXshiny",
-      "Version": "0.0.1",
+      "Version": "0.1.0",
       "Source": "unknown",
       "Remotes": "shinyTree/shinyTree",
       "Hash": "32cb252ba31e7098dd3242c13b30683d",
