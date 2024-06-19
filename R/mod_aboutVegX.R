@@ -18,8 +18,11 @@ mod_aboutVegX_ui <- function(id){
         title = "Overview",
         div(
           class = "content",
-          tags$h1("VegXshiny - A tool to organize plant community data in Veg-X exchange
-                 format"),
+          tags$h1("VegXshiny"),
+          tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
+                 VegXshiny is an interactive web application for converting 
+                 datasets into Veg-X.")),
+          
           tags$p("The increasing digitization of research data has motivated 
                  data standardization efforts across scientific disciplines. 
                  For vegetation data, Veg-X (Wiser et al., 2011) is such a 
@@ -50,7 +53,8 @@ mod_aboutVegX_ui <- function(id){
                  functionality in detail."),
           
           tags$p("-------------"),
-          tags$p("Package development: Christian K\u00f6nig, Sebastian Schmidtlein"),
+          tags$h2("Package development"),
+          tags$p("Christian K\u00f6nig, Sebastian Schmidtlein"),
           tags$h2("Acknowledgments"),
           tags$p("The development of VegXshiny is endorsed by the ", 
                  tags$a("International Association for Vegetation Science (IAVS)",
@@ -58,6 +62,7 @@ mod_aboutVegX_ui <- function(id){
                  "and received funding by the German Research Foundation (DFG, 
                  project number 460840087)."),
           
+          tags$p("Development of the R package VegX: Miquel De C\u00e1ceres"),
           tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
                   Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
                   Schmidtlein, Nick Spencer, Susan K. Wiser"),
