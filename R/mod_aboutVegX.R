@@ -58,11 +58,15 @@ mod_aboutVegX_ui <- function(id){
           tags$h2("Acknowledgments"),
           tags$p("The development of VegXshiny is endorsed by the ", 
                  tags$a("International Association for Vegetation Science (IAVS)",
-                        href = "http://iavs.org/", target = "_blank"),
+                        href = "https://www.iavs.org",
+                        target = "_blank"),
                  "and received funding by the German Research Foundation (DFG, 
-                 project number 460840087)."),
-          
-          tags$p("Development of the R package VegX: Miquel De C\u00e1ceres"),
+                 project number 460840087."),
+          tags$p("Development of the ", 
+                 tags$a("R package VegX", 
+                        href = "https://iavs-org.github.io/VegX", 
+                        target = "blank"),
+                 ": Miquel De C\u00e1ceres"),
           tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
                   Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
                   Schmidtlein, Nick Spencer, Susan K. Wiser"),
@@ -76,7 +80,9 @@ mod_aboutVegX_ui <- function(id){
                         target = "_blank"),
                  "."),
           tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. 
-                 R-package, https://iavs-org.github.io/VegX")
+                 R-package", tags$a("https://iavs-org.github.io/VegX",
+                                    href = "https://iavs-org.github.io/VegX",
+                                    target = "_blank"))
         )   
       ),
       
