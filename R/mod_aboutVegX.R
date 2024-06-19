@@ -18,7 +18,7 @@ mod_aboutVegX_ui <- function(id){
         title = "Overview",
         div(
           class = "content",
-          tags$h1("VegXshiny"),
+          tags$h1("A shinier Veg-X"),
           tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
                  VegXshiny is an interactive web application for converting 
                  datasets into Veg-X.")),
@@ -35,7 +35,7 @@ mod_aboutVegX_ui <- function(id){
           tags$p("VegXshiny was developed as a GUI-based application for 
                  creating Veg-X documents and is build around the R package VegX
                  (De C\u00E1ceres, 2018). It also allows the conversion from Veg-X 
-                 documents to table formats."),
+                 documents to other formats."),
           
           tags$p("The figure below shows a typical workflow. Start with the 
                  'Start' tab of the main menu. The second step is import, where 
