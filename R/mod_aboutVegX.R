@@ -30,10 +30,9 @@ mod_aboutVegX_ui <- function(id){
                  database operators."), 
           
           tags$p("VegXshiny was developed as a GUI-based application for 
-                 creating Veg-X documents. It is build around the R package VegX
-                 (De Cáceres, 2018) and can be used for the conversion of small 
-                 to medium sized data-sets. It also allows the conversion from 
-                 Veg-X documents to table formats."),
+                 creating Veg-X documents and is build around the R package VegX
+                 (De Cáceres, 2018). It also allows the conversion from Veg-X 
+                 documents to table formats."),
           
           tags$p("The figure below shows a typical workflow. Start with the 
                  'Start' tab of the main menu. The second step is import, where 
@@ -97,8 +96,8 @@ mod_aboutVegX_ui <- function(id){
                         href = "https://iavs-org.github.io/VegX/articles/VegXStandard.html", # nolint
                         target = "_blank"),
                  "."),
-          tags$p("Below is an interactive tree viewer of the Veg-X schema. You 
-                 can expand an element by clicking the plus icon (+). Additional 
+          tags$p("Below is an interactive tree viewer of the Veg-X schema. 
+                 Expand an element by clicking the plus icon (+). Additional 
                  information about the schema definition of the element 
                  (e.g. data type, number of occurrences, etc.) is displayed when 
                  hovering the mouse over it. The search box at the top of the 
@@ -143,9 +142,9 @@ mod_aboutVegX_ui <- function(id){
                 tags$div(class = "panel-body",
                   "The scope of Veg-X is the exchange of data-sets both between 
                   vegetation scientists and between vegetation scientists and 
-                  database operators. VegXshiny can be used for the conversion 
-                  of small to medium sized data-sets to Veg-X and for the 
-                  conversion of Veg-X documents into table formats."
+                  database operators. VegXshiny can be used to convert smaller 
+                  data sets to Veg-X and for the conversion of Veg-X documents 
+                  into table formats."
                 )
               )
             ),
