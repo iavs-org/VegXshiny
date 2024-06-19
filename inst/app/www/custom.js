@@ -33,6 +33,14 @@ $(function(){
   });
 });
 
+
+$(document).ready(function() {
+  $('.collapsible').on('click', function() {
+    $(this).nextUntil('div.collapsible').slideToggle(100);
+  });
+});
+
+
 /*
 $(document).ready(function() {
   // Observe changes in the Shiny reactive value

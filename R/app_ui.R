@@ -10,36 +10,41 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     
+    # Include the custom.js file
+    tags$head(tags$script(src = "www/custom.js")),
+    
     # Detect device & browser info
     shinybrowser::detect(),
     
     # Application UI logic 
-    navbarPage("VegXshiny",  
-               position = "fixed-top",
-               theme=bslib::bs_theme(version = 3, bootswatch = "darkly"),
-               header = tags$style(type="text/css", "body {padding-top: 80px;}"),
-               tabPanel("About", icon = icon("info", class = "icon-padded-right"),
-                        mod_aboutVegX_ui("about")),
+    navbarPage("",
+               position = "static-top",
+               theme=bslib::bs_theme(version = 3, bootswatch = "flatly"),
+               header = tags$style(type = "text/css", 
+                                   ".navbar-header { display: none; }",
+                                   ".dropdown-menu { font-size: 0.9em; }"
+               ),   
+               tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("File Manager", icon = icon("folder-open", class = "icon-padded-right"),
+               tabPanel("Start", icon = icon("file-import", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                
-               navbarMenu(title = "Build Veg-X", icon = icon("magic", class = "icon-padded-right"), 
-                          tabPanel("from Tables", mod_tableImport_ui("tableImport")),
-                          tabPanel("from Turboveg", mod_turbovegImport_ui("turbovegImport")),
-                          tabPanel("from Veg-X", mod_vegxImport_ui("vegxImport"))
+               navbarMenu(title = "Import", icon = icon("wand-sparkles", class = "icon-padded-right"), 
+                          tabPanel("Table", mod_tableImport_ui("tableImport")),
+                          tabPanel("Turboveg", mod_turbovegImport_ui("turbovegImport")),
+                          tabPanel("Veg-X", mod_vegxImport_ui("vegxImport"))
                ),
                
-               tabPanel("Veg-X Document", icon = icon("code", class = "icon-padded-right"),
+               tabPanel("Review", icon = icon("eye", class = "icon-padded-right"),
                         mod_xmlViewer_ui("xmlViewer")
                ),
                
-               tabPanel("VegX Export", icon = icon("file-export", class = "icon-padded-right"),
+               tabPanel("Download", icon = icon("file-export", class = "icon-padded-right"),
                         mod_vegxExport_ui("vegxExport")
                ),
                
-               tabPanel("Action Log", icon = icon("history", class = "icon-padded-right"),
+               tabPanel("Action Log", icon = icon("stethoscope", class = "icon-padded-right"),
                         mod_actionLog_ui("actionLog")
                )
     )

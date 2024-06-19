@@ -1,88 +1,67 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# VegXshiny - An interactive web application for vegetation ecologists
+# VegXshiny
 
-<!-- badges: start -->
-
-[![R-CMD-check](https://github.com/ChrKoenig/VegXshiny/workflows/R-CMD-check/badge.svg)](https://github.com/ChrKoenig/VegXshiny/actions)
-[![Codecov test
-coverage](https://codecov.io/gh/ChrKoenig/VegXshiny/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ChrKoenig/VegXshiny?branch=master)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-<!-- badges: end -->
+**Veg-X is a standard for the exchange of vegetation data. VegXshiny is
+an interactive web application for converting datasets into Veg-X.**
 
 ## Background
 
 The increasing digitization of research data has motivated data
-standardization efforts across scientific disciplines. The vegetation
-science community has recognized the need for a standardized exchange
-format since at least 2003 and developed the initial version of the
-Veg-X standard in 2008 (Wiser et al., 2011). Veg-X is implemented as an
-XML schema that provides both flexibility and precision in representing
-vegetation data of different origin and format.
+standardization efforts across scientific disciplines. For vegetation
+data, Veg-X (Wiser et al., 2011) is such a standard. It provides both
+flexibility and precision in representing vegetation data of different
+origins and formats. It’s scope is the exchange of data-sets both
+between vegetation scientists and between vegetation scientists and
+database operators.
 
-Veg-X has not found wide adoption among vegetation ecologists to this
-date. One of the reasons for this was the lack of tools to easily create
-Veg-X documents. A major step towards improving the usability of Veg-X
-was the publication of the VegX R-package (De Cáceres, 2018), which
-provides tools for importing, integrating and exporting vegetation data
-using the Veg-X standard. While the VegX package allows users to create
-Veg-X documents using R programming language, interest in a GUI-based
-application for Veg-X remained high.
+VegXshiny was developed as a GUI-based application for creating Veg-X
+documents and is build around the R package VegX (De Cáceres, 2018). It
+also allows the conversion from Veg-X documents to table formats.
 
-<center>
+The figure below shows a typical workflow. Start with the ‘Start’ tab of
+the main menu. The second step is import, where dialogs guide the user
+through the process of mapping data to the appropriate Veg-X elements.
+Once these steps have been completed, the VegX code can be reviewed and
+downloaded.
 
-<img src="inst/app/www/images/vegxshiny_UI.png" width="700" />
+<left> <img src="inst/app/www/images/Flowchart.svg" width="580" />
 
-*VegXshiny has an intuitive graphical user interface to guide the user
-through the conversion process*
-</center>
+The ‘Start’, ‘Import’, ‘Review’, ‘Download’ and ‘Action Log’ tabs have
+their own help sections, which describe their functionality in detail.
 
-**VegXshiny aims to make the conversion of vegetation data into Veg-X
-documents as easy as possible.** The graphical user interface of
-VegXshiny helps users, who have no experience with programming or markup
-languages (XML in this case), to build valid Veg-X documents and
-implement best practices in terms of data management and
-interoperability. Dynamic import dialogs guide users through the process
-of mapping their data to the corresponding Veg-X elements, while
-ensuring that the generated XML conforms to the Veg-X standard. The
-ability to view and edit input files and output VegX documents gives
-users full control over their data. Finally, an interactive tree viewer
-of the Veg-X schema helps making the standard accessible and
-understandable.
+<div style="text-align:left">
 
-The development of VegXshiny is endorsed by the [International
-Association for Vegetation Science (IAVS)](http://iavs.org/).
-
-<div style="text-align:center">
-
-<a href="http://37.120.167.83" target="_blank"> CLICK HERE TO OPEN THE
-APP ONLINE </a>
+<a href="http://37.120.167.83" target="_blank"> Online version of this
+app </a>
 
 </div>
 
-**References**:
+------------------------------------------------------------------------
+
+**Package development**
+
+Christian König, Sebastian Schmidtlein
+
+**Acknowledgments**
+
+The development of VegXshiny is endorsed by the International
+Association for Vegetation Science (IAVS) and received funding by the
+German Research Foundation (DFG, project number 460840087).
+
+Development of the R package VegX: Miquel De Cáceres
+
+Veg-X standard development: Brad Boyle, Miquel De Cáceres, Martin
+Kleikamp, Christian König, Robert K. Peet, Sebastian Schmidtlein, Nick
+Spencer, Susan K. Wiser
+
+**References**
 
 Wiser, S.K., Spencer, N., de Cáceres, M., Kleikamp, M., Boyle, B., Peet
-R.K. (2011): Veg-X – an exchange standard for plot-based vegetation
-data. – Journal of Vegetation Science 22: 598–609.
+R.K. (2011): Veg-X - an exchange standard for plot-based vegetation
+data. Journal of Vegetation Science 22: 598-609,
+<doi:10.1111/j.1654-1103.2010.01245.x> .
 
 De Cáceres (2018): VegX: Vegetation data in Veg-X. R-package,
 <https://iavs-org.github.io/VegX>
-
-### VegXShiny R package development:
-
-- Christian König
-- Sebastian Schmidtlein
-
-### Veg-X standard development:
-
-- Miquel De Cáceres
-- Sebastian Schmidtlein
-- Susan K. Wiser
-- Nick Spencer
-- Robert K. Peet
-- Martin Kleikamp
-- Brad Boyle
-- Christian König

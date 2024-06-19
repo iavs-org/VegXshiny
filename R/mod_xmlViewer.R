@@ -11,24 +11,50 @@ mod_xmlViewer_ui <- function(id){
   ns <- NS(id)
   
   fluidPage(
-    column(
-      width = 10, offset = 1,
-      fluidRow(
-        tags$p("Inspect, edit and validate your current VegX document.", class = "text-info annotation")
+    tabsetPanel(
+      tabPanel("Review Veg-X",
+
+        tags$h1 ("Inspect, edit and validate your current Veg-X document"),
+        column(
+          width = 12,
+          fluidRow(
+            actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
+            actionButton(ns("validate"), "Validate", width = "80px", class = "btn-xs")
+          ),
+          fluidRow(
+            aceEditor(
+              outputId = ns("xml_viewer"), 
+              value = "",
+              mode = "xml",
+              theme = "tomorrow",
+              readOnly = T,
+              autoComplete = "disabled",
+              autoScrollEditorIntoView = TRUE
+            )
+          )
+        )
       ),
-      fluidRow(
-        actionButton(ns("edit"), "Edit", width = "80px", class = "btn-xs"),
-        actionButton(ns("validate"), "Validate", width = "80px", class = "btn-xs")
-      ),
-      fluidRow(
-        aceEditor(
-          outputId = ns("xml_viewer"), 
-          value = "",
-          height = "80vh",
-          mode = "xml",
-          theme = "tomorrow",
-          readOnly = T,
-          autoComplete = "disabled"
+      
+      tabPanel("Help",
+        div(
+          class = "content",
+          tags$h1("Help with reviewing Veg-X"),
+           
+          div(class = "info-box",
+              div(class = "text-info info-box-item",
+                  icon("lightbulb", class = "icon-padded-right"),
+                  tags$span(style = "font-size:1.8rem;", "Normally, no action is 
+                            required here and you can continue with the 
+                            download.")),
+          ),
+          tags$p("You can edit the data after pressing the 'Edit' button but 
+                 caution is advised, as manually editing a Veg-X document can 
+                 quickly invalidate it. Note that edits cannot be undone once 
+                 saved."),
+          tags$p("Pressing the 'Validate' button tests whether the current Veg-X 
+                 document conforms to the Veg-X XML Schema and whether there are 
+                 any potential problems with references to nodes. Validation 
+                 errors and other problems are listed in the action log.")      
         )
       )
     )
