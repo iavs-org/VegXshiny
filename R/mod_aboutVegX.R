@@ -18,10 +18,10 @@ mod_aboutVegX_ui <- function(id){
         title = "Overview",
         div(
           class = "content",
-          tags$h1("A shinier Veg-X"),
+          tags$h1("VegXshiny"),
           tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
                  VegXshiny is an interactive web application for converting 
-                 datasets into Veg-X.")),
+                 datasets into Veg-X and back.")),
           
           tags$p("The increasing digitization of research data has motivated 
                  data standardization efforts across scientific disciplines. 

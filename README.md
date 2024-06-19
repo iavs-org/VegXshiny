@@ -4,7 +4,8 @@
 # VegXshiny
 
 **Veg-X is a standard for the exchange of vegetation data. VegXshiny is
-an interactive web application for converting datasets into Veg-X.**
+an interactive web application for converting datasets into Veg-X and
+back.**
 
 ## Background
 
@@ -18,7 +19,7 @@ database operators.
 
 VegXshiny was developed as a GUI-based application for creating Veg-X
 documents and is build around the R package VegX (De Cáceres, 2018). It
-also allows the conversion from Veg-X documents to table formats.
+also allows the conversion from Veg-X documents to other formats.
 
 The figure below shows a typical workflow. Start with the ‘Start’ tab of
 the main menu. The second step is import, where dialogs guide the user
