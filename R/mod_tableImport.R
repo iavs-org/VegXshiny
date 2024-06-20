@@ -36,7 +36,7 @@ mod_tableImport_ui <- function(id){
                 column(
                   width = 12,
                   h1("Project"),
-                  tags$p("Describe your project and its contributors. Files can be assigned in the next steps", class = "text-info annotation no-margin"),
+                  tags$p("Describe your project and its contributors. Datasets are assigned in the next steps", class = "text-info annotation no-margin"),
                   hr(),
                   uiOutput(ns("project_ui"))
                 )
@@ -447,7 +447,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     sidebar_tabs = c("Project", "Plots", "Observations", "Summary")
     
     output$navigation_ui = renderUI({
-      if(input$sidebar == "Data"){
+      if(input$sidebar == "Project"){
         buttons = fluidRow(
           column(width = 12, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right"))
         )

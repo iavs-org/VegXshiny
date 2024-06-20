@@ -16,10 +16,10 @@ mod_vegxImport_ui <- function(id){
         fluidRow(
           column(
             width = 12,
-            tags$h1 ("Reading existing Veg-X XML"),
+            tags$h1 (""),
+            tags$p("Pick a source file uploaded to the start section", class = "text-info annotation"),
             fluidRow(
               column(6, selectizeInput(ns("vegx_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
-              column(6, div(style = "display:left-align", actionButton(ns("read_vegx"), label = "Read VegX XML", style = "height: 35px; line-height: 0px")))
             ),
             
             fluidRow(
@@ -29,7 +29,10 @@ mod_vegxImport_ui <- function(id){
                      hr()
               )
             ),
-            actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right")
+            fluidRow(
+              column(3, actionButton(ns("read_tv"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
+              column(3, actionButton(ns("import"), label = "Step2: Import", class = "btn-success"), style = "130px; padding: 5px;")
+            ),
           )
         )
       ),
@@ -44,7 +47,7 @@ mod_vegxImport_ui <- function(id){
                              document can be read in here, it must first 
                              be uploaded in the 'Start' section")),
            ),
-           tags$p("Choose an uploaded Veg-X file for validation. Review the 
+           tags$p("Read Veg-X, review the 
                  summary and run the import."),
           
         )

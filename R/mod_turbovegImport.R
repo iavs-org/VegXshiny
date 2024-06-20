@@ -16,10 +16,10 @@ mod_turbovegImport_ui <- function(id){
         fluidRow(
           column(
             width = 12,
-            tags$h1 ("Conversion of Turboveg2 XML to Veg-X"),
+            tags$h1 (""),
+            tags$p("Pick a source file uploaded to the start section", class = "text-info annotation"),
             fluidRow(
               column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
-              column(6, div(style = "display:left-align", actionButton(ns("read_tv"), label = "Read Turboveg2 XML", style = "height: 35px; line-height: 0px")))
             ),
             
             fluidRow(
@@ -29,7 +29,11 @@ mod_turbovegImport_ui <- function(id){
                      hr()
               )
             ),
-            actionButton(ns("import"), label = "Import", width = "100px", class = "btn-success pull-right")
+            fluidRow(
+              column(3, actionButton(ns("read_tv"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
+              column(3, actionButton(ns("import"), label = "Step2: Import", class = "btn-success"), style = "130px; padding: 5px;")
+            ),
+           
           )
         )
       ),
@@ -41,8 +45,8 @@ mod_turbovegImport_ui <- function(id){
                  div(class = "text-info info-box-item",
                      icon("lightbulb", class = "icon-padded-right"),
                      tags$span(style = "font-size:1.8rem;", "Before a Turboveg
-                               document can be read in here, it must first be 
-                               uploaded in the 'Start' section")),
+                               document can be read in here, it must first 
+                               be uploaded in the 'Start' section")),
             ),
 
             tags$p("You can import data from ", 

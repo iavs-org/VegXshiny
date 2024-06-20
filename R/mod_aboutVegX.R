@@ -45,7 +45,7 @@ mod_aboutVegX_ui <- function(id){
           
           tags$div(style = "text-align: left",
                    tags$img(src='www/images/Flowchart.svg', 
-                            align = "center", width = 580)
+                            align = "center", width = 600)
           ),
   
           tags$p("The 'Start', 'Import', 'Review', 'Download' and 'Action Log' 
