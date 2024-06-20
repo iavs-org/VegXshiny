@@ -23,21 +23,19 @@ mod_fileManager_ui <- function(id){
                }"
              )
            ),
-         tags$h1("Upload and prepare your data"),
+         tags$p("Upload files", class = "text-info annotation", style = "padding-top: 30px;"),
+         tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                title = "Supported data formats: 
+                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+                       \nTurboveg data and Veg-X: .xml."),
          fluidRow(
            column(
              12,
-             tags$label("Upload a file"),
-             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "Supported data formats: 
-             \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-             \nTurboveg data: .xml 
-             \nSee 'About > Tutorial' for more information."),
              fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
              tags$hr(),
-             tags$label("Uploaded files"),
+             tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 30px;"),
              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "These files are available for further cloud operations (import to Veg-X, edit); they can not be downloaded."),
+                    title = "These files are available for further cloud operations (import to Veg-X, editing); they can not be downloaded."),
              fluidRow(
                class = "file-grid",
                column(
@@ -47,7 +45,7 @@ mod_fileManager_ui <- function(id){
              ),
              tags$hr(),
              div(
-               tags$label("File Editor"),
+               tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 30px;"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                       title = "Click on a file above to open the editor"),
                
