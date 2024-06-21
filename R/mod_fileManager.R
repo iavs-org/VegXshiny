@@ -31,11 +31,10 @@ mod_fileManager_ui <- function(id){
          fluidRow(
            column(
              12,
-             fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-             tags$hr(),
-             tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 30px;"),
+             fileInput(ns("upload"), label = NULL, width = "50%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+             tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 20px;"),
              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "These files are available for further cloud operations (import to Veg-X, editing); they can not be downloaded."),
+                    title = "Populated after files are uploaded. The listed datasets are available for further cloud operations (import to Veg-X, editing); they can not be downloaded."),
              fluidRow(
                class = "file-grid",
                column(
@@ -43,9 +42,8 @@ mod_fileManager_ui <- function(id){
                  uiOutput(ns("file_browser"))
                )
              ),
-             tags$hr(),
              div(
-               tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+               tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 40px; padding-bottom: 10px;"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                       title = "Click on a file above to open the editor"),
                
@@ -439,12 +437,12 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
         }
         file_ext = tools::file_ext(file_name)
         icon = switch(file_ext,                             # Assign appropriate file icon
-                      "csv" = icon("file-csv", "fa-9x black"),
-                      "txt" = icon("file", "fa-9x black"),
-                      "xls" = icon("file-excel", "fa-9x black"),
-                      "xlsx" = icon("file-excel", "fa-9x black"),
-                      "xml" = icon("file-code", "fa-9x black"),
-                      icon("file", "fa-9x black"))
+                      "csv" = icon("file-csv", "fa-6x black"),
+                      "txt" = icon("file", "fa-6x black"),
+                      "xls" = icon("file-excel", "fa-6x black"),
+                      "xlsx" = icon("file-excel", "fa-6x black"),
+                      "xml" = icon("file-code", "fa-6x black"),
+                      icon("file", "fa-6x black"))
         
         # Create Button
         button_class = if(!is.null(file_focus()) && file_name == file_focus()){
@@ -457,7 +455,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
           class = "overlay-button-container",
           title = file_name,
           actionButton(ns(paste0("select_", file_name)),
-                       width = "180px", height = "180px", 
+                       width = "130px", height = "130px", 
                        class = button_class,
                        label = div(class = "overlay-button-container-label", icon, tags$br(), file_name, `data-tooltip` = file_name)),
           actionButton(inputId = ns(paste0("delete_", file_name)),
