@@ -15,7 +15,11 @@ mod_actionLog_ui <- function(id){
       tabPanel(
       title = "Log",
         fluidRow(
-          tags$h1 ("Action Log"),
+          div(
+            tags$p("Action log", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 15px;")
+            , style = "margin-left: 15px;"
+          ),  
           column(
             width = 12,
             DT::dataTableOutput(ns("action_log"))
@@ -25,7 +29,8 @@ mod_actionLog_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-          tags$h1("Help with the Action Log"),
+          tags$p("Help with the action log", 
+               class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 15px;"),
           tags$p("The Action Log records user actions and application messages 
                    during a session. This includes file uploads and edits, import 
                    messages, Veg-X document edits and validations and file exports. 

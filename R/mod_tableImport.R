@@ -35,7 +35,6 @@ mod_tableImport_ui <- function(id){
             nav_panel(title = "1. Project", value = "Project",
                 column(
                   width = 12,
-#                  h1("Project"),
                   tags$p("Describe your project and its contributors (datasets 
                          are assigned in the next steps)", 
                          class = "text-info annotation no-margin", 
@@ -254,12 +253,7 @@ mod_tableImport_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-          tags$p("Help with reading tabular data", class = "text-info annotation", style = "padding-top: 30px;"),
-          div(class = "info-box",
-             div(class = "text-info info-box-item",
-                 icon("lightbulb", class = "icon-padded-right"),
-                 tags$span(style = "font-size:1.8rem;", "Before data can be read 
-                 in here, it must first be uploaded in the 'Start' section"))),
+          tags$p("Help with reading tabular data", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
           tags$p("While the import from 
                  Turboveg is a one step procedure, tabular data comes in many 
                  flavours so that VegXshiny needs to 

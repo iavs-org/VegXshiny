@@ -39,15 +39,8 @@ mod_turbovegImport_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-            tags$h1("Help with importing Turboveg"),
-            div(class = "info-box",
-                 div(class = "text-info info-box-item",
-                     icon("lightbulb", class = "icon-padded-right"),
-                     tags$span(style = "font-size:1.8rem;", "Before a Turboveg
-                               document can be read in here, it must first 
-                               be uploaded in the 'Start' section")),
-            ),
-
+            tags$p("Help with importing Turboveg", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px"),
             tags$p("You can import data from ", 
                    tags$a("Turboveg 2 standard XML files", 
                           href = "https://www.synbiosys.alterra.nl/turboveg/help/idh_export_xml.htm",  # nolint

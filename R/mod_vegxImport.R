@@ -38,17 +38,10 @@ mod_vegxImport_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-            tags$h1("Help with reading Veg-X"),
-            div(class = "info-box",
-               div(class = "text-info info-box-item",
-                   icon("lightbulb", class = "icon-padded-right"),
-                   tags$span(style = "font-size:1.8rem;", "Before a Veg-X 
-                             document can be read in here, it must first 
-                             be uploaded in the 'Start' section")),
-           ),
-           tags$p("Read Veg-X, review the 
+            tags$p("Help with reading Veg-X", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+            tags$p("Read Veg-X, review the 
                  summary and run the import."),
-          
         )
       )      
     )

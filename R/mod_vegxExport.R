@@ -21,10 +21,13 @@ mod_vegxExport_ui <- function(id){
     tabsetPanel(
       tabPanel("Download",
         tagList(
-          tags$h1("Download"),
+          tags$p("Download", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
           fluidRow(
-              tags$label("Veg-X document summary"),
-              uiOutput(ns("summary")),
+              div(
+                tags$label("Veg-X document summary"),
+                uiOutput(ns("summary")), style = "margin-left: 15px;"
+              ),
               hr(),
               column(3, downloadButton(ns("export_xml"), label = "Veg-X (xml)", style = "width: 100%;"), style = "padding: 5px;"),
               column(3, downloadButton(ns("export_vegtable"), label = "Wide table (csv)", style = "width: 100%;"), style = "padding: 5px;"),
@@ -38,7 +41,8 @@ mod_vegxExport_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-          tags$h1("Help with downloading"),
+          tags$p("Help with downloading", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
           tags$p("If a valid Veg-X document is available, an overview of the 
                    structure (with the number of nodes of different types) is 
                    shown on this page. The Veg-X document can then be downloaded 
