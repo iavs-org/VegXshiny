@@ -45,7 +45,7 @@ mod_aboutVegX_ui <- function(id){
           
           tags$div(style = "text-align: left",
                    tags$img(src='www/images/Flowchart.svg', 
-                            align = "center", width = 580)
+                            align = "center", width = 600)
           ),
   
           tags$p("The 'Start', 'Import', 'Review', 'Download' and 'Action Log' 
@@ -259,7 +259,7 @@ mod_aboutVegX_ui <- function(id){
             tags$div(class = "panel panel-default",
               tags$div(class = "panel-heading",
                 tags$h4(class = "panel-title",
-                  tags$a("My files are too large to upload, what should I do?", 
+                  tags$a("My files are too large to upload, what can I do?", 
                          `data-toggle` = "collapse", 
                          `data-parent` = "#accordion", 
                          href = paste0("#", ns("collapse5")))

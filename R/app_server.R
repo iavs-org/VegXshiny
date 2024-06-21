@@ -80,8 +80,8 @@ app_server <- function(input, output, session) {
     if(browser_info$dimensions$width < 800 | browser_info$device == "Mobile"){
       showModal(
         modalDialog(
-          div(class = "text-center text-danger", tags$h4("Your display dimensions may not be fully compatible with this application.")),
-          tags$p("Consider resizing you browser window or running VegXShiny on a device with a larger screen."),
+          div(class = "text-center text-danger", tags$h4("This application is 
+              designed for wider windows or screens")),
           size = "m", easyClose = T)
       )
     }

@@ -23,21 +23,19 @@ mod_fileManager_ui <- function(id){
                }"
              )
            ),
-         tags$h1("Upload and prepare your data"),
+         tags$p("Upload files", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+         tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                title = "Supported data formats: 
+                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
+                       \nTurboveg data and Veg-X: .xml."),
          fluidRow(
            column(
              12,
-             tags$label("Upload a file"),
-             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "Supported data formats: 
-             \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-             \nTurboveg data: .xml 
-             \nSee 'About > Tutorial' for more information."),
              fileInput(ns("upload"), label = NULL, width = "100%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
              tags$hr(),
-             tags$label("Uploaded files"),
+             tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 30px;"),
              tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "These files are available for further cloud operations (import to Veg-X, edit); they can not be downloaded."),
+                    title = "These files are available for further cloud operations (import to Veg-X, editing); they can not be downloaded."),
              fluidRow(
                class = "file-grid",
                column(
@@ -47,7 +45,7 @@ mod_fileManager_ui <- function(id){
              ),
              tags$hr(),
              div(
-               tags$label("File Editor"),
+               tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
                tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
                       title = "Click on a file above to open the editor"),
                
@@ -63,11 +61,12 @@ mod_fileManager_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-          tags$h1("Upload and prepare your data"),
+          tags$p("Help with uploading", 
+                 class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
           tags$p("This is the single entry point for user-supplied 
                   data. ", tags$span("All files that contain information intended 
                   for import need to be uploaded here. ", class = "text-info"), 
-                 "To upload files, click the upload widget on the left panel 
+                 "To upload files, click the upload button 
                   and browse your local file system. You can select and upload 
                   multiple files at once by pressing [CTRL]. Currently, the 
                   following file types are supported: "),
@@ -100,7 +99,8 @@ mod_fileManager_ui <- function(id){
                   tab above the data view to access functions for editing and
                   reshaping the uploaded files."), 
                   
-          tags$h1("Editing tools"),
+          tags$p("Help with editing", 
+                 class = "text-info annotation", style = "padding-top: 30px;"),
             div(class = "info-box",
               tags$p("Regarding tabular data:"),
               div(class = "text-info info-box-item",
@@ -108,12 +108,11 @@ mod_fileManager_ui <- function(id){
                   tags$span(style = "font-size:1.8rem;", "For import into Veg-X, 
                   the data must be in 'long' format, where each metric has only 
                   one column, even if it has been measured on different objects. 
-                  For example, species cover values end up in one column and 
+                  For example, species cover values all go into one column and 
                   there is a second column indicating the species to which the 
                   values belong. Records are identified by plot ID or, in the 
-                  case of time-dependent observations, by plot ID and date. Make 
-                  sure that your observation data includes the appropriate 
-                  columns.")),
+                  case of time-dependent observations like of species cover, 
+                  by plot ID and date.")),
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "Feeling lost? We are 
@@ -129,8 +128,9 @@ mod_fileManager_ui <- function(id){
             tags$p("There is currently a bug in the underlying packages that 
                    prevents the table from being saved after removing scattered 
                    columns. You can work around this by first saving the object 
-                   under a new name and then removing individual columns or 
-                   blocks of columns. Save the object after each removal."),
+                   under a new name and then removing separated individual 
+                   columns or blocks of columns one by one. Save the object 
+                   after each removal."),
             tags$p("More tools are available via the buttons at the top:"),      
             div(class = "info-box",
                 ## Save edits

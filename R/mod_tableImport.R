@@ -35,8 +35,10 @@ mod_tableImport_ui <- function(id){
             nav_panel(title = "1. Project", value = "Project",
                 column(
                   width = 12,
-                  h1("Project"),
-                  tags$p("Describe your project and its contributors. Files can be assigned in the next steps", class = "text-info annotation no-margin"),
+                  tags$p("Describe your project and its contributors (datasets 
+                         are assigned in the next steps)", 
+                         class = "text-info annotation no-margin", 
+                         style = "padding-top: 30px;"),
                   hr(),
                   uiOutput(ns("project_ui"))
                 )
@@ -46,8 +48,10 @@ mod_tableImport_ui <- function(id){
             nav_panel(title = "2. Plots", value = "Plots",
                 column(
                   width = 12,
-                  h1("Plots"),
-                  tags$p("Describe static plot properties. Properties of observations (e.g. date, observer) can be assigned in the next step.", class = "text-info annotation no-margin"),
+                  tags$p("Import static plot properties (time-dependent 
+                         observations are assigned in the next step)", 
+                         class = "text-info annotation no-margin", 
+                         style = "padding-top: 30px;"),
                   hr(),
                   uiOutput(ns("plot_ui"))
                 )
@@ -58,11 +62,10 @@ mod_tableImport_ui <- function(id){
             nav_panel(title = "3. Observations", value = "Observations",  
                 column(
                   width = 12,
-                  h1("Observations"),
-                  tags$p("Import your observation data", class = "text-info annotation no-margin"),
+                  tags$p("Import your observation data", class = "text-info annotation no-margin", style = "padding-top: 30px;"),
                   hr(),
                   tags$h4("Categories"),
-                  checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = T, 
+                  checkboxGroupInput(ns("observations_input_control"), label = NULL, inline = TRUE, 
                                      choiceNames = c("Metadata", "Individual organisms", "Aggregate organisms", "Stratum", "Community", "Surface cover"),
                                      choiceValues = c("plotObservations", "individualOrganismObservations", "aggregateOrganismObservations", 
                                                       "stratumObservations", "communityObservations", "surfaceCoverObservations")),
@@ -207,18 +210,17 @@ mod_tableImport_ui <- function(id){
             nav_panel(title = "4. Summary", value = "Summary",
                 column(
                   width = 12,
-                  h1("Summary"),
-                  tags$p("Check your entries", class = "text-info annotation no-margin"),
+                  tags$p("Check your entries", class = "text-info annotation no-margin", style = "padding-top: 30px;"),
                   hr(),
                   
-                  h3("Project", style = "margin-bottom: 6px"),
+                  tags$div(tags$i("Project"), style = "margin-bottom: 6px; margin-top: 25px;"),
                   fluidRow(
                     column(12,
                            uiOutput(ns("summary_project"))
                     )
                   ),
                   
-                  h3("Plots"),
+                  tags$div(tags$i("Plots"), style = "margin-bottom: 6px; margin-top: 25px;"),
                   fluidRow(
                     column(12,
                            uiOutput(ns("summary_plot_id")),
@@ -231,7 +233,7 @@ mod_tableImport_ui <- function(id){
                     )
                   ),
                   
-                  h3("Observations"),
+                  tags$div(tags$i("Observations"), style = "margin-bottom: 6px; margin-top: 25px;"),
                   fluidRow(
                     column(12,
                            uiOutput(ns("summary_observations"))
@@ -251,39 +253,22 @@ mod_tableImport_ui <- function(id){
       tabPanel("Help",
         div(
           class = "content",
-          tags$h1("Help with reading tabular data"),
-          div(class = "info-box",
-             div(class = "text-info info-box-item",
-                 icon("lightbulb", class = "icon-padded-right"),
-                 tags$span(style = "font-size:1.8rem;", "Before data can be read 
-                 in here, it must first be uploaded in the 'Start' section")),
-             div(class = "text-info info-box-item",
-                 icon("lightbulb", class = "icon-padded-right"),
-                 tags$span(style = "font-size:1.8rem;", "While the import from 
-                 Turboveg is a one step procedure, tabular data comes in so many 
-                 flavours that there is no simple one-step procedure for 
-                 importing. Instead, VegXshiny needs to be told which columns of 
-                 data goes in which Veg-X container and the data often needs to 
-                 be splitted into multiple objects corresponding to Veg-X 
-                 elements. The import dialogue guides through this procedure but
-                 there are also tutorial videos that could."))
-          ),       
-          tags$p("Tabular data for import are expected to be in a format where 
-                  each record has its row identified by a plot ID. In case of 
-                  date-dependent recordings (like species cover, in contrast to, 
-                  for example, bedrock type) there need to be an additional column 
-                  with a date. For example, a valid table with species cover 
-                  values has a column 
-                  for plot IDs, a column for observation date, a column for 
-                  species names and one for the cover or count values. If 
-                  species aggregation took place in layers, additional information 
-                  about layers is needed. The 'File editor' in the Start section
+          tags$p("Help with reading tabular data", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+          tags$p("While the import from 
+                 Turboveg is a one step procedure, tabular data comes in many 
+                 flavours so that VegXshiny needs to 
+                 be told which columns of a data table goes in which Veg-X 
+                 container. The import dialogue guides through this procedure."),       
+          tags$p("Importing requires the data to be organized so that each 
+                 variable has its own column and each plot or observation has 
+                 its own row. There should be only one column for each type of 
+                 variable. For example, if you measured species cover, you need 
+                 one column for species covers, another column for the 
+                 respective species, and columns for plot IDs, dates and maybe
+                 vegetation layers. A date is only needed for time-dependent 
+                 observations. The 'File editor' in the Start section
                   provided tools for transforming the data accordingly."),
-         tags$p("Details on the expected format of input data
-                  is available when hovering the info icon next to the dataset
-                  selection in the table import dialog."),
-         tags$p("The import of tabular data is structured into five steps. 
-                  Mandatory fields are marked with a star (*)"),
+         tags$p("The import of tabular data is structured into five steps:"),
          tags$ol(
            tags$p(tags$li("Project information")),
            tags$p("Provide a general description of the project and its 
@@ -293,8 +278,7 @@ mod_tableImport_ui <- function(id){
                    plot. This is distinguished from features that belong 
                    to a plotObservation, such as the date of a recording). 
                    The expected data set contains one plot per row. Each row is 
-                   identified by a unique plot ID (mandatory) and may contain 
-                   static plot properties (optional)."),
+                   identified by a unique plot ID (mandatory)."),
            tags$p("Each mapped plot property needs to be linked to a 
                   measurement method. Prefabricated descriptions of
                   common measurement methods are available in the corresponding 
@@ -311,9 +295,8 @@ mod_tableImport_ui <- function(id){
                    in Veg-X refer to a plotObservation, i.e. a sampling event at 
                    a specific plot at a specific point in time.", 
                    tags$span("Observation data of any type are identified at 
-                   least by a unique combination of plot ID and date. ", 
-                                class = "text-info"), "Depending on the 
-                   observation type, specific additional attributes are required."),
+                   least by a unique combination of plot ID and date", 
+                                class = "text-info"), "."),
            tags$p("As in the case of plot properties, measurements during 
                    observations require defined measurement methods. A dropdown 
                    menu provides a list of predefined methods. If none of these  
@@ -345,11 +328,11 @@ mod_tableImport_ui <- function(id){
                   tags$span("Your current Veg-X document will be overwritten by 
                    this. ", class = "text-info")),
            tags$p("Note that the import may take a while when working with large 
-                   input files containing thousands of observations. A progress 
+                   input files. A progress 
                    bar in the lower left corner indicates the current status. 
-                   Once the import is finished, you can view the imported Veg-X 
-                   file in the ", tags$i("Veg-X viewer"), " or export it under 
-                   ", tags$i("Veg-X export."))
+                   Once the import is finished, you can review the imported 
+                   Veg-X file in the ", tags$i("Review Section"), " or export it 
+                   under ", tags$i("Download."))
          ),
 
         )
@@ -447,7 +430,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     sidebar_tabs = c("Project", "Plots", "Observations", "Summary")
     
     output$navigation_ui = renderUI({
-      if(input$sidebar == "Data"){
+      if(input$sidebar == "Project"){
         buttons = fluidRow(
           column(width = 12, actionButton(ns("next_tab"), label = div("Next", icon("angle-right")), width = "100px", class = "pull-right"))
         )
@@ -525,7 +508,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plot_ui = renderUI({
       tagList(
         tags$h4("Main plots"),
-        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per main plot and additional plot properties in columns"),
         selectizeInput(ns("plot_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plot_mappings_ui"))
@@ -723,7 +706,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$subplot_ui = renderUI({
       if(input$plot_hasSubplot == "yes"){
         tagList(
-          tags$p("Assign a dataset", class = "text-info annotation"),
+          tags$p("Assign a dataset from the start section", class = "text-info annotation"),
           tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per subplot (identified by unique combinations of plot and subplot ids) and additional subplot properties in columns"),
           selectizeInput(ns("subplot_data"), label = NULL, choices = list("Choose a file" = "")), 
           uiOutput(ns("subplot_mappings_ui"))
@@ -841,7 +824,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plotObs_ui = renderUI({
       tagList(
         uiOutput(ns("plotObs_subplot_ui")),
-        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional) and date (YYYY-MM-DD format)"),
         selectizeInput(ns("plotObs_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plotObs_mapping_ui"))
@@ -910,7 +893,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format), taxon and stratum (optional)"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -991,7 +974,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each stratum measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and stratum."),
         selectizeInput(ns("stratumObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -1049,7 +1032,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset", class = "text-info annotation"),
+        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each surface cover measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and surface type"),
         selectizeInput(ns("covObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -1103,7 +1086,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$individualOrganismObservations_ui = renderUI({
       tagList(
         tags$p("not implemented")
-        # tags$p("Assign a dataset", class = "text-info annotation"),
+        # tags$p("Assign a dataset from the start section", class = "text-info annotation"),
         # tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A table with one row per subplot (identified by unique combinations of plot and subplot ids) and subplot properties in columns"),
         # selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         # uiOutput(ns("indOrgObs_mapping_ui"))
@@ -1241,11 +1224,12 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     
     ## Observations ####
     output$summary_observations = renderUI({
+      # Check if ANY observation exists
       if(!isTruthy(input$observations_input_control)){
-        inputs_complete$observations = F
+        inputs_complete$observations = FALSE
         return(div(class = "frame frame-danger", h4("No observations selected")))
       } else {
-        inputs_complete$observations = T
+        inputs_complete$observations = TRUE
         tagList(
           uiOutput(ns("summary_plotObs")),
           uiOutput(ns("summary_aggOrgObs")),
@@ -1258,50 +1242,62 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     ## Plot observations ####
     output$summary_plotObs = renderUI({
       if ("plotObservations" %in% input$observations_input_control){
+        
         input_values = list("Plot" = input$plotObs_plot_id, 
                             "Subplot" = input$plotObs_subplot_id, 
                             "Date" = input$plotObs_date,
                             "Party Name" = input$plotObs_party_name,
                             "Party Type" = input$plotObs_party_type,
                             "Remarks" = input$plotObs_narrative)
-  
-        if(is.null(input$plotObs_plot_id)){input_values[["Plot"]] = ""}
-        if(is.null(input$plotObs_date)){input_values[["Date"]]= ""}
-        if(is.null(input$plotObs_party_name)){input_values[["Taxon name"]] = ""}
-        if(is.null(input$plotObs_party_type)){input_values[["Measurement scale"]] = ""}
-        if(is.null(input$plotObs_narrative)){input_values[["Measurement value"]] = ""}
+
+        if(is.null(input$plotObs_plot_id)){
+          input_values[["Plot"]] = ""}
+        if(is.null(input$plotObs_date)){
+          input_values[["Date"]]= ""}
+        if(is.null(input$plotObs_party_name)){
+          input_values[["Party Name"]] = ""}
+        if(is.null(input$plotObs_party_type)){
+          input_values[["Party Type"]] = ""}
+        if(is.null(input$plotObs_narrative)){
+          input_values[["Remarks"]] = ""}
         # Make sure subplots are NULL even if they are present, but not used here
         if(isTruthy(input$plotObs_hasSubplot) && input$plotObs_hasSubplot == "no"){input_values[["Subplot"]] = NULL}
         # Remove subplots from summary if they are NULL
         if(is.null(input$plotObs_subplot_id)){input_values[["Subplot"]] <- NULL} 
- 
+
         # Determine mandatory fields
         mandatory_fields = c("Plot", "Date")  # Initial mandatory fields
-        
+    
         # Deal with subplots
         if(!is.null(input_values[["Subplot"]])) {
           mandatory_fields = c(mandatory_fields, "Subplot")
         }
+
         # Adjust mandatory fields
-        if (input$plotObs_party_name != "" || input$plotObs_party_type != "") {
+        if (input_values[["Party Name"]] != "" || 
+            input_values[["Party Type"]] != "") {
           mandatory_fields = c(mandatory_fields, "Party Name", "Party Type")
         }
-        if (input$plotObs_narrative != "") {
+
+        if (input_values[["Remarks"]] != "") {
           mandatory_fields = c(mandatory_fields, "Remarks")
         }
-        if (input$plotObs_party_name == "" && input$plotObs_party_type == "" && input$plotObs_narrative == "") {
+
+        if (input_values[["Party Name"]] == "" 
+            && input_values[["Party Type"]] == "" 
+            && input_values[["Remarks"]] == "") { 
           mandatory_fields = c(mandatory_fields, "Party Name", "Party Type", "Remarks")
         }  
         # Convert the names to indices based on the current input_values list
         mandatory_indices = match(mandatory_fields, names(input_values))
-        
+    
         # Check if any mandatory values are missing
         emptyStrings <- sapply(input_values, function(x) x == "")
         inputs_complete$plotObs <- !any(emptyStrings[mandatory_indices])
-        
+       
         render_mapping_summary(header = "Metadata", labels = names(input_values), values = unlist(input_values), inputs_complete = inputs_complete$plotObs)
       } else {
-      inputs_complete$plotObs = TRUE  # Set completeness to TRUE if UI is not rendered
+        inputs_complete$plotObs = TRUE  # Set completeness to TRUE if UI is not rendered
       return(NULL)
     }
     })
