@@ -27,7 +27,7 @@ user through the process of mapping data to the appropriate Veg-X
 elements. Once these steps have been completed, the VegX code can be
 reviewed and downloaded.
 
-<left> <img src="inst/app/www/images/Flowchart.svg" width="580" />
+<left> <img src="inst/app/www/images/Flowchart.svg" height="220" />
 
 The ‘Upload’, ‘Import’, ‘Review’, ‘Download’ and ‘Action Log’ tabs have
 their own help sections, which describe their functionality in detail.
