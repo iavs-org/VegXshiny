@@ -21,13 +21,13 @@ VegXshiny was developed as a GUI-based application for creating Veg-X
 documents and is build around the R package VegX (De Cáceres, 2018). It
 also allows the conversion from Veg-X documents to other formats.
 
-The figure below shows a typical workflow. Start with the ‘Upload’ tab of
-the main menu. The second step is import, where dialogs guide the user
-through the process of mapping data to the appropriate Veg-X elements.
-Once these steps have been completed, the VegX code can be reviewed and
-downloaded.
+The figure below shows a typical workflow. Start with the ‘Upload’ tab
+of the main menu. The second step is import, where dialogs guide the
+user through the process of mapping data to the appropriate Veg-X
+elements. Once these steps have been completed, the VegX code can be
+reviewed and downloaded.
 
-<left> <img src="inst/app/www/images/Flowchart.svg" width="570" />
+<left> <img src="inst/app/www/images/Flowchart.svg" width="580" />
 
 The ‘Upload’, ‘Import’, ‘Review’, ‘Download’ and ‘Action Log’ tabs have
 their own help sections, which describe their functionality in detail.
