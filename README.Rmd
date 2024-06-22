@@ -26,7 +26,7 @@ VegXshiny was developed as a GUI-based application for creating Veg-X documents 
 The figure below shows a typical workflow. Start with the 'Upload' tab of the main menu. The second step is import, where dialogs guide the user through the process of mapping data to the appropriate Veg-X elements. Once these steps have been completed, the VegX code can be reviewed and downloaded.
 
 <left>
-![](inst/app/www/images/Flowchart.svg){height=220px}
+![](inst/app/www/images/Flowchart.svg){height=200px}
 
 The 'Upload', 'Import', 'Review', 'Download' and 'Action Log' tabs have their own help sections, which describe their functionality in detail.
 
