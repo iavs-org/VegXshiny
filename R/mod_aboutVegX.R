@@ -38,17 +38,27 @@ mod_aboutVegX_ui <- function(id){
                  documents to other formats."),
           
           tags$p("The figure below shows a typical workflow. Start with the 
-                 'Start' tab of the main menu. The second step is import, where 
-                 dialogs guide the user through the process of mapping data to 
-                 the appropriate Veg-X elements. Once these steps have been 
-                 completed, the VegX code can be reviewed and downloaded."),
+                 'Upload' tab of the main menu. The second step is the actual 
+                 import, where dialogs guide the user through the process of 
+                 mapping data to the appropriate Veg-X elements. Once these 
+                 steps have been completed, the VegX code can be reviewed and 
+                 downloaded."),
           
           tags$div(style = "text-align: left",
-                   tags$img(src='www/images/Flowchart.svg', 
-                            align = "center", width = 600)
+                   # Upload link with an image
+                   actionLink("link_to_Upload", 
+                              label = tags$img(src = 'www/images/Flowchart_01.svg', 
+                                               style = "height: 220px;")),
+                   # Image parts
+                   tags$img(src = 'www/images/Flowchart_02.svg', 
+                                               style = "height: 220px;"),
+                   tags$img(src = 'www/images/Flowchart_03.svg', 
+                                               style = "height: 220px;"),
+                   tags$img(src = 'www/images/Flowchart_04.svg', 
+                                               style = "height: 220px;")
           ),
-  
-          tags$p("The 'Start', 'Import', 'Review', 'Download' and 'Action Log' 
+
+          tags$p("The 'Upload', 'Import', 'Review', 'Download' and 'Action Log' 
                  tabs have their own help sections, which describe their 
                  functionality in detail."),
           
@@ -173,7 +183,7 @@ mod_aboutVegX_ui <- function(id){
               ),
               tags$div(id = ns("collapse1"), class = "panel-collapse collapse",
                 tags$div(class = "panel-body",
-                  "Each main VegXshiny section (Start, Import, Review, Download, 
+                  "Each main VegXshiny section (Upload, Import, Review, Download, 
                    Action Log) has a help section where the functionality is 
                    described in detail."
                 )
@@ -225,7 +235,7 @@ mod_aboutVegX_ui <- function(id){
                   "Turboveg files, and of course Veg-X itself, 
                   should not need further preparation to be imported. Tabular 
                   data must often be rearranged but this can be done in the 
-                  'File editor' in the 'Start' section. Tables need to be in 
+                  'File editor' in the 'Upload' section. Tables need to be in 
                   'long' table format and records need to be uniquely assigned 
                   by plot IDs; time-dependent plot observations (like species 
                   cover) also need a date.")

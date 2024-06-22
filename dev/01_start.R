@@ -49,8 +49,8 @@ golem::use_recommended_deps()
 
 ## Favicon ----
 # If you want to change the favicon (default is golem's one)
-golem::use_favicon() # path = "path/to/ico". Can be an online file. 
-golem::remove_favicon()
+golem::use_favicon("www/images/favicon.ico") 
+#golem::remove_favicon()
 
 # go to dev/02_dev.R
 rstudioapi::navigateToFile( "dev/02_dev.R" )

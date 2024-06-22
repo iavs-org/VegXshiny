@@ -89,7 +89,7 @@ code, pre {
 }
 
 .file-grid {
- min-height:185px!important;
+ min-height:140px!important;
 }
 
 .htCore {
@@ -137,8 +137,8 @@ code, pre {
 
 .overlay-button-container {
   position: relative;
-  width: 180px!important;
-  height: 180px!important;
+  width: 130px!important;
+  height: 130px!important;
   float: left;
   margin: 2px;
   z-index: 1; 
@@ -148,7 +148,7 @@ code, pre {
   position: relative;
   text-overflow: ellipsis;
   overflow: hidden;
-  width: 180px;
+  width: 130px;
   white-space: nowrap;
 }
 

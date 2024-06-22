@@ -266,7 +266,7 @@ mod_tableImport_ui <- function(id){
                  one column for species covers, another column for the 
                  respective species, and columns for plot IDs, dates and maybe
                  vegetation layers. A date is only needed for time-dependent 
-                 observations. The 'File editor' in the Start section
+                 observations. The 'File editor' in the Upload section
                   provided tools for transforming the data accordingly."),
          tags$p("The import of tabular data is structured into five steps:"),
          tags$ol(
@@ -508,7 +508,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plot_ui = renderUI({
       tagList(
         tags$h4("Main plots"),
-        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per main plot and additional plot properties in columns"),
         selectizeInput(ns("plot_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plot_mappings_ui"))
@@ -706,7 +706,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$subplot_ui = renderUI({
       if(input$plot_hasSubplot == "yes"){
         tagList(
-          tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+          tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
           tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A wide-format table with one row per subplot (identified by unique combinations of plot and subplot ids) and additional subplot properties in columns"),
           selectizeInput(ns("subplot_data"), label = NULL, choices = list("Choose a file" = "")), 
           uiOutput(ns("subplot_mappings_ui"))
@@ -824,7 +824,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$plotObs_ui = renderUI({
       tagList(
         uiOutput(ns("plotObs_subplot_ui")),
-        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional) and date (YYYY-MM-DD format)"),
         selectizeInput(ns("plotObs_data"), label = NULL, choices = c("No files found" = "")),
         uiOutput(ns("plotObs_mapping_ui"))
@@ -893,7 +893,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each aggregate measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format), taxon and stratum (optional)"),
         selectizeInput(ns("aggOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -974,7 +974,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each stratum measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and stratum."),
         selectizeInput(ns("stratumObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -1032,7 +1032,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
         hr(),
         tags$label("Observations *"),
         br(),
-        tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A long format table where each surface cover measurement is identified by a unique combination of plot, subplot (optional), date (YYYY-MM-DD format) and surface type"),
         selectizeInput(ns("covObs_data"), label = NULL, choices = c("No files found" = "")),
         
@@ -1086,7 +1086,7 @@ mod_tableImport_server <- function(id, file_order, user_data, vegx_schema, vegx_
     output$individualOrganismObservations_ui = renderUI({
       tagList(
         tags$p("not implemented")
-        # tags$p("Assign a dataset from the start section", class = "text-info annotation"),
+        # tags$p("Assign a dataset from the upload section", class = "text-info annotation"),
         # tags$i(class = "glyphicon glyphicon-info-sign", class = "icon-info text-info", title = "A table with one row per subplot (identified by unique combinations of plot and subplot ids) and subplot properties in columns"),
         # selectizeInput(ns("indOrgObs_data"), label = NULL, choices = c("No files found" = "")),
         # uiOutput(ns("indOrgObs_mapping_ui"))

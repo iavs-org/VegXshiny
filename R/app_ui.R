@@ -17,7 +17,8 @@ app_ui <- function(request) {
     shinybrowser::detect(),
     
     # Application UI logic 
-    navbarPage("",
+    navbarPage(id = "main_tabset", 
+               "",
                position = "static-top",
                theme=bslib::bs_theme(version = 3, bootswatch = "flatly"),
                header = tags$style(type = "text/css", 
@@ -26,7 +27,7 @@ app_ui <- function(request) {
                ),   
                tabPanel("VegXshiny", mod_aboutVegX_ui("about")),
                
-               tabPanel("Start", icon = icon("file-import", class = "icon-padded-right"),
+               tabPanel("Upload", icon = icon("file-import", class = "icon-padded-right"),
                         mod_fileManager_ui("fileManager")
                ),
                

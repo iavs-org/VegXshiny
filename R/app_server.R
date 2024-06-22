@@ -82,9 +82,15 @@ app_server <- function(input, output, session) {
         modalDialog(
           div(class = "text-center text-danger", tags$h4("This application is 
               designed for wider windows or screens")),
-          size = "m", easyClose = T)
+          size = "m", easyClose = T,
+          style = "width: 400px;")
       )
     }
+  })
+  
+  # Image link  
+  observeEvent(input$link_to_Upload, {
+    updateNavbarPage(session, "main_tabset", selected = "Upload")
   })
   
   # --------------------------------------------------------------------------------------- #
