@@ -16,7 +16,7 @@ mod_turbovegImport_ui <- function(id){
         fluidRow(
           column(
             width = 12,
-            tags$p("Pick a source file uploaded to the start section", class = "text-info annotation", style = "padding-top: 30px;"),
+            tags$p("Pick a source file uploaded in the upload section", class = "text-info annotation", style = "padding-top: 30px;"),
             fluidRow(
               column(6, selectizeInput(ns("tv_file"), width = "100%", label = NULL, choices = c("No files found" = ""))),
             ),

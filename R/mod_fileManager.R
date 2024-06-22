@@ -14,46 +14,39 @@ mod_fileManager_ui <- function(id){
   fluidPage(
     tabsetPanel(
       tabPanel("Data handling",
-         tagList(
-           tags$head(
-             tags$style(
-               ".tab-content  {
-                padding-left: 20px;
-                padding-right: 20px;
-               }"
-             )
-           ),
-         tags$p("Upload files", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
-         tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                title = "Supported data formats: 
+        tagList(
+          tags$head(
+            tags$style(
+              ".tab-content  {
+              padding-left: 20px;
+              padding-right: 20px;
+              }"
+            )
+          ),
+          tags$p("Upload files", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+          tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+               title = "Supported data formats: 
                        \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
                        \nTurboveg data and Veg-X: .xml."),
-         fluidRow(
-           column(
-             12,
-             fileInput(ns("upload"), label = NULL, width = "50%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
-             tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 20px;"),
-             tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                    title = "Populated after files are uploaded. The listed datasets are available for further cloud operations (import to Veg-X, editing); they can not be downloaded."),
-             fluidRow(
-               class = "file-grid",
-               column(
-                 12,
-                 uiOutput(ns("file_browser"))
-               )
-             ),
-             div(
-               tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 40px; padding-bottom: 10px;"),
-               tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-                      title = "Click on a file above to open the editor"),
-               
-               uiOutput(ns("edit_toolbar")),
-               
-               uiOutput(ns("file_viewer")),
-               style = "margin-bottom: 20px"
-             )
-           )
-         )
+          fluidRow(
+            column(
+              12,
+              fileInput(ns("upload"), label = NULL, width = "25%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+              fluidRow(
+                class = "file-grid",
+                column(
+                  12,
+                  uiOutput(ns("file_browser"))
+                )
+              ),
+
+              div(id = "editSection",
+                uiOutput(ns("edit_toolbar")),
+                uiOutput(ns("file_viewer")),
+                  style = "margin-bottom: 20px"
+              )
+            ) 
+          )
         )
       ),
       tabPanel("Help",
@@ -235,9 +228,7 @@ mod_fileManager_ui <- function(id){
           )              
         )
       )
-    )
-  
-}
+    )}
 
 
 #' fileManager Server Functions
@@ -396,6 +387,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    upload_queue(queue)
                    removeModal() 
                  })
+
     
     ###### Confirm Excel Import #####
     observeEvent(eventExpr = input$confirm_read_excel, 
@@ -427,6 +419,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    })
                  })
     
+
     # ------------------------------------------------------------------------ #
     #### File browser ####
     create_file_buttons = function(){
@@ -519,14 +512,23 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     observeEvent(eventExpr = file_order(),
                  handlerExpr = {
                    output$file_browser = renderUI({
+                     
+                     header = tagList(
+                      tags$p("Uploaded files", class = "text-info annotation", style = "padding-top: 20px;"),
+                      tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                             title = "Click an icon to view a dataset and edit it if necessary"),
+                      br()
+                     )
                      file_buttons = create_file_buttons()
                      create_file_button_observers()
-                     return(file_buttons)
+                     return(tagList(header, file_buttons))
                    })
                  })
     
+    
     # ------------------------------------------------------------------------ #
-    #### File editor ####
+    
+     #### File editor ####
     observeEvent(eventExpr = list(edit_mode(), file_focus()),
                  handlerExpr = {
                    if(is.null(file_focus())){
@@ -534,10 +536,18 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      return()
                    } 
                    
-                   if(edit_mode() == T){
+                   header_content = tagList(
+                     tags$p("Edit datasets", class = "text-info annotation", style = "padding-top: 40px; padding-bottom: 10px;"),
+                     tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
+                            title = "Click the edit button to start editing"),
+                     br()
+                   )
+                   
+                   if(edit_mode() == TRUE){
                      file_ext = tools::file_ext(file_focus())
                      
                      output$edit_toolbar = renderUI({
+                       
                        button_list = list(
                          save = shinyWidgets::dropdownButton(
                            inputId = "save_dropdown",
@@ -581,7 +591,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                          button_list[["edit_names"]] = NULL
                        }
                        
-                       return(tagList(button_list))
+                       return(tagList(header_content, button_list))
                      })
                      
                      # Save current state of user data
@@ -595,8 +605,8 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                          rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, outsideClickDeselects = FALSE)
                      }
                    } else {
-                     output$edit_toolbar = renderUI({ 
-                       actionButton(ns("edit_file"), "Edit", width = "130px", class = "btn-xs")
+                       output$edit_toolbar = renderUI({ 
+                       tagList(header_content, actionButton(ns("edit_file"), "Edit", width = "130px", class = "btn-xs"))
                      })
                    }
                  })
