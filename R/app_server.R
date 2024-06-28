@@ -80,10 +80,11 @@ app_server <- function(input, output, session) {
     if(browser_info$dimensions$width < 800 | browser_info$device == "Mobile"){
       showModal(
         modalDialog(
-          div(class = "text-center text-danger", tags$h4("This application is 
-              designed for wider windows or screens")),
-          size = "m", easyClose = T,
-          style = "width: 400px;")
+          div(class = "text-left text-danger", 
+              tags$p("This application is designed for wider windows or screens"),
+              size = "s",
+              easyClose = TRUE)
+        )
       )
     }
   })

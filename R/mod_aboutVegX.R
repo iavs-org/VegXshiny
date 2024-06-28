@@ -16,8 +16,12 @@ mod_aboutVegX_ui <- function(id){
       id = ns("about_tabset"),
       tabPanel(
         title = "Overview",
-        div(
-          class = "content",
+          div(
+            class = "content",
+            tags$div(style = "text-align: left",
+                     tags$img(src = 'www/images/WCM_DSM.jpg', 
+                                                 style = "width: 690px;")
+          ),           
           tags$h1("VegXshiny"),
           tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
                  VegXshiny is an interactive web application for converting 
