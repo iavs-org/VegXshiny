@@ -18,85 +18,88 @@ mod_aboutVegX_ui <- function(id){
         title = "Overview",
           div(
             class = "content",
+tags$div(
+  style = "display: flex; align-items: flex-end;", # Align items at the bottom of the container
+  tags$div(
+    style = "text-align: left; flex-shrink: 0; margin-bottom: 22px;", # Prevent the image container from shrinking
+    tags$img(src = 'www/images/grass.jpg', style = "width: 100px;")
+  ),
+  tags$h1("VegXshiny") 
+),
+tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
+                   VegXshiny is an interactive web application for converting 
+                   datasets into Veg-X and back.")),
+            
+            tags$p("The increasing digitization of research data has motivated 
+                   data standardization efforts across scientific disciplines. 
+                   For vegetation data, Veg-X (Wiser et al., 2011) is such a 
+                   standard. It provides both flexibility and precision in 
+                   representing vegetation data of different origins and 
+                   formats. It's scope is the exchange of data-sets both between 
+                   vegetation scientists and between vegetation scientists and 
+                   database operators."), 
+            
+            tags$p("VegXshiny was developed as a GUI-based application for 
+                   creating Veg-X documents and is build around the R package VegX
+                   (De C\u00E1ceres, 2018). It also allows the conversion from Veg-X 
+                   documents to other formats."),
+            
+            tags$p("The figure below shows a typical workflow. Start with the 
+                   'Upload' tab of the main menu. The second step is the actual 
+                   import, where dialogs guide the user through the process of 
+                   mapping data to the appropriate Veg-X elements. Once these 
+                   steps have been completed, the VegX code can be reviewed and 
+                   downloaded."),
+            
             tags$div(style = "text-align: left",
-                     tags$img(src = 'www/images/WCM_DSM.jpg', 
-                                                 style = "width: 690px;")
-          ),           
-          tags$h1("VegXshiny"),
-          tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
-                 VegXshiny is an interactive web application for converting 
-                 datasets into Veg-X and back.")),
-          
-          tags$p("The increasing digitization of research data has motivated 
-                 data standardization efforts across scientific disciplines. 
-                 For vegetation data, Veg-X (Wiser et al., 2011) is such a 
-                 standard. It provides both flexibility and precision in 
-                 representing vegetation data of different origins and 
-                 formats. It's scope is the exchange of data-sets both between 
-                 vegetation scientists and between vegetation scientists and 
-                 database operators."), 
-          
-          tags$p("VegXshiny was developed as a GUI-based application for 
-                 creating Veg-X documents and is build around the R package VegX
-                 (De C\u00E1ceres, 2018). It also allows the conversion from Veg-X 
-                 documents to other formats."),
-          
-          tags$p("The figure below shows a typical workflow. Start with the 
-                 'Upload' tab of the main menu. The second step is the actual 
-                 import, where dialogs guide the user through the process of 
-                 mapping data to the appropriate Veg-X elements. Once these 
-                 steps have been completed, the VegX code can be reviewed and 
-                 downloaded."),
-          
-          tags$div(style = "text-align: left",
-                   # Upload link with an image
-                   actionLink("link_to_Upload", 
-                              label = tags$img(src = 'www/images/Flowchart_01.svg', 
-                                               style = "height: 220px;")),
-                   # Image parts
-                   tags$img(src = 'www/images/Flowchart_02.svg', 
-                                               style = "height: 220px;"),
-                   tags$img(src = 'www/images/Flowchart_03.svg', 
-                                               style = "height: 220px;"),
-                   tags$img(src = 'www/images/Flowchart_04.svg', 
-                                               style = "height: 220px;")
-          ),
-
-          tags$p("The 'Upload', 'Import', 'Review', 'Download' and 'Action Log' 
-                 tabs have their own help sections, which describe their 
-                 functionality in detail."),
-          
-          tags$p("-------------"),
-          tags$h2("Package development"),
-          tags$p("Christian K\u00f6nig, Sebastian Schmidtlein"),
-          tags$h2("Acknowledgments"),
-          tags$p("The development of VegXshiny is endorsed by the ", 
-                 tags$a("International Association for Vegetation Science (IAVS)",
-                        href = "https://www.iavs.org",
-                        target = "_blank"),
-                 "and received funding by the German Research Foundation (DFG, 
-                 project number 460840087."),
-          tags$p("Development of the ", 
-                 tags$a("R package VegX", 
-                        href = "https://iavs-org.github.io/VegX", 
-                        target = "blank"),
-                 ": Miquel De C\u00e1ceres"),
-          tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
-                  Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
-                  Schmidtlein, Nick Spencer, Susan K. Wiser"),
-          tags$h2("References"),
-          tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., 
-                 Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard 
-                 for plot-based vegetation data. Journal of Vegetation Science 
-                 22: 598-609, ",
-                 tags$a("doi:10.1111/j.1654-1103.2010.01245.x",
-                        href = "http://dx.doi.org/10.1111/j.1654-1103.2010.01245.x", # nolint
-                        target = "_blank"),
-                 "."),
-          tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. 
-                 R-package", tags$a("https://iavs-org.github.io/VegX",
-                                    href = "https://iavs-org.github.io/VegX",
-                                    target = "_blank"))
+                     # Upload link with an image
+                     actionLink("link_to_Upload", 
+                                label = tags$img(src = 'www/images/Flowchart_01.svg', 
+                                                 style = "height: 220px;")),
+                     # Image parts
+                     tags$img(src = 'www/images/Flowchart_02.svg', 
+                                                 style = "height: 220px;"),
+                     tags$img(src = 'www/images/Flowchart_03.svg', 
+                                                 style = "height: 220px;"),
+                     tags$img(src = 'www/images/Flowchart_04.svg', 
+                                                 style = "height: 220px;")
+            ),
+  
+            tags$p("The 'Upload', 'Import', 'Review', 'Download' and 'Action Log' 
+                   tabs have their own help sections, which describe their 
+                   functionality in detail."),
+            
+            tags$p("-------------"),
+            tags$h2("Package development"),
+            tags$p("Christian K\u00f6nig, Sebastian Schmidtlein"),
+            tags$h2("Acknowledgments"),
+            tags$p("The development of VegXshiny is endorsed by the ", 
+                   tags$a("International Association for Vegetation Science (IAVS)",
+                          href = "https://www.iavs.org",
+                          target = "_blank"),
+                   "and received funding by the German Research Foundation (DFG, 
+                   project number 460840087."),
+            tags$p("Development of the ", 
+                   tags$a("R package VegX", 
+                          href = "https://iavs-org.github.io/VegX", 
+                          target = "blank"),
+                   ": Miquel De C\u00e1ceres"),
+            tags$p("Veg-X standard development: Brad Boyle, Miquel De C\u00e1ceres, 
+                    Martin Kleikamp, Christian K\u00f6nig, Robert K. Peet, Sebastian 
+                    Schmidtlein, Nick Spencer, Susan K. Wiser"),
+            tags$h2("References"),
+            tags$p("Wiser, S.K., Spencer, N., de C\u00e1ceres, M., Kleikamp, M., 
+                   Boyle, B., Peet R.K. (2011): Veg-X - an exchange standard 
+                   for plot-based vegetation data. Journal of Vegetation Science 
+                   22: 598-609, ",
+                   tags$a("doi:10.1111/j.1654-1103.2010.01245.x",
+                          href = "http://dx.doi.org/10.1111/j.1654-1103.2010.01245.x", # nolint
+                          target = "_blank"),
+                   "."),
+            tags$p("De C\u00e1ceres (2018): VegX: Vegetation data in Veg-X. 
+                   R-package", tags$a("https://iavs-org.github.io/VegX",
+                                      href = "https://iavs-org.github.io/VegX",
+                                      target = "_blank"))
         )   
       ),
       
