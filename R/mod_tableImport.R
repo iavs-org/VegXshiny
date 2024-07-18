@@ -254,6 +254,9 @@ mod_tableImport_ui <- function(id){
         div(
           class = "content",
           tags$p("Help with reading tabular data", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
+          tags$p(
+            actionLink("link_to_videos", "Check out the video tutorial on the entry page!")
+          ),  
           tags$p("While the import from 
                  Turboveg is a one step procedure, tabular data comes in many 
                  flavours so that VegXshiny needs to 

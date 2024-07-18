@@ -94,6 +94,15 @@ app_server <- function(input, output, session) {
     updateNavbarPage(session, "main_tabset", selected = "Upload")
   })
   
+  # Link to video
+  observeEvent(input$link_to_videos, {
+    # Navigate to the Upload page first
+    updateNavbarPage(session, "main_tabset", selected = "VegXshiny")
+    # Then, select Tab within the Upload page
+    shinyjs::delay(500, {
+    updateTabsetPanel(session, "about-about_tabset", selected = "Tutorials")
+  })  })
+  
   # --------------------------------------------------------------------------------------- #
   # About
   mod_aboutVegX_server("about", vegx_schema, node_info)

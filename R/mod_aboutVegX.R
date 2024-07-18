@@ -18,15 +18,15 @@ mod_aboutVegX_ui <- function(id){
         title = "Overview",
           div(
             class = "content",
-tags$div(
-  style = "display: flex; align-items: flex-end;", # Align items at the bottom of the container
-  tags$div(
-    style = "text-align: left; flex-shrink: 0; margin-bottom: 22px;", # Prevent the image container from shrinking
-    tags$img(src = 'www/images/grass.jpg', style = "width: 100px;")
-  ),
-  tags$h1("VegXshiny") 
-),
-tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
+            tags$div(
+              style = "display: flex; align-items: flex-end;", # Align items at the bottom of the container
+              tags$div(
+                style = "text-align: left; flex-shrink: 0; margin-bottom: 22px;", # Prevent the image container from shrinking
+                tags$img(src = 'www/images/grass.jpg', style = "width: 100px;")
+              ),
+              tags$h1("VegXshiny") 
+            ),
+            tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data. 
                    VegXshiny is an interactive web application for converting 
                    datasets into Veg-X and back.")),
             
@@ -52,7 +52,7 @@ tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data.
                    downloaded."),
             
             tags$div(style = "text-align: left",
-                     # Upload link with an image
+                     # link with an image
                      actionLink("link_to_Upload", 
                                 label = tags$img(src = 'www/images/Flowchart_01.svg', 
                                                  style = "height: 220px;")),
@@ -339,6 +339,33 @@ tags$p(tags$b("Veg-X is a standard for the exchange of vegetation data.
           )
         )
       ),
+
+
+      tabPanel(
+        title = "Tutorials",
+        div(
+          class = "content",
+          tags$h1("Converting a vegetation table into the Veg-X exchange format"),
+          tags$div(
+            style = "position: relative; padding-top: 56.25%; height: 0;",
+            tags$iframe(
+              style = "position: absolute; top: 0; left: 0; width: 100%; 
+                       height: 100%; border: 1px solid #e5e5e5; border-radius: 5px;",
+              src = "https://www.youtube.com/embed/V1Kk5_3lSI4?rel=0",
+              frameborder = "0",
+              allowfullscreen = "true"
+            )
+          ),
+          tags$p("The video explains how to transform a vegetation 
+                 table with species covers into the Veg-X exchange format
+                 (01:07 Preparation of 'long tables', 08:46 Import into Veg-X)."
+          ),
+          tags$p("If required, further videos can be provided here. Please let 
+                 us know what you need."
+          ),
+        )
+      ),
+
 
       tabPanel(
         title = "Contact",
