@@ -29,7 +29,7 @@ mod_vegxImport_ui <- function(id){
               )
             ),
             fluidRow(
-              column(3, actionButton(ns("read_tv"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
+              column(3, actionButton(ns("read_vegx"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
               column(3, actionButton(ns("import"), label = "Step2: Import", class = "btn-success"), style = "130px; padding: 5px;")
             ),
           )

@@ -94,6 +94,10 @@ mod_fileManager_ui <- function(id){
                  class = "text-info annotation", style = "padding-top: 30px;"),
             div(class = "info-box",
               tags$p("Regarding tabular data:"),
+              
+              tags$p(
+                actionLink("link_to_videos", "Check out the video tutorial on the entry page!")
+              ),  
               div(class = "text-info info-box-item",
                   icon("lightbulb", class = "icon-padded-right"),
                   tags$span(style = "font-size:1.8rem;", "For import into Veg-X, 
