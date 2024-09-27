@@ -170,7 +170,7 @@ vegx_to_df = function(vegx_doc, return_vegtable = F){
       incProgress(amount = progress_incr, paste0("Converting XML to data.frames ... ", main_element))
       result = mapply(function(node, node_name){
         values = unlist(node)
-        if(is.null(names(values))){ # Set name manually for leaf nodes (e.g. organismName)
+        if (!is.null(values) && is.null(names(values))){
           names(values) = node_name
         } 
         return(c("id" = attr(node, "id"), values))
