@@ -29,8 +29,8 @@ mod_vegxImport_ui <- function(id){
               )
             ),
             fluidRow(
-              column(3, actionButton(ns("read_vegx"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
-              column(3, actionButton(ns("import"), label = "Step2: Import", class = "btn-success"), style = "130px; padding: 5px;")
+              column(3, actionButton(ns("read_vegx"), label = "Step1: Read", class = "btn-success"), style = "width: 130px; padding: 5px;"),
+              column(3, actionButton(ns("import"), label = "Step2: Import"), style = "130px; padding: 5px;")
             ),
           )
         )
@@ -44,7 +44,21 @@ mod_vegxImport_ui <- function(id){
                  summary and run the import."),
         )
       )      
-    )
+    ),
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('toggleButtonClass', function(message) {
+        var readButton = $('#' + message.ns + '-read_vegx');
+        var importButton = $('#' + message.ns + '-import');
+        
+        if (message.action === 'readSuccessful') {
+          readButton.addClass('btn-success');
+          importButton.addClass('btn-success');
+        } else if (message.action === 'importSuccessful') {
+          readButton.addClass('btn-success');
+          importButton.addClass('btn-success');
+        }
+      });
+    "))
   )  
 }
 
@@ -73,7 +87,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
       updateSelectizeInput(session, inputId = "vegx_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
     })
     
-    # Read Turboveg XML into tabular format
+    # Read veg-x XML
     observeEvent(
       eventExpr = input$read_vegx,
       handlerExpr = {  
@@ -98,6 +112,10 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
           
           upload_valid(T)
           showNotification("VegX document read.")
+        
+          # Toggle button classes after successful reading
+            session$sendCustomMessage('toggleButtonClass', list(ns = ns(NULL), action = 'readSuccessful'))
+        
         }, error = function(e){
           upload_valid(F)
         }, finally = {
@@ -111,7 +129,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
       eventExpr = input$import, 
       handlerExpr = {
         if(upload_valid()){
-          modal_content = div(class = "text-center text-info", icon("check"), tags$p("This will replace the current VegX document with the uploaded file."))
+          modal_content = div(class = "text-center text-info", icon("check"), tags$p("Any Veg-X documents that may already be in progress will be overwritten by the import."))
           modal_footer = tags$span(actionButton(ns("dismiss_modal"), "Abort", class = "pull-left btn-danger", icon = icon("times")), 
                                    actionButton(ns("confirm_import"), class = "pull-right btn-success", "Proceed", icon("check")))
         } else {

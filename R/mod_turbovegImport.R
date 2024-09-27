@@ -29,8 +29,8 @@ mod_turbovegImport_ui <- function(id){
               )
             ),
             fluidRow(
-              column(3, actionButton(ns("read_tv"), label = "Step1: Read"), style = "width: 130px; padding: 5px;"),
-              column(3, actionButton(ns("import"), label = "Step2: Import", class = "btn-success"), style = "130px; padding: 5px;")
+              column(3, actionButton(ns("read_tv"), label = "Step1: Read", class = "btn-success"), style = "width: 130px; padding: 5px;"),
+              column(3, actionButton(ns("import"), label = "Step2: Import"), style = "130px; padding: 5px;")
             ),
            
           )
@@ -48,8 +48,8 @@ mod_turbovegImport_ui <- function(id){
             tags$p("Choose an uploaded Turboveg 2 XML file and press the read
                    button. Once the extraction is finished, a summary 
                    is displayed."),
-            tags$p("Submitting the resulting, pre-processed data with the 
-                   ", tags$i("Import"), " button will open a dialog where you can 
+            tags$p("Read Turboveg file, review the summary and run the import.
+                   The ", tags$i("Import"), " button will open a dialog where you can 
                    select, which 'undefined' Turboveg header data you want to 
                    import (i.e. data lacking information that is required by 
                    pre-defined Veg-X elements). The selected fields will be 
@@ -58,7 +58,21 @@ mod_turbovegImport_ui <- function(id){
                    start the conversion to Veg-X.")
         )
       )      
-    )
+    ),
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('toggleButtonClass', function(message) {
+        var readButton = $('#' + message.ns + '-read_tv');
+        var importButton = $('#' + message.ns + '-import');
+        
+        if (message.action === 'readSuccessful') {
+          readButton.addClass('btn-success');
+          importButton.addClass('btn-success');
+        } else if (message.action === 'importSuccessful') {
+          readButton.addClass('btn-success');
+          importButton.addClass('btn-success');
+        }
+      });
+    "))
   )
 }
 
@@ -108,6 +122,10 @@ mod_turbovegImport_server <- function(id, user_data, vegx_schema, vegx_doc, vegx
           tv_dfs(tv_import)
           upload_valid(T)
           showNotification("Turboveg file read.")
+
+          # Toggle button classes after successful reading
+          session$sendCustomMessage('toggleButtonClass', list(ns = ns(NULL), action = 'readSuccessful'))
+
         }, error = function(e){
           upload_valid(F)
           tv_dfs(NULL)
