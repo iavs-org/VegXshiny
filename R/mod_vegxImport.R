@@ -83,7 +83,7 @@ mod_vegxImport_server <- function(id, user_data, vegx_doc, vegx_txt, action_log,
     # Observe and update input instead of using a reactive expression in the definition, thus preventing re-rendering of the entire UI when `user_data()` changes 
     observe({   
       file_selected = input$vegx_file # save current selection
-      choices = names(user_data)[stringr::str_ends(names(user_data), ".xml")]
+      choices = names(user_data)[stringr::str_ends(names(user_data), "\\.(xml|vegx)$")]
       updateSelectizeInput(session, inputId = "vegx_file", selected = file_selected, choices = c(dropdown_empty(), choices)) 
     })
     

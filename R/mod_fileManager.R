@@ -24,14 +24,15 @@ mod_fileManager_ui <- function(id){
             )
           ),
           tags$p("Upload files", class = "text-info annotation", style = "padding-top: 30px; padding-bottom: 10px;"),
-          tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info", 
-               title = "Supported data formats: 
-                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx 
-                       \nTurboveg data and Veg-X: .xml."),
+          tags$i(class = "glyphicon glyphicon-info-sign icon-info text-info",
+               title = "Supported data formats:
+                       \nTabular data: .csv, .txt, .tsv, .xls and .xlsx
+                       \nTurboveg data and Veg-X: .xml
+                       \nVeg-X data: .xml and .vegx."),
           fluidRow(
             column(
               12,
-              fileInput(ns("upload"), label = NULL, width = "25%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml")),
+              fileInput(ns("upload"), label = NULL, width = "25%", placeholder = "", multiple = T, accept = c(".csv", ".txt", ".tsv", ".tab", ".xls", ".xlsx", ".xml", ".vegx")),
               fluidRow(
                 class = "file-grid",
                 column(
@@ -68,9 +69,9 @@ mod_fileManager_ui <- function(id){
             tags$li(".xls, .xslx")
           ),
           tags$h4("Turboveg 2:"),
-          tags$ul(tags$li("xml")),
+          tags$ul(tags$li(".xml")),
           tags$h4("Veg-X:"),
-          tags$ul(tags$li("xml")),
+          tags$ul(tags$li(".xml, .vegx")),
           tags$p("If an upload of tabular data fails, check the following 
                   possible reasons or fixes:"),
           tags$ul(
@@ -269,7 +270,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
           rhandsontable::rhandsontable(useTypes = FALSE, selectCallback = TRUE, readOnly = T,
                                        outsideClickDeselects = TRUE) %>% 
           rhandsontable::hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
-      } else if(file_ext == "xml"){
+      } else if(file_ext %in% c("xml", "vegx")){
         file_data = xml2::read_xml(file_info$datapath)
       } else if(file_ext %in% c("xls", "xlsx")){
         excel_sheets_available = readxl::excel_sheets(file_info$datapath)
@@ -439,6 +440,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                       "xls" = icon("file-excel", "fa-6x black"),
                       "xlsx" = icon("file-excel", "fa-6x black"),
                       "xml" = icon("file-code", "fa-6x black"),
+                      "vegx" = icon("file-code", "fa-6x black"),
                       icon("file", "fa-6x black"))
         
         # Create Button
@@ -590,7 +592,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                          discard = actionButton(ns("discard"), "Discard edits", width = "130px", class = "btn-xs", icon = icon("times"))
                        )
                        
-                       if(file_ext == "xml"){   # remove table-specific buttons
+                       if(file_ext %in% c("xml", "vegx")){   # remove table-specific buttons
                          button_list[["reshape"]] = NULL  
                          button_list[["edit_names"]] = NULL
                        }
@@ -602,7 +604,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                      data_unedited(user_data[[file_focus()]])
                      
                      # Make user_data editable
-                     if(file_ext == "xml"){
+                     if(file_ext %in% c("xml", "vegx")){
                        updateAceEditor(session, "editor", readOnly = F)
                      } else {
                        user_data[[file_focus()]] = rhandsontable::hot_to_r(input$editor) %>%
@@ -618,7 +620,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
     observeEvent(eventExpr = file_focus(),
                  handlerExpr = {
                    file_ext = tools::file_ext(file_focus())
-                   if(file_ext == "xml"){
+                   if(file_ext %in% c("xml", "vegx")){
                      output$file_viewer = renderUI(aceEditor(outputId = ns("editor"), value = as.character(user_data[[file_focus()]]), 
                                                              height = "500px", mode = "xml", theme = "tomorrow", readOnly = T, autoComplete = "disabled"))
                    } else {
@@ -658,7 +660,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                  handlerExpr = {
                    tryCatch({
                      file_ext = tools::file_ext(file_focus())
-                     if(file_ext == "xml"){
+                     if(file_ext %in% c("xml", "vegx")){
                        user_data[[file_focus()]] = read_xml(isolate(input$editor))
                      } else {
                        # Read edits
@@ -716,7 +718,7 @@ mod_fileManager_server <- function(id, file_order, action_log, log_path){
                    tryCatch({
                      file_ext = tools::file_ext(file_focus())
                      file_name_orig = file_focus()
-                     if(file_ext == "xml"){
+                     if(file_ext %in% c("xml", "vegx")){
                        file_name = paste0(input$new_file_name, ".", file_ext)
                        data_edited = read_xml(isolate(input$editor))
                        user_data[[file_name]] = data_edited
